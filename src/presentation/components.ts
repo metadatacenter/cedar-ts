@@ -1,6 +1,16 @@
 import { type Iri, iri } from '../leaves/index.js';
 import type { ArtifactMetadata } from '../metadata/index.js';
-import type { PresentationComponentId } from '../identity.js';
+import { type PresentationComponentId, presentationComponentId } from '../identity.js';
+
+// Idempotent: accepts a typed PresentationComponentId, an Iri, or a bare
+// string IRI. Used by every component constructor below so callers can pass
+// any of the three at the `id` slot.
+const toPresentationComponentId = (
+  v: PresentationComponentId | Iri | string,
+): PresentationComponentId =>
+  typeof v !== 'string' && (v as { kind: unknown }).kind === 'presentation_component_id'
+    ? (v as PresentationComponentId)
+    : presentationComponentId(v as Iri | string);
 
 // PresentationComponent contributes presentational or instructional structure
 // to a rendered template without producing instance data. Five concrete
@@ -16,14 +26,16 @@ export interface RichTextComponent {
 }
 
 export interface RichTextComponentInit {
-  readonly id: PresentationComponentId;
+  readonly id: PresentationComponentId | Iri | string;
   readonly metadata: ArtifactMetadata;
   readonly htmlContent: string;
 }
 
 export const richTextComponent = (init: RichTextComponentInit): RichTextComponent => ({
   kind: 'rich_text_component',
-  ...init,
+  id: toPresentationComponentId(init.id),
+  metadata: init.metadata,
+  htmlContent: init.htmlContent,
 });
 
 export interface ImageComponent {
@@ -34,7 +46,7 @@ export interface ImageComponent {
 }
 
 export interface ImageComponentInit {
-  readonly id: PresentationComponentId;
+  readonly id: PresentationComponentId | Iri | string;
   readonly metadata: ArtifactMetadata;
   readonly imageSource: Iri | string;
 }
@@ -42,7 +54,7 @@ export interface ImageComponentInit {
 export function imageComponent(init: ImageComponentInit): ImageComponent {
   return {
     kind: 'image_component',
-    id: init.id,
+    id: toPresentationComponentId(init.id),
     metadata: init.metadata,
     imageSource:
       typeof init.imageSource === 'string' ? iri(init.imageSource) : init.imageSource,
@@ -57,7 +69,7 @@ export interface YoutubeVideoComponent {
 }
 
 export interface YoutubeVideoComponentInit {
-  readonly id: PresentationComponentId;
+  readonly id: PresentationComponentId | Iri | string;
   readonly metadata: ArtifactMetadata;
   readonly youtubeVideoSource: Iri | string;
 }
@@ -67,7 +79,7 @@ export function youtubeVideoComponent(
 ): YoutubeVideoComponent {
   return {
     kind: 'youtube_video_component',
-    id: init.id,
+    id: toPresentationComponentId(init.id),
     metadata: init.metadata,
     youtubeVideoSource:
       typeof init.youtubeVideoSource === 'string'
@@ -83,7 +95,7 @@ export interface SectionBreakComponent {
 }
 
 export interface SectionBreakComponentInit {
-  readonly id: PresentationComponentId;
+  readonly id: PresentationComponentId | Iri | string;
   readonly metadata: ArtifactMetadata;
 }
 
@@ -91,7 +103,8 @@ export const sectionBreakComponent = (
   init: SectionBreakComponentInit,
 ): SectionBreakComponent => ({
   kind: 'section_break_component',
-  ...init,
+  id: toPresentationComponentId(init.id),
+  metadata: init.metadata,
 });
 
 export interface PageBreakComponent {
@@ -101,7 +114,7 @@ export interface PageBreakComponent {
 }
 
 export interface PageBreakComponentInit {
-  readonly id: PresentationComponentId;
+  readonly id: PresentationComponentId | Iri | string;
   readonly metadata: ArtifactMetadata;
 }
 
@@ -109,7 +122,8 @@ export const pageBreakComponent = (
   init: PageBreakComponentInit,
 ): PageBreakComponent => ({
   kind: 'page_break_component',
-  ...init,
+  id: toPresentationComponentId(init.id),
+  metadata: init.metadata,
 });
 
 export type PresentationComponent =

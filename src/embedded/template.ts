@@ -1,4 +1,5 @@
 import type { TemplateReference } from '../identity.js';
+import type { Template } from '../template.js';
 import { type EmbeddedArtifactKey, embeddedArtifactKey } from './key.js';
 import type { ValueRequirement } from './requirement.js';
 import type { Cardinality } from './cardinality.js';
@@ -23,9 +24,11 @@ export interface EmbeddedTemplate {
 }
 
 // `key` accepts a fully-built EmbeddedArtifactKey or a bare string.
+// `reference` accepts either the typed TemplateReference or the reusable
+// Template artifact itself; the constructor extracts `.id` from the latter.
 export interface EmbeddedTemplateInit {
   readonly key: EmbeddedArtifactKey | string;
-  readonly reference: TemplateReference;
+  readonly reference: TemplateReference | Template;
   readonly valueRequirement?: ValueRequirement;
   readonly cardinality?: Cardinality;
   readonly visibility?: Visibility;
@@ -46,7 +49,7 @@ export function embeddedTemplate(init: EmbeddedTemplateInit): EmbeddedTemplate {
   } = {
     kind: 'embedded_template',
     key: embeddedArtifactKey(init.key),
-    reference: init.reference,
+    reference: init.reference.kind === 'template' ? init.reference.id : init.reference,
   };
   if (init.valueRequirement !== undefined) out.valueRequirement = init.valueRequirement;
   if (init.cardinality !== undefined) out.cardinality = init.cardinality;

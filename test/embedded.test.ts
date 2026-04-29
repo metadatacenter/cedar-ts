@@ -48,7 +48,36 @@ import {
   stringLiteral,
   numericLiteral,
   nonNegativeInteger,
+  textField,
+  textFieldSpec,
+  template,
+  richTextComponent,
+  artifactMetadata,
+  descriptiveMetadata,
+  temporalProvenance,
+  schemaArtifactMetadata,
+  schemaVersioning,
 } from '../src/index.js';
+
+// Shared fixtures for tests that need to construct full Field / Template /
+// PresentationComponent artifacts.
+const tp = temporalProvenance({
+  createdOn: '2024-01-01T00:00:00Z',
+  createdBy: 'https://example.org/u',
+  modifiedOn: '2024-01-01T00:00:00Z',
+  modifiedBy: 'https://example.org/u',
+});
+const meta = schemaArtifactMetadata({
+  artifact: artifactMetadata({
+    descriptive: descriptiveMetadata({ name: 'X' }),
+    provenance: tp,
+  }),
+  versioning: schemaVersioning({
+    version: '1.0.0',
+    status: 'draft',
+    modelVersion: '2.0.0',
+  }),
+});
 
 describe('EmbeddedArtifactKey', () => {
   it('accepts a string and wraps it as KeyIdentifier', () => {
@@ -74,6 +103,63 @@ describe('EmbeddedArtifactKey', () => {
     const k1 = embeddedArtifactKey('participant_id');
     const k2 = embeddedArtifactKey(k1);
     expect(k2).toBe(k1);
+  });
+});
+
+describe('Inline Field/Template/PresentationComponent reference inputs', () => {
+  it('embeddedTextField extracts .id when given a TextField artifact', () => {
+    const artifact = textField({
+      id: textFieldId('https://example.org/fields/title'),
+      metadata: meta,
+      fieldSpec: textFieldSpec(),
+    });
+    const ef = embeddedTextField({ key: 'title', reference: artifact });
+    expect(ef.reference).toBe(artifact.id);
+    expect(ef.reference.kind).toBe('field_id');
+    expect(ef.reference.fieldKind).toBe('text');
+  });
+
+  it('embeddedTextField passes the FieldReference through', () => {
+    const ref = textFieldId('https://example.org/fields/title');
+    const ef = embeddedTextField({ key: 'title', reference: ref });
+    expect(ef.reference).toBe(ref);
+  });
+
+  it('embeddedDateField rejects a TextField reference at the type level', () => {
+    const wrongFamily = textField({
+      id: textFieldId('https://example.org/fields/x'),
+      metadata: meta,
+      fieldSpec: textFieldSpec(),
+    });
+    embeddedDateField({
+      key: 'born',
+      // @ts-expect-error TextField is not a DateField (or DateFieldReference)
+      reference: wrongFamily,
+    });
+  });
+
+  it('embeddedTemplate extracts .id when given a Template artifact', () => {
+    const t = template({
+      id: templateId('https://example.org/templates/address'),
+      metadata: meta,
+    });
+    const et = embeddedTemplate({ key: 'address', reference: t });
+    expect(et.reference).toBe(t.id);
+    expect(et.reference.kind).toBe('template_id');
+  });
+
+  it('embeddedPresentationComponent extracts .id when given a PresentationComponent', () => {
+    const pc = richTextComponent({
+      id: presentationComponentId('https://example.org/pc/intro'),
+      metadata: artifactMetadata({
+        descriptive: descriptiveMetadata({ name: 'Intro' }),
+        provenance: tp,
+      }),
+      htmlContent: '<p>hi</p>',
+    });
+    const ep = embeddedPresentationComponent({ key: 'intro', reference: pc });
+    expect(ep.reference).toBe(pc.id);
+    expect(ep.reference.kind).toBe('presentation_component_id');
   });
 });
 

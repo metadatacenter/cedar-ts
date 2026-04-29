@@ -8,7 +8,6 @@ import {
   artifactMetadata,
   cardinality,
   dateField,
-  dateFieldId,
   dateFieldSpec,
   DEFAULT_VALUE_REQUIREMENT,
   descriptiveMetadata,
@@ -21,7 +20,6 @@ import {
   embeddedSingleChoiceField,
   embeddedTextField,
   emailField,
-  emailFieldId,
   emailFieldSpec,
   emailValue,
   fieldValue,
@@ -32,29 +30,22 @@ import {
   literalChoiceValue,
   literalSingleChoiceFieldSpec,
   orcidField,
-  orcidFieldId,
   orcidFieldSpec,
   orcidValue,
   phoneNumberField,
-  phoneNumberFieldId,
   phoneNumberFieldSpec,
-  presentationComponentId,
   richTextComponent,
   rorField,
-  rorFieldId,
   rorFieldSpec,
   rorValue,
   schemaArtifactMetadata,
   schemaVersioning,
   singleChoiceField,
-  singleChoiceFieldId,
   template,
-  templateId,
   templateInstance,
   templateInstanceId,
   temporalProvenance,
   textField,
-  textFieldId,
   textFieldSpec,
   textValue,
   unboundedCardinality,
@@ -105,7 +96,7 @@ function meta(name: string, description: string): SchemaArtifactMetadata {
 // ---- Reusable Field artifacts -----------------------------------------
 
 const fullName = textField({
-  id: textFieldId(`${FIELDS}full-name`),
+  id: `${FIELDS}full-name`,
   metadata: meta('Full Name', 'Full legal name of the principal investigator.'),
   fieldSpec: textFieldSpec({
     minLength: { kind: 'non_negative_integer', value: '1' },
@@ -115,7 +106,7 @@ const fullName = textField({
 // literalChoiceOption accepts a (text, lang) pair as a shortcut for a
 // langStringLiteral; pass a Literal directly for typed-string options.
 const academicTitle = singleChoiceField({
-  id: singleChoiceFieldId(`${FIELDS}academic-title`),
+  id: `${FIELDS}academic-title`,
   metadata: meta('Academic Title', 'Academic rank or position.'),
   fieldSpec: literalSingleChoiceFieldSpec({
     options: [
@@ -129,31 +120,31 @@ const academicTitle = singleChoiceField({
 });
 
 const email = emailField({
-  id: emailFieldId(`${FIELDS}email`),
+  id: `${FIELDS}email`,
   metadata: meta('Email Address', 'Primary work email.'),
   fieldSpec: emailFieldSpec(),
 });
 
 const phone = phoneNumberField({
-  id: phoneNumberFieldId(`${FIELDS}phone`),
+  id: `${FIELDS}phone`,
   metadata: meta('Phone Number', 'Primary work phone, in international format.'),
   fieldSpec: phoneNumberFieldSpec(),
 });
 
 const orcid = orcidField({
-  id: orcidFieldId(`${FIELDS}orcid`),
+  id: `${FIELDS}orcid`,
   metadata: meta('ORCID iD', 'ORCID identifier (https://orcid.org/...).'),
   fieldSpec: orcidFieldSpec(),
 });
 
 const institutionName = textField({
-  id: textFieldId(`${FIELDS}institution-name`),
+  id: `${FIELDS}institution-name`,
   metadata: meta('Institution Name', 'Name of the home institution.'),
   fieldSpec: textFieldSpec(),
 });
 
 const institutionRor = rorField({
-  id: rorFieldId(`${FIELDS}institution-ror`),
+  id: `${FIELDS}institution-ror`,
   metadata: meta(
     'Institution ROR',
     'Research Organization Registry identifier for the home institution.',
@@ -162,19 +153,19 @@ const institutionRor = rorField({
 });
 
 const department = textField({
-  id: textFieldId(`${FIELDS}department`),
+  id: `${FIELDS}department`,
   metadata: meta('Department', 'Department or division within the institution.'),
   fieldSpec: textFieldSpec(),
 });
 
 const appointmentDate = dateField({
-  id: dateFieldId(`${FIELDS}appointment-date`),
+  id: `${FIELDS}appointment-date`,
   metadata: meta('Appointment Date', 'Start date of current appointment.'),
   fieldSpec: dateFieldSpec({ dateValueType: 'full_date' }),
 });
 
 const researchInterest = textField({
-  id: textFieldId(`${FIELDS}research-interest`),
+  id: `${FIELDS}research-interest`,
   metadata: meta('Research Interest', 'A single research interest or keyword.'),
   fieldSpec: textFieldSpec(),
 });
@@ -184,7 +175,7 @@ const researchInterest = textField({
 // PresentationComponent carries plain ArtifactMetadata — it is an Artifact but
 // not a SchemaArtifact, so it has no version / status / model-version.
 const intro = richTextComponent({
-  id: presentationComponentId(`${COMPONENTS}pi-intro`),
+  id: `${COMPONENTS}pi-intro`,
   metadata: artifactMeta('PI Intro', 'Introductory text shown above the PI form.'),
   htmlContent:
     '<p>Please provide details for the <strong>principal investigator</strong> ' +
@@ -195,7 +186,7 @@ const intro = richTextComponent({
 // ---- The Template -----------------------------------------------------
 
 export const principalInvestigatorTemplate: Template = template({
-  id: templateId(`${TEMPLATES}principal-investigator`),
+  id: `${TEMPLATES}principal-investigator`,
   metadata: meta(
     'Principal Investigator Details',
     'Identity, contact information, and institutional affiliation of a study PI.',
@@ -205,18 +196,18 @@ export const principalInvestigatorTemplate: Template = template({
   embedded: [
     embeddedPresentationComponent({
       key: 'intro',
-      reference: intro.id,
+      reference: intro,
     }),
 
     embeddedTextField({
       key: 'full_name',
-      reference: fullName.id,
+      reference: fullName,
       valueRequirement: 'required',
       property: 'https://schema.org/name',
     }),
     embeddedSingleChoiceField({
       key: 'academic_title',
-      reference: academicTitle.id,
+      reference: academicTitle,
       valueRequirement: 'required',
       property: {
         propertyIri: 'https://schema.org/jobTitle',
@@ -226,19 +217,19 @@ export const principalInvestigatorTemplate: Template = template({
 
     embeddedEmailField({
       key: 'email',
-      reference: email.id,
+      reference: email,
       valueRequirement: 'required',
       property: 'https://schema.org/email',
     }),
     embeddedPhoneNumberField({
       key: 'phone',
-      reference: phone.id,
+      reference: phone,
       valueRequirement: 'optional',
       property: 'https://schema.org/telephone',
     }),
     embeddedOrcidField({
       key: 'orcid',
-      reference: orcid.id,
+      reference: orcid,
       valueRequirement: 'recommended',
       property: 'https://schema.org/identifier',
       labelOverride: labelOverride({
@@ -249,14 +240,14 @@ export const principalInvestigatorTemplate: Template = template({
 
     embeddedTextField({
       key: 'institution_name',
-      reference: institutionName.id,
+      reference: institutionName,
       valueRequirement: 'required',
       defaultValue: 'Stanford University',
       property: 'https://schema.org/affiliation',
     }),
     embeddedRorField({
       key: 'institution_ror',
-      reference: institutionRor.id,
+      reference: institutionRor,
       valueRequirement: 'recommended',
       property: {
         propertyIri: 'https://schema.org/affiliation',
@@ -265,14 +256,14 @@ export const principalInvestigatorTemplate: Template = template({
     }),
     embeddedTextField({
       key: 'department',
-      reference: department.id,
+      reference: department,
       valueRequirement: 'optional',
       property: 'https://schema.org/department',
     }),
 
     embeddedDateField({
       key: 'appointment_date',
-      reference: appointmentDate.id,
+      reference: appointmentDate,
       valueRequirement: 'optional',
       property: 'https://schema.org/startDate',
     }),
@@ -280,7 +271,7 @@ export const principalInvestigatorTemplate: Template = template({
     // Multi-valued: zero or more research interests, no upper bound.
     embeddedTextField({
       key: 'research_interests',
-      reference: researchInterest.id,
+      reference: researchInterest,
       valueRequirement: 'optional',
       cardinality: cardinality({ min: 0, max: unboundedCardinality }),
       labelOverride: labelOverride({ label: 'Research Interests' }),

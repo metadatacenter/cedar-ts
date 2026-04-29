@@ -1,24 +1,43 @@
 import type { FieldKind } from './identity.js';
-import type {
-  TextFieldId,
-  NumericFieldId,
-  DateFieldId,
-  TimeFieldId,
-  DateTimeFieldId,
-  ControlledTermFieldId,
-  SingleChoiceFieldId,
-  MultipleChoiceFieldId,
-  LinkFieldId,
-  EmailFieldId,
-  PhoneNumberFieldId,
-  OrcidFieldId,
-  RorFieldId,
-  DoiFieldId,
-  PubMedIdFieldId,
-  RridFieldId,
-  NihGrantIdFieldId,
-  AttributeValueFieldId,
+import {
+  type TextFieldId,
+  type NumericFieldId,
+  type DateFieldId,
+  type TimeFieldId,
+  type DateTimeFieldId,
+  type ControlledTermFieldId,
+  type SingleChoiceFieldId,
+  type MultipleChoiceFieldId,
+  type LinkFieldId,
+  type EmailFieldId,
+  type PhoneNumberFieldId,
+  type OrcidFieldId,
+  type RorFieldId,
+  type DoiFieldId,
+  type PubMedIdFieldId,
+  type RridFieldId,
+  type NihGrantIdFieldId,
+  type AttributeValueFieldId,
+  textFieldId,
+  numericFieldId,
+  dateFieldId,
+  timeFieldId,
+  dateTimeFieldId,
+  controlledTermFieldId,
+  singleChoiceFieldId,
+  multipleChoiceFieldId,
+  linkFieldId,
+  emailFieldId,
+  phoneNumberFieldId,
+  orcidFieldId,
+  rorFieldId,
+  doiFieldId,
+  pubMedIdFieldId,
+  rridFieldId,
+  nihGrantIdFieldId,
+  attributeValueFieldId,
 } from './identity.js';
+import type { Iri } from './leaves/index.js';
 import type { SchemaArtifactMetadata } from './metadata/index.js';
 import type {
   TextFieldSpec,
@@ -219,96 +238,96 @@ export type Field =
 
 // ---- Init types (per family) ------------------------------------------
 //
-// Same shape as the corresponding Field minus the constant `kind` and
-// `fieldKind` discriminants the constructor injects.
+// `id` accepts the typed XxxFieldId, an Iri, or a bare string IRI. The
+// constructor coerces via the corresponding xxxFieldId() helper (idempotent).
 
 export interface TextFieldInit {
-  readonly id: TextFieldId;
+  readonly id: TextFieldId | Iri | string;
   readonly metadata: SchemaArtifactMetadata;
   readonly fieldSpec: TextFieldSpec;
 }
 export interface NumericFieldInit {
-  readonly id: NumericFieldId;
+  readonly id: NumericFieldId | Iri | string;
   readonly metadata: SchemaArtifactMetadata;
   readonly fieldSpec: NumericFieldSpec;
 }
 export interface DateFieldInit {
-  readonly id: DateFieldId;
+  readonly id: DateFieldId | Iri | string;
   readonly metadata: SchemaArtifactMetadata;
   readonly fieldSpec: DateFieldSpec;
 }
 export interface TimeFieldInit {
-  readonly id: TimeFieldId;
+  readonly id: TimeFieldId | Iri | string;
   readonly metadata: SchemaArtifactMetadata;
   readonly fieldSpec: TimeFieldSpec;
 }
 export interface DateTimeFieldInit {
-  readonly id: DateTimeFieldId;
+  readonly id: DateTimeFieldId | Iri | string;
   readonly metadata: SchemaArtifactMetadata;
   readonly fieldSpec: DateTimeFieldSpec;
 }
 export interface ControlledTermFieldInit {
-  readonly id: ControlledTermFieldId;
+  readonly id: ControlledTermFieldId | Iri | string;
   readonly metadata: SchemaArtifactMetadata;
   readonly fieldSpec: ControlledTermFieldSpec;
 }
 export interface SingleChoiceFieldInit {
-  readonly id: SingleChoiceFieldId;
+  readonly id: SingleChoiceFieldId | Iri | string;
   readonly metadata: SchemaArtifactMetadata;
   readonly fieldSpec: SingleChoiceFieldSpec;
 }
 export interface MultipleChoiceFieldInit {
-  readonly id: MultipleChoiceFieldId;
+  readonly id: MultipleChoiceFieldId | Iri | string;
   readonly metadata: SchemaArtifactMetadata;
   readonly fieldSpec: MultipleChoiceFieldSpec;
 }
 export interface LinkFieldInit {
-  readonly id: LinkFieldId;
+  readonly id: LinkFieldId | Iri | string;
   readonly metadata: SchemaArtifactMetadata;
   readonly fieldSpec: LinkFieldSpec;
 }
 export interface EmailFieldInit {
-  readonly id: EmailFieldId;
+  readonly id: EmailFieldId | Iri | string;
   readonly metadata: SchemaArtifactMetadata;
   readonly fieldSpec: EmailFieldSpec;
 }
 export interface PhoneNumberFieldInit {
-  readonly id: PhoneNumberFieldId;
+  readonly id: PhoneNumberFieldId | Iri | string;
   readonly metadata: SchemaArtifactMetadata;
   readonly fieldSpec: PhoneNumberFieldSpec;
 }
 export interface OrcidFieldInit {
-  readonly id: OrcidFieldId;
+  readonly id: OrcidFieldId | Iri | string;
   readonly metadata: SchemaArtifactMetadata;
   readonly fieldSpec: OrcidFieldSpec;
 }
 export interface RorFieldInit {
-  readonly id: RorFieldId;
+  readonly id: RorFieldId | Iri | string;
   readonly metadata: SchemaArtifactMetadata;
   readonly fieldSpec: RorFieldSpec;
 }
 export interface DoiFieldInit {
-  readonly id: DoiFieldId;
+  readonly id: DoiFieldId | Iri | string;
   readonly metadata: SchemaArtifactMetadata;
   readonly fieldSpec: DoiFieldSpec;
 }
 export interface PubMedIdFieldInit {
-  readonly id: PubMedIdFieldId;
+  readonly id: PubMedIdFieldId | Iri | string;
   readonly metadata: SchemaArtifactMetadata;
   readonly fieldSpec: PubMedIdFieldSpec;
 }
 export interface RridFieldInit {
-  readonly id: RridFieldId;
+  readonly id: RridFieldId | Iri | string;
   readonly metadata: SchemaArtifactMetadata;
   readonly fieldSpec: RridFieldSpec;
 }
 export interface NihGrantIdFieldInit {
-  readonly id: NihGrantIdFieldId;
+  readonly id: NihGrantIdFieldId | Iri | string;
   readonly metadata: SchemaArtifactMetadata;
   readonly fieldSpec: NihGrantIdFieldSpec;
 }
 export interface AttributeValueFieldInit {
-  readonly id: AttributeValueFieldId;
+  readonly id: AttributeValueFieldId | Iri | string;
   readonly metadata: SchemaArtifactMetadata;
   readonly fieldSpec: AttributeValueFieldSpec;
 }
@@ -316,41 +335,41 @@ export interface AttributeValueFieldInit {
 // ---- Per-family constructors -------------------------------------------
 
 export const textField = (init: TextFieldInit): TextField =>
-  ({ kind: 'field', fieldKind: 'text', ...init });
+  ({ kind: 'field', fieldKind: 'text', id: textFieldId(init.id), metadata: init.metadata, fieldSpec: init.fieldSpec });
 export const numericField = (init: NumericFieldInit): NumericField =>
-  ({ kind: 'field', fieldKind: 'numeric', ...init });
+  ({ kind: 'field', fieldKind: 'numeric', id: numericFieldId(init.id), metadata: init.metadata, fieldSpec: init.fieldSpec });
 export const dateField = (init: DateFieldInit): DateField =>
-  ({ kind: 'field', fieldKind: 'date', ...init });
+  ({ kind: 'field', fieldKind: 'date', id: dateFieldId(init.id), metadata: init.metadata, fieldSpec: init.fieldSpec });
 export const timeField = (init: TimeFieldInit): TimeField =>
-  ({ kind: 'field', fieldKind: 'time', ...init });
+  ({ kind: 'field', fieldKind: 'time', id: timeFieldId(init.id), metadata: init.metadata, fieldSpec: init.fieldSpec });
 export const dateTimeField = (init: DateTimeFieldInit): DateTimeField =>
-  ({ kind: 'field', fieldKind: 'date_time', ...init });
+  ({ kind: 'field', fieldKind: 'date_time', id: dateTimeFieldId(init.id), metadata: init.metadata, fieldSpec: init.fieldSpec });
 export const controlledTermField = (init: ControlledTermFieldInit): ControlledTermField =>
-  ({ kind: 'field', fieldKind: 'controlled_term', ...init });
+  ({ kind: 'field', fieldKind: 'controlled_term', id: controlledTermFieldId(init.id), metadata: init.metadata, fieldSpec: init.fieldSpec });
 export const singleChoiceField = (init: SingleChoiceFieldInit): SingleChoiceField =>
-  ({ kind: 'field', fieldKind: 'single_choice', ...init });
+  ({ kind: 'field', fieldKind: 'single_choice', id: singleChoiceFieldId(init.id), metadata: init.metadata, fieldSpec: init.fieldSpec });
 export const multipleChoiceField = (init: MultipleChoiceFieldInit): MultipleChoiceField =>
-  ({ kind: 'field', fieldKind: 'multiple_choice', ...init });
+  ({ kind: 'field', fieldKind: 'multiple_choice', id: multipleChoiceFieldId(init.id), metadata: init.metadata, fieldSpec: init.fieldSpec });
 export const linkField = (init: LinkFieldInit): LinkField =>
-  ({ kind: 'field', fieldKind: 'link', ...init });
+  ({ kind: 'field', fieldKind: 'link', id: linkFieldId(init.id), metadata: init.metadata, fieldSpec: init.fieldSpec });
 export const emailField = (init: EmailFieldInit): EmailField =>
-  ({ kind: 'field', fieldKind: 'email', ...init });
+  ({ kind: 'field', fieldKind: 'email', id: emailFieldId(init.id), metadata: init.metadata, fieldSpec: init.fieldSpec });
 export const phoneNumberField = (init: PhoneNumberFieldInit): PhoneNumberField =>
-  ({ kind: 'field', fieldKind: 'phone_number', ...init });
+  ({ kind: 'field', fieldKind: 'phone_number', id: phoneNumberFieldId(init.id), metadata: init.metadata, fieldSpec: init.fieldSpec });
 export const orcidField = (init: OrcidFieldInit): OrcidField =>
-  ({ kind: 'field', fieldKind: 'orcid', ...init });
+  ({ kind: 'field', fieldKind: 'orcid', id: orcidFieldId(init.id), metadata: init.metadata, fieldSpec: init.fieldSpec });
 export const rorField = (init: RorFieldInit): RorField =>
-  ({ kind: 'field', fieldKind: 'ror', ...init });
+  ({ kind: 'field', fieldKind: 'ror', id: rorFieldId(init.id), metadata: init.metadata, fieldSpec: init.fieldSpec });
 export const doiField = (init: DoiFieldInit): DoiField =>
-  ({ kind: 'field', fieldKind: 'doi', ...init });
+  ({ kind: 'field', fieldKind: 'doi', id: doiFieldId(init.id), metadata: init.metadata, fieldSpec: init.fieldSpec });
 export const pubMedIdField = (init: PubMedIdFieldInit): PubMedIdField =>
-  ({ kind: 'field', fieldKind: 'pub_med_id', ...init });
+  ({ kind: 'field', fieldKind: 'pub_med_id', id: pubMedIdFieldId(init.id), metadata: init.metadata, fieldSpec: init.fieldSpec });
 export const rridField = (init: RridFieldInit): RridField =>
-  ({ kind: 'field', fieldKind: 'rrid', ...init });
+  ({ kind: 'field', fieldKind: 'rrid', id: rridFieldId(init.id), metadata: init.metadata, fieldSpec: init.fieldSpec });
 export const nihGrantIdField = (init: NihGrantIdFieldInit): NihGrantIdField =>
-  ({ kind: 'field', fieldKind: 'nih_grant_id', ...init });
+  ({ kind: 'field', fieldKind: 'nih_grant_id', id: nihGrantIdFieldId(init.id), metadata: init.metadata, fieldSpec: init.fieldSpec });
 export const attributeValueField = (init: AttributeValueFieldInit): AttributeValueField =>
-  ({ kind: 'field', fieldKind: 'attribute_value', ...init });
+  ({ kind: 'field', fieldKind: 'attribute_value', id: attributeValueFieldId(init.id), metadata: init.metadata, fieldSpec: init.fieldSpec });
 
 // ---- Type guards -------------------------------------------------------
 

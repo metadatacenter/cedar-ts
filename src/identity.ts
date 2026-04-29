@@ -117,28 +117,33 @@ export type RridFieldReference            = RridFieldId;
 export type NihGrantIdFieldReference      = NihGrantIdFieldId;
 export type AttributeValueFieldReference  = AttributeValueFieldId;
 
-// Per-family constructors. Each accepts an Iri or a bare string IRI.
+// Per-family constructors. Each is idempotent: accepts its own output type,
+// an Iri, or a bare string IRI. The own-output passthrough lets downstream
+// constructors (xxxField, embedded* helpers) call these unconditionally on
+// inputs that may already be a typed FieldId.
 
 const toIri = (v: Iri | string): Iri => (typeof v === 'string' ? iri(v) : v);
+const isAlreadyFieldId = (v: object): v is { kind: 'field_id' } =>
+  (v as { kind?: unknown }).kind === 'field_id';
 
-export const textFieldId            = (v: Iri | string): TextFieldId            => ({ kind: 'field_id', fieldKind: 'text',            iri: toIri(v) });
-export const numericFieldId         = (v: Iri | string): NumericFieldId         => ({ kind: 'field_id', fieldKind: 'numeric',         iri: toIri(v) });
-export const dateFieldId            = (v: Iri | string): DateFieldId            => ({ kind: 'field_id', fieldKind: 'date',            iri: toIri(v) });
-export const timeFieldId            = (v: Iri | string): TimeFieldId            => ({ kind: 'field_id', fieldKind: 'time',            iri: toIri(v) });
-export const dateTimeFieldId        = (v: Iri | string): DateTimeFieldId        => ({ kind: 'field_id', fieldKind: 'date_time',       iri: toIri(v) });
-export const controlledTermFieldId  = (v: Iri | string): ControlledTermFieldId  => ({ kind: 'field_id', fieldKind: 'controlled_term', iri: toIri(v) });
-export const singleChoiceFieldId    = (v: Iri | string): SingleChoiceFieldId    => ({ kind: 'field_id', fieldKind: 'single_choice',   iri: toIri(v) });
-export const multipleChoiceFieldId  = (v: Iri | string): MultipleChoiceFieldId  => ({ kind: 'field_id', fieldKind: 'multiple_choice', iri: toIri(v) });
-export const linkFieldId            = (v: Iri | string): LinkFieldId            => ({ kind: 'field_id', fieldKind: 'link',            iri: toIri(v) });
-export const emailFieldId           = (v: Iri | string): EmailFieldId           => ({ kind: 'field_id', fieldKind: 'email',           iri: toIri(v) });
-export const phoneNumberFieldId     = (v: Iri | string): PhoneNumberFieldId     => ({ kind: 'field_id', fieldKind: 'phone_number',    iri: toIri(v) });
-export const orcidFieldId           = (v: Iri | string): OrcidFieldId           => ({ kind: 'field_id', fieldKind: 'orcid',           iri: toIri(v) });
-export const rorFieldId             = (v: Iri | string): RorFieldId             => ({ kind: 'field_id', fieldKind: 'ror',             iri: toIri(v) });
-export const doiFieldId             = (v: Iri | string): DoiFieldId             => ({ kind: 'field_id', fieldKind: 'doi',             iri: toIri(v) });
-export const pubMedIdFieldId        = (v: Iri | string): PubMedIdFieldId        => ({ kind: 'field_id', fieldKind: 'pub_med_id',      iri: toIri(v) });
-export const rridFieldId            = (v: Iri | string): RridFieldId            => ({ kind: 'field_id', fieldKind: 'rrid',            iri: toIri(v) });
-export const nihGrantIdFieldId      = (v: Iri | string): NihGrantIdFieldId      => ({ kind: 'field_id', fieldKind: 'nih_grant_id',    iri: toIri(v) });
-export const attributeValueFieldId  = (v: Iri | string): AttributeValueFieldId  => ({ kind: 'field_id', fieldKind: 'attribute_value', iri: toIri(v) });
+export const textFieldId            = (v: TextFieldId            | Iri | string): TextFieldId            => typeof v !== 'string' && isAlreadyFieldId(v) ? (v as TextFieldId)            : { kind: 'field_id', fieldKind: 'text',            iri: toIri(v) };
+export const numericFieldId         = (v: NumericFieldId         | Iri | string): NumericFieldId         => typeof v !== 'string' && isAlreadyFieldId(v) ? (v as NumericFieldId)         : { kind: 'field_id', fieldKind: 'numeric',         iri: toIri(v) };
+export const dateFieldId            = (v: DateFieldId            | Iri | string): DateFieldId            => typeof v !== 'string' && isAlreadyFieldId(v) ? (v as DateFieldId)            : { kind: 'field_id', fieldKind: 'date',            iri: toIri(v) };
+export const timeFieldId            = (v: TimeFieldId            | Iri | string): TimeFieldId            => typeof v !== 'string' && isAlreadyFieldId(v) ? (v as TimeFieldId)            : { kind: 'field_id', fieldKind: 'time',            iri: toIri(v) };
+export const dateTimeFieldId        = (v: DateTimeFieldId        | Iri | string): DateTimeFieldId        => typeof v !== 'string' && isAlreadyFieldId(v) ? (v as DateTimeFieldId)        : { kind: 'field_id', fieldKind: 'date_time',       iri: toIri(v) };
+export const controlledTermFieldId  = (v: ControlledTermFieldId  | Iri | string): ControlledTermFieldId  => typeof v !== 'string' && isAlreadyFieldId(v) ? (v as ControlledTermFieldId)  : { kind: 'field_id', fieldKind: 'controlled_term', iri: toIri(v) };
+export const singleChoiceFieldId    = (v: SingleChoiceFieldId    | Iri | string): SingleChoiceFieldId    => typeof v !== 'string' && isAlreadyFieldId(v) ? (v as SingleChoiceFieldId)    : { kind: 'field_id', fieldKind: 'single_choice',   iri: toIri(v) };
+export const multipleChoiceFieldId  = (v: MultipleChoiceFieldId  | Iri | string): MultipleChoiceFieldId  => typeof v !== 'string' && isAlreadyFieldId(v) ? (v as MultipleChoiceFieldId)  : { kind: 'field_id', fieldKind: 'multiple_choice', iri: toIri(v) };
+export const linkFieldId            = (v: LinkFieldId            | Iri | string): LinkFieldId            => typeof v !== 'string' && isAlreadyFieldId(v) ? (v as LinkFieldId)            : { kind: 'field_id', fieldKind: 'link',            iri: toIri(v) };
+export const emailFieldId           = (v: EmailFieldId           | Iri | string): EmailFieldId           => typeof v !== 'string' && isAlreadyFieldId(v) ? (v as EmailFieldId)           : { kind: 'field_id', fieldKind: 'email',           iri: toIri(v) };
+export const phoneNumberFieldId     = (v: PhoneNumberFieldId     | Iri | string): PhoneNumberFieldId     => typeof v !== 'string' && isAlreadyFieldId(v) ? (v as PhoneNumberFieldId)     : { kind: 'field_id', fieldKind: 'phone_number',    iri: toIri(v) };
+export const orcidFieldId           = (v: OrcidFieldId           | Iri | string): OrcidFieldId           => typeof v !== 'string' && isAlreadyFieldId(v) ? (v as OrcidFieldId)           : { kind: 'field_id', fieldKind: 'orcid',           iri: toIri(v) };
+export const rorFieldId             = (v: RorFieldId             | Iri | string): RorFieldId             => typeof v !== 'string' && isAlreadyFieldId(v) ? (v as RorFieldId)             : { kind: 'field_id', fieldKind: 'ror',             iri: toIri(v) };
+export const doiFieldId             = (v: DoiFieldId             | Iri | string): DoiFieldId             => typeof v !== 'string' && isAlreadyFieldId(v) ? (v as DoiFieldId)             : { kind: 'field_id', fieldKind: 'doi',             iri: toIri(v) };
+export const pubMedIdFieldId        = (v: PubMedIdFieldId        | Iri | string): PubMedIdFieldId        => typeof v !== 'string' && isAlreadyFieldId(v) ? (v as PubMedIdFieldId)        : { kind: 'field_id', fieldKind: 'pub_med_id',      iri: toIri(v) };
+export const rridFieldId            = (v: RridFieldId            | Iri | string): RridFieldId            => typeof v !== 'string' && isAlreadyFieldId(v) ? (v as RridFieldId)            : { kind: 'field_id', fieldKind: 'rrid',            iri: toIri(v) };
+export const nihGrantIdFieldId      = (v: NihGrantIdFieldId      | Iri | string): NihGrantIdFieldId      => typeof v !== 'string' && isAlreadyFieldId(v) ? (v as NihGrantIdFieldId)      : { kind: 'field_id', fieldKind: 'nih_grant_id',    iri: toIri(v) };
+export const attributeValueFieldId  = (v: AttributeValueFieldId  | Iri | string): AttributeValueFieldId  => typeof v !== 'string' && isAlreadyFieldId(v) ? (v as AttributeValueFieldId)  : { kind: 'field_id', fieldKind: 'attribute_value', iri: toIri(v) };
 
 export function isFieldId(x: unknown): x is FieldId {
   return (
