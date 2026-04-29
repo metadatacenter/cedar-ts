@@ -54,7 +54,6 @@ import type {
   FullDateLiteral,
 } from './literals/index.js';
 import type { Iri } from './leaves/index.js';
-import type { FieldKind } from './identity.js';
 
 // Permissive input type for each external-authority default-value constructor:
 // matches the corresponding xxxValue() input plus the value type itself, so
@@ -77,16 +76,20 @@ export interface TextDefaultValue {
   readonly value: TextValue;
 }
 
-// Accepts any of:
-//   - a fully-built TextValue (passes through)
+// Idempotent. Accepts any of:
+//   - a fully-built TextDefaultValue (passes through)
+//   - a TextValue (wrapped)
 //   - a TextLiteral (wrapped via textValue)
 //   - a plain string (wrapped via textValue → stringLiteral; xsd:string)
 // The widened input avoids three-layer call sites like
 //   textDefaultValue(textValue(stringLiteral('Hello')))
 // for the common case where xsd:string is what's intended.
 export function textDefaultValue(
-  input: TextValue | TextLiteral | string,
+  input: TextDefaultValue | TextValue | TextLiteral | string,
 ): TextDefaultValue {
+  if (typeof input === 'object' && 'kind' in input && input.kind === 'text_default_value') {
+    return input;
+  }
   return {
     kind: 'text_default_value',
     value: isTextValue(input) ? input : textValue(input),
@@ -105,11 +108,15 @@ export interface DateDefaultValue {
   readonly value: DateValue;
 }
 
-// Accepts a DateValue, a FullDateLiteral, or a plain string discriminated by
-// lexical shape ('YYYY', 'YYYY-MM', 'YYYY-MM-DD…'). See dateValue for details.
+// Idempotent. Accepts a DateDefaultValue (pass-through), a DateValue, a
+// FullDateLiteral, or a plain string discriminated by lexical shape ('YYYY',
+// 'YYYY-MM', 'YYYY-MM-DD…'). See dateValue for details.
 export function dateDefaultValue(
-  input: DateValue | FullDateLiteral | string,
+  input: DateDefaultValue | DateValue | FullDateLiteral | string,
 ): DateDefaultValue {
+  if (typeof input === 'object' && 'kind' in input && input.kind === 'date_default_value') {
+    return input;
+  }
   return {
     kind: 'date_default_value',
     value: isDateValue(input) ? input : dateValue(input),
@@ -121,11 +128,14 @@ export interface TimeDefaultValue {
   readonly value: TimeValue;
 }
 
-// Accepts a TimeValue, a TimeLiteral, or a plain xsd:time lexical form. See
-// textDefaultValue for the rationale.
+// Idempotent. Accepts a TimeDefaultValue, a TimeValue, a TimeLiteral, or a
+// plain xsd:time lexical form. See textDefaultValue for the rationale.
 export function timeDefaultValue(
-  input: TimeValue | TimeLiteral | string,
+  input: TimeDefaultValue | TimeValue | TimeLiteral | string,
 ): TimeDefaultValue {
+  if (typeof input === 'object' && 'kind' in input && input.kind === 'time_default_value') {
+    return input;
+  }
   return {
     kind: 'time_default_value',
     value: isTimeValue(input) ? input : timeValue(input),
@@ -137,11 +147,14 @@ export interface DateTimeDefaultValue {
   readonly value: DateTimeValue;
 }
 
-// Accepts a DateTimeValue, a DateTimeLiteral, or a plain xsd:dateTime lexical
-// form. See textDefaultValue for the rationale.
+// Idempotent. Accepts a DateTimeDefaultValue, a DateTimeValue, a
+// DateTimeLiteral, or a plain xsd:dateTime lexical form.
 export function dateTimeDefaultValue(
-  input: DateTimeValue | DateTimeLiteral | string,
+  input: DateTimeDefaultValue | DateTimeValue | DateTimeLiteral | string,
 ): DateTimeDefaultValue {
+  if (typeof input === 'object' && 'kind' in input && input.kind === 'date_time_default_value') {
+    return input;
+  }
   return {
     kind: 'date_time_default_value',
     value: isDateTimeValue(input) ? input : dateTimeValue(input),
@@ -181,10 +194,14 @@ export interface EmailDefaultValue {
   readonly kind: 'email_default_value';
   readonly value: EmailValue;
 }
-// Accepts an EmailValue, a StringLiteral, or a plain string (the email lexical form).
+// Idempotent. Accepts an EmailDefaultValue, an EmailValue, a StringLiteral,
+// or a plain string (the email lexical form).
 export function emailDefaultValue(
-  input: EmailValue | StringLiteral | string,
+  input: EmailDefaultValue | EmailValue | StringLiteral | string,
 ): EmailDefaultValue {
+  if (typeof input === 'object' && 'kind' in input && input.kind === 'email_default_value') {
+    return input;
+  }
   return {
     kind: 'email_default_value',
     value: isEmailValue(input) ? input : emailValue(input),
@@ -196,8 +213,11 @@ export interface PhoneNumberDefaultValue {
   readonly value: PhoneNumberValue;
 }
 export function phoneNumberDefaultValue(
-  input: PhoneNumberValue | StringLiteral | string,
+  input: PhoneNumberDefaultValue | PhoneNumberValue | StringLiteral | string,
 ): PhoneNumberDefaultValue {
+  if (typeof input === 'object' && 'kind' in input && input.kind === 'phone_number_default_value') {
+    return input;
+  }
   return {
     kind: 'phone_number_default_value',
     value: isPhoneNumberValue(input) ? input : phoneNumberValue(input),
@@ -209,8 +229,11 @@ export interface OrcidDefaultValue {
   readonly value: OrcidValue;
 }
 export function orcidDefaultValue(
-  input: AuthorityDefaultValueInput<OrcidIri, OrcidValue>,
+  input: OrcidDefaultValue | AuthorityDefaultValueInput<OrcidIri, OrcidValue>,
 ): OrcidDefaultValue {
+  if (typeof input === 'object' && 'kind' in input && input.kind === 'orcid_default_value') {
+    return input;
+  }
   return {
     kind: 'orcid_default_value',
     value: isOrcidValue(input) ? input : orcidValue(input),
@@ -222,8 +245,11 @@ export interface RorDefaultValue {
   readonly value: RorValue;
 }
 export function rorDefaultValue(
-  input: AuthorityDefaultValueInput<RorIri, RorValue>,
+  input: RorDefaultValue | AuthorityDefaultValueInput<RorIri, RorValue>,
 ): RorDefaultValue {
+  if (typeof input === 'object' && 'kind' in input && input.kind === 'ror_default_value') {
+    return input;
+  }
   return {
     kind: 'ror_default_value',
     value: isRorValue(input) ? input : rorValue(input),
@@ -235,8 +261,11 @@ export interface DoiDefaultValue {
   readonly value: DoiValue;
 }
 export function doiDefaultValue(
-  input: AuthorityDefaultValueInput<DoiIri, DoiValue>,
+  input: DoiDefaultValue | AuthorityDefaultValueInput<DoiIri, DoiValue>,
 ): DoiDefaultValue {
+  if (typeof input === 'object' && 'kind' in input && input.kind === 'doi_default_value') {
+    return input;
+  }
   return {
     kind: 'doi_default_value',
     value: isDoiValue(input) ? input : doiValue(input),
@@ -248,8 +277,11 @@ export interface PubMedIdDefaultValue {
   readonly value: PubMedIdValue;
 }
 export function pubMedIdDefaultValue(
-  input: AuthorityDefaultValueInput<PubMedIri, PubMedIdValue>,
+  input: PubMedIdDefaultValue | AuthorityDefaultValueInput<PubMedIri, PubMedIdValue>,
 ): PubMedIdDefaultValue {
+  if (typeof input === 'object' && 'kind' in input && input.kind === 'pub_med_id_default_value') {
+    return input;
+  }
   return {
     kind: 'pub_med_id_default_value',
     value: isPubMedIdValue(input) ? input : pubMedIdValue(input),
@@ -261,8 +293,11 @@ export interface RridDefaultValue {
   readonly value: RridValue;
 }
 export function rridDefaultValue(
-  input: AuthorityDefaultValueInput<RridIri, RridValue>,
+  input: RridDefaultValue | AuthorityDefaultValueInput<RridIri, RridValue>,
 ): RridDefaultValue {
+  if (typeof input === 'object' && 'kind' in input && input.kind === 'rrid_default_value') {
+    return input;
+  }
   return {
     kind: 'rrid_default_value',
     value: isRridValue(input) ? input : rridValue(input),
@@ -274,8 +309,11 @@ export interface NihGrantIdDefaultValue {
   readonly value: NihGrantIdValue;
 }
 export function nihGrantIdDefaultValue(
-  input: AuthorityDefaultValueInput<NihGrantIri, NihGrantIdValue>,
+  input: NihGrantIdDefaultValue | AuthorityDefaultValueInput<NihGrantIri, NihGrantIdValue>,
 ): NihGrantIdDefaultValue {
+  if (typeof input === 'object' && 'kind' in input && input.kind === 'nih_grant_id_default_value') {
+    return input;
+  }
   return {
     kind: 'nih_grant_id_default_value',
     value: isNihGrantIdValue(input) ? input : nihGrantIdValue(input),
@@ -300,30 +338,6 @@ export type DefaultValue =
   | RridDefaultValue
   | NihGrantIdDefaultValue;
 
-// Mapped type: which DefaultValue family corresponds to a given FieldKind.
-// 'attribute_value' has no default — modeled as `never` so an EmbeddedField
-// of that kind cannot carry a default at the type level.
-export type DefaultValueFor<K extends FieldKind> = {
-  text: TextDefaultValue;
-  numeric: NumericDefaultValue;
-  date: DateDefaultValue;
-  time: TimeDefaultValue;
-  date_time: DateTimeDefaultValue;
-  controlled_term: ControlledTermDefaultValue;
-  single_choice: ChoiceDefaultValue;
-  multiple_choice: ChoiceDefaultValue;
-  link: LinkDefaultValue;
-  email: EmailDefaultValue;
-  phone_number: PhoneNumberDefaultValue;
-  orcid: OrcidDefaultValue;
-  ror: RorDefaultValue;
-  doi: DoiDefaultValue;
-  pub_med_id: PubMedIdDefaultValue;
-  rrid: RridDefaultValue;
-  nih_grant_id: NihGrantIdDefaultValue;
-  attribute_value: never;
-}[K];
-
 export function isDefaultValue(x: unknown): x is DefaultValue {
   if (typeof x !== 'object' || x === null) return false;
   const k = (x as { kind?: unknown }).kind;
@@ -347,74 +361,3 @@ export function isDefaultValue(x: unknown): x is DefaultValue {
   );
 }
 
-// Mapped type: the *input* shape accepted for each field family's default
-// value at the embedding-init layer. This is the input of the corresponding
-// xxxDefaultValue() constructor, minus the DefaultValue type itself (which is
-// added back as `DefaultValueFor<K>` when constructing an EmbeddedField, so
-// callers can pass either a fully-built default or a permissive primitive).
-//
-// Families whose input requires more than a primitive (numeric: which datatype?
-// date: which DateValue variant? choice: which Literal kind? controlled_term:
-// term IRI plus optional label/notation; link: structured) are `never` here —
-// the caller must construct the DefaultValue explicitly.
-export type DefaultValueInputFor<K extends FieldKind> = {
-  text: string | TextValue | TextLiteral;
-  numeric: never;
-  date: string | DateValue | FullDateLiteral;
-  time: string | TimeValue | TimeLiteral;
-  date_time: string | DateTimeValue | DateTimeLiteral;
-  controlled_term: never;
-  single_choice: never;
-  multiple_choice: never;
-  link: never;
-  email: string | StringLiteral | EmailValue;
-  phone_number: string | StringLiteral | PhoneNumberValue;
-  orcid: AuthorityDefaultValueInput<OrcidIri, OrcidValue>;
-  ror: AuthorityDefaultValueInput<RorIri, RorValue>;
-  doi: AuthorityDefaultValueInput<DoiIri, DoiValue>;
-  pub_med_id: AuthorityDefaultValueInput<PubMedIri, PubMedIdValue>;
-  rrid: AuthorityDefaultValueInput<RridIri, RridValue>;
-  nih_grant_id: AuthorityDefaultValueInput<NihGrantIri, NihGrantIdValue>;
-  attribute_value: never;
-}[K];
-
-// Coerce a (possibly raw) default-value input into a fully-built DefaultValue
-// for the given field kind. Used by the EmbeddedField constructor so that
-// callers can write `defaultValue: 'Stanford University'` directly instead of
-// `defaultValue: textDefaultValue('Stanford University')`. If the input is
-// already a DefaultValue, it passes through unchanged.
-export function coerceDefaultValueFor<K extends FieldKind>(
-  fieldKind: K,
-  input: DefaultValueFor<K> | DefaultValueInputFor<K>,
-): DefaultValueFor<K> {
-  if (isDefaultValue(input)) return input as DefaultValueFor<K>;
-  switch (fieldKind) {
-    case 'text':
-      return textDefaultValue(input as never) as DefaultValueFor<K>;
-    case 'time':
-      return timeDefaultValue(input as never) as DefaultValueFor<K>;
-    case 'date':
-      return dateDefaultValue(input as never) as DefaultValueFor<K>;
-    case 'date_time':
-      return dateTimeDefaultValue(input as never) as DefaultValueFor<K>;
-    case 'email':
-      return emailDefaultValue(input as never) as DefaultValueFor<K>;
-    case 'phone_number':
-      return phoneNumberDefaultValue(input as never) as DefaultValueFor<K>;
-    case 'orcid':
-      return orcidDefaultValue(input as never) as DefaultValueFor<K>;
-    case 'ror':
-      return rorDefaultValue(input as never) as DefaultValueFor<K>;
-    case 'doi':
-      return doiDefaultValue(input as never) as DefaultValueFor<K>;
-    case 'pub_med_id':
-      return pubMedIdDefaultValue(input as never) as DefaultValueFor<K>;
-    case 'rrid':
-      return rridDefaultValue(input as never) as DefaultValueFor<K>;
-    case 'nih_grant_id':
-      return nihGrantIdDefaultValue(input as never) as DefaultValueFor<K>;
-    default:
-      // Families with no widening: input is already DefaultValueFor<K>.
-      return input as DefaultValueFor<K>;
-  }
-}

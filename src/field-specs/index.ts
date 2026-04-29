@@ -181,7 +181,6 @@ import type {
   NihGrantIdFieldSpec,
 } from './external-authority.js';
 import type { AttributeValueFieldSpec } from './attribute.js';
-import type { FieldKind } from '../identity.js';
 
 // FieldSpec union — every concrete spec discriminated on `kind`.
 // SingleChoiceFieldSpec and MultipleChoiceFieldSpec each hold two concrete
@@ -208,34 +207,6 @@ export type FieldSpec =
   | RridFieldSpec
   | NihGrantIdFieldSpec
   | AttributeValueFieldSpec;
-
-// Type-level mapping from FieldKind to the FieldSpec interface for that
-// family. `single_choice` and `multiple_choice` map to their union of
-// literal/controlled-term variants, since the value-kind dimension is
-// orthogonal to the field kind. Used downstream by Field<K> and
-// EmbeddedField<K> to enforce family alignment.
-export type FieldSpecFor<K extends FieldKind> = {
-  text: TextFieldSpec;
-  numeric: NumericFieldSpec;
-  date: DateFieldSpec;
-  time: TimeFieldSpec;
-  date_time: DateTimeFieldSpec;
-  controlled_term: ControlledTermFieldSpec;
-  single_choice: LiteralSingleChoiceFieldSpec | ControlledTermSingleChoiceFieldSpec;
-  multiple_choice:
-    | LiteralMultipleChoiceFieldSpec
-    | ControlledTermMultipleChoiceFieldSpec;
-  link: LinkFieldSpec;
-  email: EmailFieldSpec;
-  phone_number: PhoneNumberFieldSpec;
-  orcid: OrcidFieldSpec;
-  ror: RorFieldSpec;
-  doi: DoiFieldSpec;
-  pub_med_id: PubMedIdFieldSpec;
-  rrid: RridFieldSpec;
-  nih_grant_id: NihGrantIdFieldSpec;
-  attribute_value: AttributeValueFieldSpec;
-}[K];
 
 const FIELD_SPEC_KINDS = new Set<string>([
   'text_field_spec',

@@ -23,7 +23,6 @@ import {
   emailField,
   emailFieldId,
   emailFieldSpec,
-  field,
   isField,
   isFieldOfKind,
   linkField,
@@ -93,10 +92,9 @@ const meta = schemaArtifactMetadata({
   }),
 });
 
-describe('Generic Field<K>', () => {
-  it('field() composes id, metadata, and spec into a tagged Field', () => {
-    const f = field({
-      fieldKind: 'text',
+describe('Field constructors', () => {
+  it('textField composes id, metadata, and spec into a tagged TextField', () => {
+    const f = textField({
       id: textFieldId('https://example.org/fields/title'),
       metadata: meta,
       fieldSpec: textFieldSpec(),
@@ -110,22 +108,20 @@ describe('Generic Field<K>', () => {
     expect(isFieldOfKind(f, 'numeric')).toBe(false);
   });
 
-  it('rejects misaligned id and fieldKind at the type level', () => {
-    // @ts-expect-error TextFieldId cannot satisfy FieldId<'date'>
-    field({
-      fieldKind: 'date',
+  it('rejects a misaligned id at the type level', () => {
+    dateField({
+      // @ts-expect-error TextFieldId is not a DateFieldId
       id: textFieldId('https://example.org/fields/x'),
       metadata: meta,
       fieldSpec: dateFieldSpec({ dateValueType: 'full_date' }),
     });
   });
 
-  it('rejects misaligned spec and fieldKind at the type level', () => {
-    // @ts-expect-error TextFieldSpec cannot satisfy FieldSpecFor<'numeric'>
-    field({
-      fieldKind: 'numeric',
+  it('rejects a misaligned fieldSpec at the type level', () => {
+    numericField({
       id: numericFieldId('https://example.org/fields/x'),
       metadata: meta,
+      // @ts-expect-error TextFieldSpec is not a NumericFieldSpec
       fieldSpec: textFieldSpec(),
     });
   });

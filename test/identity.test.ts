@@ -2,7 +2,6 @@ import { describe, expect, it } from 'vitest';
 import {
   CedarConstructionError,
   FIELD_KINDS,
-  fieldId,
   isFieldId,
   isFieldIdOf,
   isFieldKind,
@@ -48,9 +47,9 @@ describe('FieldKind enumeration', () => {
   });
 });
 
-describe('FieldId — generic constructor', () => {
+describe('FieldId basics', () => {
   it('produces a tagged object with the requested fieldKind', () => {
-    const id = fieldId('text', 'https://example.org/fields/title');
+    const id = textFieldId('https://example.org/fields/title');
     expect(id.kind).toBe('field_id');
     expect(id.fieldKind).toBe('text');
     expect(id.iri.value).toBe('https://example.org/fields/title');
@@ -58,11 +57,11 @@ describe('FieldId — generic constructor', () => {
   });
 
   it('throws on a malformed IRI string', () => {
-    expect(() => fieldId('text', 'not an iri')).toThrow(CedarConstructionError);
+    expect(() => textFieldId('not an iri')).toThrow(CedarConstructionError);
   });
 
   it('isFieldIdOf narrows by family', () => {
-    const id = fieldId('date', 'https://example.org/fields/dob');
+    const id = dateFieldId('https://example.org/fields/dob');
     expect(isFieldIdOf(id, 'date')).toBe(true);
     expect(isFieldIdOf(id, 'text')).toBe(false);
   });

@@ -19,7 +19,6 @@ import {
   isLabelOverride,
   property,
   isProperty,
-  embeddedField,
   isEmbeddedField,
   isEmbeddedFieldOfKind,
   embeddedTextField,
@@ -214,10 +213,9 @@ const dateRef = dateFieldId('https://example.org/fields/born');
 const choiceRef = singleChoiceFieldId('https://example.org/fields/sex');
 const attrRef = attributeValueFieldId('https://example.org/fields/attr');
 
-describe('EmbeddedField<K>', () => {
-  it('embeddedField() composes key, reference, and a tagged shape', () => {
-    const ef = embeddedField({
-      fieldKind: 'text',
+describe('EmbeddedField constructors', () => {
+  it('embeddedTextField composes key, reference, and a tagged shape', () => {
+    const ef = embeddedTextField({
       key: embeddedArtifactKey('title'),
       reference: txtRef,
     });
@@ -242,14 +240,13 @@ describe('EmbeddedField<K>', () => {
   });
 
   it('rejects a misaligned reference at the type level', () => {
-    // @ts-expect-error TextFieldReference cannot satisfy FieldReference<'date'>
-    embeddedField({
-      fieldKind: 'date',
+    embeddedDateField({
       key: embeddedArtifactKey('born'),
+      // @ts-expect-error TextFieldReference is not a DateFieldReference
       reference: txtRef,
     });
 
-    // @ts-expect-error TextFieldReference cannot satisfy FieldReference<'numeric'>
+    // @ts-expect-error TextFieldReference is not a NumericFieldReference
     embeddedNumericField({ key: embeddedArtifactKey('age'), reference: txtRef });
   });
 
@@ -340,12 +337,11 @@ describe('EmbeddedField<K>', () => {
     expect(ef2.defaultValue).toBeUndefined();
   });
 
-  it('embeddedField rejects a string defaultValue when the family has no input widening', () => {
-    // @ts-expect-error 'numeric' has DefaultValueInputFor = never; only an explicit DefaultValue is allowed
-    embeddedField({
-      fieldKind: 'numeric',
+  it('embeddedNumericField rejects a string defaultValue', () => {
+    embeddedNumericField({
       key: embeddedArtifactKey('count'),
       reference: numRef,
+      // @ts-expect-error EmbeddedNumericFieldInit's defaultValue is NumericDefaultValue only
       defaultValue: 'oops',
     });
   });

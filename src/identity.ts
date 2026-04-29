@@ -49,41 +49,55 @@ export function isFieldKind(x: unknown): x is FieldKind {
   return typeof x === 'string' && (FIELD_KINDS as readonly string[]).includes(x);
 }
 
-// FieldId is generic over its field kind. The outer `kind: 'field_id'` is the
-// top-level discriminant that distinguishes FieldId from TemplateId etc. The
-// inner `fieldKind` is the second-level discriminant that keeps families apart
-// (so a TextFieldId cannot be assigned where a DateFieldId is required).
-export interface FieldId<K extends FieldKind = FieldKind> {
-  readonly kind: 'field_id';
-  readonly fieldKind: K;
-  readonly iri: Iri;
-}
+// Each concrete FieldId interface carries the same outer `kind: 'field_id'`
+// discriminant (distinguishing FieldId from TemplateId, etc.) plus an inner
+// `fieldKind` discriminant that keeps the eighteen families distinct (so a
+// TextFieldId cannot be assigned where a DateFieldId is required). Writing
+// the families out as concrete interfaces keeps IDE hovers fully resolved.
 
-// FieldReference is structurally identical to FieldId; the alias documents
-// the role distinction (an identifier names a reusable artifact; a reference
-// expresses the intention to embed it).
-export type FieldReference<K extends FieldKind = FieldKind> = FieldId<K>;
+export interface TextFieldId            { readonly kind: 'field_id'; readonly fieldKind: 'text';            readonly iri: Iri; }
+export interface NumericFieldId         { readonly kind: 'field_id'; readonly fieldKind: 'numeric';         readonly iri: Iri; }
+export interface DateFieldId            { readonly kind: 'field_id'; readonly fieldKind: 'date';            readonly iri: Iri; }
+export interface TimeFieldId            { readonly kind: 'field_id'; readonly fieldKind: 'time';            readonly iri: Iri; }
+export interface DateTimeFieldId        { readonly kind: 'field_id'; readonly fieldKind: 'date_time';       readonly iri: Iri; }
+export interface ControlledTermFieldId  { readonly kind: 'field_id'; readonly fieldKind: 'controlled_term'; readonly iri: Iri; }
+export interface SingleChoiceFieldId    { readonly kind: 'field_id'; readonly fieldKind: 'single_choice';   readonly iri: Iri; }
+export interface MultipleChoiceFieldId  { readonly kind: 'field_id'; readonly fieldKind: 'multiple_choice'; readonly iri: Iri; }
+export interface LinkFieldId            { readonly kind: 'field_id'; readonly fieldKind: 'link';            readonly iri: Iri; }
+export interface EmailFieldId           { readonly kind: 'field_id'; readonly fieldKind: 'email';           readonly iri: Iri; }
+export interface PhoneNumberFieldId     { readonly kind: 'field_id'; readonly fieldKind: 'phone_number';    readonly iri: Iri; }
+export interface OrcidFieldId           { readonly kind: 'field_id'; readonly fieldKind: 'orcid';           readonly iri: Iri; }
+export interface RorFieldId             { readonly kind: 'field_id'; readonly fieldKind: 'ror';             readonly iri: Iri; }
+export interface DoiFieldId             { readonly kind: 'field_id'; readonly fieldKind: 'doi';             readonly iri: Iri; }
+export interface PubMedIdFieldId        { readonly kind: 'field_id'; readonly fieldKind: 'pub_med_id';      readonly iri: Iri; }
+export interface RridFieldId            { readonly kind: 'field_id'; readonly fieldKind: 'rrid';            readonly iri: Iri; }
+export interface NihGrantIdFieldId      { readonly kind: 'field_id'; readonly fieldKind: 'nih_grant_id';    readonly iri: Iri; }
+export interface AttributeValueFieldId  { readonly kind: 'field_id'; readonly fieldKind: 'attribute_value'; readonly iri: Iri; }
 
-// Convenience aliases for each field family.
-export type TextFieldId            = FieldId<'text'>;
-export type NumericFieldId         = FieldId<'numeric'>;
-export type DateFieldId            = FieldId<'date'>;
-export type TimeFieldId            = FieldId<'time'>;
-export type DateTimeFieldId        = FieldId<'date_time'>;
-export type ControlledTermFieldId  = FieldId<'controlled_term'>;
-export type SingleChoiceFieldId    = FieldId<'single_choice'>;
-export type MultipleChoiceFieldId  = FieldId<'multiple_choice'>;
-export type LinkFieldId            = FieldId<'link'>;
-export type EmailFieldId           = FieldId<'email'>;
-export type PhoneNumberFieldId     = FieldId<'phone_number'>;
-export type OrcidFieldId           = FieldId<'orcid'>;
-export type RorFieldId             = FieldId<'ror'>;
-export type DoiFieldId             = FieldId<'doi'>;
-export type PubMedIdFieldId        = FieldId<'pub_med_id'>;
-export type RridFieldId            = FieldId<'rrid'>;
-export type NihGrantIdFieldId      = FieldId<'nih_grant_id'>;
-export type AttributeValueFieldId  = FieldId<'attribute_value'>;
+export type FieldId =
+  | TextFieldId
+  | NumericFieldId
+  | DateFieldId
+  | TimeFieldId
+  | DateTimeFieldId
+  | ControlledTermFieldId
+  | SingleChoiceFieldId
+  | MultipleChoiceFieldId
+  | LinkFieldId
+  | EmailFieldId
+  | PhoneNumberFieldId
+  | OrcidFieldId
+  | RorFieldId
+  | DoiFieldId
+  | PubMedIdFieldId
+  | RridFieldId
+  | NihGrantIdFieldId
+  | AttributeValueFieldId;
 
+// FieldReference is structurally identical to FieldId; the alias family
+// documents the role distinction (an identifier names a reusable artifact;
+// a reference expresses the intention to embed it).
+export type FieldReference = FieldId;
 export type TextFieldReference            = TextFieldId;
 export type NumericFieldReference         = NumericFieldId;
 export type DateFieldReference            = DateFieldId;
@@ -103,37 +117,28 @@ export type RridFieldReference            = RridFieldId;
 export type NihGrantIdFieldReference      = NihGrantIdFieldId;
 export type AttributeValueFieldReference  = AttributeValueFieldId;
 
-// Generic constructor. The field-kind-specific helpers below are convenience
-// wrappers; either form yields the same shape.
-export function fieldId<K extends FieldKind>(
-  fieldKind: K,
-  value: Iri | string,
-): FieldId<K> {
-  return {
-    kind: 'field_id',
-    fieldKind,
-    iri: typeof value === 'string' ? iri(value) : value,
-  };
-}
+// Per-family constructors. Each accepts an Iri or a bare string IRI.
 
-export const textFieldId            = (v: Iri | string): TextFieldId            => fieldId('text', v);
-export const numericFieldId         = (v: Iri | string): NumericFieldId         => fieldId('numeric', v);
-export const dateFieldId            = (v: Iri | string): DateFieldId            => fieldId('date', v);
-export const timeFieldId            = (v: Iri | string): TimeFieldId            => fieldId('time', v);
-export const dateTimeFieldId        = (v: Iri | string): DateTimeFieldId        => fieldId('date_time', v);
-export const controlledTermFieldId  = (v: Iri | string): ControlledTermFieldId  => fieldId('controlled_term', v);
-export const singleChoiceFieldId    = (v: Iri | string): SingleChoiceFieldId    => fieldId('single_choice', v);
-export const multipleChoiceFieldId  = (v: Iri | string): MultipleChoiceFieldId  => fieldId('multiple_choice', v);
-export const linkFieldId            = (v: Iri | string): LinkFieldId            => fieldId('link', v);
-export const emailFieldId           = (v: Iri | string): EmailFieldId           => fieldId('email', v);
-export const phoneNumberFieldId     = (v: Iri | string): PhoneNumberFieldId     => fieldId('phone_number', v);
-export const orcidFieldId           = (v: Iri | string): OrcidFieldId           => fieldId('orcid', v);
-export const rorFieldId             = (v: Iri | string): RorFieldId             => fieldId('ror', v);
-export const doiFieldId             = (v: Iri | string): DoiFieldId             => fieldId('doi', v);
-export const pubMedIdFieldId        = (v: Iri | string): PubMedIdFieldId        => fieldId('pub_med_id', v);
-export const rridFieldId            = (v: Iri | string): RridFieldId            => fieldId('rrid', v);
-export const nihGrantIdFieldId      = (v: Iri | string): NihGrantIdFieldId      => fieldId('nih_grant_id', v);
-export const attributeValueFieldId  = (v: Iri | string): AttributeValueFieldId  => fieldId('attribute_value', v);
+const toIri = (v: Iri | string): Iri => (typeof v === 'string' ? iri(v) : v);
+
+export const textFieldId            = (v: Iri | string): TextFieldId            => ({ kind: 'field_id', fieldKind: 'text',            iri: toIri(v) });
+export const numericFieldId         = (v: Iri | string): NumericFieldId         => ({ kind: 'field_id', fieldKind: 'numeric',         iri: toIri(v) });
+export const dateFieldId            = (v: Iri | string): DateFieldId            => ({ kind: 'field_id', fieldKind: 'date',            iri: toIri(v) });
+export const timeFieldId            = (v: Iri | string): TimeFieldId            => ({ kind: 'field_id', fieldKind: 'time',            iri: toIri(v) });
+export const dateTimeFieldId        = (v: Iri | string): DateTimeFieldId        => ({ kind: 'field_id', fieldKind: 'date_time',       iri: toIri(v) });
+export const controlledTermFieldId  = (v: Iri | string): ControlledTermFieldId  => ({ kind: 'field_id', fieldKind: 'controlled_term', iri: toIri(v) });
+export const singleChoiceFieldId    = (v: Iri | string): SingleChoiceFieldId    => ({ kind: 'field_id', fieldKind: 'single_choice',   iri: toIri(v) });
+export const multipleChoiceFieldId  = (v: Iri | string): MultipleChoiceFieldId  => ({ kind: 'field_id', fieldKind: 'multiple_choice', iri: toIri(v) });
+export const linkFieldId            = (v: Iri | string): LinkFieldId            => ({ kind: 'field_id', fieldKind: 'link',            iri: toIri(v) });
+export const emailFieldId           = (v: Iri | string): EmailFieldId           => ({ kind: 'field_id', fieldKind: 'email',           iri: toIri(v) });
+export const phoneNumberFieldId     = (v: Iri | string): PhoneNumberFieldId     => ({ kind: 'field_id', fieldKind: 'phone_number',    iri: toIri(v) });
+export const orcidFieldId           = (v: Iri | string): OrcidFieldId           => ({ kind: 'field_id', fieldKind: 'orcid',           iri: toIri(v) });
+export const rorFieldId             = (v: Iri | string): RorFieldId             => ({ kind: 'field_id', fieldKind: 'ror',             iri: toIri(v) });
+export const doiFieldId             = (v: Iri | string): DoiFieldId             => ({ kind: 'field_id', fieldKind: 'doi',             iri: toIri(v) });
+export const pubMedIdFieldId        = (v: Iri | string): PubMedIdFieldId        => ({ kind: 'field_id', fieldKind: 'pub_med_id',      iri: toIri(v) });
+export const rridFieldId            = (v: Iri | string): RridFieldId            => ({ kind: 'field_id', fieldKind: 'rrid',            iri: toIri(v) });
+export const nihGrantIdFieldId      = (v: Iri | string): NihGrantIdFieldId      => ({ kind: 'field_id', fieldKind: 'nih_grant_id',    iri: toIri(v) });
+export const attributeValueFieldId  = (v: Iri | string): AttributeValueFieldId  => ({ kind: 'field_id', fieldKind: 'attribute_value', iri: toIri(v) });
 
 export function isFieldId(x: unknown): x is FieldId {
   return (
@@ -142,10 +147,11 @@ export function isFieldId(x: unknown): x is FieldId {
   );
 }
 
+// Narrows a FieldId to the concrete family identified by `fieldKind`.
 export function isFieldIdOf<K extends FieldKind>(
   x: unknown,
   fieldKind: K,
-): x is FieldId<K> {
+): x is Extract<FieldId, { fieldKind: K }> {
   return isFieldId(x) && x.fieldKind === fieldKind;
 }
 
