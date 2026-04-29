@@ -1,0 +1,45 @@
+import { type TermIri, iri } from '../leaves/index.js';
+
+// ControlledTermValue identifies a term drawn from an ontology, branch, class
+// set, or value set declared in the corresponding ControlledTermFieldSpec.
+// `label` corresponds to the grammar's required Label component, but the
+// validator treats label as SHOULD-include and warns rather than errors when
+// absent. We follow the spec by making it optional in the type and warning
+// at validation time.
+export interface ControlledTermValue {
+  readonly kind: 'controlled_term_value';
+  readonly termIri: TermIri;
+  readonly label?: string;
+  readonly notation?: string;
+  readonly preferredLabel?: string;
+}
+
+export interface ControlledTermValueInit {
+  readonly termIri: TermIri | string;
+  readonly label?: string;
+  readonly notation?: string;
+  readonly preferredLabel?: string;
+}
+
+export function controlledTermValue(init: ControlledTermValueInit): ControlledTermValue {
+  const termIri =
+    typeof init.termIri === 'string' ? iri(init.termIri) : init.termIri;
+  const out: {
+    kind: 'controlled_term_value';
+    termIri: TermIri;
+    label?: string;
+    notation?: string;
+    preferredLabel?: string;
+  } = { kind: 'controlled_term_value', termIri };
+  if (init.label !== undefined) out.label = init.label;
+  if (init.notation !== undefined) out.notation = init.notation;
+  if (init.preferredLabel !== undefined) out.preferredLabel = init.preferredLabel;
+  return out;
+}
+
+export function isControlledTermValue(x: unknown): x is ControlledTermValue {
+  return (
+    typeof x === 'object' && x !== null &&
+    (x as { kind?: unknown }).kind === 'controlled_term_value'
+  );
+}
