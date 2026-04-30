@@ -17,7 +17,7 @@ import {
 describe('DescriptiveMetadata', () => {
   it('requires only a name and defaults altLabels to empty', () => {
     const dm = descriptiveMetadata({ name: 'Title' });
-    expect(dm.name).toBe('Title');
+    expect(dm.name).toEqual([{ value: 'Title', lang: 'und' }]);
     expect(dm.altLabels).toEqual([]);
     expect('description' in dm).toBe(false);
     expect('identifier' in dm).toBe(false);
@@ -32,10 +32,13 @@ describe('DescriptiveMetadata', () => {
       preferredLabel: 'Study title',
       altLabels: ['Title', 'Name of study'],
     });
-    expect(dm.description).toBe('The study title');
+    expect(dm.description).toEqual([{ value: 'The study title', lang: 'und' }]);
     expect(dm.identifier).toBe('study-001');
-    expect(dm.preferredLabel).toBe('Study title');
-    expect(dm.altLabels).toEqual(['Title', 'Name of study']);
+    expect(dm.preferredLabel).toEqual([{ value: 'Study title', lang: 'und' }]);
+    expect(dm.altLabels).toEqual([
+      [{ value: 'Title', lang: 'und' }],
+      [{ value: 'Name of study', lang: 'und' }],
+    ]);
   });
 });
 

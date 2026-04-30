@@ -3,6 +3,11 @@ import { type TemplateId, templateId } from './identity.js';
 import type { SchemaArtifactMetadata } from './metadata/index.js';
 import type { EmbeddedArtifact } from './embedded/index.js';
 import type { Field } from './fields.js';
+import {
+  type MultilingualString,
+  type MultilingualStringInput,
+  multilingualString,
+} from './multilingual.js';
 
 // =====================================================================
 // Template — see grammar.md §Core Structure.
@@ -28,11 +33,9 @@ import type { Field } from './fields.js';
 //
 // Header and footer
 // -----------------
-// `header` and `footer` are optional plain strings shown above and below
-// the rendered form. Per the design rule "brand only leaves that get
-// mixed up at call sites" (see metadata/descriptive.ts), they are not
-// wrapped in dedicated leaf types — the property name on this struct
-// preserves the grammar's distinction.
+// `header` and `footer` are optional MultilingualStrings shown above and
+// below the rendered form (see src/multilingual.ts). Each carries a
+// non-empty set of language-tagged localizations.
 //
 // Order of `embedded`
 // -------------------
@@ -53,19 +56,20 @@ export interface Template {
   readonly kind: 'Template';
   readonly id: TemplateId;
   readonly metadata: SchemaArtifactMetadata;
-  readonly header?: string;
-  readonly footer?: string;
+  readonly header?: MultilingualString;
+  readonly footer?: MultilingualString;
   readonly embedded: readonly EmbeddedArtifact[];
 }
 
 // Init type for `template()`. Accepts a bare-string IRI at `id` (widened
 // via `templateId()`); `embedded` is optional and defaults to an empty
-// sequence.
+// sequence. `header` and `footer` accept any MultilingualStringInput
+// (bare string, lang map, etc. — see src/multilingual.ts).
 export interface TemplateInit {
   readonly id: TemplateId | string;
   readonly metadata: SchemaArtifactMetadata;
-  readonly header?: string;
-  readonly footer?: string;
+  readonly header?: MultilingualStringInput;
+  readonly footer?: MultilingualStringInput;
   readonly embedded?: readonly EmbeddedArtifact[];
 }
 
@@ -95,8 +99,8 @@ export function template(init: TemplateInit): Template {
     kind: 'Template';
     id: TemplateId;
     metadata: SchemaArtifactMetadata;
-    header?: string;
-    footer?: string;
+    header?: MultilingualString;
+    footer?: MultilingualString;
     embedded: readonly EmbeddedArtifact[];
   } = {
     kind: 'Template',
@@ -104,8 +108,8 @@ export function template(init: TemplateInit): Template {
     metadata: init.metadata,
     embedded,
   };
-  if (init.header !== undefined) out.header = init.header;
-  if (init.footer !== undefined) out.footer = init.footer;
+  if (init.header !== undefined) out.header = multilingualString(init.header);
+  if (init.footer !== undefined) out.footer = multilingualString(init.footer);
   return out;
 }
 

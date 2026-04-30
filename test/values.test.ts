@@ -115,9 +115,9 @@ describe('ControlledTermValue', () => {
     });
     expect(v.kind).toBe('ControlledTermValue');
     expect(v.term.value).toBe('http://purl.obolibrary.org/obo/UBERON_0000178');
-    expect(v.label).toBe('blood');
+    expect(v.label).toEqual([{ value: 'blood', lang: 'und' }]);
     expect(v.notation).toBe('UBERON:0000178');
-    expect(v.preferredLabel).toBe('blood');
+    expect(v.preferredLabel).toEqual([{ value: 'blood', lang: 'und' }]);
   });
 
   it('accepts only a TermIri with no extra metadata', () => {

@@ -1,25 +1,30 @@
 import type { Iri, NumericDatatypeKind } from '../leaves/index.js';
 import { iri, assertNonNegativeInteger } from '../leaves/index.js';
+import {
+  type MultilingualString,
+  type MultilingualStringInput,
+  multilingualString,
+} from '../multilingual.js';
 import type { NumericValue } from '../values/index.js';
 import type { NumericRenderingHint } from './rendering-hints.js';
 
 // Unit denotes a measurement or quantity unit. The grammar pairs an Iri with
-// an optional Label; we model Label as a plain optional string.
+// an optional human-readable Label, modeled here as a MultilingualString.
 export interface Unit {
   readonly iri: Iri;
-  readonly label?: string;
+  readonly label?: MultilingualString;
 }
 
 export interface UnitInit {
   readonly iri: Iri | string;
-  readonly label?: string;
+  readonly label?: MultilingualStringInput;
 }
 
 export function unit(init: UnitInit): Unit {
-  const out: { iri: Iri; label?: string } = {
+  const out: { iri: Iri; label?: MultilingualString } = {
     iri: typeof init.iri === 'string' ? iri(init.iri) : init.iri,
   };
-  if (init.label !== undefined) out.label = init.label;
+  if (init.label !== undefined) out.label = multilingualString(init.label);
   return out;
 }
 

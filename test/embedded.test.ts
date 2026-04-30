@@ -194,7 +194,7 @@ describe('Cardinality', () => {
 describe('LabelOverride and Property', () => {
   it('labelOverride defaults altLabels to an empty array', () => {
     const lo = labelOverride({ label: 'Participant' });
-    expect(lo.label).toBe('Participant');
+    expect(lo.label).toEqual([{ value: 'Participant', lang: 'und' }]);
     expect(lo.altLabels).toEqual([]);
   });
 
@@ -205,7 +205,7 @@ describe('LabelOverride and Property', () => {
     });
     expect(p.iri.kind).toBe('Iri');
     expect(p.iri.value).toBe('https://schema.org/identifier');
-    expect(p.label).toBe('identifier');
+    expect(p.label).toEqual([{ value: 'identifier', lang: 'und' }]);
   });
 
   it('property accepts a bare string IRI (no label)', () => {
@@ -240,7 +240,7 @@ describe('LabelOverride and Property', () => {
         label: 'name',
       },
     });
-    expect(ef.property?.label).toBe('name');
+    expect(ef.property?.label).toEqual([{ value: 'name', lang: 'und' }]);
   });
 });
 
@@ -327,7 +327,7 @@ describe('EmbeddedField constructors', () => {
     expect(ef.cardinality?.min).toBe(1);
     expect(ef.visibility).toBe('visible');
     expect(ef.defaultValue?.kind).toBe('TextDefaultValue');
-    expect(ef.labelOverride?.label).toBe('Document Title');
+    expect(ef.labelOverride?.label).toEqual([{ value: 'Document Title', lang: 'und' }]);
     expect(ef.property?.iri.value).toBe('https://schema.org/name');
   });
 

@@ -1,25 +1,31 @@
+import {
+  type MultilingualString,
+  type MultilingualStringInput,
+  multilingualString,
+} from '../multilingual.js';
+
 // LabelOverride — see grammar.md §Label Override.
 // Provides template-specific labeling for an embedded artifact, overriding
 // the reusable artifact's default label in this embedding context.
 //
-// Per the design rule "brand only leaves that get mixed up at call sites"
-// (see metadata/descriptive.ts), the grammar's `Label` and `AlternativeLabel`
-// wrappers are kept as plain string properties; the property name on this
-// struct preserves the grammar distinction.
+// `label` and each entry of `altLabels` are MultilingualStrings: a non-empty
+// set of (value, lang) pairs covering the desired localizations of one
+// conceptual label. Multiple alternative-label phrasings are represented by
+// multiple entries in `altLabels`, each itself translatable.
 
 export interface LabelOverride {
-  readonly label: string;
-  readonly altLabels: readonly string[];
+  readonly label: MultilingualString;
+  readonly altLabels: readonly MultilingualString[];
 }
 
 export interface LabelOverrideInit {
-  readonly label: string;
-  readonly altLabels?: readonly string[];
+  readonly label: MultilingualStringInput;
+  readonly altLabels?: readonly MultilingualStringInput[];
 }
 
 export function labelOverride(init: LabelOverrideInit): LabelOverride {
   return {
-    label: init.label,
-    altLabels: init.altLabels ?? [],
+    label: multilingualString(init.label),
+    altLabels: (init.altLabels ?? []).map(multilingualString),
   };
 }

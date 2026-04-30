@@ -92,7 +92,7 @@ describe('NumericFieldSpec', () => {
   it('Unit pairs an Iri with an optional label', () => {
     const u = unit({ iri: 'http://qudt.org/vocab/unit/M', label: 'metre' });
     expect(u.iri.value).toBe('http://qudt.org/vocab/unit/M');
-    expect(u.label).toBe('metre');
+    expect(u.label).toEqual([{ value: 'metre', lang: 'und' }]);
 
     const fs = numericFieldSpec({
       datatype: 'decimal',
@@ -146,7 +146,7 @@ describe('Controlled-term field spec and sources', () => {
   it('OntologyDisplayHint requires at least one of acronym or name', () => {
     expect(ontologyDisplayHint({ acronym: 'OBI' }).acronym).toBe('OBI');
     expect(ontologyDisplayHint({ name: 'Ontology for Biomedical Investigations' }).name)
-      .toBe('Ontology for Biomedical Investigations');
+      .toEqual([{ value: 'Ontology for Biomedical Investigations', lang: 'und' }]);
     expect(() => ontologyDisplayHint({})).toThrow(CedarConstructionError);
   });
 
@@ -169,7 +169,7 @@ describe('Controlled-term field spec and sources', () => {
       maxTraversalDepth: 3,
     });
     expect(bs.kind).toBe('BranchSource');
-    expect(bs.rootTermLabel).toBe('Root');
+    expect(bs.rootTermLabel).toEqual([{ value: 'Root', lang: 'und' }]);
     expect(bs.maxTraversalDepth).toBe(3);
   });
 

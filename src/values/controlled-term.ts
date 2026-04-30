@@ -1,4 +1,9 @@
 import { type TermIri, iri } from '../leaves/index.js';
+import {
+  type MultilingualString,
+  type MultilingualStringInput,
+  multilingualString,
+} from '../multilingual.js';
 
 // ControlledTermValue identifies a term drawn from an ontology, branch, class
 // set, or value set declared in the corresponding ControlledTermFieldSpec.
@@ -6,19 +11,23 @@ import { type TermIri, iri } from '../leaves/index.js';
 // validator treats label as SHOULD-include and warns rather than errors when
 // absent. We follow the spec by making it optional in the type and warning
 // at validation time.
+//
+// `label` and `preferredLabel` are MultilingualStrings (display text);
+// `notation` stays a plain string (a technical short-form code, e.g. a
+// SKOS notation).
 export interface ControlledTermValue {
   readonly kind: 'ControlledTermValue';
   readonly term: TermIri;
-  readonly label?: string;
+  readonly label?: MultilingualString;
   readonly notation?: string;
-  readonly preferredLabel?: string;
+  readonly preferredLabel?: MultilingualString;
 }
 
 export interface ControlledTermValueInit {
   readonly term: TermIri | string;
-  readonly label?: string;
+  readonly label?: MultilingualStringInput;
   readonly notation?: string;
-  readonly preferredLabel?: string;
+  readonly preferredLabel?: MultilingualStringInput;
 }
 
 export function controlledTermValue(init: ControlledTermValueInit): ControlledTermValue {
@@ -26,13 +35,14 @@ export function controlledTermValue(init: ControlledTermValueInit): ControlledTe
   const out: {
     kind: 'ControlledTermValue';
     term: TermIri;
-    label?: string;
+    label?: MultilingualString;
     notation?: string;
-    preferredLabel?: string;
+    preferredLabel?: MultilingualString;
   } = { kind: 'ControlledTermValue', term };
-  if (init.label !== undefined) out.label = init.label;
+  if (init.label !== undefined) out.label = multilingualString(init.label);
   if (init.notation !== undefined) out.notation = init.notation;
-  if (init.preferredLabel !== undefined) out.preferredLabel = init.preferredLabel;
+  if (init.preferredLabel !== undefined)
+    out.preferredLabel = multilingualString(init.preferredLabel);
   return out;
 }
 

@@ -1,5 +1,6 @@
 // Public API. Curated re-exports as each layer comes online.
 export * from './leaves/index.js';
+export * from './multilingual.js';
 export * from './literals/index.js';
 export * from './values/index.js';
 export * from './identity.js';

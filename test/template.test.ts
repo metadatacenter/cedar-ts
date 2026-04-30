@@ -97,8 +97,8 @@ describe('Template', () => {
       header: 'Welcome',
       footer: 'Thanks for participating.',
     });
-    expect(t.header).toBe('Welcome');
-    expect(t.footer).toBe('Thanks for participating.');
+    expect(t.header).toEqual([{ value: 'Welcome', lang: 'und' }]);
+    expect(t.footer).toEqual([{ value: 'Thanks for participating.', lang: 'und' }]);
   });
 
   it('rejects duplicate EmbeddedArtifactKey values within a single template', () => {

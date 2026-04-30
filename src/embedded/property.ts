@@ -1,19 +1,27 @@
 import { type Iri, iri } from '../leaves/index.js';
+import {
+  type MultilingualString,
+  type MultilingualStringInput,
+  multilingualString,
+} from '../multilingual.js';
 
 // Property — see grammar.md §Properties.
 // Associates a semantic property IRI with an EmbeddedField or EmbeddedTemplate
 // within a specific Template. Distinct from the intrinsic metadata of the
 // referenced artifact: the same reusable artifact may be embedded under
 // different property IRIs in different templates.
+//
+// `label` is a MultilingualString — a non-empty set of language-tagged
+// localizations of the human-readable property label.
 
 export interface Property {
   readonly iri: Iri;
-  readonly label?: string;
+  readonly label?: MultilingualString;
 }
 
 export interface PropertyInit {
   readonly iri: Iri | string;
-  readonly label?: string;
+  readonly label?: MultilingualStringInput;
 }
 
 // All input shapes accepted by property(). The bare-string and bare-Iri forms
@@ -31,10 +39,10 @@ export function property(input: PropertyInput): Property {
   // An Iri carries `kind: 'Iri'` (and a `value` rather than an `iri` property);
   // a PropertyInit / Property exposes an `iri` property.
   if ('iri' in input) {
-    const out: { iri: Iri; label?: string } = {
+    const out: { iri: Iri; label?: MultilingualString } = {
       iri: typeof input.iri === 'string' ? iri(input.iri) : input.iri,
     };
-    if (input.label !== undefined) out.label = input.label;
+    if (input.label !== undefined) out.label = multilingualString(input.label);
     return out;
   }
   // Bare Iri

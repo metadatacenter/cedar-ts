@@ -382,7 +382,12 @@ export const principalInvestigatorTemplate: Template = template({
     'Principal Investigator Details',
     'Identity, contact information, and institutional affiliation of a study PI.',
   ),
-  header: 'Principal Investigator Details',
+  // Human-facing schema-metadata positions accept a `MultilingualString`.
+  // Any input shape works: a bare string (lang defaults to 'und'), a
+  // `(value, lang)` tuple, an explicit `{value, lang}` object, an array of
+  // entries, or — as shown here — a `{ [lang]: value }` map for compact
+  // two-language localization.
+  header: { en: 'Principal Investigator Details', fr: 'Détails du chercheur principal' },
   footer: 'All personal data is handled per the study’s data-management plan.',
   embedded: [
     embeddedPresentationComponent({
@@ -443,9 +448,11 @@ export const principalInvestigatorTemplate: Template = template({
       property: 'https://schema.org/identifier',
       // labelOverride supplies template-local labels that override the
       // reusable Field's metadata.name in this embedding context only.
+      // Each label position accepts any MultilingualString input shape;
+      // here we use the map form for the primary label.
       labelOverride: labelOverride({
-        label: 'ORCID iD',
-        altLabels: ['Open Researcher and Contributor iD'],
+        label: { en: 'ORCID iD', fr: 'iD ORCID' },
+        altLabels: [{ en: 'Open Researcher and Contributor iD' }],
       }),
     }),
 

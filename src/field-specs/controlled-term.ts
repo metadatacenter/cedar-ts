@@ -1,20 +1,27 @@
 import type { Iri } from '../leaves/index.js';
 import { iri, assertNonNegativeInteger } from '../leaves/index.js';
+import {
+  type MultilingualString,
+  type MultilingualStringInput,
+  multilingualString,
+} from '../multilingual.js';
 
 // OntologyDisplayHint — at least one of acronym/name must be present per
 // grammar:
 //   OntologyDisplayHintContent ::= OntologyAcronym | OntologyName | OntologyAcronym OntologyName
 // We model this with two optional fields and a runtime check at construction.
+// `acronym` is a plain string (it is a technical short-form, not human-readable
+// display text); `name` is a MultilingualString.
 import { CedarConstructionError } from '../leaves/index.js';
 
 export interface OntologyDisplayHint {
   readonly acronym?: string;
-  readonly name?: string;
+  readonly name?: MultilingualString;
 }
 
 export interface OntologyDisplayHintInit {
   readonly acronym?: string;
-  readonly name?: string;
+  readonly name?: MultilingualStringInput;
 }
 
 export function ontologyDisplayHint(init: OntologyDisplayHintInit): OntologyDisplayHint {
@@ -23,9 +30,9 @@ export function ontologyDisplayHint(init: OntologyDisplayHintInit): OntologyDisp
       'OntologyDisplayHint requires at least one of acronym or name',
     );
   }
-  const out: { acronym?: string; name?: string } = {};
+  const out: { acronym?: string; name?: MultilingualString } = {};
   if (init.acronym !== undefined) out.acronym = init.acronym;
-  if (init.name !== undefined) out.name = init.name;
+  if (init.name !== undefined) out.name = multilingualString(init.name);
   return out;
 }
 
@@ -64,14 +71,14 @@ export interface BranchSource {
   readonly kind: 'BranchSource';
   readonly ontology: OntologyReference;
   readonly rootTermIri: Iri;
-  readonly rootTermLabel: string;
+  readonly rootTermLabel: MultilingualString;
   readonly maxTraversalDepth?: number;
 }
 
 export interface BranchSourceInit {
   readonly ontology: OntologyReference;
   readonly rootTermIri: Iri | string;
-  readonly rootTermLabel: string;
+  readonly rootTermLabel: MultilingualStringInput;
   readonly maxTraversalDepth?: number;
 }
 
@@ -80,14 +87,14 @@ export function branchSource(init: BranchSourceInit): BranchSource {
     kind: 'BranchSource';
     ontology: OntologyReference;
     rootTermIri: Iri;
-    rootTermLabel: string;
+    rootTermLabel: MultilingualString;
     maxTraversalDepth?: number;
   } = {
     kind: 'BranchSource',
     ontology: init.ontology,
     rootTermIri:
       typeof init.rootTermIri === 'string' ? iri(init.rootTermIri) : init.rootTermIri,
-    rootTermLabel: init.rootTermLabel,
+    rootTermLabel: multilingualString(init.rootTermLabel),
   };
   if (init.maxTraversalDepth !== undefined)
     out.maxTraversalDepth = assertNonNegativeInteger(init.maxTraversalDepth);
@@ -96,13 +103,13 @@ export function branchSource(init: BranchSourceInit): BranchSource {
 
 export interface ControlledTermClass {
   readonly term: Iri;
-  readonly label: string;
+  readonly label: MultilingualString;
   readonly ontology: OntologyReference;
 }
 
 export interface ControlledTermClassInit {
   readonly term: Iri | string;
-  readonly label: string;
+  readonly label: MultilingualStringInput;
   readonly ontology: OntologyReference;
 }
 
@@ -111,7 +118,7 @@ export function controlledTermClass(
 ): ControlledTermClass {
   return {
     term: typeof init.term === 'string' ? iri(init.term) : init.term,
-    label: init.label,
+    label: multilingualString(init.label),
     ontology: init.ontology,
   };
 }
@@ -130,13 +137,13 @@ export function classSource(
 export interface ValueSetSource {
   readonly kind: 'ValueSetSource';
   readonly identifier: string;
-  readonly name?: string;
+  readonly name?: MultilingualString;
   readonly iri?: Iri;
 }
 
 export interface ValueSetSourceInit {
   readonly identifier: string;
-  readonly name?: string;
+  readonly name?: MultilingualStringInput;
   readonly iri?: Iri | string;
 }
 
@@ -144,10 +151,10 @@ export function valueSetSource(init: ValueSetSourceInit): ValueSetSource {
   const out: {
     kind: 'ValueSetSource';
     identifier: string;
-    name?: string;
+    name?: MultilingualString;
     iri?: Iri;
   } = { kind: 'ValueSetSource', identifier: init.identifier };
-  if (init.name !== undefined) out.name = init.name;
+  if (init.name !== undefined) out.name = multilingualString(init.name);
   if (init.iri !== undefined) {
     out.iri = typeof init.iri === 'string' ? iri(init.iri) : init.iri;
   }
