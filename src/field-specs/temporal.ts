@@ -6,42 +6,42 @@ import type {
 
 // DateValueType selects the granularity of dates accepted by a DateFieldSpec.
 // String-literal union (per nullary-constructor convention).
-export type DateValueType = 'year' | 'year_month' | 'full_date';
+export type DateValueType = 'year' | 'yearMonth' | 'fullDate';
 export const DATE_VALUE_TYPES: readonly DateValueType[] = Object.freeze([
   'year',
-  'year_month',
-  'full_date',
+  'yearMonth',
+  'fullDate',
 ]);
 
 // TimePrecision identifies the finest time precision permitted by a TimeFieldSpec.
 // Strict-truncation rules apply at validation: finer components MUST be omitted.
 export type TimePrecision =
-  | 'hour_minute'
-  | 'hour_minute_second'
-  | 'hour_minute_second_fraction';
+  | 'hourMinute'
+  | 'hourMinuteSecond'
+  | 'hourMinuteSecondFraction';
 export const TIME_PRECISIONS: readonly TimePrecision[] = Object.freeze([
-  'hour_minute',
-  'hour_minute_second',
-  'hour_minute_second_fraction',
+  'hourMinute',
+  'hourMinuteSecond',
+  'hourMinuteSecondFraction',
 ]);
 
 // DateTimeValueType identifies the finest permitted date-time precision.
 // Same strict-truncation rule as TimePrecision applies.
 export type DateTimeValueType =
-  | 'date_hour_minute'
-  | 'date_hour_minute_second'
-  | 'date_hour_minute_second_fraction';
+  | 'dateHourMinute'
+  | 'dateHourMinuteSecond'
+  | 'dateHourMinuteSecondFraction';
 export const DATE_TIME_VALUE_TYPES: readonly DateTimeValueType[] = Object.freeze([
-  'date_hour_minute',
-  'date_hour_minute_second',
-  'date_hour_minute_second_fraction',
+  'dateHourMinute',
+  'dateHourMinuteSecond',
+  'dateHourMinuteSecondFraction',
 ]);
 
 // TimezoneRequirement: whether timezone information is required.
-export type TimezoneRequirement = 'required' | 'not_required';
+export type TimezoneRequirement = 'required' | 'notRequired';
 export const TIMEZONE_REQUIREMENTS: readonly TimezoneRequirement[] = Object.freeze([
   'required',
-  'not_required',
+  'notRequired',
 ]);
 
 // ----- DateFieldSpec -----

@@ -283,7 +283,7 @@ const departmentField = textField({
 const appointmentDateField = dateField({
   id: `${FIELDS}appointment-date`,
   metadata: meta('Appointment Date', 'Start date of current appointment.'),
-  fieldSpec: dateFieldSpec({ dateValueType: 'full_date' }),
+  fieldSpec: dateFieldSpec({ dateValueType: 'fullDate' }),
 });
 
 // This single Field is embedded with min=0 / max=∞ cardinality below to

@@ -4,83 +4,74 @@
 // MultiLineTextRenderingHint), the hint is a string-literal union for
 // simpler comparison and serialization.
 
-export type TextRenderingHint = 'single_line_text' | 'multi_line_text';
+export type TextRenderingHint = 'singleLine' | 'multiLine';
 export const TEXT_RENDERING_HINTS: readonly TextRenderingHint[] = Object.freeze([
-  'single_line_text',
-  'multi_line_text',
+  'singleLine',
+  'multiLine',
 ]);
 
-export type SingleChoiceRenderingHint = 'radio' | 'single_select_dropdown';
+export type SingleChoiceRenderingHint = 'radio' | 'singleSelectDropdown';
 export const SINGLE_CHOICE_RENDERING_HINTS: readonly SingleChoiceRenderingHint[] =
-  Object.freeze(['radio', 'single_select_dropdown']);
+  Object.freeze(['radio', 'singleSelectDropdown']);
 
-export type MultipleChoiceRenderingHint = 'checkbox' | 'multi_select_dropdown';
+export type MultipleChoiceRenderingHint = 'checkbox' | 'multiSelectDropdown';
 export const MULTIPLE_CHOICE_RENDERING_HINTS: readonly MultipleChoiceRenderingHint[] =
-  Object.freeze(['checkbox', 'multi_select_dropdown']);
+  Object.freeze(['checkbox', 'multiSelectDropdown']);
 
 // NumericRenderingHint has only one widget. Modeled as a singleton union
 // for symmetry and forward-compatibility.
-export type NumericRenderingHint = 'numeric_input';
+export type NumericRenderingHint = 'numericInput';
 
 // DateComponentOrder is the ordering used by DateRenderingHint to display
 // or acquire date components.
-export type DateComponentOrder = 'day_month_year' | 'month_day_year' | 'year_month_day';
+export type DateComponentOrder = 'dayMonthYear' | 'monthDayYear' | 'yearMonthDay';
 export const DATE_COMPONENT_ORDERS: readonly DateComponentOrder[] = Object.freeze([
-  'day_month_year',
-  'month_day_year',
-  'year_month_day',
+  'dayMonthYear',
+  'monthDayYear',
+  'yearMonthDay',
 ]);
 
 // TimeFormat distinguishes 12- and 24-hour clock display. Used by both
 // TimeRenderingHint and DateTimeRenderingHint.
-export type TimeFormat = 'twelve_hour' | 'twenty_four_hour';
+export type TimeFormat = 'twelveHour' | 'twentyFourHour';
 export const TIME_FORMATS: readonly TimeFormat[] = Object.freeze([
-  'twelve_hour',
-  'twenty_four_hour',
+  'twelveHour',
+  'twentyFourHour',
 ]);
 
-// Temporal rendering hints retain object structure because they pair a
-// widget kind with an optional format component.
+// Temporal rendering hints carry only their configuration component. Each
+// hint occupies a singleton position on its FieldSpec, so there is no need
+// for a `kind` discriminant; each family has only one possible widget, so
+// there is no need for a `widget` field either. (See spec/serialization.md
+// §6 and grammar.md §Temporal Field Specs.)
 
 export interface DateRenderingHint {
-  readonly kind: 'DateRenderingHint';
-  readonly widget: 'date_picker';
-  readonly format?: DateComponentOrder;
+  readonly componentOrder?: DateComponentOrder;
 }
 
-export function dateRenderingHint(format?: DateComponentOrder): DateRenderingHint {
-  const out: { kind: 'DateRenderingHint'; widget: 'date_picker'; format?: DateComponentOrder } =
-    { kind: 'DateRenderingHint', widget: 'date_picker' };
-  if (format !== undefined) out.format = format;
+export function dateRenderingHint(componentOrder?: DateComponentOrder): DateRenderingHint {
+  const out: { componentOrder?: DateComponentOrder } = {};
+  if (componentOrder !== undefined) out.componentOrder = componentOrder;
   return out;
 }
 
 export interface TimeRenderingHint {
-  readonly kind: 'TimeRenderingHint';
-  readonly widget: 'time_picker';
-  readonly format?: TimeFormat;
+  readonly timeFormat?: TimeFormat;
 }
 
-export function timeRenderingHint(format?: TimeFormat): TimeRenderingHint {
-  const out: { kind: 'TimeRenderingHint'; widget: 'time_picker'; format?: TimeFormat } =
-    { kind: 'TimeRenderingHint', widget: 'time_picker' };
-  if (format !== undefined) out.format = format;
+export function timeRenderingHint(timeFormat?: TimeFormat): TimeRenderingHint {
+  const out: { timeFormat?: TimeFormat } = {};
+  if (timeFormat !== undefined) out.timeFormat = timeFormat;
   return out;
 }
 
 export interface DateTimeRenderingHint {
-  readonly kind: 'DateTimeRenderingHint';
-  readonly widget: 'date_time_picker';
-  readonly format?: TimeFormat;
+  readonly timeFormat?: TimeFormat;
 }
 
-export function dateTimeRenderingHint(format?: TimeFormat): DateTimeRenderingHint {
-  const out: {
-    kind: 'DateTimeRenderingHint';
-    widget: 'date_time_picker';
-    format?: TimeFormat;
-  } = { kind: 'DateTimeRenderingHint', widget: 'date_time_picker' };
-  if (format !== undefined) out.format = format;
+export function dateTimeRenderingHint(timeFormat?: TimeFormat): DateTimeRenderingHint {
+  const out: { timeFormat?: TimeFormat } = {};
+  if (timeFormat !== undefined) out.timeFormat = timeFormat;
   return out;
 }
 

@@ -72,12 +72,12 @@ describe('TextFieldSpec', () => {
       minLength: 1,
       maxLength: 255,
       validationRegex: '^[A-Z].*$',
-      renderingHint: 'multi_line_text',
+      renderingHint: 'multiLine',
     });
     expect(fs.minLength).toBe(1);
     expect(fs.maxLength).toBe(255);
     expect(fs.validationRegex).toBe('^[A-Z].*$');
-    expect(fs.renderingHint).toBe('multi_line_text');
+    expect(fs.renderingHint).toBe('multiLine');
     expect(isTextFieldSpec(fs)).toBe(true);
   });
 });
@@ -100,7 +100,7 @@ describe('NumericFieldSpec', () => {
       numericPrecision: 3,
       minValue: numericValue(numericLiteral('0', 'decimal')),
       maxValue: numericValue(numericLiteral('100', 'decimal')),
-      renderingHint: 'numeric_input',
+      renderingHint: 'numericInput',
     });
     expect(fs.unit).toBe(u);
     expect(fs.numericPrecision).toBe(3);
@@ -110,34 +110,34 @@ describe('NumericFieldSpec', () => {
 describe('Temporal field specs', () => {
   it('DateFieldSpec carries a DateValueType and optional rendering hint', () => {
     const fs = dateFieldSpec({
-      dateValueType: 'full_date',
-      renderingHint: dateRenderingHint('day_month_year'),
+      dateValueType: 'fullDate',
+      renderingHint: dateRenderingHint('dayMonthYear'),
     });
-    expect(fs.dateValueType).toBe('full_date');
-    expect(fs.renderingHint?.format).toBe('day_month_year');
+    expect(fs.dateValueType).toBe('fullDate');
+    expect(fs.renderingHint?.componentOrder).toBe('dayMonthYear');
     expect(isDateFieldSpec(fs)).toBe(true);
   });
 
   it('TimeFieldSpec carries optional precision, timezone requirement, and rendering hint', () => {
     const fs = timeFieldSpec({
-      timePrecision: 'hour_minute_second',
+      timePrecision: 'hourMinuteSecond',
       timezoneRequirement: 'required',
-      renderingHint: timeRenderingHint('twenty_four_hour'),
+      renderingHint: timeRenderingHint('twentyFourHour'),
     });
-    expect(fs.timePrecision).toBe('hour_minute_second');
+    expect(fs.timePrecision).toBe('hourMinuteSecond');
     expect(fs.timezoneRequirement).toBe('required');
-    expect(fs.renderingHint?.format).toBe('twenty_four_hour');
+    expect(fs.renderingHint?.timeFormat).toBe('twentyFourHour');
     expect(isTimeFieldSpec(fs)).toBe(true);
   });
 
   it('DateTimeFieldSpec carries a value type and optional timezone requirement', () => {
     const fs = dateTimeFieldSpec({
-      dateTimeValueType: 'date_hour_minute_second_fraction',
-      timezoneRequirement: 'not_required',
-      renderingHint: dateTimeRenderingHint('twelve_hour'),
+      dateTimeValueType: 'dateHourMinuteSecondFraction',
+      timezoneRequirement: 'notRequired',
+      renderingHint: dateTimeRenderingHint('twelveHour'),
     });
-    expect(fs.dateTimeValueType).toBe('date_hour_minute_second_fraction');
-    expect(fs.timezoneRequirement).toBe('not_required');
+    expect(fs.dateTimeValueType).toBe('dateHourMinuteSecondFraction');
+    expect(fs.timezoneRequirement).toBe('notRequired');
     expect(isDateTimeFieldSpec(fs)).toBe(true);
   });
 });
@@ -237,7 +237,7 @@ describe('ChoiceFieldSpec', () => {
     const opt = controlledTermChoiceOption(ctv, { default: true });
     const fs = controlledTermSingleChoiceFieldSpec({
       options: [opt],
-      renderingHint: 'single_select_dropdown',
+      renderingHint: 'singleSelectDropdown',
     });
     expect(fs.kind).toBe('ControlledTermSingleChoiceFieldSpec');
     expect(fs.options[0]?.default).toBe(true);
@@ -255,7 +255,7 @@ describe('ChoiceFieldSpec', () => {
     const ctv = controlledTermValue({ term: 'http://example.org/t/1' });
     const fs = controlledTermMultipleChoiceFieldSpec({
       options: [controlledTermChoiceOption(ctv)],
-      renderingHint: 'multi_select_dropdown',
+      renderingHint: 'multiSelectDropdown',
     });
     expect(fs.kind).toBe('ControlledTermMultipleChoiceFieldSpec');
   });
@@ -307,9 +307,9 @@ describe('FieldSpec union', () => {
     const all: FieldSpec[] = [
       textFieldSpec(),
       numericFieldSpec({ datatype: 'integer' }),
-      dateFieldSpec({ dateValueType: 'full_date' }),
+      dateFieldSpec({ dateValueType: 'fullDate' }),
       timeFieldSpec(),
-      dateTimeFieldSpec({ dateTimeValueType: 'date_hour_minute' }),
+      dateTimeFieldSpec({ dateTimeValueType: 'dateHourMinute' }),
       controlledTermFieldSpec(
         ontologySource(ontologyReference({ iri: 'http://example.org/o' })),
       ),
@@ -340,7 +340,7 @@ describe('FieldSpecFor<K> mapped type (compile-time)', () => {
   it('resolves to the right spec interface per kind', () => {
     const t: FieldSpecFor<'text'> = textFieldSpec();
     const n: FieldSpecFor<'numeric'> = numericFieldSpec({ datatype: 'integer' });
-    const d: FieldSpecFor<'date'> = dateFieldSpec({ dateValueType: 'full_date' });
+    const d: FieldSpecFor<'date'> = dateFieldSpec({ dateValueType: 'fullDate' });
     const sc: FieldSpecFor<'single_choice'> = literalSingleChoiceFieldSpec({
       options: [literalChoiceOption(datatypeIriLiteral('a', XsdNumericDatatypeIri.integer))],
     });

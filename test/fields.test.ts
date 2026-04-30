@@ -113,7 +113,7 @@ describe('Field constructors', () => {
       // @ts-expect-error TextFieldId is not a DateFieldId
       id: textFieldId('https://example.org/fields/x'),
       metadata: meta,
-      fieldSpec: dateFieldSpec({ dateValueType: 'full_date' }),
+      fieldSpec: dateFieldSpec({ dateValueType: 'fullDate' }),
     });
   });
 
@@ -152,7 +152,7 @@ describe('Per-family helpers', () => {
       dateField({
         id: dateFieldId('https://example.org/d'),
         metadata: meta,
-        fieldSpec: dateFieldSpec({ dateValueType: 'full_date' }),
+        fieldSpec: dateFieldSpec({ dateValueType: 'fullDate' }),
       }),
       timeField({
         id: timeFieldId('https://example.org/ti'),
@@ -162,7 +162,7 @@ describe('Per-family helpers', () => {
       dateTimeField({
         id: dateTimeFieldId('https://example.org/dt'),
         metadata: meta,
-        fieldSpec: dateTimeFieldSpec({ dateTimeValueType: 'date_hour_minute' }),
+        fieldSpec: dateTimeFieldSpec({ dateTimeValueType: 'dateHourMinute' }),
       }),
       controlledTermField({
         id: controlledTermFieldId('https://example.org/ct'),
@@ -227,7 +227,7 @@ describe('Per-family helpers', () => {
       metadata: meta,
       fieldSpec: controlledTermSingleChoiceFieldSpec({
         options: [controlledTermChoiceOption(ctv)],
-        renderingHint: 'single_select_dropdown',
+        renderingHint: 'singleSelectDropdown',
       }),
     });
     expect(f.fieldSpec.kind).toBe('ControlledTermSingleChoiceFieldSpec');

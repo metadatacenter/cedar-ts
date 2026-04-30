@@ -318,7 +318,7 @@ export const principalInvestigatorTemplate: Template = template({
       reference: dateField({
         id: `${FIELDS}appointment-date`,
         metadata: meta('Appointment Date', 'Start date of current appointment.'),
-        fieldSpec: dateFieldSpec({ dateValueType: 'full_date' }),
+        fieldSpec: dateFieldSpec({ dateValueType: 'fullDate' }),
       }),
       valueRequirement: 'optional',
       property: 'https://schema.org/startDate',
