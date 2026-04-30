@@ -7,24 +7,22 @@ import {
   STATUSES,
   isStatus,
   annotation,
-  annotationName,
-  literalAnnotationValue,
-  iriAnnotationValue,
   isAnnotation,
   isAnnotationValue,
   artifactMetadata,
   schemaArtifactMetadata,
   isArtifactMetadata,
   isSchemaArtifactMetadata,
-  stringLiteral,
+  iri,
+  langStringLiteral,
 } from '../src/index.js';
 
 describe('DescriptiveMetadata', () => {
-  it('requires only a name and defaults alternativeLabels to empty', () => {
+  it('requires only a name and defaults altLabels to empty', () => {
     const dm = descriptiveMetadata({ name: 'Title' });
     expect(dm.kind).toBe('descriptive_metadata');
     expect(dm.name).toBe('Title');
-    expect(dm.alternativeLabels).toEqual([]);
+    expect(dm.altLabels).toEqual([]);
     expect('description' in dm).toBe(false);
     expect('identifier' in dm).toBe(false);
     expect('preferredLabel' in dm).toBe(false);
@@ -36,12 +34,12 @@ describe('DescriptiveMetadata', () => {
       description: 'The study title',
       identifier: 'study-001',
       preferredLabel: 'Study title',
-      alternativeLabels: ['Title', 'Name of study'],
+      altLabels: ['Title', 'Name of study'],
     });
     expect(dm.description).toBe('The study title');
     expect(dm.identifier).toBe('study-001');
     expect(dm.preferredLabel).toBe('Study title');
-    expect(dm.alternativeLabels).toEqual(['Title', 'Name of study']);
+    expect(dm.altLabels).toEqual(['Title', 'Name of study']);
   });
 });
 
@@ -127,21 +125,21 @@ describe('Annotation', () => {
   it('literal-valued annotation', () => {
     const a = annotation(
       'http://purl.org/dc/terms/title',
-      literalAnnotationValue(stringLiteral('A study')),
+      langStringLiteral('A study', 'en'),
     );
     expect(isAnnotation(a)).toBe(true);
-    expect(a.name.kind).toBe('annotation_name');
-    expect(a.name.iri.value).toBe('http://purl.org/dc/terms/title');
-    expect(a.value.kind).toBe('literal_annotation_value');
-    expect(isAnnotationValue(a.value)).toBe(true);
+    expect(a.property.kind).toBe('iri');
+    expect(a.property.value).toBe('http://purl.org/dc/terms/title');
+    expect(a.body.kind).toBe('lang_string_literal');
+    expect(isAnnotationValue(a.body)).toBe(true);
   });
 
   it('iri-valued annotation', () => {
     const a = annotation(
-      annotationName('http://purl.org/dc/terms/source'),
-      iriAnnotationValue('https://example.org/source/1'),
+      'http://purl.org/dc/terms/source',
+      iri('https://example.org/source/1'),
     );
-    expect(a.value.kind).toBe('iri_annotation_value');
+    expect(a.body.kind).toBe('iri');
   });
 });
 
@@ -160,16 +158,16 @@ describe('ArtifactMetadata and SchemaArtifactMetadata', () => {
   });
 
   it('ArtifactMetadata bundles descriptive + provenance + annotations', () => {
-    const m = artifactMetadata({ descriptive: dm, provenance: tp });
+    const m = artifactMetadata({ descriptiveMetadata: dm, provenance: tp });
     expect(isArtifactMetadata(m)).toBe(true);
     expect(m.annotations).toEqual([]);
     const m2 = artifactMetadata({
-      descriptive: dm,
+      descriptiveMetadata: dm,
       provenance: tp,
       annotations: [
         annotation(
           'http://purl.org/dc/terms/title',
-          literalAnnotationValue(stringLiteral('x')),
+          langStringLiteral('x', 'en'),
         ),
       ],
     });
@@ -177,7 +175,7 @@ describe('ArtifactMetadata and SchemaArtifactMetadata', () => {
   });
 
   it('SchemaArtifactMetadata adds schema versioning', () => {
-    const m = artifactMetadata({ descriptive: dm, provenance: tp });
+    const m = artifactMetadata({ descriptiveMetadata: dm, provenance: tp });
     const sm = schemaArtifactMetadata({ artifact: m, versioning: sv });
     expect(isSchemaArtifactMetadata(sm)).toBe(true);
     expect(sm.artifact).toBe(m);

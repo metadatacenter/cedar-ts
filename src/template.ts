@@ -63,7 +63,7 @@ function assertUniqueEmbeddedArtifactKeys(
 ): void {
   const seen = new Set<string>();
   for (const e of embedded) {
-    const k = e.key.identifier.value;
+    const k = e.key;
     if (seen.has(k)) {
       throw new CedarConstructionError(
         `Duplicate EmbeddedArtifactKey within Template: ${JSON.stringify(k)}`,

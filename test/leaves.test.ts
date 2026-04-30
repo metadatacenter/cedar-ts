@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   CedarConstructionError,
+  assertNonNegativeInteger,
   isAsciiIdentifier,
   isBcp47Tag,
   isIntegerLexicalForm,
@@ -11,10 +12,7 @@ import {
   isXsdTimeLexicalForm,
   iri,
   isoDateTimeStamp,
-  keyIdentifier,
   languageTag,
-  nonNegativeInteger,
-  nonNegativeIntegerToNumber,
   parseAsciiIdentifier,
   parseIriString,
   parseSemanticVersion,
@@ -173,43 +171,15 @@ describe('IsoDateTimeStamp wrapper', () => {
   });
 });
 
-describe('NonNegativeInteger wrapper', () => {
-  it('accepts non-negative numbers', () => {
-    const n = nonNegativeInteger(0);
-    expect(n.value).toBe('0');
-    expect(nonNegativeIntegerToNumber(n)).toBe(0);
-
-    const m = nonNegativeInteger(42);
-    expect(m.value).toBe('42');
+describe('assertNonNegativeInteger', () => {
+  it('accepts non-negative numbers and returns them unchanged', () => {
+    expect(assertNonNegativeInteger(0)).toBe(0);
+    expect(assertNonNegativeInteger(42)).toBe(42);
   });
 
-  it('accepts non-negative bigints', () => {
-    const n = nonNegativeInteger(123456789012345678901234567890n);
-    expect(n.value).toBe('123456789012345678901234567890');
-  });
-
-  it('accepts well-formed lexical strings', () => {
-    expect(nonNegativeInteger('7').value).toBe('7');
-  });
-
-  it('rejects negative or malformed input', () => {
-    expect(() => nonNegativeInteger(-1)).toThrow(CedarConstructionError);
-    expect(() => nonNegativeInteger(1.5)).toThrow(CedarConstructionError);
-    expect(() => nonNegativeInteger(-1n)).toThrow(CedarConstructionError);
-    expect(() => nonNegativeInteger('-3')).toThrow(CedarConstructionError);
-    expect(() => nonNegativeInteger('07')).toThrow(CedarConstructionError);
-  });
-});
-
-describe('KeyIdentifier wrapper', () => {
-  it('constructs from a valid identifier', () => {
-    const k = keyIdentifier('study_arm');
-    expect(k.kind).toBe('key_identifier');
-    expect(k.value).toBe('study_arm');
-  });
-
-  it('rejects invalid identifiers', () => {
-    expect(() => keyIdentifier('1bad')).toThrow(CedarConstructionError);
+  it('rejects negative or non-integer input', () => {
+    expect(() => assertNonNegativeInteger(-1)).toThrow(CedarConstructionError);
+    expect(() => assertNonNegativeInteger(1.5)).toThrow(CedarConstructionError);
   });
 });
 

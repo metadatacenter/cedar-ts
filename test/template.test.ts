@@ -2,7 +2,6 @@ import { describe, expect, it } from 'vitest';
 import {
   artifactMetadata,
   descriptiveMetadata,
-  embeddedArtifactKey,
   embeddedPresentationComponent,
   embeddedTemplate,
   embeddedTextField,
@@ -29,7 +28,7 @@ const tp = temporalProvenance({
   modifiedBy: 'https://example.org/u',
 });
 const meta = schemaArtifactMetadata({
-  artifact: artifactMetadata({ descriptive: dm, provenance: tp }),
+  artifact: artifactMetadata({ descriptiveMetadata: dm, provenance: tp }),
   versioning: schemaVersioning({
     version: '1.0.0',
     status: 'draft',
@@ -38,19 +37,19 @@ const meta = schemaArtifactMetadata({
 });
 
 const titleEmbedding = embeddedTextField({
-  key: embeddedArtifactKey('title'),
+  key: 'title',
   reference: textFieldId('https://example.org/fields/title'),
 });
 const subtitleEmbedding = embeddedTextField({
-  key: embeddedArtifactKey('subtitle'),
+  key: 'subtitle',
   reference: textFieldId('https://example.org/fields/subtitle'),
 });
 const introEmbedding = embeddedPresentationComponent({
-  key: embeddedArtifactKey('intro'),
+  key: 'intro',
   reference: presentationComponentId('https://example.org/pc/intro'),
 });
 const addressEmbedding = embeddedTemplate({
-  key: embeddedArtifactKey('address'),
+  key: 'address',
   reference: templateId('https://example.org/templates/address'),
 });
 
@@ -83,7 +82,7 @@ describe('Template', () => {
       metadata: meta,
       embedded: [introEmbedding, titleEmbedding, addressEmbedding, subtitleEmbedding],
     });
-    expect(t.embedded.map((e) => e.key.identifier.value)).toEqual([
+    expect(t.embedded.map((e) => e.key)).toEqual([
       'intro',
       'title',
       'address',
@@ -104,7 +103,7 @@ describe('Template', () => {
 
   it('rejects duplicate EmbeddedArtifactKey values within a single template', () => {
     const dup = embeddedTextField({
-      key: embeddedArtifactKey('title'),
+      key: 'title',
       reference: textFieldId('https://example.org/fields/other-title'),
     });
     expect(() =>
@@ -127,8 +126,8 @@ describe('Template', () => {
       metadata: meta,
       embedded: [titleEmbedding],
     });
-    expect(t1.embedded[0]?.key.identifier.value).toBe('title');
-    expect(t2.embedded[0]?.key.identifier.value).toBe('title');
+    expect(t1.embedded[0]?.key).toBe('title');
+    expect(t2.embedded[0]?.key).toBe('title');
   });
 });
 

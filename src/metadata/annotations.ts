@@ -1,81 +1,33 @@
-import { type Iri, iri } from '../leaves/index.js';
-import { type Literal } from '../literals/index.js';
+import { type Iri, iri, isIri } from '../leaves/index.js';
+import { type Literal, isLiteral } from '../literals/index.js';
 
-// AnnotationName carries the IRI identifying the annotated metadata property.
-// Modeled as a tagged wrapper because the grammar gives it an explicit
-// constructor and downstream code reads `annotation.name.iri.value`.
-export interface AnnotationName {
-  readonly kind: 'annotation_name';
-  readonly iri: Iri;
-}
+// Annotation — see grammar.md §Annotations.
+// Pairs an annotation property IRI with an annotation value. The value is
+// either a Literal or an IRI; AnnotationValue is the union of those two
+// shapes (no wrapper productions).
 
-export function annotationName(value: Iri | string): AnnotationName {
-  return {
-    kind: 'annotation_name',
-    iri: typeof value === 'string' ? iri(value) : value,
-  };
-}
+export type AnnotationValue = Literal | Iri;
 
-// AnnotationValue is one of two forms.
-
-export interface LiteralAnnotationValue {
-  readonly kind: 'literal_annotation_value';
-  readonly literal: Literal;
-}
-
-export function literalAnnotationValue(literal: Literal): LiteralAnnotationValue {
-  return { kind: 'literal_annotation_value', literal };
-}
-
-export interface IriAnnotationValue {
-  readonly kind: 'iri_annotation_value';
-  readonly iri: Iri;
-}
-
-export function iriAnnotationValue(value: Iri | string): IriAnnotationValue {
-  return {
-    kind: 'iri_annotation_value',
-    iri: typeof value === 'string' ? iri(value) : value,
-  };
-}
-
-export type AnnotationValue = LiteralAnnotationValue | IriAnnotationValue;
-
-export function isLiteralAnnotationValue(x: unknown): x is LiteralAnnotationValue {
-  return (
-    typeof x === 'object' && x !== null &&
-    (x as { kind?: unknown }).kind === 'literal_annotation_value'
-  );
-}
-export function isIriAnnotationValue(x: unknown): x is IriAnnotationValue {
-  return (
-    typeof x === 'object' && x !== null &&
-    (x as { kind?: unknown }).kind === 'iri_annotation_value'
-  );
-}
-export function isAnnotationValue(x: unknown): x is AnnotationValue {
-  return isLiteralAnnotationValue(x) || isIriAnnotationValue(x);
-}
+export const isAnnotationValue = (x: unknown): x is AnnotationValue =>
+  isLiteral(x) || isIri(x);
 
 export interface Annotation {
   readonly kind: 'annotation';
-  readonly name: AnnotationName;
-  readonly value: AnnotationValue;
+  readonly property: Iri;
+  readonly body: AnnotationValue;
 }
 
+// Idempotent: a bare string IRI is wrapped via iri(); an existing Iri is used
+// as the property. The body is passed through unchanged.
 export function annotation(
-  name: AnnotationName | Iri | string,
-  value: AnnotationValue,
+  property: Iri | string,
+  body: AnnotationValue,
 ): Annotation {
-  let resolvedName: AnnotationName;
-  if (typeof name === 'string') {
-    resolvedName = annotationName(name);
-  } else if ('kind' in name && name.kind === 'annotation_name') {
-    resolvedName = name;
-  } else {
-    resolvedName = annotationName(name);
-  }
-  return { kind: 'annotation', name: resolvedName, value };
+  return {
+    kind: 'annotation',
+    property: typeof property === 'string' ? iri(property) : property,
+    body,
+  };
 }
 
 export function isAnnotation(x: unknown): x is Annotation {

@@ -14,7 +14,7 @@ export interface DescriptiveMetadata {
   readonly description?: string;
   readonly identifier?: string;
   readonly preferredLabel?: string;
-  readonly alternativeLabels: readonly string[];
+  readonly altLabels: readonly string[];
 }
 
 export interface DescriptiveMetadataInit {
@@ -22,7 +22,7 @@ export interface DescriptiveMetadataInit {
   readonly description?: string;
   readonly identifier?: string;
   readonly preferredLabel?: string;
-  readonly alternativeLabels?: readonly string[];
+  readonly altLabels?: readonly string[];
 }
 
 export function descriptiveMetadata(init: DescriptiveMetadataInit): DescriptiveMetadata {
@@ -32,11 +32,11 @@ export function descriptiveMetadata(init: DescriptiveMetadataInit): DescriptiveM
     description?: string;
     identifier?: string;
     preferredLabel?: string;
-    alternativeLabels: readonly string[];
+    altLabels: readonly string[];
   } = {
     kind: 'descriptive_metadata',
     name: init.name,
-    alternativeLabels: init.alternativeLabels ?? [],
+    altLabels: init.altLabels ?? [],
   };
   if (init.description !== undefined) out.description = init.description;
   if (init.identifier !== undefined) out.identifier = init.identifier;

@@ -52,7 +52,7 @@ describe('DefaultValue family', () => {
     const td2 = timeDefaultValue(timeValue(timeLiteral('10:30:00')));
     const dt = dateTimeDefaultValue(dateTimeValue(dateTimeLiteral('2024-06-15T10:30:00')));
     const ct = controlledTermDefaultValue(
-      controlledTermValue({ termIri: 'http://example.org/t' }),
+      controlledTermValue({ term: 'http://example.org/t' }),
     );
     const cd = choiceDefaultValue(
       literalChoiceValue(datatypeIriLiteral('1', XsdNumericDatatypeIri.integer)),

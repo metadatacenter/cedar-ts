@@ -8,29 +8,28 @@ import { type TermIri, iri } from '../leaves/index.js';
 // at validation time.
 export interface ControlledTermValue {
   readonly kind: 'controlled_term_value';
-  readonly termIri: TermIri;
+  readonly term: TermIri;
   readonly label?: string;
   readonly notation?: string;
   readonly preferredLabel?: string;
 }
 
 export interface ControlledTermValueInit {
-  readonly termIri: TermIri | string;
+  readonly term: TermIri | string;
   readonly label?: string;
   readonly notation?: string;
   readonly preferredLabel?: string;
 }
 
 export function controlledTermValue(init: ControlledTermValueInit): ControlledTermValue {
-  const termIri =
-    typeof init.termIri === 'string' ? iri(init.termIri) : init.termIri;
+  const term = typeof init.term === 'string' ? iri(init.term) : init.term;
   const out: {
     kind: 'controlled_term_value';
-    termIri: TermIri;
+    term: TermIri;
     label?: string;
     notation?: string;
     preferredLabel?: string;
-  } = { kind: 'controlled_term_value', termIri };
+  } = { kind: 'controlled_term_value', term };
   if (init.label !== undefined) out.label = init.label;
   if (init.notation !== undefined) out.notation = init.notation;
   if (init.preferredLabel !== undefined) out.preferredLabel = init.preferredLabel;

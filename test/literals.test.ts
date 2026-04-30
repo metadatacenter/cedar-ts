@@ -39,7 +39,7 @@ describe('StringLiteral', () => {
     const dt = stringLiteralToDatatypeIriLiteral(s);
     expect(dt.kind).toBe('datatype_iri_literal');
     expect(dt.lexicalForm).toBe('x');
-    expect(dt.datatypeIri.value).toBe(XsdStringDatatypeIri);
+    expect(dt.datatype.value).toBe(XsdStringDatatypeIri);
   });
 });
 
@@ -48,7 +48,7 @@ describe('LangStringLiteral', () => {
     const ls = langStringLiteral('hello', 'en-US');
     expect(ls.kind).toBe('lang_string_literal');
     expect(ls.lexicalForm).toBe('hello');
-    expect(ls.languageTag.value).toBe('en-US');
+    expect(ls.lang.value).toBe('en-US');
     expect(isLangStringLiteral(ls)).toBe(true);
     expect(isTextLiteral(ls)).toBe(true);
     expect(isLiteral(ls)).toBe(true);
@@ -60,7 +60,7 @@ describe('DatatypeIriLiteral', () => {
     const lit = datatypeIriLiteral('42', 'http://www.w3.org/2001/XMLSchema#integer');
     expect(lit.kind).toBe('datatype_iri_literal');
     expect(lit.lexicalForm).toBe('42');
-    expect(lit.datatypeIri.value).toBe('http://www.w3.org/2001/XMLSchema#integer');
+    expect(lit.datatype.value).toBe('http://www.w3.org/2001/XMLSchema#integer');
     expect(isDatatypeIriLiteral(lit)).toBe(true);
     expect(isLiteral(lit)).toBe(true);
   });

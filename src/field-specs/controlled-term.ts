@@ -1,5 +1,5 @@
-import type { Iri, NonNegativeInteger } from '../leaves/index.js';
-import { iri } from '../leaves/index.js';
+import type { Iri } from '../leaves/index.js';
+import { iri, assertNonNegativeInteger } from '../leaves/index.js';
 
 // OntologyDisplayHint — at least one of acronym/name must be present per
 // grammar:
@@ -34,24 +34,23 @@ export function ontologyDisplayHint(init: OntologyDisplayHintInit): OntologyDisp
 
 export interface OntologyReference {
   readonly kind: 'ontology_reference';
-  readonly ontologyIri: Iri;
+  readonly iri: Iri;
   readonly displayHint?: OntologyDisplayHint;
 }
 
 export interface OntologyReferenceInit {
-  readonly ontologyIri: Iri | string;
+  readonly iri: Iri | string;
   readonly displayHint?: OntologyDisplayHint;
 }
 
 export function ontologyReference(init: OntologyReferenceInit): OntologyReference {
   const out: {
     kind: 'ontology_reference';
-    ontologyIri: Iri;
+    iri: Iri;
     displayHint?: OntologyDisplayHint;
   } = {
     kind: 'ontology_reference',
-    ontologyIri:
-      typeof init.ontologyIri === 'string' ? iri(init.ontologyIri) : init.ontologyIri,
+    iri: typeof init.iri === 'string' ? iri(init.iri) : init.iri,
   };
   if (init.displayHint !== undefined) out.displayHint = init.displayHint;
   return out;
@@ -72,14 +71,14 @@ export interface BranchSource {
   readonly ontology: OntologyReference;
   readonly rootTermIri: Iri;
   readonly rootTermLabel: string;
-  readonly maxTraversalDepth?: NonNegativeInteger;
+  readonly maxTraversalDepth?: number;
 }
 
 export interface BranchSourceInit {
   readonly ontology: OntologyReference;
   readonly rootTermIri: Iri | string;
   readonly rootTermLabel: string;
-  readonly maxTraversalDepth?: NonNegativeInteger;
+  readonly maxTraversalDepth?: number;
 }
 
 export function branchSource(init: BranchSourceInit): BranchSource {
@@ -88,7 +87,7 @@ export function branchSource(init: BranchSourceInit): BranchSource {
     ontology: OntologyReference;
     rootTermIri: Iri;
     rootTermLabel: string;
-    maxTraversalDepth?: NonNegativeInteger;
+    maxTraversalDepth?: number;
   } = {
     kind: 'branch_source',
     ontology: init.ontology,
@@ -97,19 +96,19 @@ export function branchSource(init: BranchSourceInit): BranchSource {
     rootTermLabel: init.rootTermLabel,
   };
   if (init.maxTraversalDepth !== undefined)
-    out.maxTraversalDepth = init.maxTraversalDepth;
+    out.maxTraversalDepth = assertNonNegativeInteger(init.maxTraversalDepth);
   return out;
 }
 
 export interface ControlledTermClass {
   readonly kind: 'controlled_term_class';
-  readonly termIri: Iri;
+  readonly term: Iri;
   readonly label: string;
   readonly ontology: OntologyReference;
 }
 
 export interface ControlledTermClassInit {
-  readonly termIri: Iri | string;
+  readonly term: Iri | string;
   readonly label: string;
   readonly ontology: OntologyReference;
 }
@@ -119,7 +118,7 @@ export function controlledTermClass(
 ): ControlledTermClass {
   return {
     kind: 'controlled_term_class',
-    termIri: typeof init.termIri === 'string' ? iri(init.termIri) : init.termIri,
+    term: typeof init.term === 'string' ? iri(init.term) : init.term,
     label: init.label,
     ontology: init.ontology,
   };
@@ -140,13 +139,13 @@ export interface ValueSetSource {
   readonly kind: 'value_set_source';
   readonly identifier: string;
   readonly name?: string;
-  readonly valueSetIri?: Iri;
+  readonly iri?: Iri;
 }
 
 export interface ValueSetSourceInit {
   readonly identifier: string;
   readonly name?: string;
-  readonly valueSetIri?: Iri | string;
+  readonly iri?: Iri | string;
 }
 
 export function valueSetSource(init: ValueSetSourceInit): ValueSetSource {
@@ -154,12 +153,11 @@ export function valueSetSource(init: ValueSetSourceInit): ValueSetSource {
     kind: 'value_set_source';
     identifier: string;
     name?: string;
-    valueSetIri?: Iri;
+    iri?: Iri;
   } = { kind: 'value_set_source', identifier: init.identifier };
   if (init.name !== undefined) out.name = init.name;
-  if (init.valueSetIri !== undefined) {
-    out.valueSetIri =
-      typeof init.valueSetIri === 'string' ? iri(init.valueSetIri) : init.valueSetIri;
+  if (init.iri !== undefined) {
+    out.iri = typeof init.iri === 'string' ? iri(init.iri) : init.iri;
   }
   return out;
 }

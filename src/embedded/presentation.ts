@@ -1,6 +1,6 @@
+import { parseAsciiIdentifier } from '../leaves/index.js';
 import type { PresentationComponentReference } from '../identity.js';
 import type { PresentationComponent } from '../presentation/index.js';
-import { type EmbeddedArtifactKey, embeddedArtifactKey } from './key.js';
 import type { Visibility } from './visibility.js';
 import type { LabelOverride } from './label-override.js';
 
@@ -11,18 +11,17 @@ import type { LabelOverride } from './label-override.js';
 
 export interface EmbeddedPresentationComponent {
   readonly kind: 'embedded_presentation_component';
-  readonly key: EmbeddedArtifactKey;
+  readonly key: string;
   readonly reference: PresentationComponentReference;
   readonly visibility?: Visibility;
   readonly labelOverride?: LabelOverride;
 }
 
-// `key` accepts a fully-built EmbeddedArtifactKey or a bare string.
 // `reference` accepts either the typed PresentationComponentReference or the
 // reusable PresentationComponent artifact itself; the constructor extracts
 // `.id` from the latter.
 export interface EmbeddedPresentationComponentInit {
-  readonly key: EmbeddedArtifactKey | string;
+  readonly key: string;
   readonly reference: PresentationComponentReference | PresentationComponent;
   readonly visibility?: Visibility;
   readonly labelOverride?: LabelOverride;
@@ -33,13 +32,13 @@ export function embeddedPresentationComponent(
 ): EmbeddedPresentationComponent {
   const out: {
     kind: 'embedded_presentation_component';
-    key: EmbeddedArtifactKey;
+    key: string;
     reference: PresentationComponentReference;
     visibility?: Visibility;
     labelOverride?: LabelOverride;
   } = {
     kind: 'embedded_presentation_component',
-    key: embeddedArtifactKey(init.key),
+    key: parseAsciiIdentifier(init.key),
     reference:
       init.reference.kind === 'presentation_component_id'
         ? init.reference

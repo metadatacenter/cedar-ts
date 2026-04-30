@@ -1,7 +1,4 @@
-import {
-  type EmbeddedArtifactKey,
-  embeddedArtifactKey,
-} from '../embedded/index.js';
+import { parseAsciiIdentifier } from '../leaves/index.js';
 import type { Value } from '../values/index.js';
 
 // FieldValue — see grammar.md §Instances.
@@ -19,17 +16,16 @@ import type { Value } from '../values/index.js';
 
 export interface FieldValue {
   readonly kind: 'field_value';
-  readonly key: EmbeddedArtifactKey;
+  readonly key: string;
   readonly values: readonly [Value, ...Value[]];
 }
 
-// The `key` argument accepts a fully-built EmbeddedArtifactKey or a bare
-// string (validated against the ASCII-identifier pattern via embeddedArtifactKey).
+// `key` is validated against the ASCII-identifier pattern.
 export function fieldValue(
-  key: EmbeddedArtifactKey | string,
+  key: string,
   ...values: [Value, ...Value[]]
 ): FieldValue {
-  return { kind: 'field_value', key: embeddedArtifactKey(key), values };
+  return { kind: 'field_value', key: parseAsciiIdentifier(key), values };
 }
 
 export const isFieldValue = (x: unknown): x is FieldValue =>

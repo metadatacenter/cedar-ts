@@ -31,3 +31,15 @@ export function integerLexicalFormFromNumber(n: number): string {
 export function integerLexicalFormFromBigInt(n: bigint): string {
   return n.toString(10);
 }
+
+// Validates that `n` is a finite, non-negative JavaScript integer and returns
+// it unchanged. Used at construction sites where the grammar requires a
+// NonNegativeInteger (cardinality bounds, length bounds, traversal depth).
+export function assertNonNegativeInteger(n: number): number {
+  if (!Number.isInteger(n) || n < 0) {
+    throw new CedarConstructionError(
+      `Expected a non-negative integer; got ${n}`,
+    );
+  }
+  return n;
+}

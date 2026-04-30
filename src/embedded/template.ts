@@ -1,6 +1,6 @@
+import { parseAsciiIdentifier } from '../leaves/index.js';
 import type { TemplateReference } from '../identity.js';
 import type { Template } from '../template.js';
-import { type EmbeddedArtifactKey, embeddedArtifactKey } from './key.js';
 import type { ValueRequirement } from './requirement.js';
 import type { Cardinality } from './cardinality.js';
 import type { Visibility } from './visibility.js';
@@ -14,7 +14,7 @@ import { type Property, type PropertyInput, property } from './property.js';
 
 export interface EmbeddedTemplate {
   readonly kind: 'embedded_template';
-  readonly key: EmbeddedArtifactKey;
+  readonly key: string;
   readonly reference: TemplateReference;
   readonly valueRequirement?: ValueRequirement;
   readonly cardinality?: Cardinality;
@@ -23,11 +23,10 @@ export interface EmbeddedTemplate {
   readonly property?: Property;
 }
 
-// `key` accepts a fully-built EmbeddedArtifactKey or a bare string.
 // `reference` accepts either the typed TemplateReference or the reusable
 // Template artifact itself; the constructor extracts `.id` from the latter.
 export interface EmbeddedTemplateInit {
-  readonly key: EmbeddedArtifactKey | string;
+  readonly key: string;
   readonly reference: TemplateReference | Template;
   readonly valueRequirement?: ValueRequirement;
   readonly cardinality?: Cardinality;
@@ -39,7 +38,7 @@ export interface EmbeddedTemplateInit {
 export function embeddedTemplate(init: EmbeddedTemplateInit): EmbeddedTemplate {
   const out: {
     kind: 'embedded_template';
-    key: EmbeddedArtifactKey;
+    key: string;
     reference: TemplateReference;
     valueRequirement?: ValueRequirement;
     cardinality?: Cardinality;
@@ -48,7 +47,7 @@ export function embeddedTemplate(init: EmbeddedTemplateInit): EmbeddedTemplate {
     property?: Property;
   } = {
     kind: 'embedded_template',
-    key: embeddedArtifactKey(init.key),
+    key: parseAsciiIdentifier(init.key),
     reference: init.reference.kind === 'template' ? init.reference.id : init.reference,
   };
   if (init.valueRequirement !== undefined) out.valueRequirement = init.valueRequirement;

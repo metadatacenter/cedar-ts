@@ -1,4 +1,4 @@
-import type { NonNegativeInteger } from '../leaves/index.js';
+import { assertNonNegativeInteger } from '../leaves/index.js';
 import type { TextDefaultValue } from '../defaults.js';
 import type { TextRenderingHint } from './rendering-hints.js';
 
@@ -9,16 +9,16 @@ import type { TextRenderingHint } from './rendering-hints.js';
 export interface TextFieldSpec {
   readonly kind: 'text_field_spec';
   readonly defaultValue?: TextDefaultValue;
-  readonly minLength?: NonNegativeInteger;
-  readonly maxLength?: NonNegativeInteger;
+  readonly minLength?: number;
+  readonly maxLength?: number;
   readonly validationRegex?: string;
   readonly renderingHint?: TextRenderingHint;
 }
 
 export interface TextFieldSpecInit {
   readonly defaultValue?: TextDefaultValue;
-  readonly minLength?: NonNegativeInteger;
-  readonly maxLength?: NonNegativeInteger;
+  readonly minLength?: number;
+  readonly maxLength?: number;
   readonly validationRegex?: string;
   readonly renderingHint?: TextRenderingHint;
 }
@@ -27,14 +27,14 @@ export function textFieldSpec(init: TextFieldSpecInit = {}): TextFieldSpec {
   const out: {
     kind: 'text_field_spec';
     defaultValue?: TextDefaultValue;
-    minLength?: NonNegativeInteger;
-    maxLength?: NonNegativeInteger;
+    minLength?: number;
+    maxLength?: number;
     validationRegex?: string;
     renderingHint?: TextRenderingHint;
   } = { kind: 'text_field_spec' };
   if (init.defaultValue !== undefined) out.defaultValue = init.defaultValue;
-  if (init.minLength !== undefined) out.minLength = init.minLength;
-  if (init.maxLength !== undefined) out.maxLength = init.maxLength;
+  if (init.minLength !== undefined) out.minLength = assertNonNegativeInteger(init.minLength);
+  if (init.maxLength !== undefined) out.maxLength = assertNonNegativeInteger(init.maxLength);
   if (init.validationRegex !== undefined) out.validationRegex = init.validationRegex;
   if (init.renderingHint !== undefined) out.renderingHint = init.renderingHint;
   return out;

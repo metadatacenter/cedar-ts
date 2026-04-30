@@ -11,7 +11,7 @@ import {
 export interface DatatypeIriLiteral {
   readonly kind: 'datatype_iri_literal';
   readonly lexicalForm: string;
-  readonly datatypeIri: Iri;
+  readonly datatype: Iri;
 }
 
 export function datatypeIriLiteral(
@@ -21,7 +21,7 @@ export function datatypeIriLiteral(
   return {
     kind: 'datatype_iri_literal',
     lexicalForm,
-    datatypeIri: typeof datatype === 'string' ? iri(datatype) : datatype,
+    datatype: typeof datatype === 'string' ? iri(datatype) : datatype,
   };
 }
 
@@ -29,7 +29,7 @@ export function datatypeIriLiteral(
 export interface LangStringLiteral {
   readonly kind: 'lang_string_literal';
   readonly lexicalForm: string;
-  readonly languageTag: LanguageTag;
+  readonly lang: LanguageTag;
 }
 
 export function langStringLiteral(
@@ -39,7 +39,7 @@ export function langStringLiteral(
   return {
     kind: 'lang_string_literal',
     lexicalForm,
-    languageTag: typeof tag === 'string' ? languageTag(tag) : tag,
+    lang: typeof tag === 'string' ? languageTag(tag) : tag,
   };
 }
 
@@ -59,7 +59,7 @@ export function stringLiteralToDatatypeIriLiteral(s: StringLiteral): DatatypeIri
   return {
     kind: 'datatype_iri_literal',
     lexicalForm: s.lexicalForm,
-    datatypeIri: { kind: 'iri', value: XsdStringDatatypeIri },
+    datatype: { kind: 'iri', value: XsdStringDatatypeIri },
   };
 }
 
@@ -104,11 +104,11 @@ export function literalsTermEqual(
   b: Literal | StringLiteral,
 ): boolean {
   if (isLangStringLiteral(a) && isLangStringLiteral(b)) {
-    return a.lexicalForm === b.lexicalForm && a.languageTag.value === b.languageTag.value;
+    return a.lexicalForm === b.lexicalForm && a.lang.value === b.lang.value;
   }
   if (isLangStringLiteral(a) || isLangStringLiteral(b)) return false;
   // Both are typed string literals. Normalize StringLiteral to xsd:string.
-  const aDt = isStringLiteral(a) ? XsdStringDatatypeIri : a.datatypeIri.value;
-  const bDt = isStringLiteral(b) ? XsdStringDatatypeIri : b.datatypeIri.value;
+  const aDt = isStringLiteral(a) ? XsdStringDatatypeIri : a.datatype.value;
+  const bDt = isStringLiteral(b) ? XsdStringDatatypeIri : b.datatype.value;
   return a.lexicalForm === b.lexicalForm && aDt === bDt;
 }

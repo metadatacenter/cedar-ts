@@ -26,7 +26,7 @@ const tp = temporalProvenance({
   modifiedOn: '2024-01-01T00:00:00Z',
   modifiedBy: 'https://example.org/u',
 });
-const meta = artifactMetadata({ descriptive: dm, provenance: tp });
+const meta = artifactMetadata({ descriptiveMetadata: dm, provenance: tp });
 const id = presentationComponentId('https://example.org/pc/1');
 
 describe('PresentationComponent variants', () => {
@@ -34,10 +34,10 @@ describe('PresentationComponent variants', () => {
     const c = richTextComponent({
       id,
       metadata: meta,
-      htmlContent: '<p>Instructions go here.</p>',
+      html: '<p>Instructions go here.</p>',
     });
     expect(c.kind).toBe('rich_text_component');
-    expect(c.htmlContent).toBe('<p>Instructions go here.</p>');
+    expect(c.html).toBe('<p>Instructions go here.</p>');
     expect(isRichTextComponent(c)).toBe(true);
     expect(isPresentationComponent(c)).toBe(true);
   });
@@ -46,16 +46,16 @@ describe('PresentationComponent variants', () => {
     const c = imageComponent({
       id,
       metadata: meta,
-      imageSource: 'https://example.org/img/1.png',
+      image: 'https://example.org/img/1.png',
     });
     expect(c.kind).toBe('image_component');
-    expect(c.imageSource.value).toBe('https://example.org/img/1.png');
+    expect(c.image.value).toBe('https://example.org/img/1.png');
     expect(isImageComponent(c)).toBe(true);
   });
 
   it('ImageComponent rejects malformed source strings', () => {
     expect(() =>
-      imageComponent({ id, metadata: meta, imageSource: 'not an iri' }),
+      imageComponent({ id, metadata: meta, image: 'not an iri' }),
     ).toThrow(CedarConstructionError);
   });
 
@@ -63,10 +63,10 @@ describe('PresentationComponent variants', () => {
     const c = youtubeVideoComponent({
       id,
       metadata: meta,
-      youtubeVideoSource: 'https://www.youtube.com/watch?v=abc123',
+      video: 'https://www.youtube.com/watch?v=abc123',
     });
     expect(c.kind).toBe('youtube_video_component');
-    expect(c.youtubeVideoSource.value).toBe('https://www.youtube.com/watch?v=abc123');
+    expect(c.video.value).toBe('https://www.youtube.com/watch?v=abc123');
     expect(isYoutubeVideoComponent(c)).toBe(true);
   });
 
@@ -86,12 +86,12 @@ describe('PresentationComponent variants', () => {
 describe('isPresentationComponent', () => {
   it('accepts every concrete variant', () => {
     const variants: PresentationComponent[] = [
-      richTextComponent({ id, metadata: meta, htmlContent: '' }),
-      imageComponent({ id, metadata: meta, imageSource: 'https://example.org/i.png' }),
+      richTextComponent({ id, metadata: meta, html: '' }),
+      imageComponent({ id, metadata: meta, image: 'https://example.org/i.png' }),
       youtubeVideoComponent({
         id,
         metadata: meta,
-        youtubeVideoSource: 'https://www.youtube.com/watch?v=x',
+        video: 'https://www.youtube.com/watch?v=x',
       }),
       sectionBreakComponent({ id, metadata: meta }),
       pageBreakComponent({ id, metadata: meta }),

@@ -44,7 +44,6 @@ import {
   numericLiteral,
   datatypeIriLiteral,
   XsdNumericDatatypeIri,
-  nonNegativeInteger,
   isTextFieldSpec,
   isNumericFieldSpec,
   isDateFieldSpec,
@@ -70,13 +69,13 @@ describe('TextFieldSpec', () => {
 
   it('preserves all supplied constraints', () => {
     const fs = textFieldSpec({
-      minLength: nonNegativeInteger(1),
-      maxLength: nonNegativeInteger(255),
+      minLength: 1,
+      maxLength: 255,
       validationRegex: '^[A-Z].*$',
       renderingHint: 'multi_line_text',
     });
-    expect(fs.minLength?.value).toBe('1');
-    expect(fs.maxLength?.value).toBe('255');
+    expect(fs.minLength).toBe(1);
+    expect(fs.maxLength).toBe(255);
     expect(fs.validationRegex).toBe('^[A-Z].*$');
     expect(fs.renderingHint).toBe('multi_line_text');
     expect(isTextFieldSpec(fs)).toBe(true);
@@ -99,13 +98,13 @@ describe('NumericFieldSpec', () => {
     const fs = numericFieldSpec({
       datatype: 'decimal',
       unit: u,
-      numericPrecision: nonNegativeInteger(3),
+      numericPrecision: 3,
       minValue: numericValue(numericLiteral('0', 'decimal')),
       maxValue: numericValue(numericLiteral('100', 'decimal')),
       renderingHint: 'numeric_input',
     });
     expect(fs.unit).toBe(u);
-    expect(fs.numericPrecision?.value).toBe('3');
+    expect(fs.numericPrecision).toBe(3);
   });
 });
 
@@ -154,36 +153,36 @@ describe('Controlled-term field spec and sources', () => {
 
   it('OntologySource wraps an OntologyReference', () => {
     const ref = ontologyReference({
-      ontologyIri: 'http://purl.obolibrary.org/obo/obi.owl',
+      iri: 'http://purl.obolibrary.org/obo/obi.owl',
       displayHint: ontologyDisplayHint({ acronym: 'OBI' }),
     });
     const src = ontologySource(ref);
     expect(src.kind).toBe('ontology_source');
-    expect(src.ontology.ontologyIri.value).toBe('http://purl.obolibrary.org/obo/obi.owl');
+    expect(src.ontology.iri.value).toBe('http://purl.obolibrary.org/obo/obi.owl');
   });
 
   it('BranchSource carries root term metadata and optional max depth', () => {
-    const ref = ontologyReference({ ontologyIri: 'http://example.org/onto' });
+    const ref = ontologyReference({ iri: 'http://example.org/onto' });
     const bs = branchSource({
       ontology: ref,
       rootTermIri: 'http://example.org/term/root',
       rootTermLabel: 'Root',
-      maxTraversalDepth: nonNegativeInteger(3),
+      maxTraversalDepth: 3,
     });
     expect(bs.kind).toBe('branch_source');
     expect(bs.rootTermLabel).toBe('Root');
-    expect(bs.maxTraversalDepth?.value).toBe('3');
+    expect(bs.maxTraversalDepth).toBe(3);
   });
 
   it('ClassSource collects one or more controlled-term classes', () => {
-    const ref = ontologyReference({ ontologyIri: 'http://example.org/onto' });
+    const ref = ontologyReference({ iri: 'http://example.org/onto' });
     const c1 = controlledTermClass({
-      termIri: 'http://example.org/term/1',
+      term: 'http://example.org/term/1',
       label: 'One',
       ontology: ref,
     });
     const c2 = controlledTermClass({
-      termIri: 'http://example.org/term/2',
+      term: 'http://example.org/term/2',
       label: 'Two',
       ontology: ref,
     });
@@ -196,14 +195,14 @@ describe('Controlled-term field spec and sources', () => {
     const vs = valueSetSource({
       identifier: 'vs-001',
       name: 'Demographics',
-      valueSetIri: 'http://example.org/valuesets/demographics',
+      iri: 'http://example.org/valuesets/demographics',
     });
     expect(vs.identifier).toBe('vs-001');
-    expect(vs.valueSetIri?.value).toBe('http://example.org/valuesets/demographics');
+    expect(vs.iri?.value).toBe('http://example.org/valuesets/demographics');
   });
 
   it('ControlledTermFieldSpec requires at least one source', () => {
-    const ref = ontologyReference({ ontologyIri: 'http://example.org/onto' });
+    const ref = ontologyReference({ iri: 'http://example.org/onto' });
     const fs = controlledTermFieldSpec(ontologySource(ref));
     expect(fs.kind).toBe('controlled_term_field_spec');
     expect(fs.sources.length).toBe(1);
@@ -235,7 +234,7 @@ describe('ChoiceFieldSpec', () => {
   });
 
   it('ControlledTermSingleChoiceFieldSpec carries controlled-term options', () => {
-    const ctv = controlledTermValue({ termIri: 'http://example.org/t/1', label: 'One' });
+    const ctv = controlledTermValue({ term: 'http://example.org/t/1', label: 'One' });
     const opt = controlledTermChoiceOption(ctv, { default: true });
     const fs = controlledTermSingleChoiceFieldSpec({
       options: [opt],
@@ -254,7 +253,7 @@ describe('ChoiceFieldSpec', () => {
   });
 
   it('ControlledTermMultipleChoiceFieldSpec', () => {
-    const ctv = controlledTermValue({ termIri: 'http://example.org/t/1' });
+    const ctv = controlledTermValue({ term: 'http://example.org/t/1' });
     const fs = controlledTermMultipleChoiceFieldSpec({
       options: [controlledTermChoiceOption(ctv)],
       renderingHint: 'multi_select_dropdown',
@@ -314,7 +313,7 @@ describe('FieldSpec union', () => {
       timeFieldSpec(),
       dateTimeFieldSpec({ dateTimeValueType: 'date_hour_minute' }),
       controlledTermFieldSpec(
-        ontologySource(ontologyReference({ ontologyIri: 'http://example.org/o' })),
+        ontologySource(ontologyReference({ iri: 'http://example.org/o' })),
       ),
       literalSingleChoiceFieldSpec({
         options: [literalChoiceOption(datatypeIriLiteral('a', XsdNumericDatatypeIri.integer))],

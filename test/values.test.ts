@@ -108,20 +108,20 @@ describe('TimeValue / DateTimeValue', () => {
 describe('ControlledTermValue', () => {
   it('requires a TermIri and accepts optional textual metadata', () => {
     const v = controlledTermValue({
-      termIri: 'http://purl.obolibrary.org/obo/UBERON_0000178',
+      term: 'http://purl.obolibrary.org/obo/UBERON_0000178',
       label: 'blood',
       notation: 'UBERON:0000178',
       preferredLabel: 'blood',
     });
     expect(v.kind).toBe('controlled_term_value');
-    expect(v.termIri.value).toBe('http://purl.obolibrary.org/obo/UBERON_0000178');
+    expect(v.term.value).toBe('http://purl.obolibrary.org/obo/UBERON_0000178');
     expect(v.label).toBe('blood');
     expect(v.notation).toBe('UBERON:0000178');
     expect(v.preferredLabel).toBe('blood');
   });
 
   it('accepts only a TermIri with no extra metadata', () => {
-    const v = controlledTermValue({ termIri: 'http://example.org/term/1' });
+    const v = controlledTermValue({ term: 'http://example.org/term/1' });
     expect(v.label).toBeUndefined();
     expect(v.notation).toBeUndefined();
     expect(v.preferredLabel).toBeUndefined();
@@ -138,7 +138,7 @@ describe('ChoiceValue', () => {
   });
 
   it('ControlledTermChoiceValue wraps a ControlledTermValue', () => {
-    const ctv = controlledTermValue({ termIri: 'http://example.org/t' });
+    const ctv = controlledTermValue({ term: 'http://example.org/t' });
     const cv = controlledTermChoiceValue(ctv);
     expect(isControlledTermChoiceValue(cv)).toBe(true);
     expect(isChoiceValue(cv)).toBe(true);
@@ -236,7 +236,7 @@ describe('Value union recognition', () => {
     expect(isValue(timeValue(timeLiteral('10:30:00')))).toBe(true);
     expect(isValue(dateTimeValue(dateTimeLiteral('2024-06-15T10:30:00')))).toBe(true);
     expect(
-      isValue(controlledTermValue({ termIri: 'http://example.org/t' })),
+      isValue(controlledTermValue({ term: 'http://example.org/t' })),
     ).toBe(true);
     expect(
       isValue(literalChoiceValue(datatypeIriLiteral('1', XsdNumericDatatypeIri.integer))),
@@ -384,7 +384,7 @@ describe('literalChoiceValue input widening', () => {
     expect(v.literal.kind).toBe('lang_string_literal');
     expect(v.literal.lexicalForm).toBe('Professor');
     if (v.literal.kind === 'lang_string_literal') {
-      expect(v.literal.languageTag.value).toBe('en');
+      expect(v.literal.lang.value).toBe('en');
     }
   });
 

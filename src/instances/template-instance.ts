@@ -19,14 +19,14 @@ export interface TemplateInstance {
   readonly kind: 'template_instance';
   readonly id: TemplateInstanceId;
   readonly metadata: ArtifactMetadata;
-  readonly templateReference: TemplateReference;
+  readonly templateRef: TemplateReference;
   readonly values: readonly InstanceValue[];
 }
 
 export interface TemplateInstanceInit {
   readonly id: TemplateInstanceId | string;
   readonly metadata: ArtifactMetadata;
-  readonly templateReference: TemplateReference | string;
+  readonly templateRef: TemplateReference | string;
   readonly values?: readonly InstanceValue[];
 }
 
@@ -52,10 +52,10 @@ export function templateInstance(init: TemplateInstanceInit): TemplateInstance {
     kind: 'template_instance',
     id: typeof init.id === 'string' ? templateInstanceId(init.id) : init.id,
     metadata: init.metadata,
-    templateReference:
-      typeof init.templateReference === 'string'
-        ? templateId(init.templateReference)
-        : init.templateReference,
+    templateRef:
+      typeof init.templateRef === 'string'
+        ? templateId(init.templateRef)
+        : init.templateRef,
     values,
   };
 }
@@ -66,7 +66,7 @@ function assertConsistentInstanceValueKeys(
   const fieldKeys = new Set<string>();
   const templateKeys = new Set<string>();
   for (const v of values) {
-    const k = v.key.identifier.value;
+    const k = v.key;
     if (isFieldValue(v)) {
       if (fieldKeys.has(k)) {
         throw new CedarConstructionError(

@@ -101,7 +101,7 @@ import {
   rridDefaultValue,
   nihGrantIdDefaultValue,
 } from '../defaults.js';
-import { type EmbeddedArtifactKey, embeddedArtifactKey } from './key.js';
+import { parseAsciiIdentifier } from '../leaves/index.js';
 import type { ValueRequirement } from './requirement.js';
 import type { Cardinality } from './cardinality.js';
 import type { Visibility } from './visibility.js';
@@ -124,7 +124,7 @@ import { type Property, type PropertyInput, property } from './property.js';
 
 interface EmbeddedFieldCommon {
   readonly kind: 'embedded_field';
-  readonly key: EmbeddedArtifactKey;
+  readonly key: string;
   readonly valueRequirement?: ValueRequirement;
   readonly cardinality?: Cardinality;
   readonly visibility?: Visibility;
@@ -272,7 +272,7 @@ export type EmbeddedField =
 // objects into a fully-built DefaultValue.
 
 interface EmbeddedFieldInitCommon {
-  readonly key: EmbeddedArtifactKey | string;
+  readonly key: string;
   readonly valueRequirement?: ValueRequirement;
   readonly cardinality?: Cardinality;
   readonly visibility?: Visibility;
@@ -409,7 +409,7 @@ export interface EmbeddedAttributeValueFieldInit extends EmbeddedFieldInitCommon
 
 type AssembledCommon = {
   kind: 'embedded_field';
-  key: EmbeddedArtifactKey;
+  key: string;
   valueRequirement?: ValueRequirement;
   cardinality?: Cardinality;
   visibility?: Visibility;
@@ -420,7 +420,7 @@ type AssembledCommon = {
 function assembleCommon(init: EmbeddedFieldInitCommon): AssembledCommon {
   const out: AssembledCommon = {
     kind: 'embedded_field',
-    key: embeddedArtifactKey(init.key),
+    key: parseAsciiIdentifier(init.key),
   };
   if (init.valueRequirement !== undefined) out.valueRequirement = init.valueRequirement;
   if (init.cardinality !== undefined) out.cardinality = init.cardinality;

@@ -84,7 +84,7 @@ const tp = temporalProvenance({
   modifiedBy: 'https://example.org/u',
 });
 const meta = schemaArtifactMetadata({
-  artifact: artifactMetadata({ descriptive: dm, provenance: tp }),
+  artifact: artifactMetadata({ descriptiveMetadata: dm, provenance: tp }),
   versioning: schemaVersioning({
     version: '1.0.0',
     status: 'draft',

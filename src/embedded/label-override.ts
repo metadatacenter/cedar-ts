@@ -10,19 +10,19 @@
 export interface LabelOverride {
   readonly kind: 'label_override';
   readonly label: string;
-  readonly alternativeLabels: readonly string[];
+  readonly altLabels: readonly string[];
 }
 
 export interface LabelOverrideInit {
   readonly label: string;
-  readonly alternativeLabels?: readonly string[];
+  readonly altLabels?: readonly string[];
 }
 
 export function labelOverride(init: LabelOverrideInit): LabelOverride {
   return {
     kind: 'label_override',
     label: init.label,
-    alternativeLabels: init.alternativeLabels ?? [],
+    altLabels: init.altLabels ?? [],
   };
 }
 

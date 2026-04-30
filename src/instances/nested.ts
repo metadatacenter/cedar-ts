@@ -1,7 +1,4 @@
-import {
-  type EmbeddedArtifactKey,
-  embeddedArtifactKey,
-} from '../embedded/index.js';
+import { parseAsciiIdentifier } from '../leaves/index.js';
 import type { FieldValue } from './field-value.js';
 
 // InstanceValue and NestedTemplateInstance — see grammar.md §Instances.
@@ -18,19 +15,18 @@ export type InstanceValue = FieldValue | NestedTemplateInstance;
 
 export interface NestedTemplateInstance {
   readonly kind: 'nested_template_instance';
-  readonly key: EmbeddedArtifactKey;
+  readonly key: string;
   readonly values: readonly InstanceValue[];
 }
 
-// The `key` argument accepts a fully-built EmbeddedArtifactKey or a bare
-// string (validated against the ASCII-identifier pattern via embeddedArtifactKey).
+// `key` is validated against the ASCII-identifier pattern.
 export function nestedTemplateInstance(
-  key: EmbeddedArtifactKey | string,
+  key: string,
   values: readonly InstanceValue[] = [],
 ): NestedTemplateInstance {
   return {
     kind: 'nested_template_instance',
-    key: embeddedArtifactKey(key),
+    key: parseAsciiIdentifier(key),
     values,
   };
 }

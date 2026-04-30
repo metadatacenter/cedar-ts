@@ -24,6 +24,7 @@ export {
   tryParseIntegerLexicalForm,
   integerLexicalFormFromNumber,
   integerLexicalFormFromBigInt,
+  assertNonNegativeInteger,
 } from './integer.js';
 export { toNfc } from './lexical.js';
 export {
@@ -44,10 +45,4 @@ export {
   languageTag,
   type IsoDateTimeStamp,
   isoDateTimeStamp,
-  type NonNegativeInteger,
-  nonNegativeInteger,
-  nonNegativeIntegerToNumber,
-  nonNegativeIntegerToBigInt,
-  type KeyIdentifier,
-  keyIdentifier,
 } from './wrappers.js';

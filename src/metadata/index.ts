@@ -23,15 +23,7 @@ export {
 } from './versioning.js';
 
 export {
-  type AnnotationName,
-  annotationName,
-  type LiteralAnnotationValue,
-  literalAnnotationValue,
-  type IriAnnotationValue,
-  iriAnnotationValue,
   type AnnotationValue,
-  isLiteralAnnotationValue,
-  isIriAnnotationValue,
   isAnnotationValue,
   type Annotation,
   annotation,
@@ -47,13 +39,13 @@ import type { Annotation } from './annotations.js';
 // identity (grammar §Aggregate Structure).
 export interface ArtifactMetadata {
   readonly kind: 'artifact_metadata';
-  readonly descriptive: DescriptiveMetadata;
+  readonly descriptiveMetadata: DescriptiveMetadata;
   readonly provenance: TemporalProvenance;
   readonly annotations: readonly Annotation[];
 }
 
 export interface ArtifactMetadataInit {
-  readonly descriptive: DescriptiveMetadata;
+  readonly descriptiveMetadata: DescriptiveMetadata;
   readonly provenance: TemporalProvenance;
   readonly annotations?: readonly Annotation[];
 }
@@ -61,7 +53,7 @@ export interface ArtifactMetadataInit {
 export function artifactMetadata(init: ArtifactMetadataInit): ArtifactMetadata {
   return {
     kind: 'artifact_metadata',
-    descriptive: init.descriptive,
+    descriptiveMetadata: init.descriptiveMetadata,
     provenance: init.provenance,
     annotations: init.annotations ?? [],
   };

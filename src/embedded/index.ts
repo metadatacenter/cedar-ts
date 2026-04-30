@@ -1,10 +1,4 @@
 export {
-  type EmbeddedArtifactKey,
-  embeddedArtifactKey,
-  isEmbeddedArtifactKey,
-} from './key.js';
-
-export {
   type ValueRequirement,
   VALUE_REQUIREMENTS,
   DEFAULT_VALUE_REQUIREMENT,
@@ -21,12 +15,8 @@ export {
 export {
   type Cardinality,
   type CardinalityInit,
-  type CardinalityUpperBound,
-  type UnboundedCardinality,
   cardinality,
-  unboundedCardinality,
   isCardinality,
-  isUnboundedCardinality,
 } from './cardinality.js';
 
 export {

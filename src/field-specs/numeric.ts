@@ -1,5 +1,5 @@
-import type { Iri, NonNegativeInteger, NumericDatatypeKind } from '../leaves/index.js';
-import { iri } from '../leaves/index.js';
+import type { Iri, NumericDatatypeKind } from '../leaves/index.js';
+import { iri, assertNonNegativeInteger } from '../leaves/index.js';
 import type { NumericValue } from '../values/index.js';
 import type { NumericRenderingHint } from './rendering-hints.js';
 
@@ -36,7 +36,7 @@ export interface NumericFieldSpec {
   readonly kind: 'numeric_field_spec';
   readonly datatype: NumericDatatypeKind;
   readonly unit?: Unit;
-  readonly numericPrecision?: NonNegativeInteger;
+  readonly numericPrecision?: number;
   readonly minValue?: NumericValue;
   readonly maxValue?: NumericValue;
   readonly renderingHint?: NumericRenderingHint;
@@ -45,7 +45,7 @@ export interface NumericFieldSpec {
 export interface NumericFieldSpecInit {
   readonly datatype: NumericDatatypeKind;
   readonly unit?: Unit;
-  readonly numericPrecision?: NonNegativeInteger;
+  readonly numericPrecision?: number;
   readonly minValue?: NumericValue;
   readonly maxValue?: NumericValue;
   readonly renderingHint?: NumericRenderingHint;
@@ -56,13 +56,14 @@ export function numericFieldSpec(init: NumericFieldSpecInit): NumericFieldSpec {
     kind: 'numeric_field_spec';
     datatype: NumericDatatypeKind;
     unit?: Unit;
-    numericPrecision?: NonNegativeInteger;
+    numericPrecision?: number;
     minValue?: NumericValue;
     maxValue?: NumericValue;
     renderingHint?: NumericRenderingHint;
   } = { kind: 'numeric_field_spec', datatype: init.datatype };
   if (init.unit !== undefined) out.unit = init.unit;
-  if (init.numericPrecision !== undefined) out.numericPrecision = init.numericPrecision;
+  if (init.numericPrecision !== undefined)
+    out.numericPrecision = assertNonNegativeInteger(init.numericPrecision);
   if (init.minValue !== undefined) out.minValue = init.minValue;
   if (init.maxValue !== undefined) out.maxValue = init.maxValue;
   if (init.renderingHint !== undefined) out.renderingHint = init.renderingHint;

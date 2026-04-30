@@ -5,7 +5,6 @@ import {
   attributeValueFieldId,
   attributeValueFieldSpec,
   descriptiveMetadata,
-  embeddedArtifactKey,
   fieldValue,
   fullDateLiteral,
   fullDateValue,
@@ -40,11 +39,11 @@ const tp = temporalProvenance({
   modifiedOn: '2024-01-01T00:00:00Z',
   modifiedBy: 'https://example.org/u',
 });
-const am = artifactMetadata({ descriptive: dm, provenance: tp });
+const am = artifactMetadata({ descriptiveMetadata: dm, provenance: tp });
 
 const tref = templateId('https://example.org/templates/demo');
-const titleKey = embeddedArtifactKey('title');
-const studyArmKey = embeddedArtifactKey('study_arm');
+const titleKey = 'title';
+const studyArmKey = 'study_arm';
 
 describe('FieldValue', () => {
   it('builds a FieldValue with a single value', () => {
@@ -58,13 +57,12 @@ describe('FieldValue', () => {
 
   it('accepts a bare string as the key', () => {
     const fv = fieldValue('title', textValue(stringLiteral('Hello')));
-    expect(fv.key.kind).toBe('embedded_artifact_key');
-    expect(fv.key.identifier.value).toBe('title');
+    expect(fv.key).toBe('title');
   });
 
   it('builds a FieldValue with multiple values for a multi-valued field', () => {
     const fv = fieldValue(
-      embeddedArtifactKey('keywords'),
+      'keywords',
       textValue(stringLiteral('alpha')),
       textValue(stringLiteral('beta')),
       textValue(stringLiteral('gamma')),
@@ -89,7 +87,7 @@ describe('NestedTemplateInstance', () => {
 
   it('accepts a bare string as the key', () => {
     const nti = nestedTemplateInstance('study_arm');
-    expect(nti.key.identifier.value).toBe('study_arm');
+    expect(nti.key).toBe('study_arm');
   });
 
   it('supports recursive nesting via InstanceValue', () => {
@@ -98,7 +96,7 @@ describe('NestedTemplateInstance', () => {
     expect(nti.values).toHaveLength(1);
     expect(isFieldValue(nti.values[0])).toBe(true);
 
-    const deeper = nestedTemplateInstance(embeddedArtifactKey('outer'), [nti]);
+    const deeper = nestedTemplateInstance('outer', [nti]);
     expect(isNestedTemplateInstance(deeper.values[0])).toBe(true);
   });
 });
@@ -107,31 +105,31 @@ describe('TemplateInstance', () => {
   const baseInit = {
     id: templateInstanceId('https://example.org/instances/i1'),
     metadata: am,
-    templateReference: tref,
+    templateRef: tref,
   };
 
   it('builds an empty TemplateInstance', () => {
     const ti = templateInstance(baseInit);
     expect(ti.kind).toBe('template_instance');
     expect(ti.values).toEqual([]);
-    expect(ti.templateReference.iri.value).toBe('https://example.org/templates/demo');
+    expect(ti.templateRef.iri.value).toBe('https://example.org/templates/demo');
     expect(isTemplateInstance(ti)).toBe(true);
   });
 
-  it('coerces string id and templateReference', () => {
+  it('coerces string id and templateRef', () => {
     const ti = templateInstance({
       id: 'https://example.org/instances/i2',
       metadata: am,
-      templateReference: 'https://example.org/templates/demo',
+      templateRef: 'https://example.org/templates/demo',
     });
     expect(ti.id.kind).toBe('template_instance_id');
-    expect(ti.templateReference.kind).toBe('template_id');
+    expect(ti.templateRef.kind).toBe('template_id');
   });
 
   it('preserves the order of InstanceValues', () => {
-    const k1 = embeddedArtifactKey('a');
-    const k2 = embeddedArtifactKey('b');
-    const k3 = embeddedArtifactKey('c');
+    const k1 = 'a';
+    const k2 = 'b';
+    const k3 = 'c';
     const ti = templateInstance({
       ...baseInit,
       values: [
@@ -140,7 +138,7 @@ describe('TemplateInstance', () => {
         fieldValue(k3, textValue(stringLiteral('C'))),
       ],
     });
-    expect(ti.values.map((v) => v.key.identifier.value)).toEqual(['a', 'b', 'c']);
+    expect(ti.values.map((v) => v.key)).toEqual(['a', 'b', 'c']);
   });
 
   it('permits multiple NestedTemplateInstance entries with the same key (multi-cardinality)', () => {
@@ -156,7 +154,7 @@ describe('TemplateInstance', () => {
       ],
     });
     expect(ti.values).toHaveLength(2);
-    expect(ti.values.every((v) => v.key.identifier.value === 'study_arm')).toBe(true);
+    expect(ti.values.every((v) => v.key === 'study_arm')).toBe(true);
   });
 
   it('rejects two FieldValues sharing a key', () => {
@@ -197,8 +195,8 @@ describe('TemplateInstance', () => {
     const ti: TemplateInstance = templateInstance({
       ...baseInit,
       values: [
-        fieldValue(embeddedArtifactKey('count'), numericValue(numericLiteral('1', 'integer'))),
-        fieldValue(embeddedArtifactKey('born'), fullDateValue(fullDateLiteral('1990-01-01'))),
+        fieldValue('count', numericValue(numericLiteral('1', 'integer'))),
+        fieldValue('born', fullDateValue(fullDateLiteral('1990-01-01'))),
       ],
     });
     const all: InstanceValue[] = [...ti.values];
@@ -228,13 +226,13 @@ describe('Artifact union', () => {
     });
     const pc = richTextComponent({
       id: presentationComponentId('https://example.org/pc/r'),
-      metadata: meta,
-      content: 'Hi',
+      metadata: am,
+      html: 'Hi',
     });
     const ti = templateInstance({
       id: templateInstanceId('https://example.org/instances/i1'),
       metadata: am,
-      templateReference: tref,
+      templateRef: tref,
     });
 
     const all: Artifact[] = [f, t, pc, ti];

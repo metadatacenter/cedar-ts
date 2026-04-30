@@ -22,33 +22,33 @@ export interface RichTextComponent {
   readonly metadata: ArtifactMetadata;
   // HtmlContent — the permitted feature set and any sanitization requirements
   // are out of scope for the abstract specification.
-  readonly htmlContent: string;
+  readonly html: string;
 }
 
 export interface RichTextComponentInit {
   readonly id: PresentationComponentId | Iri | string;
   readonly metadata: ArtifactMetadata;
-  readonly htmlContent: string;
+  readonly html: string;
 }
 
 export const richTextComponent = (init: RichTextComponentInit): RichTextComponent => ({
   kind: 'rich_text_component',
   id: toPresentationComponentId(init.id),
   metadata: init.metadata,
-  htmlContent: init.htmlContent,
+  html: init.html,
 });
 
 export interface ImageComponent {
   readonly kind: 'image_component';
   readonly id: PresentationComponentId;
   readonly metadata: ArtifactMetadata;
-  readonly imageSource: Iri;
+  readonly image: Iri;
 }
 
 export interface ImageComponentInit {
   readonly id: PresentationComponentId | Iri | string;
   readonly metadata: ArtifactMetadata;
-  readonly imageSource: Iri | string;
+  readonly image: Iri | string;
 }
 
 export function imageComponent(init: ImageComponentInit): ImageComponent {
@@ -56,8 +56,7 @@ export function imageComponent(init: ImageComponentInit): ImageComponent {
     kind: 'image_component',
     id: toPresentationComponentId(init.id),
     metadata: init.metadata,
-    imageSource:
-      typeof init.imageSource === 'string' ? iri(init.imageSource) : init.imageSource,
+    image: typeof init.image === 'string' ? iri(init.image) : init.image,
   };
 }
 
@@ -65,13 +64,13 @@ export interface YoutubeVideoComponent {
   readonly kind: 'youtube_video_component';
   readonly id: PresentationComponentId;
   readonly metadata: ArtifactMetadata;
-  readonly youtubeVideoSource: Iri;
+  readonly video: Iri;
 }
 
 export interface YoutubeVideoComponentInit {
   readonly id: PresentationComponentId | Iri | string;
   readonly metadata: ArtifactMetadata;
-  readonly youtubeVideoSource: Iri | string;
+  readonly video: Iri | string;
 }
 
 export function youtubeVideoComponent(
@@ -81,10 +80,7 @@ export function youtubeVideoComponent(
     kind: 'youtube_video_component',
     id: toPresentationComponentId(init.id),
     metadata: init.metadata,
-    youtubeVideoSource:
-      typeof init.youtubeVideoSource === 'string'
-        ? iri(init.youtubeVideoSource)
-        : init.youtubeVideoSource,
+    video: typeof init.video === 'string' ? iri(init.video) : init.video,
   };
 }
 

@@ -5,19 +5,16 @@ import { type Iri, iri } from '../leaves/index.js';
 // within a specific Template. Distinct from the intrinsic metadata of the
 // referenced artifact: the same reusable artifact may be embedded under
 // different property IRIs in different templates.
-//
-// PropertyLabel is a plain string per the descriptive-metadata rule; PropertyIri
-// uses the existing Iri leaf, which is the universal carrier of IRI semantics.
 
 export interface Property {
   readonly kind: 'property';
-  readonly propertyIri: Iri;
-  readonly propertyLabel?: string;
+  readonly iri: Iri;
+  readonly label?: string;
 }
 
 export interface PropertyInit {
-  readonly propertyIri: Iri | string;
-  readonly propertyLabel?: string;
+  readonly iri: Iri | string;
+  readonly label?: string;
 }
 
 // All input shapes accepted by property(). The bare-string and bare-Iri forms
@@ -26,24 +23,23 @@ export interface PropertyInit {
 export type PropertyInput = string | Iri | PropertyInit | Property;
 
 // Idempotent: an existing Property passes through unchanged. A bare string or
-// Iri is treated as the propertyIri with no label. An init object carries an
-// optional propertyLabel.
+// Iri is treated as the IRI with no label. An init object carries an optional
+// label.
 export function property(input: PropertyInput): Property {
   if (typeof input === 'string') {
-    return { kind: 'property', propertyIri: iri(input) };
+    return { kind: 'property', iri: iri(input) };
   }
   if ('kind' in input) {
     // Iri or Property
     if (input.kind === 'property') return input;
-    return { kind: 'property', propertyIri: input };
+    return { kind: 'property', iri: input };
   }
   // PropertyInit
-  const out: { kind: 'property'; propertyIri: Iri; propertyLabel?: string } = {
+  const out: { kind: 'property'; iri: Iri; label?: string } = {
     kind: 'property',
-    propertyIri:
-      typeof input.propertyIri === 'string' ? iri(input.propertyIri) : input.propertyIri,
+    iri: typeof input.iri === 'string' ? iri(input.iri) : input.iri,
   };
-  if (input.propertyLabel !== undefined) out.propertyLabel = input.propertyLabel;
+  if (input.label !== undefined) out.label = input.label;
   return out;
 }
 
