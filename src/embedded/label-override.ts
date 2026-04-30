@@ -8,7 +8,6 @@
 // struct preserves the grammar distinction.
 
 export interface LabelOverride {
-  readonly kind: 'label_override';
   readonly label: string;
   readonly altLabels: readonly string[];
 }
@@ -20,12 +19,7 @@ export interface LabelOverrideInit {
 
 export function labelOverride(init: LabelOverrideInit): LabelOverride {
   return {
-    kind: 'label_override',
     label: init.label,
     altLabels: init.altLabels ?? [],
   };
 }
-
-export const isLabelOverride = (x: unknown): x is LabelOverride =>
-  typeof x === 'object' && x !== null &&
-  (x as { kind?: unknown }).kind === 'label_override';

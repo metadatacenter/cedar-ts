@@ -4,52 +4,52 @@ import { type Iri, iri } from '../leaves/index.js';
 // Iri; pattern conformance is enforced by Phase 2 of the validation algorithm
 // (validate_external_authority_value), not by these constructors.
 
-export interface OrcidIri    { readonly kind: 'orcid_iri';    readonly value: Iri; }
-export interface RorIri      { readonly kind: 'ror_iri';      readonly value: Iri; }
-export interface DoiIri      { readonly kind: 'doi_iri';      readonly value: Iri; }
-export interface PubMedIri   { readonly kind: 'pub_med_iri';  readonly value: Iri; }
-export interface RridIri     { readonly kind: 'rrid_iri';     readonly value: Iri; }
-export interface NihGrantIri { readonly kind: 'nih_grant_iri'; readonly value: Iri; }
+export interface OrcidIri    { readonly kind: 'OrcidIri';    readonly value: Iri; }
+export interface RorIri      { readonly kind: 'RorIri';      readonly value: Iri; }
+export interface DoiIri      { readonly kind: 'DoiIri';      readonly value: Iri; }
+export interface PubMedIri   { readonly kind: 'PubMedIri';  readonly value: Iri; }
+export interface RridIri     { readonly kind: 'RridIri';     readonly value: Iri; }
+export interface NihGrantIri { readonly kind: 'NihGrantIri'; readonly value: Iri; }
 
 const wrapIri = (raw: Iri | string): Iri =>
   typeof raw === 'string' ? iri(raw) : raw;
 
-export const orcidIri    = (v: Iri | string): OrcidIri    => ({ kind: 'orcid_iri',    value: wrapIri(v) });
-export const rorIri      = (v: Iri | string): RorIri      => ({ kind: 'ror_iri',      value: wrapIri(v) });
-export const doiIri      = (v: Iri | string): DoiIri      => ({ kind: 'doi_iri',      value: wrapIri(v) });
-export const pubMedIri   = (v: Iri | string): PubMedIri   => ({ kind: 'pub_med_iri',  value: wrapIri(v) });
-export const rridIri     = (v: Iri | string): RridIri     => ({ kind: 'rrid_iri',     value: wrapIri(v) });
-export const nihGrantIri = (v: Iri | string): NihGrantIri => ({ kind: 'nih_grant_iri', value: wrapIri(v) });
+export const orcidIri    = (v: Iri | string): OrcidIri    => ({ kind: 'OrcidIri',    value: wrapIri(v) });
+export const rorIri      = (v: Iri | string): RorIri      => ({ kind: 'RorIri',      value: wrapIri(v) });
+export const doiIri      = (v: Iri | string): DoiIri      => ({ kind: 'DoiIri',      value: wrapIri(v) });
+export const pubMedIri   = (v: Iri | string): PubMedIri   => ({ kind: 'PubMedIri',  value: wrapIri(v) });
+export const rridIri     = (v: Iri | string): RridIri     => ({ kind: 'RridIri',     value: wrapIri(v) });
+export const nihGrantIri = (v: Iri | string): NihGrantIri => ({ kind: 'NihGrantIri', value: wrapIri(v) });
 
 // External authority values.
 
 export interface OrcidValue {
-  readonly kind: 'orcid_value';
+  readonly kind: 'OrcidValue';
   readonly iri: OrcidIri;
   readonly label?: string;
 }
 export interface RorValue {
-  readonly kind: 'ror_value';
+  readonly kind: 'RorValue';
   readonly iri: RorIri;
   readonly label?: string;
 }
 export interface DoiValue {
-  readonly kind: 'doi_value';
+  readonly kind: 'DoiValue';
   readonly iri: DoiIri;
   readonly label?: string;
 }
 export interface PubMedIdValue {
-  readonly kind: 'pub_med_id_value';
+  readonly kind: 'PubMedIdValue';
   readonly iri: PubMedIri;
   readonly label?: string;
 }
 export interface RridValue {
-  readonly kind: 'rrid_value';
+  readonly kind: 'RridValue';
   readonly iri: RridIri;
   readonly label?: string;
 }
 export interface NihGrantIdValue {
-  readonly kind: 'nih_grant_id_value';
+  readonly kind: 'NihGrantIdValue';
   readonly iri: NihGrantIri;
   readonly label?: string;
 }
@@ -107,53 +107,53 @@ function authorityValueFromInput<K extends string, I extends object>(
 }
 
 export const orcidValue = (input: AuthorityValueInput<OrcidIri>): OrcidValue =>
-  authorityValueFromInput('orcid_value', toOrcidIri, input);
+  authorityValueFromInput('OrcidValue', toOrcidIri, input);
 export const rorValue = (input: AuthorityValueInput<RorIri>): RorValue =>
-  authorityValueFromInput('ror_value', toRorIri, input);
+  authorityValueFromInput('RorValue', toRorIri, input);
 export const doiValue = (input: AuthorityValueInput<DoiIri>): DoiValue =>
-  authorityValueFromInput('doi_value', toDoiIri, input);
+  authorityValueFromInput('DoiValue', toDoiIri, input);
 export const pubMedIdValue = (input: AuthorityValueInput<PubMedIri>): PubMedIdValue =>
-  authorityValueFromInput('pub_med_id_value', toPubMedIri, input);
+  authorityValueFromInput('PubMedIdValue', toPubMedIri, input);
 export const rridValue = (input: AuthorityValueInput<RridIri>): RridValue =>
-  authorityValueFromInput('rrid_value', toRridIri, input);
+  authorityValueFromInput('RridValue', toRridIri, input);
 export const nihGrantIdValue = (input: AuthorityValueInput<NihGrantIri>): NihGrantIdValue =>
-  authorityValueFromInput('nih_grant_id_value', toNihGrantIri, input);
+  authorityValueFromInput('NihGrantIdValue', toNihGrantIri, input);
 
 function isTaggedIri<K extends string>(x: unknown, kind: K): boolean {
   return typeof x === 'object' && x !== null && (x as { kind?: unknown }).kind === kind;
 }
 
 function toOrcidIri(v: OrcidIri | Iri | string): OrcidIri {
-  if (isTaggedIri(v, 'orcid_iri')) return v as OrcidIri;
+  if (isTaggedIri(v, 'OrcidIri')) return v as OrcidIri;
   return orcidIri(v as Iri | string);
 }
 function toRorIri(v: RorIri | Iri | string): RorIri {
-  if (isTaggedIri(v, 'ror_iri')) return v as RorIri;
+  if (isTaggedIri(v, 'RorIri')) return v as RorIri;
   return rorIri(v as Iri | string);
 }
 function toDoiIri(v: DoiIri | Iri | string): DoiIri {
-  if (isTaggedIri(v, 'doi_iri')) return v as DoiIri;
+  if (isTaggedIri(v, 'DoiIri')) return v as DoiIri;
   return doiIri(v as Iri | string);
 }
 function toPubMedIri(v: PubMedIri | Iri | string): PubMedIri {
-  if (isTaggedIri(v, 'pub_med_iri')) return v as PubMedIri;
+  if (isTaggedIri(v, 'PubMedIri')) return v as PubMedIri;
   return pubMedIri(v as Iri | string);
 }
 function toRridIri(v: RridIri | Iri | string): RridIri {
-  if (isTaggedIri(v, 'rrid_iri')) return v as RridIri;
+  if (isTaggedIri(v, 'RridIri')) return v as RridIri;
   return rridIri(v as Iri | string);
 }
 function toNihGrantIri(v: NihGrantIri | Iri | string): NihGrantIri {
-  if (isTaggedIri(v, 'nih_grant_iri')) return v as NihGrantIri;
+  if (isTaggedIri(v, 'NihGrantIri')) return v as NihGrantIri;
   return nihGrantIri(v as Iri | string);
 }
 
-export const isOrcidValue       = (x: unknown): x is OrcidValue       => isTaggedIri(x, 'orcid_value');
-export const isRorValue         = (x: unknown): x is RorValue         => isTaggedIri(x, 'ror_value');
-export const isDoiValue         = (x: unknown): x is DoiValue         => isTaggedIri(x, 'doi_value');
-export const isPubMedIdValue    = (x: unknown): x is PubMedIdValue    => isTaggedIri(x, 'pub_med_id_value');
-export const isRridValue        = (x: unknown): x is RridValue        => isTaggedIri(x, 'rrid_value');
-export const isNihGrantIdValue  = (x: unknown): x is NihGrantIdValue  => isTaggedIri(x, 'nih_grant_id_value');
+export const isOrcidValue       = (x: unknown): x is OrcidValue       => isTaggedIri(x, 'OrcidValue');
+export const isRorValue         = (x: unknown): x is RorValue         => isTaggedIri(x, 'RorValue');
+export const isDoiValue         = (x: unknown): x is DoiValue         => isTaggedIri(x, 'DoiValue');
+export const isPubMedIdValue    = (x: unknown): x is PubMedIdValue    => isTaggedIri(x, 'PubMedIdValue');
+export const isRridValue        = (x: unknown): x is RridValue        => isTaggedIri(x, 'RridValue');
+export const isNihGrantIdValue  = (x: unknown): x is NihGrantIdValue  => isTaggedIri(x, 'NihGrantIdValue');
 
 export function isExternalAuthorityValue(x: unknown): x is ExternalAuthorityValue {
   return (

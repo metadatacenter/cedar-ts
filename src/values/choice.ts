@@ -5,7 +5,7 @@ import {
 } from './controlled-term.js';
 
 export interface LiteralChoiceValue {
-  readonly kind: 'literal_choice_value';
+  readonly kind: 'LiteralChoiceValue';
   readonly literal: Literal;
 }
 
@@ -20,18 +20,18 @@ export function literalChoiceValue(
 ): LiteralChoiceValue {
   const literal: Literal =
     typeof arg1 === 'string' ? langStringLiteral(arg1, arg2 as string) : arg1;
-  return { kind: 'literal_choice_value', literal };
+  return { kind: 'LiteralChoiceValue', literal };
 }
 
 export interface ControlledTermChoiceValue {
-  readonly kind: 'controlled_term_choice_value';
+  readonly kind: 'ControlledTermChoiceValue';
   readonly value: ControlledTermValue;
 }
 
 export function controlledTermChoiceValue(
   value: ControlledTermValue,
 ): ControlledTermChoiceValue {
-  return { kind: 'controlled_term_choice_value', value };
+  return { kind: 'ControlledTermChoiceValue', value };
 }
 
 export type ChoiceValue = LiteralChoiceValue | ControlledTermChoiceValue;
@@ -39,7 +39,7 @@ export type ChoiceValue = LiteralChoiceValue | ControlledTermChoiceValue;
 export function isLiteralChoiceValue(x: unknown): x is LiteralChoiceValue {
   return (
     typeof x === 'object' && x !== null &&
-    (x as { kind?: unknown }).kind === 'literal_choice_value'
+    (x as { kind?: unknown }).kind === 'LiteralChoiceValue'
   );
 }
 export function isControlledTermChoiceValue(
@@ -47,7 +47,7 @@ export function isControlledTermChoiceValue(
 ): x is ControlledTermChoiceValue {
   return (
     typeof x === 'object' && x !== null &&
-    (x as { kind?: unknown }).kind === 'controlled_term_choice_value' &&
+    (x as { kind?: unknown }).kind === 'ControlledTermChoiceValue' &&
     isControlledTermValue((x as ControlledTermChoiceValue).value)
   );
 }

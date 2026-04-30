@@ -16,14 +16,12 @@ export {
   type Cardinality,
   type CardinalityInit,
   cardinality,
-  isCardinality,
 } from './cardinality.js';
 
 export {
   type LabelOverride,
   type LabelOverrideInit,
   labelOverride,
-  isLabelOverride,
 } from './label-override.js';
 
 export {
@@ -31,7 +29,6 @@ export {
   type PropertyInit,
   type PropertyInput,
   property,
-  isProperty,
 } from './property.js';
 
 export {

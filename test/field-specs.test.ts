@@ -61,7 +61,7 @@ import {
 describe('TextFieldSpec', () => {
   it('builds an empty spec when no constraints are supplied', () => {
     const fs = textFieldSpec();
-    expect(fs.kind).toBe('text_field_spec');
+    expect(fs.kind).toBe('TextFieldSpec');
     expect('minLength' in fs).toBe(false);
     expect('maxLength' in fs).toBe(false);
     expect('renderingHint' in fs).toBe(false);
@@ -91,7 +91,6 @@ describe('NumericFieldSpec', () => {
 
   it('Unit pairs an Iri with an optional label', () => {
     const u = unit({ iri: 'http://qudt.org/vocab/unit/M', label: 'metre' });
-    expect(u.kind).toBe('unit');
     expect(u.iri.value).toBe('http://qudt.org/vocab/unit/M');
     expect(u.label).toBe('metre');
 
@@ -157,7 +156,7 @@ describe('Controlled-term field spec and sources', () => {
       displayHint: ontologyDisplayHint({ acronym: 'OBI' }),
     });
     const src = ontologySource(ref);
-    expect(src.kind).toBe('ontology_source');
+    expect(src.kind).toBe('OntologySource');
     expect(src.ontology.iri.value).toBe('http://purl.obolibrary.org/obo/obi.owl');
   });
 
@@ -169,7 +168,7 @@ describe('Controlled-term field spec and sources', () => {
       rootTermLabel: 'Root',
       maxTraversalDepth: 3,
     });
-    expect(bs.kind).toBe('branch_source');
+    expect(bs.kind).toBe('BranchSource');
     expect(bs.rootTermLabel).toBe('Root');
     expect(bs.maxTraversalDepth).toBe(3);
   });
@@ -187,7 +186,7 @@ describe('Controlled-term field spec and sources', () => {
       ontology: ref,
     });
     const cs = classSource(c1, c2);
-    expect(cs.kind).toBe('class_source');
+    expect(cs.kind).toBe('ClassSource');
     expect(cs.classes.length).toBe(2);
   });
 
@@ -204,7 +203,7 @@ describe('Controlled-term field spec and sources', () => {
   it('ControlledTermFieldSpec requires at least one source', () => {
     const ref = ontologyReference({ iri: 'http://example.org/onto' });
     const fs = controlledTermFieldSpec(ontologySource(ref));
-    expect(fs.kind).toBe('controlled_term_field_spec');
+    expect(fs.kind).toBe('ControlledTermFieldSpec');
     expect(fs.sources.length).toBe(1);
     expect(isControlledTermFieldSpec(fs)).toBe(true);
 
@@ -224,7 +223,7 @@ describe('ChoiceFieldSpec', () => {
       options: [o1, o2],
       renderingHint: 'radio',
     });
-    expect(fs.kind).toBe('literal_single_choice_field_spec');
+    expect(fs.kind).toBe('LiteralSingleChoiceFieldSpec');
     expect(fs.options.length).toBe(2);
     expect(fs.options[0]?.default).toBe(true);
     expect(fs.options[1]?.default).toBeUndefined();
@@ -240,14 +239,14 @@ describe('ChoiceFieldSpec', () => {
       options: [opt],
       renderingHint: 'single_select_dropdown',
     });
-    expect(fs.kind).toBe('controlled_term_single_choice_field_spec');
+    expect(fs.kind).toBe('ControlledTermSingleChoiceFieldSpec');
     expect(fs.options[0]?.default).toBe(true);
   });
 
   it('LiteralMultipleChoiceFieldSpec uses MultipleChoiceRenderingHint', () => {
     const o1 = literalChoiceOption(datatypeIriLiteral('a', XsdNumericDatatypeIri.integer));
     const fs = literalMultipleChoiceFieldSpec({ options: [o1], renderingHint: 'checkbox' });
-    expect(fs.kind).toBe('literal_multiple_choice_field_spec');
+    expect(fs.kind).toBe('LiteralMultipleChoiceFieldSpec');
     expect(fs.renderingHint).toBe('checkbox');
     expect(isMultipleChoiceFieldSpec(fs)).toBe(true);
   });
@@ -258,13 +257,12 @@ describe('ChoiceFieldSpec', () => {
       options: [controlledTermChoiceOption(ctv)],
       renderingHint: 'multi_select_dropdown',
     });
-    expect(fs.kind).toBe('controlled_term_multiple_choice_field_spec');
+    expect(fs.kind).toBe('ControlledTermMultipleChoiceFieldSpec');
   });
 
   it('literalChoiceOption accepts (text, lang) and (text, lang, options)', () => {
     const plain = literalChoiceOption('Professor', 'en');
-    expect(plain.kind).toBe('literal_choice_option');
-    expect(plain.literal.kind).toBe('lang_string_literal');
+    expect(plain.literal.kind).toBe('LangStringLiteral');
     expect(plain.literal.lexicalForm).toBe('Professor');
     expect(plain.default).toBeUndefined();
 
@@ -276,19 +274,19 @@ describe('ChoiceFieldSpec', () => {
       datatypeIriLiteral('a', XsdNumericDatatypeIri.integer),
       { default: true },
     );
-    expect(lit.literal.kind).toBe('datatype_iri_literal');
+    expect(lit.literal.kind).toBe('DatatypeIriLiteral');
   });
 });
 
 describe('Body-less field specs', () => {
   it('Link / Email / PhoneNumber / external authority / attribute-value specs', () => {
-    expect(linkFieldSpec().kind).toBe('link_field_spec');
+    expect(linkFieldSpec().kind).toBe('LinkFieldSpec');
     expect(isLinkFieldSpec(linkFieldSpec())).toBe(true);
 
-    expect(emailFieldSpec().kind).toBe('email_field_spec');
+    expect(emailFieldSpec().kind).toBe('EmailFieldSpec');
     expect(isEmailFieldSpec(emailFieldSpec())).toBe(true);
 
-    expect(phoneNumberFieldSpec().kind).toBe('phone_number_field_spec');
+    expect(phoneNumberFieldSpec().kind).toBe('PhoneNumberFieldSpec');
     expect(isPhoneNumberFieldSpec(phoneNumberFieldSpec())).toBe(true);
 
     const ea = [
@@ -299,7 +297,7 @@ describe('Body-less field specs', () => {
       expect(isExternalAuthorityFieldSpec(fs)).toBe(true);
     }
 
-    expect(attributeValueFieldSpec().kind).toBe('attribute_value_field_spec');
+    expect(attributeValueFieldSpec().kind).toBe('AttributeValueFieldSpec');
     expect(isAttributeValueFieldSpec(attributeValueFieldSpec())).toBe(true);
   });
 });
@@ -346,10 +344,10 @@ describe('FieldSpecFor<K> mapped type (compile-time)', () => {
     const sc: FieldSpecFor<'single_choice'> = literalSingleChoiceFieldSpec({
       options: [literalChoiceOption(datatypeIriLiteral('a', XsdNumericDatatypeIri.integer))],
     });
-    expect(t.kind).toBe('text_field_spec');
-    expect(n.kind).toBe('numeric_field_spec');
-    expect(d.kind).toBe('date_field_spec');
-    expect(sc.kind).toBe('literal_single_choice_field_spec');
+    expect(t.kind).toBe('TextFieldSpec');
+    expect(n.kind).toBe('NumericFieldSpec');
+    expect(d.kind).toBe('DateFieldSpec');
+    expect(sc.kind).toBe('LiteralSingleChoiceFieldSpec');
     // @ts-expect-error a NumericFieldSpec is not assignable to FieldSpecFor<'text'>
     const wrong: FieldSpecFor<'text'> = numericFieldSpec({ datatype: 'integer' });
     void wrong;

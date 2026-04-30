@@ -1,18 +1,18 @@
 export interface EmailFieldSpec {
-  readonly kind: 'email_field_spec';
+  readonly kind: 'EmailFieldSpec';
 }
-export const emailFieldSpec = (): EmailFieldSpec => ({ kind: 'email_field_spec' });
+export const emailFieldSpec = (): EmailFieldSpec => ({ kind: 'EmailFieldSpec' });
 export const isEmailFieldSpec = (x: unknown): x is EmailFieldSpec =>
   typeof x === 'object' && x !== null &&
-  (x as { kind?: unknown }).kind === 'email_field_spec';
+  (x as { kind?: unknown }).kind === 'EmailFieldSpec';
 
 export interface PhoneNumberFieldSpec {
-  readonly kind: 'phone_number_field_spec';
+  readonly kind: 'PhoneNumberFieldSpec';
 }
 export const phoneNumberFieldSpec = (): PhoneNumberFieldSpec =>
-  ({ kind: 'phone_number_field_spec' });
+  ({ kind: 'PhoneNumberFieldSpec' });
 export const isPhoneNumberFieldSpec = (x: unknown): x is PhoneNumberFieldSpec =>
   typeof x === 'object' && x !== null &&
-  (x as { kind?: unknown }).kind === 'phone_number_field_spec';
+  (x as { kind?: unknown }).kind === 'PhoneNumberFieldSpec';
 
 export type ContactFieldSpec = EmailFieldSpec | PhoneNumberFieldSpec;

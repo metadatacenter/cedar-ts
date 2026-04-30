@@ -7,7 +7,7 @@ import {
 // We carry the datatype as a kind name (e.g. 'integer'); the full IRI is
 // looked up via XsdNumericDatatypeIri[kind].
 export interface NumericLiteral {
-  readonly kind: 'numeric_literal';
+  readonly kind: 'NumericLiteral';
   readonly lexicalForm: string;
   readonly datatype: NumericDatatypeKind;
 }
@@ -16,7 +16,7 @@ export function numericLiteral(
   lexicalForm: string,
   datatype: NumericDatatypeKind,
 ): NumericLiteral {
-  return { kind: 'numeric_literal', lexicalForm, datatype };
+  return { kind: 'NumericLiteral', lexicalForm, datatype };
 }
 
 export function numericLiteralDatatypeIri(lit: NumericLiteral): string {
@@ -26,7 +26,7 @@ export function numericLiteralDatatypeIri(lit: NumericLiteral): string {
 export function isNumericLiteral(x: unknown): x is NumericLiteral {
   return (
     typeof x === 'object' && x !== null &&
-    (x as { kind?: unknown }).kind === 'numeric_literal'
+    (x as { kind?: unknown }).kind === 'NumericLiteral'
   );
 }
 

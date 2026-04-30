@@ -17,25 +17,25 @@ import { CedarConstructionError } from '../leaves/index.js';
 // checked by validate_date_value in Phase 2.
 
 export interface YearValue {
-  readonly kind: 'year_value';
+  readonly kind: 'YearValue';
   readonly value: string;
 }
 
 export function yearValue(value: string): YearValue {
-  return { kind: 'year_value', value };
+  return { kind: 'YearValue', value };
 }
 
 export interface YearMonthValue {
-  readonly kind: 'year_month_value';
+  readonly kind: 'YearMonthValue';
   readonly value: string;
 }
 
 export function yearMonthValue(value: string): YearMonthValue {
-  return { kind: 'year_month_value', value };
+  return { kind: 'YearMonthValue', value };
 }
 
 export interface FullDateValue {
-  readonly kind: 'full_date_value';
+  readonly kind: 'FullDateValue';
   readonly literal: FullDateLiteral;
 }
 
@@ -44,7 +44,7 @@ export interface FullDateValue {
 // matching the behavior of fullDateLiteral itself.
 export function fullDateValue(input: FullDateLiteral | string): FullDateValue {
   return {
-    kind: 'full_date_value',
+    kind: 'FullDateValue',
     literal: typeof input === 'string' ? fullDateLiteral(input) : input,
   };
 }
@@ -86,19 +86,19 @@ export function dateValue(
 export function isYearValue(x: unknown): x is YearValue {
   return (
     typeof x === 'object' && x !== null &&
-    (x as { kind?: unknown }).kind === 'year_value'
+    (x as { kind?: unknown }).kind === 'YearValue'
   );
 }
 export function isYearMonthValue(x: unknown): x is YearMonthValue {
   return (
     typeof x === 'object' && x !== null &&
-    (x as { kind?: unknown }).kind === 'year_month_value'
+    (x as { kind?: unknown }).kind === 'YearMonthValue'
   );
 }
 export function isFullDateValue(x: unknown): x is FullDateValue {
   return (
     typeof x === 'object' && x !== null &&
-    (x as { kind?: unknown }).kind === 'full_date_value'
+    (x as { kind?: unknown }).kind === 'FullDateValue'
   );
 }
 export function isDateValue(x: unknown): x is DateValue {
@@ -106,14 +106,14 @@ export function isDateValue(x: unknown): x is DateValue {
 }
 
 export interface TimeValue {
-  readonly kind: 'time_value';
+  readonly kind: 'TimeValue';
   readonly literal: TimeLiteral;
 }
 
 // Accepts a TimeLiteral or its lexical form directly. See fullDateValue.
 export function timeValue(input: TimeLiteral | string): TimeValue {
   return {
-    kind: 'time_value',
+    kind: 'TimeValue',
     literal: typeof input === 'string' ? timeLiteral(input) : input,
   };
 }
@@ -121,19 +121,19 @@ export function timeValue(input: TimeLiteral | string): TimeValue {
 export function isTimeValue(x: unknown): x is TimeValue {
   return (
     typeof x === 'object' && x !== null &&
-    (x as { kind?: unknown }).kind === 'time_value'
+    (x as { kind?: unknown }).kind === 'TimeValue'
   );
 }
 
 export interface DateTimeValue {
-  readonly kind: 'date_time_value';
+  readonly kind: 'DateTimeValue';
   readonly literal: DateTimeLiteral;
 }
 
 // Accepts a DateTimeLiteral or its lexical form directly. See fullDateValue.
 export function dateTimeValue(input: DateTimeLiteral | string): DateTimeValue {
   return {
-    kind: 'date_time_value',
+    kind: 'DateTimeValue',
     literal: typeof input === 'string' ? dateTimeLiteral(input) : input,
   };
 }
@@ -141,6 +141,6 @@ export function dateTimeValue(input: DateTimeLiteral | string): DateTimeValue {
 export function isDateTimeValue(x: unknown): x is DateTimeValue {
   return (
     typeof x === 'object' && x !== null &&
-    (x as { kind?: unknown }).kind === 'date_time_value'
+    (x as { kind?: unknown }).kind === 'DateTimeValue'
   );
 }

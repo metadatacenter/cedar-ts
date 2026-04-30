@@ -5,16 +5,16 @@ import { parseIso8601DateTimeLexicalForm } from './datetime.js';
 // ----- Iri -----
 
 export interface Iri {
-  readonly kind: 'iri';
+  readonly kind: 'Iri';
   readonly value: string;
 }
 
 export function iri(value: string): Iri {
-  return { kind: 'iri', value: parseIriString(value) };
+  return { kind: 'Iri', value: parseIriString(value) };
 }
 
 export function isIri(x: unknown): x is Iri {
-  return typeof x === 'object' && x !== null && (x as { kind?: unknown }).kind === 'iri';
+  return typeof x === 'object' && x !== null && (x as { kind?: unknown }).kind === 'Iri';
 }
 
 // DatatypeIri and TermIri are intentionally just Iri — see grammar.md §Core IRI and String Types.
@@ -25,24 +25,21 @@ export type TermIri = Iri;
 // ----- LanguageTag -----
 
 export interface LanguageTag {
-  readonly kind: 'language_tag';
   readonly value: string;
 }
 
 export function languageTag(value: string): LanguageTag {
-  return { kind: 'language_tag', value: parseBcp47Tag(value) };
+  return { value: parseBcp47Tag(value) };
 }
 
 // ----- IsoDateTimeStamp -----
 
 export interface IsoDateTimeStamp {
-  readonly kind: 'iso_date_time_stamp';
   readonly value: string;
 }
 
 export function isoDateTimeStamp(value: string): IsoDateTimeStamp {
   return {
-    kind: 'iso_date_time_stamp',
     value: parseIso8601DateTimeLexicalForm(value),
   };
 }

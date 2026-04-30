@@ -14,7 +14,7 @@ import type { FieldValue } from './field-value.js';
 export type InstanceValue = FieldValue | NestedTemplateInstance;
 
 export interface NestedTemplateInstance {
-  readonly kind: 'nested_template_instance';
+  readonly kind: 'NestedTemplateInstance';
   readonly key: string;
   readonly values: readonly InstanceValue[];
 }
@@ -25,7 +25,7 @@ export function nestedTemplateInstance(
   values: readonly InstanceValue[] = [],
 ): NestedTemplateInstance {
   return {
-    kind: 'nested_template_instance',
+    kind: 'NestedTemplateInstance',
     key: parseAsciiIdentifier(key),
     values,
   };
@@ -35,4 +35,4 @@ export const isNestedTemplateInstance = (
   x: unknown,
 ): x is NestedTemplateInstance =>
   typeof x === 'object' && x !== null &&
-  (x as { kind?: unknown }).kind === 'nested_template_instance';
+  (x as { kind?: unknown }).kind === 'NestedTemplateInstance';

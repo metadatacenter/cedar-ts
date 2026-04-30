@@ -2,11 +2,11 @@
 // alone is sufficient; the field's value rules are fixed by the
 // FieldSpec-to-Value correspondence.
 export interface LinkFieldSpec {
-  readonly kind: 'link_field_spec';
+  readonly kind: 'LinkFieldSpec';
 }
 
-export const linkFieldSpec = (): LinkFieldSpec => ({ kind: 'link_field_spec' });
+export const linkFieldSpec = (): LinkFieldSpec => ({ kind: 'LinkFieldSpec' });
 
 export const isLinkFieldSpec = (x: unknown): x is LinkFieldSpec =>
   typeof x === 'object' && x !== null &&
-  (x as { kind?: unknown }).kind === 'link_field_spec';
+  (x as { kind?: unknown }).kind === 'LinkFieldSpec';

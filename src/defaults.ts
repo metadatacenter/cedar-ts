@@ -72,7 +72,7 @@ type AuthorityDefaultValueInput<I extends object, V> =
 // AttributeValueField has no default.
 
 export interface TextDefaultValue {
-  readonly kind: 'text_default_value';
+  readonly kind: 'TextDefaultValue';
   readonly value: TextValue;
 }
 
@@ -87,24 +87,24 @@ export interface TextDefaultValue {
 export function textDefaultValue(
   input: TextDefaultValue | TextValue | TextLiteral | string,
 ): TextDefaultValue {
-  if (typeof input === 'object' && 'kind' in input && input.kind === 'text_default_value') {
+  if (typeof input === 'object' && 'kind' in input && input.kind === 'TextDefaultValue') {
     return input;
   }
   return {
-    kind: 'text_default_value',
+    kind: 'TextDefaultValue',
     value: isTextValue(input) ? input : textValue(input),
   };
 }
 
 export interface NumericDefaultValue {
-  readonly kind: 'numeric_default_value';
+  readonly kind: 'NumericDefaultValue';
   readonly value: NumericValue;
 }
 export const numericDefaultValue = (value: NumericValue): NumericDefaultValue =>
-  ({ kind: 'numeric_default_value', value });
+  ({ kind: 'NumericDefaultValue', value });
 
 export interface DateDefaultValue {
-  readonly kind: 'date_default_value';
+  readonly kind: 'DateDefaultValue';
   readonly value: DateValue;
 }
 
@@ -114,17 +114,17 @@ export interface DateDefaultValue {
 export function dateDefaultValue(
   input: DateDefaultValue | DateValue | FullDateLiteral | string,
 ): DateDefaultValue {
-  if (typeof input === 'object' && 'kind' in input && input.kind === 'date_default_value') {
+  if (typeof input === 'object' && 'kind' in input && input.kind === 'DateDefaultValue') {
     return input;
   }
   return {
-    kind: 'date_default_value',
+    kind: 'DateDefaultValue',
     value: isDateValue(input) ? input : dateValue(input),
   };
 }
 
 export interface TimeDefaultValue {
-  readonly kind: 'time_default_value';
+  readonly kind: 'TimeDefaultValue';
   readonly value: TimeValue;
 }
 
@@ -133,17 +133,17 @@ export interface TimeDefaultValue {
 export function timeDefaultValue(
   input: TimeDefaultValue | TimeValue | TimeLiteral | string,
 ): TimeDefaultValue {
-  if (typeof input === 'object' && 'kind' in input && input.kind === 'time_default_value') {
+  if (typeof input === 'object' && 'kind' in input && input.kind === 'TimeDefaultValue') {
     return input;
   }
   return {
-    kind: 'time_default_value',
+    kind: 'TimeDefaultValue',
     value: isTimeValue(input) ? input : timeValue(input),
   };
 }
 
 export interface DateTimeDefaultValue {
-  readonly kind: 'date_time_default_value';
+  readonly kind: 'DateTimeDefaultValue';
   readonly value: DateTimeValue;
 }
 
@@ -152,46 +152,46 @@ export interface DateTimeDefaultValue {
 export function dateTimeDefaultValue(
   input: DateTimeDefaultValue | DateTimeValue | DateTimeLiteral | string,
 ): DateTimeDefaultValue {
-  if (typeof input === 'object' && 'kind' in input && input.kind === 'date_time_default_value') {
+  if (typeof input === 'object' && 'kind' in input && input.kind === 'DateTimeDefaultValue') {
     return input;
   }
   return {
-    kind: 'date_time_default_value',
+    kind: 'DateTimeDefaultValue',
     value: isDateTimeValue(input) ? input : dateTimeValue(input),
   };
 }
 
 export interface ControlledTermDefaultValue {
-  readonly kind: 'controlled_term_default_value';
+  readonly kind: 'ControlledTermDefaultValue';
   readonly value: ControlledTermValue;
 }
 export const controlledTermDefaultValue = (
   value: ControlledTermValue,
 ): ControlledTermDefaultValue =>
-  ({ kind: 'controlled_term_default_value', value });
+  ({ kind: 'ControlledTermDefaultValue', value });
 
 // ChoiceDefaultValue is shared by single- and multiple-choice embeddings.
 // Grammar uses `ChoiceValue+`; we model with a NonEmptyArray invariant
 // enforced at construction.
 export interface ChoiceDefaultValue {
-  readonly kind: 'choice_default_value';
+  readonly kind: 'ChoiceDefaultValue';
   readonly values: readonly [ChoiceValue, ...ChoiceValue[]];
 }
 export function choiceDefaultValue(
   ...values: [ChoiceValue, ...ChoiceValue[]]
 ): ChoiceDefaultValue {
-  return { kind: 'choice_default_value', values };
+  return { kind: 'ChoiceDefaultValue', values };
 }
 
 export interface LinkDefaultValue {
-  readonly kind: 'link_default_value';
+  readonly kind: 'LinkDefaultValue';
   readonly value: LinkValue;
 }
 export const linkDefaultValue = (value: LinkValue): LinkDefaultValue =>
-  ({ kind: 'link_default_value', value });
+  ({ kind: 'LinkDefaultValue', value });
 
 export interface EmailDefaultValue {
-  readonly kind: 'email_default_value';
+  readonly kind: 'EmailDefaultValue';
   readonly value: EmailValue;
 }
 // Idempotent. Accepts an EmailDefaultValue, an EmailValue, a StringLiteral,
@@ -199,123 +199,123 @@ export interface EmailDefaultValue {
 export function emailDefaultValue(
   input: EmailDefaultValue | EmailValue | StringLiteral | string,
 ): EmailDefaultValue {
-  if (typeof input === 'object' && 'kind' in input && input.kind === 'email_default_value') {
+  if (typeof input === 'object' && 'kind' in input && input.kind === 'EmailDefaultValue') {
     return input;
   }
   return {
-    kind: 'email_default_value',
+    kind: 'EmailDefaultValue',
     value: isEmailValue(input) ? input : emailValue(input),
   };
 }
 
 export interface PhoneNumberDefaultValue {
-  readonly kind: 'phone_number_default_value';
+  readonly kind: 'PhoneNumberDefaultValue';
   readonly value: PhoneNumberValue;
 }
 export function phoneNumberDefaultValue(
   input: PhoneNumberDefaultValue | PhoneNumberValue | StringLiteral | string,
 ): PhoneNumberDefaultValue {
-  if (typeof input === 'object' && 'kind' in input && input.kind === 'phone_number_default_value') {
+  if (typeof input === 'object' && 'kind' in input && input.kind === 'PhoneNumberDefaultValue') {
     return input;
   }
   return {
-    kind: 'phone_number_default_value',
+    kind: 'PhoneNumberDefaultValue',
     value: isPhoneNumberValue(input) ? input : phoneNumberValue(input),
   };
 }
 
 export interface OrcidDefaultValue {
-  readonly kind: 'orcid_default_value';
+  readonly kind: 'OrcidDefaultValue';
   readonly value: OrcidValue;
 }
 export function orcidDefaultValue(
   input: OrcidDefaultValue | AuthorityDefaultValueInput<OrcidIri, OrcidValue>,
 ): OrcidDefaultValue {
-  if (typeof input === 'object' && 'kind' in input && input.kind === 'orcid_default_value') {
+  if (typeof input === 'object' && 'kind' in input && input.kind === 'OrcidDefaultValue') {
     return input;
   }
   return {
-    kind: 'orcid_default_value',
+    kind: 'OrcidDefaultValue',
     value: isOrcidValue(input) ? input : orcidValue(input),
   };
 }
 
 export interface RorDefaultValue {
-  readonly kind: 'ror_default_value';
+  readonly kind: 'RorDefaultValue';
   readonly value: RorValue;
 }
 export function rorDefaultValue(
   input: RorDefaultValue | AuthorityDefaultValueInput<RorIri, RorValue>,
 ): RorDefaultValue {
-  if (typeof input === 'object' && 'kind' in input && input.kind === 'ror_default_value') {
+  if (typeof input === 'object' && 'kind' in input && input.kind === 'RorDefaultValue') {
     return input;
   }
   return {
-    kind: 'ror_default_value',
+    kind: 'RorDefaultValue',
     value: isRorValue(input) ? input : rorValue(input),
   };
 }
 
 export interface DoiDefaultValue {
-  readonly kind: 'doi_default_value';
+  readonly kind: 'DoiDefaultValue';
   readonly value: DoiValue;
 }
 export function doiDefaultValue(
   input: DoiDefaultValue | AuthorityDefaultValueInput<DoiIri, DoiValue>,
 ): DoiDefaultValue {
-  if (typeof input === 'object' && 'kind' in input && input.kind === 'doi_default_value') {
+  if (typeof input === 'object' && 'kind' in input && input.kind === 'DoiDefaultValue') {
     return input;
   }
   return {
-    kind: 'doi_default_value',
+    kind: 'DoiDefaultValue',
     value: isDoiValue(input) ? input : doiValue(input),
   };
 }
 
 export interface PubMedIdDefaultValue {
-  readonly kind: 'pub_med_id_default_value';
+  readonly kind: 'PubMedIdDefaultValue';
   readonly value: PubMedIdValue;
 }
 export function pubMedIdDefaultValue(
   input: PubMedIdDefaultValue | AuthorityDefaultValueInput<PubMedIri, PubMedIdValue>,
 ): PubMedIdDefaultValue {
-  if (typeof input === 'object' && 'kind' in input && input.kind === 'pub_med_id_default_value') {
+  if (typeof input === 'object' && 'kind' in input && input.kind === 'PubMedIdDefaultValue') {
     return input;
   }
   return {
-    kind: 'pub_med_id_default_value',
+    kind: 'PubMedIdDefaultValue',
     value: isPubMedIdValue(input) ? input : pubMedIdValue(input),
   };
 }
 
 export interface RridDefaultValue {
-  readonly kind: 'rrid_default_value';
+  readonly kind: 'RridDefaultValue';
   readonly value: RridValue;
 }
 export function rridDefaultValue(
   input: RridDefaultValue | AuthorityDefaultValueInput<RridIri, RridValue>,
 ): RridDefaultValue {
-  if (typeof input === 'object' && 'kind' in input && input.kind === 'rrid_default_value') {
+  if (typeof input === 'object' && 'kind' in input && input.kind === 'RridDefaultValue') {
     return input;
   }
   return {
-    kind: 'rrid_default_value',
+    kind: 'RridDefaultValue',
     value: isRridValue(input) ? input : rridValue(input),
   };
 }
 
 export interface NihGrantIdDefaultValue {
-  readonly kind: 'nih_grant_id_default_value';
+  readonly kind: 'NihGrantIdDefaultValue';
   readonly value: NihGrantIdValue;
 }
 export function nihGrantIdDefaultValue(
   input: NihGrantIdDefaultValue | AuthorityDefaultValueInput<NihGrantIri, NihGrantIdValue>,
 ): NihGrantIdDefaultValue {
-  if (typeof input === 'object' && 'kind' in input && input.kind === 'nih_grant_id_default_value') {
+  if (typeof input === 'object' && 'kind' in input && input.kind === 'NihGrantIdDefaultValue') {
     return input;
   }
   return {
-    kind: 'nih_grant_id_default_value',
+    kind: 'NihGrantIdDefaultValue',
     value: isNihGrantIdValue(input) ? input : nihGrantIdValue(input),
   };
 }
@@ -342,22 +342,22 @@ export function isDefaultValue(x: unknown): x is DefaultValue {
   if (typeof x !== 'object' || x === null) return false;
   const k = (x as { kind?: unknown }).kind;
   return (
-    k === 'text_default_value' ||
-    k === 'numeric_default_value' ||
-    k === 'date_default_value' ||
-    k === 'time_default_value' ||
-    k === 'date_time_default_value' ||
-    k === 'controlled_term_default_value' ||
-    k === 'choice_default_value' ||
-    k === 'link_default_value' ||
-    k === 'email_default_value' ||
-    k === 'phone_number_default_value' ||
-    k === 'orcid_default_value' ||
-    k === 'ror_default_value' ||
-    k === 'doi_default_value' ||
-    k === 'pub_med_id_default_value' ||
-    k === 'rrid_default_value' ||
-    k === 'nih_grant_id_default_value'
+    k === 'TextDefaultValue' ||
+    k === 'NumericDefaultValue' ||
+    k === 'DateDefaultValue' ||
+    k === 'TimeDefaultValue' ||
+    k === 'DateTimeDefaultValue' ||
+    k === 'ControlledTermDefaultValue' ||
+    k === 'ChoiceDefaultValue' ||
+    k === 'LinkDefaultValue' ||
+    k === 'EmailDefaultValue' ||
+    k === 'PhoneNumberDefaultValue' ||
+    k === 'OrcidDefaultValue' ||
+    k === 'RorDefaultValue' ||
+    k === 'DoiDefaultValue' ||
+    k === 'PubMedIdDefaultValue' ||
+    k === 'RridDefaultValue' ||
+    k === 'NihGrantIdDefaultValue'
   );
 }
 

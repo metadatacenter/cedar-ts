@@ -7,7 +7,7 @@ import type { TextRenderingHint } from './rendering-hints.js';
 // All components are optional.
 
 export interface TextFieldSpec {
-  readonly kind: 'text_field_spec';
+  readonly kind: 'TextFieldSpec';
   readonly defaultValue?: TextDefaultValue;
   readonly minLength?: number;
   readonly maxLength?: number;
@@ -25,13 +25,13 @@ export interface TextFieldSpecInit {
 
 export function textFieldSpec(init: TextFieldSpecInit = {}): TextFieldSpec {
   const out: {
-    kind: 'text_field_spec';
+    kind: 'TextFieldSpec';
     defaultValue?: TextDefaultValue;
     minLength?: number;
     maxLength?: number;
     validationRegex?: string;
     renderingHint?: TextRenderingHint;
-  } = { kind: 'text_field_spec' };
+  } = { kind: 'TextFieldSpec' };
   if (init.defaultValue !== undefined) out.defaultValue = init.defaultValue;
   if (init.minLength !== undefined) out.minLength = assertNonNegativeInteger(init.minLength);
   if (init.maxLength !== undefined) out.maxLength = assertNonNegativeInteger(init.maxLength);
@@ -42,4 +42,4 @@ export function textFieldSpec(init: TextFieldSpecInit = {}): TextFieldSpec {
 
 export const isTextFieldSpec = (x: unknown): x is TextFieldSpec =>
   typeof x === 'object' && x !== null &&
-  (x as { kind?: unknown }).kind === 'text_field_spec';
+  (x as { kind?: unknown }).kind === 'TextFieldSpec';

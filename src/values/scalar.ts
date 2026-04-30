@@ -2,7 +2,7 @@ import { type TextLiteral, stringLiteral } from '../literals/index.js';
 import { type NumericLiteral } from '../literals/index.js';
 
 export interface TextValue {
-  readonly kind: 'text_value';
+  readonly kind: 'TextValue';
   readonly literal: TextLiteral;
 }
 
@@ -12,7 +12,7 @@ export interface TextValue {
 // mean — pass langStringLiteral(...) explicitly when a language tag is needed.
 export function textValue(input: TextLiteral | string): TextValue {
   return {
-    kind: 'text_value',
+    kind: 'TextValue',
     literal: typeof input === 'string' ? stringLiteral(input) : input,
   };
 }
@@ -20,22 +20,22 @@ export function textValue(input: TextLiteral | string): TextValue {
 export function isTextValue(x: unknown): x is TextValue {
   return (
     typeof x === 'object' && x !== null &&
-    (x as { kind?: unknown }).kind === 'text_value'
+    (x as { kind?: unknown }).kind === 'TextValue'
   );
 }
 
 export interface NumericValue {
-  readonly kind: 'numeric_value';
+  readonly kind: 'NumericValue';
   readonly literal: NumericLiteral;
 }
 
 export function numericValue(literal: NumericLiteral): NumericValue {
-  return { kind: 'numeric_value', literal };
+  return { kind: 'NumericValue', literal };
 }
 
 export function isNumericValue(x: unknown): x is NumericValue {
   return (
     typeof x === 'object' && x !== null &&
-    (x as { kind?: unknown }).kind === 'numeric_value'
+    (x as { kind?: unknown }).kind === 'NumericValue'
   );
 }

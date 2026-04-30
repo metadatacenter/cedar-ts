@@ -48,7 +48,7 @@ const studyArmKey = 'study_arm';
 describe('FieldValue', () => {
   it('builds a FieldValue with a single value', () => {
     const fv = fieldValue(titleKey, textValue(stringLiteral('Hello')));
-    expect(fv.kind).toBe('field_value');
+    expect(fv.kind).toBe('FieldValue');
     expect(fv.key).toBe(titleKey);
     expect(fv.values).toHaveLength(1);
     expect(isFieldValue(fv)).toBe(true);
@@ -79,7 +79,7 @@ describe('FieldValue', () => {
 describe('NestedTemplateInstance', () => {
   it('defaults to empty values when none are supplied', () => {
     const nti = nestedTemplateInstance(studyArmKey);
-    expect(nti.kind).toBe('nested_template_instance');
+    expect(nti.kind).toBe('NestedTemplateInstance');
     expect(nti.values).toEqual([]);
     expect(isNestedTemplateInstance(nti)).toBe(true);
     expect(isInstanceValue(nti)).toBe(true);
@@ -110,7 +110,7 @@ describe('TemplateInstance', () => {
 
   it('builds an empty TemplateInstance', () => {
     const ti = templateInstance(baseInit);
-    expect(ti.kind).toBe('template_instance');
+    expect(ti.kind).toBe('TemplateInstance');
     expect(ti.values).toEqual([]);
     expect(ti.templateRef.iri.value).toBe('https://example.org/templates/demo');
     expect(isTemplateInstance(ti)).toBe(true);
@@ -122,8 +122,8 @@ describe('TemplateInstance', () => {
       metadata: am,
       templateRef: 'https://example.org/templates/demo',
     });
-    expect(ti.id.kind).toBe('template_instance_id');
-    expect(ti.templateRef.kind).toBe('template_id');
+    expect(ti.id.kind).toBe('TemplateInstanceId');
+    expect(ti.templateRef.kind).toBe('TemplateId');
   });
 
   it('preserves the order of InstanceValues', () => {
@@ -238,8 +238,8 @@ describe('Artifact union', () => {
     const all: Artifact[] = [f, t, pc, ti];
     for (const a of all) expect(isArtifact(a)).toBe(true);
 
-    expect(isArtifact({ kind: 'embedded_field' })).toBe(false);
-    expect(isArtifact({ kind: 'field_value' })).toBe(false);
+    expect(isArtifact({ kind: 'EmbeddedField' })).toBe(false);
+    expect(isArtifact({ kind: 'FieldValue' })).toBe(false);
     expect(isArtifact(null)).toBe(false);
   });
 });

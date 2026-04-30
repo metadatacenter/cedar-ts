@@ -50,16 +50,16 @@ import {
 describe('Scalar values', () => {
   it('TextValue wraps a TextLiteral', () => {
     const tv = textValue(stringLiteral('hello'));
-    expect(tv.kind).toBe('text_value');
-    expect(tv.literal.kind).toBe('string_literal');
+    expect(tv.kind).toBe('TextValue');
+    expect(tv.literal.kind).toBe('StringLiteral');
 
     const lv = textValue(langStringLiteral('hello', 'en'));
-    expect(lv.literal.kind).toBe('lang_string_literal');
+    expect(lv.literal.kind).toBe('LangStringLiteral');
   });
 
   it('NumericValue wraps a NumericLiteral', () => {
     const nv = numericValue(numericLiteral('42', 'integer'));
-    expect(nv.kind).toBe('numeric_value');
+    expect(nv.kind).toBe('NumericValue');
     expect(nv.literal.lexicalForm).toBe('42');
   });
 });
@@ -67,7 +67,7 @@ describe('Scalar values', () => {
 describe('DateValue refinements', () => {
   it('YearValue carries a plain string', () => {
     const y = yearValue('2024');
-    expect(y.kind).toBe('year_value');
+    expect(y.kind).toBe('YearValue');
     expect(y.value).toBe('2024');
     expect(isYearValue(y)).toBe(true);
     expect(isDateValue(y)).toBe(true);
@@ -75,14 +75,14 @@ describe('DateValue refinements', () => {
 
   it('YearMonthValue carries a plain string', () => {
     const ym = yearMonthValue('2024-06');
-    expect(ym.kind).toBe('year_month_value');
+    expect(ym.kind).toBe('YearMonthValue');
     expect(isYearMonthValue(ym)).toBe(true);
     expect(isDateValue(ym)).toBe(true);
   });
 
   it('FullDateValue wraps a FullDateLiteral', () => {
     const fd = fullDateValue(fullDateLiteral('2024-06-15'));
-    expect(fd.kind).toBe('full_date_value');
+    expect(fd.kind).toBe('FullDateValue');
     expect(isFullDateValue(fd)).toBe(true);
     expect(isDateValue(fd)).toBe(true);
   });
@@ -96,12 +96,12 @@ describe('DateValue refinements', () => {
 describe('TimeValue / DateTimeValue', () => {
   it('TimeValue wraps a TimeLiteral', () => {
     const tv = timeValue(timeLiteral('10:30:00'));
-    expect(tv.kind).toBe('time_value');
+    expect(tv.kind).toBe('TimeValue');
   });
 
   it('DateTimeValue wraps a DateTimeLiteral', () => {
     const dtv = dateTimeValue(dateTimeLiteral('2024-06-15T10:30:00Z'));
-    expect(dtv.kind).toBe('date_time_value');
+    expect(dtv.kind).toBe('DateTimeValue');
   });
 });
 
@@ -113,7 +113,7 @@ describe('ControlledTermValue', () => {
       notation: 'UBERON:0000178',
       preferredLabel: 'blood',
     });
-    expect(v.kind).toBe('controlled_term_value');
+    expect(v.kind).toBe('ControlledTermValue');
     expect(v.term.value).toBe('http://purl.obolibrary.org/obo/UBERON_0000178');
     expect(v.label).toBe('blood');
     expect(v.notation).toBe('UBERON:0000178');
@@ -161,7 +161,7 @@ describe('LinkValue', () => {
 describe('Contact values', () => {
   it('EmailValue wraps a StringLiteral', () => {
     const ev = emailValue('me@example.org');
-    expect(ev.literal.kind).toBe('string_literal');
+    expect(ev.literal.kind).toBe('StringLiteral');
     expect(ev.literal.lexicalForm).toBe('me@example.org');
   });
 
@@ -173,12 +173,12 @@ describe('Contact values', () => {
 
 describe('External authority values', () => {
   it('typed IRI wrappers are constructable', () => {
-    expect(orcidIri('https://orcid.org/0000-0002-1825-0097').kind).toBe('orcid_iri');
-    expect(rorIri('https://ror.org/05dxps055').kind).toBe('ror_iri');
-    expect(doiIri('https://doi.org/10.1000/xyz').kind).toBe('doi_iri');
-    expect(pubMedIri('https://pubmed.ncbi.nlm.nih.gov/12345').kind).toBe('pub_med_iri');
-    expect(rridIri('https://identifiers.org/RRID:AB_12345').kind).toBe('rrid_iri');
-    expect(nihGrantIri('https://example.org/nih/grant/1').kind).toBe('nih_grant_iri');
+    expect(orcidIri('https://orcid.org/0000-0002-1825-0097').kind).toBe('OrcidIri');
+    expect(rorIri('https://ror.org/05dxps055').kind).toBe('RorIri');
+    expect(doiIri('https://doi.org/10.1000/xyz').kind).toBe('DoiIri');
+    expect(pubMedIri('https://pubmed.ncbi.nlm.nih.gov/12345').kind).toBe('PubMedIri');
+    expect(rridIri('https://identifiers.org/RRID:AB_12345').kind).toBe('RridIri');
+    expect(nihGrantIri('https://example.org/nih/grant/1').kind).toBe('NihGrantIri');
   });
 
   it('values carry typed IRIs and optional labels', () => {
@@ -186,8 +186,8 @@ describe('External authority values', () => {
       iri: 'https://orcid.org/0000-0002-1825-0097',
       label: 'Researcher',
     });
-    expect(ov.kind).toBe('orcid_value');
-    expect(ov.iri.kind).toBe('orcid_iri');
+    expect(ov.kind).toBe('OrcidValue');
+    expect(ov.iri.kind).toBe('OrcidIri');
     expect(ov.label).toBe('Researcher');
     expect(isExternalAuthorityValue(ov)).toBe(true);
 
@@ -205,14 +205,14 @@ describe('External authority values', () => {
 
   it('accepts a pre-wrapped typed IRI', () => {
     const ov = orcidValue({ iri: orcidIri('https://orcid.org/0000-0002-1825-0097') });
-    expect(ov.iri.kind).toBe('orcid_iri');
+    expect(ov.iri.kind).toBe('OrcidIri');
   });
 });
 
 describe('AttributeValue (recursive)', () => {
   it('can carry a scalar value', () => {
     const av = attributeValue('color', textValue(stringLiteral('blue')));
-    expect(av.kind).toBe('attribute_value');
+    expect(av.kind).toBe('AttributeValue');
     expect(av.name).toBe('color');
     expect(isAttributeValue(av)).toBe(true);
   });
@@ -221,8 +221,8 @@ describe('AttributeValue (recursive)', () => {
     const inner = attributeValue('depth', numericValue(numericLiteral('3', 'integer')));
     const middle = attributeValue('layer', inner);
     const outer = attributeValue('outer', middle);
-    expect(outer.value.kind).toBe('attribute_value');
-    expect((outer.value as typeof middle).value.kind).toBe('attribute_value');
+    expect(outer.value.kind).toBe('AttributeValue');
+    expect((outer.value as typeof middle).value.kind).toBe('AttributeValue');
   });
 });
 
@@ -262,14 +262,14 @@ describe('Value union recognition', () => {
 describe('Value-constructor input widening', () => {
   it('textValue accepts a plain string and wraps it as a StringLiteral', () => {
     const v = textValue('Hello');
-    expect(v.kind).toBe('text_value');
-    expect(v.literal.kind).toBe('string_literal');
+    expect(v.kind).toBe('TextValue');
+    expect(v.literal.kind).toBe('StringLiteral');
     expect(v.literal.lexicalForm).toBe('Hello');
   });
 
   it('textValue still accepts a langStringLiteral and passes it through', () => {
     const v = textValue(langStringLiteral('Bonjour', 'fr'));
-    expect(v.literal.kind).toBe('lang_string_literal');
+    expect(v.literal.kind).toBe('LangStringLiteral');
   });
 
   it('textValue still accepts a stringLiteral and passes it through', () => {
@@ -280,8 +280,8 @@ describe('Value-constructor input widening', () => {
 
   it('fullDateValue accepts a lexical-form string', () => {
     const v = fullDateValue('2024-06-15');
-    expect(v.kind).toBe('full_date_value');
-    expect(v.literal.kind).toBe('full_date_literal');
+    expect(v.kind).toBe('FullDateValue');
+    expect(v.literal.kind).toBe('FullDateLiteral');
     expect(v.literal.lexicalForm).toBe('2024-06-15');
   });
 
@@ -299,29 +299,29 @@ describe('Value-constructor input widening', () => {
 describe('dateValue smart constructor', () => {
   it('discriminates a 4-digit year string as YearValue', () => {
     const v = dateValue('2024');
-    expect(v.kind).toBe('year_value');
-    if (v.kind === 'year_value') expect(v.value).toBe('2024');
+    expect(v.kind).toBe('YearValue');
+    if (v.kind === 'YearValue') expect(v.value).toBe('2024');
   });
 
   it('discriminates YYYY-MM as YearMonthValue', () => {
     const v = dateValue('2024-06');
-    expect(v.kind).toBe('year_month_value');
-    if (v.kind === 'year_month_value') expect(v.value).toBe('2024-06');
+    expect(v.kind).toBe('YearMonthValue');
+    if (v.kind === 'YearMonthValue') expect(v.value).toBe('2024-06');
   });
 
   it('discriminates YYYY-MM-DD as FullDateValue', () => {
     const v = dateValue('2024-06-15');
-    expect(v.kind).toBe('full_date_value');
-    if (v.kind === 'full_date_value') {
+    expect(v.kind).toBe('FullDateValue');
+    if (v.kind === 'FullDateValue') {
       expect(v.literal.lexicalForm).toBe('2024-06-15');
     }
   });
 
   it('tolerates a trailing time-zone designator on full dates', () => {
     const v = dateValue('2024-06-15Z');
-    expect(v.kind).toBe('full_date_value');
+    expect(v.kind).toBe('FullDateValue');
     const v2 = dateValue('2024-06-15+05:00');
-    expect(v2.kind).toBe('full_date_value');
+    expect(v2.kind).toBe('FullDateValue');
   });
 
   it('passes through an existing DateValue', () => {
@@ -343,14 +343,14 @@ describe('dateValue smart constructor', () => {
 describe('External-authority value input widening', () => {
   it('accepts a bare string IRI (no label)', () => {
     const v = orcidValue('https://orcid.org/0000-0002-1825-0097');
-    expect(v.kind).toBe('orcid_value');
-    expect(v.iri.kind).toBe('orcid_iri');
+    expect(v.kind).toBe('OrcidValue');
+    expect(v.iri.kind).toBe('OrcidIri');
     expect(v.iri.value.value).toBe('https://orcid.org/0000-0002-1825-0097');
     expect(v.label).toBeUndefined();
   });
 
   it('accepts an Iri (no label)', () => {
-    const v = rorValue({ kind: 'iri', value: 'https://ror.org/05dxps055' });
+    const v = rorValue({ kind: 'Iri', value: 'https://ror.org/05dxps055' });
     expect(v.iri.value.value).toBe('https://ror.org/05dxps055');
     expect(v.label).toBeUndefined();
   });
@@ -363,27 +363,27 @@ describe('External-authority value input widening', () => {
 
   it('still accepts the init-object form with an optional label', () => {
     const v = doiValue({ iri: 'https://doi.org/10.1000/xyz', label: 'Sample DOI' });
-    expect(v.iri.kind).toBe('doi_iri');
+    expect(v.iri.kind).toBe('DoiIri');
     expect(v.label).toBe('Sample DOI');
   });
 
   it('all six families accept a bare string IRI', () => {
-    expect(orcidValue('https://orcid.org/0000-0002-1825-0097').kind).toBe('orcid_value');
-    expect(rorValue('https://ror.org/05dxps055').kind).toBe('ror_value');
-    expect(doiValue('https://doi.org/10.1000/xyz').kind).toBe('doi_value');
-    expect(pubMedIdValue('https://pubmed.ncbi.nlm.nih.gov/12345').kind).toBe('pub_med_id_value');
-    expect(rridValue('https://identifiers.org/RRID:AB_12345').kind).toBe('rrid_value');
-    expect(nihGrantIdValue('https://example.org/nih/grant/1').kind).toBe('nih_grant_id_value');
+    expect(orcidValue('https://orcid.org/0000-0002-1825-0097').kind).toBe('OrcidValue');
+    expect(rorValue('https://ror.org/05dxps055').kind).toBe('RorValue');
+    expect(doiValue('https://doi.org/10.1000/xyz').kind).toBe('DoiValue');
+    expect(pubMedIdValue('https://pubmed.ncbi.nlm.nih.gov/12345').kind).toBe('PubMedIdValue');
+    expect(rridValue('https://identifiers.org/RRID:AB_12345').kind).toBe('RridValue');
+    expect(nihGrantIdValue('https://example.org/nih/grant/1').kind).toBe('NihGrantIdValue');
   });
 });
 
 describe('literalChoiceValue input widening', () => {
   it('accepts (text, lang) and wraps as a langStringLiteral', () => {
     const v = literalChoiceValue('Professor', 'en');
-    expect(v.kind).toBe('literal_choice_value');
-    expect(v.literal.kind).toBe('lang_string_literal');
+    expect(v.kind).toBe('LiteralChoiceValue');
+    expect(v.literal.kind).toBe('LangStringLiteral');
     expect(v.literal.lexicalForm).toBe('Professor');
-    if (v.literal.kind === 'lang_string_literal') {
+    if (v.literal.kind === 'LangStringLiteral') {
       expect(v.literal.lang.value).toBe('en');
     }
   });

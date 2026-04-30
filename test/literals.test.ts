@@ -28,7 +28,7 @@ import {
 describe('StringLiteral', () => {
   it('is constructed from a plain string', () => {
     const s = stringLiteral('hello');
-    expect(s.kind).toBe('string_literal');
+    expect(s.kind).toBe('StringLiteral');
     expect(s.lexicalForm).toBe('hello');
     expect(isStringLiteral(s)).toBe(true);
     expect(isTextLiteral(s)).toBe(true);
@@ -37,7 +37,7 @@ describe('StringLiteral', () => {
   it('converts to a DatatypeIriLiteral with xsd:string', () => {
     const s = stringLiteral('x');
     const dt = stringLiteralToDatatypeIriLiteral(s);
-    expect(dt.kind).toBe('datatype_iri_literal');
+    expect(dt.kind).toBe('DatatypeIriLiteral');
     expect(dt.lexicalForm).toBe('x');
     expect(dt.datatype.value).toBe(XsdStringDatatypeIri);
   });
@@ -46,7 +46,7 @@ describe('StringLiteral', () => {
 describe('LangStringLiteral', () => {
   it('is constructed from a lexical form and language tag', () => {
     const ls = langStringLiteral('hello', 'en-US');
-    expect(ls.kind).toBe('lang_string_literal');
+    expect(ls.kind).toBe('LangStringLiteral');
     expect(ls.lexicalForm).toBe('hello');
     expect(ls.lang.value).toBe('en-US');
     expect(isLangStringLiteral(ls)).toBe(true);
@@ -58,7 +58,7 @@ describe('LangStringLiteral', () => {
 describe('DatatypeIriLiteral', () => {
   it('is constructed with an explicit datatype IRI', () => {
     const lit = datatypeIriLiteral('42', 'http://www.w3.org/2001/XMLSchema#integer');
-    expect(lit.kind).toBe('datatype_iri_literal');
+    expect(lit.kind).toBe('DatatypeIriLiteral');
     expect(lit.lexicalForm).toBe('42');
     expect(lit.datatype.value).toBe('http://www.w3.org/2001/XMLSchema#integer');
     expect(isDatatypeIriLiteral(lit)).toBe(true);
@@ -99,7 +99,7 @@ describe('literalsTermEqual', () => {
 describe('NumericLiteral', () => {
   it('carries a kind name resolving to the canonical XSD IRI', () => {
     const lit = numericLiteral('42', 'integer');
-    expect(lit.kind).toBe('numeric_literal');
+    expect(lit.kind).toBe('NumericLiteral');
     expect(lit.lexicalForm).toBe('42');
     expect(lit.datatype).toBe('integer');
     expect(numericLiteralDatatypeIri(lit)).toBe(

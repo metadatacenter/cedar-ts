@@ -15,7 +15,7 @@ import type { Value } from '../values/index.js';
 // enforced at validation rather than at this structural layer.
 
 export interface FieldValue {
-  readonly kind: 'field_value';
+  readonly kind: 'FieldValue';
   readonly key: string;
   readonly values: readonly [Value, ...Value[]];
 }
@@ -25,9 +25,9 @@ export function fieldValue(
   key: string,
   ...values: [Value, ...Value[]]
 ): FieldValue {
-  return { kind: 'field_value', key: parseAsciiIdentifier(key), values };
+  return { kind: 'FieldValue', key: parseAsciiIdentifier(key), values };
 }
 
 export const isFieldValue = (x: unknown): x is FieldValue =>
   typeof x === 'object' && x !== null &&
-  (x as { kind?: unknown }).kind === 'field_value';
+  (x as { kind?: unknown }).kind === 'FieldValue';

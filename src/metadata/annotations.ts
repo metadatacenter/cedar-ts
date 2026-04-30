@@ -12,7 +12,6 @@ export const isAnnotationValue = (x: unknown): x is AnnotationValue =>
   isLiteral(x) || isIri(x);
 
 export interface Annotation {
-  readonly kind: 'annotation';
   readonly property: Iri;
   readonly body: AnnotationValue;
 }
@@ -24,15 +23,7 @@ export function annotation(
   body: AnnotationValue,
 ): Annotation {
   return {
-    kind: 'annotation',
     property: typeof property === 'string' ? iri(property) : property,
     body,
   };
-}
-
-export function isAnnotation(x: unknown): x is Annotation {
-  return (
-    typeof x === 'object' && x !== null &&
-    (x as { kind?: unknown }).kind === 'annotation'
-  );
 }

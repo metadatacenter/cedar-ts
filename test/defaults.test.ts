@@ -92,9 +92,9 @@ describe('DefaultValue family', () => {
 describe('Default-value-constructor input widening', () => {
   it('textDefaultValue accepts a plain string', () => {
     const dv = textDefaultValue('Stanford University');
-    expect(dv.kind).toBe('text_default_value');
-    expect(dv.value.kind).toBe('text_value');
-    expect(dv.value.literal.kind).toBe('string_literal');
+    expect(dv.kind).toBe('TextDefaultValue');
+    expect(dv.value.kind).toBe('TextValue');
+    expect(dv.value.literal.kind).toBe('StringLiteral');
     expect(dv.value.literal.lexicalForm).toBe('Stanford University');
   });
 
@@ -106,7 +106,7 @@ describe('Default-value-constructor input widening', () => {
 
   it('textDefaultValue accepts a TextLiteral directly', () => {
     const dv = textDefaultValue(stringLiteral('Hi'));
-    expect(dv.value.literal.kind).toBe('string_literal');
+    expect(dv.value.literal.kind).toBe('StringLiteral');
     expect(dv.value.literal.lexicalForm).toBe('Hi');
   });
 

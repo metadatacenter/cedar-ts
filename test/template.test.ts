@@ -59,8 +59,8 @@ describe('Template', () => {
       id: templateId('https://example.org/templates/demo'),
       metadata: meta,
     });
-    expect(t.kind).toBe('template');
-    expect(t.id.kind).toBe('template_id');
+    expect(t.kind).toBe('Template');
+    expect(t.id.kind).toBe('TemplateId');
     expect(t.embedded).toEqual([]);
     expect(t.header).toBeUndefined();
     expect(t.footer).toBeUndefined();
@@ -72,7 +72,7 @@ describe('Template', () => {
       id: 'https://example.org/templates/demo',
       metadata: meta,
     });
-    expect(t.id.kind).toBe('template_id');
+    expect(t.id.kind).toBe('TemplateId');
     expect(t.id.iri.value).toBe('https://example.org/templates/demo');
   });
 
@@ -145,7 +145,7 @@ describe('SchemaArtifact union', () => {
     const all: SchemaArtifact[] = [f, t];
     for (const a of all) expect(isSchemaArtifact(a)).toBe(true);
 
-    expect(isSchemaArtifact({ kind: 'embedded_field' })).toBe(false);
+    expect(isSchemaArtifact({ kind: 'EmbeddedField' })).toBe(false);
     expect(isSchemaArtifact(null)).toBe(false);
   });
 });

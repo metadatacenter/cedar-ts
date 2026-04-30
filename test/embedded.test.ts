@@ -9,11 +9,8 @@ import {
   DEFAULT_VISIBILITY,
   isVisibility,
   cardinality,
-  isCardinality,
   labelOverride,
-  isLabelOverride,
   property,
-  isProperty,
   isEmbeddedField,
   isEmbeddedFieldOfKind,
   embeddedTextField,
@@ -82,8 +79,8 @@ describe('Inline Field/Template/PresentationComponent reference inputs', () => {
     });
     const ef = embeddedTextField({ key: 'title', reference: artifact });
     expect(ef.reference).toBe(artifact.id);
-    expect(ef.reference.kind).toBe('field_id');
-    expect(ef.reference.fieldKind).toBe('text');
+    expect(ef.reference.kind).toBe('FieldId');
+    expect(ef.reference.fieldKind).toBe('Text');
   });
 
   it('embeddedTextField passes the FieldReference through', () => {
@@ -112,7 +109,7 @@ describe('Inline Field/Template/PresentationComponent reference inputs', () => {
     });
     const et = embeddedTemplate({ key: 'address', reference: t });
     expect(et.reference).toBe(t.id);
-    expect(et.reference.kind).toBe('template_id');
+    expect(et.reference.kind).toBe('TemplateId');
   });
 
   it('embeddedPresentationComponent extracts .id when given a PresentationComponent', () => {
@@ -126,7 +123,7 @@ describe('Inline Field/Template/PresentationComponent reference inputs', () => {
     });
     const ep = embeddedPresentationComponent({ key: 'intro', reference: pc });
     expect(ep.reference).toBe(pc.id);
-    expect(ep.reference.kind).toBe('presentation_component_id');
+    expect(ep.reference.kind).toBe('PresentationComponentId');
   });
 });
 
@@ -180,7 +177,6 @@ describe('Visibility', () => {
 describe('Cardinality', () => {
   it('accepts plain numbers', () => {
     const c = cardinality({ min: 1, max: 3 });
-    expect(isCardinality(c)).toBe(true);
     expect(c.min).toBe(1);
     expect(c.max).toBe(3);
   });
@@ -198,7 +194,6 @@ describe('Cardinality', () => {
 describe('LabelOverride and Property', () => {
   it('labelOverride defaults altLabels to an empty array', () => {
     const lo = labelOverride({ label: 'Participant' });
-    expect(isLabelOverride(lo)).toBe(true);
     expect(lo.label).toBe('Participant');
     expect(lo.altLabels).toEqual([]);
   });
@@ -208,23 +203,22 @@ describe('LabelOverride and Property', () => {
       iri: 'https://schema.org/identifier',
       label: 'identifier',
     });
-    expect(isProperty(p)).toBe(true);
-    expect(p.iri.kind).toBe('iri');
+    expect(p.iri.kind).toBe('Iri');
     expect(p.iri.value).toBe('https://schema.org/identifier');
     expect(p.label).toBe('identifier');
   });
 
   it('property accepts a bare string IRI (no label)', () => {
     const p = property('https://schema.org/name');
-    expect(isProperty(p)).toBe(true);
     expect(p.iri.value).toBe('https://schema.org/name');
     expect(p.label).toBeUndefined();
   });
 
-  it('property is idempotent', () => {
+  it('property accepts an existing Property structurally (init shape)', () => {
     const p1 = property('https://schema.org/name');
     const p2 = property(p1);
-    expect(p2).toBe(p1);
+    expect(p2.iri.value).toBe('https://schema.org/name');
+    expect(p2.label).toBeUndefined();
   });
 
   it('embedded-init property accepts a bare string IRI', () => {
@@ -262,12 +256,12 @@ describe('EmbeddedField constructors', () => {
       key: 'title',
       reference: txtRef,
     });
-    expect(ef.kind).toBe('embedded_field');
-    expect(ef.fieldKind).toBe('text');
-    expect(ef.reference.fieldKind).toBe('text');
+    expect(ef.kind).toBe('EmbeddedField');
+    expect(ef.fieldKind).toBe('Text');
+    expect(ef.reference.fieldKind).toBe('Text');
     expect(isEmbeddedField(ef)).toBe(true);
-    expect(isEmbeddedFieldOfKind(ef, 'text')).toBe(true);
-    expect(isEmbeddedFieldOfKind(ef, 'numeric')).toBe(false);
+    expect(isEmbeddedFieldOfKind(ef, 'Text')).toBe(true);
+    expect(isEmbeddedFieldOfKind(ef, 'Numeric')).toBe(false);
   });
 
   it('per-family helpers pin the type', () => {
@@ -275,7 +269,7 @@ describe('EmbeddedField constructors', () => {
       key: 'title',
       reference: txtRef,
     });
-    expect(ef.fieldKind).toBe('text');
+    expect(ef.fieldKind).toBe('Text');
 
     // @ts-expect-error EmbeddedTextField is not assignable to EmbeddedDateField
     const d: EmbeddedDateField = ef;
@@ -307,7 +301,7 @@ describe('EmbeddedField constructors', () => {
       key: 'attr',
       reference: attrRef,
     });
-    expect(ef.fieldKind).toBe('attribute_value');
+    expect(ef.fieldKind).toBe('AttributeValue');
     expect(ef.defaultValue).toBeUndefined();
 
     // @ts-expect-error DefaultValueFor<'attribute_value'> is never
@@ -332,7 +326,7 @@ describe('EmbeddedField constructors', () => {
     expect(ef.valueRequirement).toBe('required');
     expect(ef.cardinality?.min).toBe(1);
     expect(ef.visibility).toBe('visible');
-    expect(ef.defaultValue?.kind).toBe('text_default_value');
+    expect(ef.defaultValue?.kind).toBe('TextDefaultValue');
     expect(ef.labelOverride?.label).toBe('Document Title');
     expect(ef.property?.iri.value).toBe('https://schema.org/name');
   });
@@ -343,9 +337,9 @@ describe('EmbeddedField constructors', () => {
       reference: dateRef,
       defaultValue: '1990-06-15',
     });
-    expect(ef.defaultValue?.kind).toBe('date_default_value');
-    if (ef.defaultValue?.kind === 'date_default_value') {
-      expect(ef.defaultValue.value.kind).toBe('full_date_value');
+    expect(ef.defaultValue?.kind).toBe('DateDefaultValue');
+    if (ef.defaultValue?.kind === 'DateDefaultValue') {
+      expect(ef.defaultValue.value.kind).toBe('FullDateValue');
     }
 
     const efYear = embeddedDateField({
@@ -353,8 +347,8 @@ describe('EmbeddedField constructors', () => {
       reference: dateRef,
       defaultValue: '1990',
     });
-    if (efYear.defaultValue?.kind === 'date_default_value') {
-      expect(efYear.defaultValue.value.kind).toBe('year_value');
+    if (efYear.defaultValue?.kind === 'DateDefaultValue') {
+      expect(efYear.defaultValue.value.kind).toBe('YearValue');
     }
   });
 
@@ -364,9 +358,9 @@ describe('EmbeddedField constructors', () => {
       reference: txtRef,
       defaultValue: 'Untitled',
     });
-    expect(ef.defaultValue?.kind).toBe('text_default_value');
-    if (ef.defaultValue?.kind === 'text_default_value') {
-      expect(ef.defaultValue.value.literal.kind).toBe('string_literal');
+    expect(ef.defaultValue?.kind).toBe('TextDefaultValue');
+    if (ef.defaultValue?.kind === 'TextDefaultValue') {
+      expect(ef.defaultValue.value.literal.kind).toBe('StringLiteral');
       expect(ef.defaultValue.value.literal.lexicalForm).toBe('Untitled');
     }
 
@@ -405,7 +399,7 @@ describe('EmbeddedTemplate', () => {
       property: property({ iri: 'https://schema.org/address' }),
     });
     expect(isEmbeddedTemplate(et)).toBe(true);
-    expect(et.kind).toBe('embedded_template');
+    expect(et.kind).toBe('EmbeddedTemplate');
     expect(et.cardinality?.min).toBe(0);
     expect(et.property?.iri.value).toBe('https://schema.org/address');
   });
@@ -419,7 +413,7 @@ describe('EmbeddedPresentationComponent', () => {
       visibility: 'hidden',
     });
     expect(isEmbeddedPresentationComponent(ep)).toBe(true);
-    expect(ep.kind).toBe('embedded_presentation_component');
+    expect(ep.kind).toBe('EmbeddedPresentationComponent');
     expect(ep.visibility).toBe('hidden');
   });
 });
@@ -438,7 +432,7 @@ describe('EmbeddedArtifact union', () => {
       }),
     ];
     for (const a of all) expect(isEmbeddedArtifact(a)).toBe(true);
-    expect(isEmbeddedArtifact({ kind: 'field' })).toBe(false);
+    expect(isEmbeddedArtifact({ kind: 'Field' })).toBe(false);
     expect(isEmbeddedArtifact(null)).toBe(false);
     expect(isEmbeddedArtifact('embedded_field')).toBe(false);
   });

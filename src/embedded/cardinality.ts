@@ -10,7 +10,6 @@ import { assertNonNegativeInteger } from '../leaves/index.js';
 // unbounded upper bound (grammar §Cardinality).
 
 export interface Cardinality {
-  readonly kind: 'cardinality';
   readonly min: number;
   readonly max?: number;
 }
@@ -21,14 +20,9 @@ export interface CardinalityInit {
 }
 
 export function cardinality(init: CardinalityInit): Cardinality {
-  const out: { kind: 'cardinality'; min: number; max?: number } = {
-    kind: 'cardinality',
+  const out: { min: number; max?: number } = {
     min: assertNonNegativeInteger(init.min),
   };
   if (init.max !== undefined) out.max = assertNonNegativeInteger(init.max);
   return out;
 }
-
-export const isCardinality = (x: unknown): x is Cardinality =>
-  typeof x === 'object' && x !== null &&
-  (x as { kind?: unknown }).kind === 'cardinality';

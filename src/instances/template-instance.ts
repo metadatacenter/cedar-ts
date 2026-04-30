@@ -16,7 +16,7 @@ import { isNestedTemplateInstance, type InstanceValue } from './nested.js';
 // but do not carry schema versioning.
 
 export interface TemplateInstance {
-  readonly kind: 'template_instance';
+  readonly kind: 'TemplateInstance';
   readonly id: TemplateInstanceId;
   readonly metadata: ArtifactMetadata;
   readonly templateRef: TemplateReference;
@@ -49,7 +49,7 @@ export function templateInstance(init: TemplateInstanceInit): TemplateInstance {
   const values = init.values ?? [];
   assertConsistentInstanceValueKeys(values);
   return {
-    kind: 'template_instance',
+    kind: 'TemplateInstance',
     id: typeof init.id === 'string' ? templateInstanceId(init.id) : init.id,
     metadata: init.metadata,
     templateRef:
@@ -92,4 +92,4 @@ function assertConsistentInstanceValueKeys(
 
 export const isTemplateInstance = (x: unknown): x is TemplateInstance =>
   typeof x === 'object' && x !== null &&
-  (x as { kind?: unknown }).kind === 'template_instance';
+  (x as { kind?: unknown }).kind === 'TemplateInstance';

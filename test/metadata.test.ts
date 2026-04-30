@@ -7,12 +7,9 @@ import {
   STATUSES,
   isStatus,
   annotation,
-  isAnnotation,
   isAnnotationValue,
   artifactMetadata,
   schemaArtifactMetadata,
-  isArtifactMetadata,
-  isSchemaArtifactMetadata,
   iri,
   langStringLiteral,
 } from '../src/index.js';
@@ -20,7 +17,6 @@ import {
 describe('DescriptiveMetadata', () => {
   it('requires only a name and defaults altLabels to empty', () => {
     const dm = descriptiveMetadata({ name: 'Title' });
-    expect(dm.kind).toBe('descriptive_metadata');
     expect(dm.name).toBe('Title');
     expect(dm.altLabels).toEqual([]);
     expect('description' in dm).toBe(false);
@@ -51,7 +47,6 @@ describe('TemporalProvenance', () => {
       modifiedOn: '2024-06-01T12:00:00Z',
       modifiedBy: 'https://example.org/users/bob',
     });
-    expect(tp.kind).toBe('temporal_provenance');
     expect(tp.createdOn.value).toBe('2024-01-01T00:00:00Z');
     expect(tp.createdBy.value).toBe('https://example.org/users/alice');
     expect(tp.modifiedOn.value).toBe('2024-06-01T12:00:00Z');
@@ -95,7 +90,6 @@ describe('Status and SchemaVersioning', () => {
       previousVersion: 'https://example.org/templates/t/1.2.2',
       derivedFrom: 'https://example.org/templates/source/1.0.0',
     });
-    expect(sv.kind).toBe('schema_versioning');
     expect(sv.version).toBe('1.2.3');
     expect(sv.modelVersion).toBe('2.0.0');
     expect(sv.previousVersion?.value).toBe(
@@ -127,10 +121,9 @@ describe('Annotation', () => {
       'http://purl.org/dc/terms/title',
       langStringLiteral('A study', 'en'),
     );
-    expect(isAnnotation(a)).toBe(true);
-    expect(a.property.kind).toBe('iri');
+    expect(a.property.kind).toBe('Iri');
     expect(a.property.value).toBe('http://purl.org/dc/terms/title');
-    expect(a.body.kind).toBe('lang_string_literal');
+    expect(a.body.kind).toBe('LangStringLiteral');
     expect(isAnnotationValue(a.body)).toBe(true);
   });
 
@@ -139,7 +132,7 @@ describe('Annotation', () => {
       'http://purl.org/dc/terms/source',
       iri('https://example.org/source/1'),
     );
-    expect(a.body.kind).toBe('iri');
+    expect(a.body.kind).toBe('Iri');
   });
 });
 
@@ -159,7 +152,6 @@ describe('ArtifactMetadata and SchemaArtifactMetadata', () => {
 
   it('ArtifactMetadata bundles descriptive + provenance + annotations', () => {
     const m = artifactMetadata({ descriptiveMetadata: dm, provenance: tp });
-    expect(isArtifactMetadata(m)).toBe(true);
     expect(m.annotations).toEqual([]);
     const m2 = artifactMetadata({
       descriptiveMetadata: dm,
@@ -177,7 +169,6 @@ describe('ArtifactMetadata and SchemaArtifactMetadata', () => {
   it('SchemaArtifactMetadata adds schema versioning', () => {
     const m = artifactMetadata({ descriptiveMetadata: dm, provenance: tp });
     const sm = schemaArtifactMetadata({ artifact: m, versioning: sv });
-    expect(isSchemaArtifactMetadata(sm)).toBe(true);
     expect(sm.artifact).toBe(m);
     expect(sm.versioning).toBe(sv);
   });

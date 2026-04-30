@@ -146,7 +146,7 @@ describe('IntegerLexicalForm', () => {
 describe('Iri wrapper', () => {
   it('constructs from a valid string', () => {
     const x = iri('https://example.org/foo');
-    expect(x.kind).toBe('iri');
+    expect(x.kind).toBe('Iri');
     expect(x.value).toBe('https://example.org/foo');
   });
 
@@ -158,7 +158,6 @@ describe('Iri wrapper', () => {
 describe('LanguageTag wrapper', () => {
   it('constructs from a valid tag', () => {
     const t = languageTag('en-US');
-    expect(t.kind).toBe('language_tag');
     expect(t.value).toBe('en-US');
   });
 });
@@ -166,7 +165,6 @@ describe('LanguageTag wrapper', () => {
 describe('IsoDateTimeStamp wrapper', () => {
   it('constructs from a valid xsd:dateTime', () => {
     const ts = isoDateTimeStamp('2024-06-15T10:30:00Z');
-    expect(ts.kind).toBe('iso_date_time_stamp');
     expect(ts.value).toBe('2024-06-15T10:30:00Z');
   });
 });

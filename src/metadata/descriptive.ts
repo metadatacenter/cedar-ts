@@ -9,7 +9,6 @@
 // preserved by the property name on this struct.
 
 export interface DescriptiveMetadata {
-  readonly kind: 'descriptive_metadata';
   readonly name: string;
   readonly description?: string;
   readonly identifier?: string;
@@ -27,14 +26,12 @@ export interface DescriptiveMetadataInit {
 
 export function descriptiveMetadata(init: DescriptiveMetadataInit): DescriptiveMetadata {
   const out: {
-    kind: 'descriptive_metadata';
     name: string;
     description?: string;
     identifier?: string;
     preferredLabel?: string;
     altLabels: readonly string[];
   } = {
-    kind: 'descriptive_metadata',
     name: init.name,
     altLabels: init.altLabels ?? [],
   };
@@ -42,11 +39,4 @@ export function descriptiveMetadata(init: DescriptiveMetadataInit): DescriptiveM
   if (init.identifier !== undefined) out.identifier = init.identifier;
   if (init.preferredLabel !== undefined) out.preferredLabel = init.preferredLabel;
   return out;
-}
-
-export function isDescriptiveMetadata(x: unknown): x is DescriptiveMetadata {
-  return (
-    typeof x === 'object' && x !== null &&
-    (x as { kind?: unknown }).kind === 'descriptive_metadata'
-  );
 }

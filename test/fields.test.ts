@@ -99,13 +99,13 @@ describe('Field constructors', () => {
       metadata: meta,
       fieldSpec: textFieldSpec(),
     });
-    expect(f.kind).toBe('field');
-    expect(f.fieldKind).toBe('text');
-    expect(f.id.fieldKind).toBe('text');
-    expect(f.fieldSpec.kind).toBe('text_field_spec');
+    expect(f.kind).toBe('Field');
+    expect(f.fieldKind).toBe('Text');
+    expect(f.id.fieldKind).toBe('Text');
+    expect(f.fieldSpec.kind).toBe('TextFieldSpec');
     expect(isField(f)).toBe(true);
-    expect(isFieldOfKind(f, 'text')).toBe(true);
-    expect(isFieldOfKind(f, 'numeric')).toBe(false);
+    expect(isFieldOfKind(f, 'Text')).toBe(true);
+    expect(isFieldOfKind(f, 'Numeric')).toBe(false);
   });
 
   it('rejects a misaligned id at the type level', () => {
@@ -134,7 +134,7 @@ describe('Per-family helpers', () => {
       metadata: meta,
       fieldSpec: textFieldSpec(),
     });
-    expect(f.fieldKind).toBe('text');
+    expect(f.fieldKind).toBe('Text');
 
     // @ts-expect-error TextField is not assignable to DateField
     const d: DateField = f;
@@ -230,7 +230,7 @@ describe('Per-family helpers', () => {
         renderingHint: 'single_select_dropdown',
       }),
     });
-    expect(f.fieldSpec.kind).toBe('controlled_term_single_choice_field_spec');
+    expect(f.fieldSpec.kind).toBe('ControlledTermSingleChoiceFieldSpec');
   });
 });
 
@@ -241,7 +241,7 @@ describe('isFieldOfKind narrows correctly', () => {
       metadata: meta,
       fieldSpec: numericFieldSpec({ datatype: 'integer' }),
     });
-    if (isFieldOfKind(f, 'numeric')) {
+    if (isFieldOfKind(f, 'Numeric')) {
       const spec: NumericFieldSpec = f.fieldSpec;
       expect(spec.datatype).toBe('integer');
     } else {
@@ -251,11 +251,11 @@ describe('isFieldOfKind narrows correctly', () => {
 
   it('FIELD_KINDS-style table check that every family round-trips', () => {
     const kinds: FieldKind[] = [
-      'text', 'numeric', 'date', 'time', 'date_time',
-      'controlled_term', 'single_choice', 'multiple_choice',
-      'link', 'email', 'phone_number',
-      'orcid', 'ror', 'doi', 'pub_med_id', 'rrid', 'nih_grant_id',
-      'attribute_value',
+      'Text', 'Numeric', 'Date', 'Time', 'DateTime',
+      'ControlledTerm', 'SingleChoice', 'MultipleChoice',
+      'Link', 'Email', 'PhoneNumber',
+      'Orcid', 'Ror', 'Doi', 'PubMedId', 'Rrid', 'NihGrantId',
+      'AttributeValue',
     ];
     expect(kinds.length).toBe(18);
   });

@@ -8,7 +8,7 @@ import { type PresentationComponentId, presentationComponentId } from '../identi
 const toPresentationComponentId = (
   v: PresentationComponentId | Iri | string,
 ): PresentationComponentId =>
-  typeof v !== 'string' && (v as { kind: unknown }).kind === 'presentation_component_id'
+  typeof v !== 'string' && (v as { kind: unknown }).kind === 'PresentationComponentId'
     ? (v as PresentationComponentId)
     : presentationComponentId(v as Iri | string);
 
@@ -17,7 +17,7 @@ const toPresentationComponentId = (
 // variants per grammar §Presentation Components.
 
 export interface RichTextComponent {
-  readonly kind: 'rich_text_component';
+  readonly kind: 'RichTextComponent';
   readonly id: PresentationComponentId;
   readonly metadata: ArtifactMetadata;
   // HtmlContent — the permitted feature set and any sanitization requirements
@@ -32,14 +32,14 @@ export interface RichTextComponentInit {
 }
 
 export const richTextComponent = (init: RichTextComponentInit): RichTextComponent => ({
-  kind: 'rich_text_component',
+  kind: 'RichTextComponent',
   id: toPresentationComponentId(init.id),
   metadata: init.metadata,
   html: init.html,
 });
 
 export interface ImageComponent {
-  readonly kind: 'image_component';
+  readonly kind: 'ImageComponent';
   readonly id: PresentationComponentId;
   readonly metadata: ArtifactMetadata;
   readonly image: Iri;
@@ -53,7 +53,7 @@ export interface ImageComponentInit {
 
 export function imageComponent(init: ImageComponentInit): ImageComponent {
   return {
-    kind: 'image_component',
+    kind: 'ImageComponent',
     id: toPresentationComponentId(init.id),
     metadata: init.metadata,
     image: typeof init.image === 'string' ? iri(init.image) : init.image,
@@ -61,7 +61,7 @@ export function imageComponent(init: ImageComponentInit): ImageComponent {
 }
 
 export interface YoutubeVideoComponent {
-  readonly kind: 'youtube_video_component';
+  readonly kind: 'YoutubeVideoComponent';
   readonly id: PresentationComponentId;
   readonly metadata: ArtifactMetadata;
   readonly video: Iri;
@@ -77,7 +77,7 @@ export function youtubeVideoComponent(
   init: YoutubeVideoComponentInit,
 ): YoutubeVideoComponent {
   return {
-    kind: 'youtube_video_component',
+    kind: 'YoutubeVideoComponent',
     id: toPresentationComponentId(init.id),
     metadata: init.metadata,
     video: typeof init.video === 'string' ? iri(init.video) : init.video,
@@ -85,7 +85,7 @@ export function youtubeVideoComponent(
 }
 
 export interface SectionBreakComponent {
-  readonly kind: 'section_break_component';
+  readonly kind: 'SectionBreakComponent';
   readonly id: PresentationComponentId;
   readonly metadata: ArtifactMetadata;
 }
@@ -98,13 +98,13 @@ export interface SectionBreakComponentInit {
 export const sectionBreakComponent = (
   init: SectionBreakComponentInit,
 ): SectionBreakComponent => ({
-  kind: 'section_break_component',
+  kind: 'SectionBreakComponent',
   id: toPresentationComponentId(init.id),
   metadata: init.metadata,
 });
 
 export interface PageBreakComponent {
-  readonly kind: 'page_break_component';
+  readonly kind: 'PageBreakComponent';
   readonly id: PresentationComponentId;
   readonly metadata: ArtifactMetadata;
 }
@@ -117,7 +117,7 @@ export interface PageBreakComponentInit {
 export const pageBreakComponent = (
   init: PageBreakComponentInit,
 ): PageBreakComponent => ({
-  kind: 'page_break_component',
+  kind: 'PageBreakComponent',
   id: toPresentationComponentId(init.id),
   metadata: init.metadata,
 });
@@ -133,23 +133,23 @@ const taggedKind = (x: unknown): unknown =>
   typeof x === 'object' && x !== null ? (x as { kind?: unknown }).kind : undefined;
 
 export const isRichTextComponent = (x: unknown): x is RichTextComponent =>
-  taggedKind(x) === 'rich_text_component';
+  taggedKind(x) === 'RichTextComponent';
 export const isImageComponent = (x: unknown): x is ImageComponent =>
-  taggedKind(x) === 'image_component';
+  taggedKind(x) === 'ImageComponent';
 export const isYoutubeVideoComponent = (x: unknown): x is YoutubeVideoComponent =>
-  taggedKind(x) === 'youtube_video_component';
+  taggedKind(x) === 'YoutubeVideoComponent';
 export const isSectionBreakComponent = (x: unknown): x is SectionBreakComponent =>
-  taggedKind(x) === 'section_break_component';
+  taggedKind(x) === 'SectionBreakComponent';
 export const isPageBreakComponent = (x: unknown): x is PageBreakComponent =>
-  taggedKind(x) === 'page_break_component';
+  taggedKind(x) === 'PageBreakComponent';
 
 export function isPresentationComponent(x: unknown): x is PresentationComponent {
   const k = taggedKind(x);
   return (
-    k === 'rich_text_component' ||
-    k === 'image_component' ||
-    k === 'youtube_video_component' ||
-    k === 'section_break_component' ||
-    k === 'page_break_component'
+    k === 'RichTextComponent' ||
+    k === 'ImageComponent' ||
+    k === 'YoutubeVideoComponent' ||
+    k === 'SectionBreakComponent' ||
+    k === 'PageBreakComponent'
   );
 }

@@ -10,7 +10,7 @@ import type { LabelOverride } from './label-override.js';
 // property — it does not bear data.
 
 export interface EmbeddedPresentationComponent {
-  readonly kind: 'embedded_presentation_component';
+  readonly kind: 'EmbeddedPresentationComponent';
   readonly key: string;
   readonly reference: PresentationComponentReference;
   readonly visibility?: Visibility;
@@ -31,16 +31,16 @@ export function embeddedPresentationComponent(
   init: EmbeddedPresentationComponentInit,
 ): EmbeddedPresentationComponent {
   const out: {
-    kind: 'embedded_presentation_component';
+    kind: 'EmbeddedPresentationComponent';
     key: string;
     reference: PresentationComponentReference;
     visibility?: Visibility;
     labelOverride?: LabelOverride;
   } = {
-    kind: 'embedded_presentation_component',
+    kind: 'EmbeddedPresentationComponent',
     key: parseAsciiIdentifier(init.key),
     reference:
-      init.reference.kind === 'presentation_component_id'
+      init.reference.kind === 'PresentationComponentId'
         ? init.reference
         : init.reference.id,
   };
@@ -53,4 +53,4 @@ export const isEmbeddedPresentationComponent = (
   x: unknown,
 ): x is EmbeddedPresentationComponent =>
   typeof x === 'object' && x !== null &&
-  (x as { kind?: unknown }).kind === 'embedded_presentation_component';
+  (x as { kind?: unknown }).kind === 'EmbeddedPresentationComponent';

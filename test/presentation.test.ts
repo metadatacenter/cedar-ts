@@ -36,7 +36,7 @@ describe('PresentationComponent variants', () => {
       metadata: meta,
       html: '<p>Instructions go here.</p>',
     });
-    expect(c.kind).toBe('rich_text_component');
+    expect(c.kind).toBe('RichTextComponent');
     expect(c.html).toBe('<p>Instructions go here.</p>');
     expect(isRichTextComponent(c)).toBe(true);
     expect(isPresentationComponent(c)).toBe(true);
@@ -48,7 +48,7 @@ describe('PresentationComponent variants', () => {
       metadata: meta,
       image: 'https://example.org/img/1.png',
     });
-    expect(c.kind).toBe('image_component');
+    expect(c.kind).toBe('ImageComponent');
     expect(c.image.value).toBe('https://example.org/img/1.png');
     expect(isImageComponent(c)).toBe(true);
   });
@@ -65,20 +65,20 @@ describe('PresentationComponent variants', () => {
       metadata: meta,
       video: 'https://www.youtube.com/watch?v=abc123',
     });
-    expect(c.kind).toBe('youtube_video_component');
+    expect(c.kind).toBe('YoutubeVideoComponent');
     expect(c.video.value).toBe('https://www.youtube.com/watch?v=abc123');
     expect(isYoutubeVideoComponent(c)).toBe(true);
   });
 
   it('SectionBreakComponent carries only id and metadata', () => {
     const c = sectionBreakComponent({ id, metadata: meta });
-    expect(c.kind).toBe('section_break_component');
+    expect(c.kind).toBe('SectionBreakComponent');
     expect(isSectionBreakComponent(c)).toBe(true);
   });
 
   it('PageBreakComponent carries only id and metadata', () => {
     const c = pageBreakComponent({ id, metadata: meta });
-    expect(c.kind).toBe('page_break_component');
+    expect(c.kind).toBe('PageBreakComponent');
     expect(isPageBreakComponent(c)).toBe(true);
   });
 });

@@ -9,7 +9,6 @@ import type {
 // `default` is modeled as a plain boolean property; the grammar's
 // `default_option()` nullary constructor collapses to `default: true` here.
 export interface LiteralChoiceOption {
-  readonly kind: 'literal_choice_option';
   readonly literal: Literal;
   readonly default?: true;
 }
@@ -37,8 +36,7 @@ export function literalChoiceOption(
     typeof arg1 === 'string'
       ? arg3
       : (arg2 as { default?: boolean } | undefined);
-  const out: { kind: 'literal_choice_option'; literal: Literal; default?: true } = {
-    kind: 'literal_choice_option',
+  const out: { literal: Literal; default?: true } = {
     literal,
   };
   if (options?.default === true) out.default = true;
@@ -46,7 +44,6 @@ export function literalChoiceOption(
 }
 
 export interface ControlledTermChoiceOption {
-  readonly kind: 'controlled_term_choice_option';
   readonly value: ControlledTermValue;
   readonly default?: true;
 }
@@ -56,10 +53,9 @@ export function controlledTermChoiceOption(
   options: { default?: boolean } = {},
 ): ControlledTermChoiceOption {
   const out: {
-    kind: 'controlled_term_choice_option';
     value: ControlledTermValue;
     default?: true;
-  } = { kind: 'controlled_term_choice_option', value };
+  } = { value };
   if (options.default === true) out.default = true;
   return out;
 }
@@ -71,7 +67,7 @@ export function controlledTermChoiceOption(
 // choice unions and the all-encompassing ChoiceFieldSpec.
 
 export interface LiteralSingleChoiceFieldSpec {
-  readonly kind: 'literal_single_choice_field_spec';
+  readonly kind: 'LiteralSingleChoiceFieldSpec';
   readonly options: readonly [LiteralChoiceOption, ...LiteralChoiceOption[]];
   readonly renderingHint?: SingleChoiceRenderingHint;
 }
@@ -81,16 +77,16 @@ export function literalSingleChoiceFieldSpec(init: {
   readonly renderingHint?: SingleChoiceRenderingHint;
 }): LiteralSingleChoiceFieldSpec {
   const out: {
-    kind: 'literal_single_choice_field_spec';
+    kind: 'LiteralSingleChoiceFieldSpec';
     options: readonly [LiteralChoiceOption, ...LiteralChoiceOption[]];
     renderingHint?: SingleChoiceRenderingHint;
-  } = { kind: 'literal_single_choice_field_spec', options: init.options };
+  } = { kind: 'LiteralSingleChoiceFieldSpec', options: init.options };
   if (init.renderingHint !== undefined) out.renderingHint = init.renderingHint;
   return out;
 }
 
 export interface ControlledTermSingleChoiceFieldSpec {
-  readonly kind: 'controlled_term_single_choice_field_spec';
+  readonly kind: 'ControlledTermSingleChoiceFieldSpec';
   readonly options: readonly [
     ControlledTermChoiceOption,
     ...ControlledTermChoiceOption[],
@@ -106,14 +102,14 @@ export function controlledTermSingleChoiceFieldSpec(init: {
   readonly renderingHint?: SingleChoiceRenderingHint;
 }): ControlledTermSingleChoiceFieldSpec {
   const out: {
-    kind: 'controlled_term_single_choice_field_spec';
+    kind: 'ControlledTermSingleChoiceFieldSpec';
     options: readonly [
       ControlledTermChoiceOption,
       ...ControlledTermChoiceOption[],
     ];
     renderingHint?: SingleChoiceRenderingHint;
   } = {
-    kind: 'controlled_term_single_choice_field_spec',
+    kind: 'ControlledTermSingleChoiceFieldSpec',
     options: init.options,
   };
   if (init.renderingHint !== undefined) out.renderingHint = init.renderingHint;
@@ -121,7 +117,7 @@ export function controlledTermSingleChoiceFieldSpec(init: {
 }
 
 export interface LiteralMultipleChoiceFieldSpec {
-  readonly kind: 'literal_multiple_choice_field_spec';
+  readonly kind: 'LiteralMultipleChoiceFieldSpec';
   readonly options: readonly [LiteralChoiceOption, ...LiteralChoiceOption[]];
   readonly renderingHint?: MultipleChoiceRenderingHint;
 }
@@ -131,16 +127,16 @@ export function literalMultipleChoiceFieldSpec(init: {
   readonly renderingHint?: MultipleChoiceRenderingHint;
 }): LiteralMultipleChoiceFieldSpec {
   const out: {
-    kind: 'literal_multiple_choice_field_spec';
+    kind: 'LiteralMultipleChoiceFieldSpec';
     options: readonly [LiteralChoiceOption, ...LiteralChoiceOption[]];
     renderingHint?: MultipleChoiceRenderingHint;
-  } = { kind: 'literal_multiple_choice_field_spec', options: init.options };
+  } = { kind: 'LiteralMultipleChoiceFieldSpec', options: init.options };
   if (init.renderingHint !== undefined) out.renderingHint = init.renderingHint;
   return out;
 }
 
 export interface ControlledTermMultipleChoiceFieldSpec {
-  readonly kind: 'controlled_term_multiple_choice_field_spec';
+  readonly kind: 'ControlledTermMultipleChoiceFieldSpec';
   readonly options: readonly [
     ControlledTermChoiceOption,
     ...ControlledTermChoiceOption[],
@@ -156,14 +152,14 @@ export function controlledTermMultipleChoiceFieldSpec(init: {
   readonly renderingHint?: MultipleChoiceRenderingHint;
 }): ControlledTermMultipleChoiceFieldSpec {
   const out: {
-    kind: 'controlled_term_multiple_choice_field_spec';
+    kind: 'ControlledTermMultipleChoiceFieldSpec';
     options: readonly [
       ControlledTermChoiceOption,
       ...ControlledTermChoiceOption[],
     ];
     renderingHint?: MultipleChoiceRenderingHint;
   } = {
-    kind: 'controlled_term_multiple_choice_field_spec',
+    kind: 'ControlledTermMultipleChoiceFieldSpec',
     options: init.options,
   };
   if (init.renderingHint !== undefined) out.renderingHint = init.renderingHint;
@@ -184,25 +180,25 @@ export const isLiteralSingleChoiceFieldSpec = (
   x: unknown,
 ): x is LiteralSingleChoiceFieldSpec =>
   typeof x === 'object' && x !== null &&
-  (x as { kind?: unknown }).kind === 'literal_single_choice_field_spec';
+  (x as { kind?: unknown }).kind === 'LiteralSingleChoiceFieldSpec';
 
 export const isControlledTermSingleChoiceFieldSpec = (
   x: unknown,
 ): x is ControlledTermSingleChoiceFieldSpec =>
   typeof x === 'object' && x !== null &&
-  (x as { kind?: unknown }).kind === 'controlled_term_single_choice_field_spec';
+  (x as { kind?: unknown }).kind === 'ControlledTermSingleChoiceFieldSpec';
 
 export const isLiteralMultipleChoiceFieldSpec = (
   x: unknown,
 ): x is LiteralMultipleChoiceFieldSpec =>
   typeof x === 'object' && x !== null &&
-  (x as { kind?: unknown }).kind === 'literal_multiple_choice_field_spec';
+  (x as { kind?: unknown }).kind === 'LiteralMultipleChoiceFieldSpec';
 
 export const isControlledTermMultipleChoiceFieldSpec = (
   x: unknown,
 ): x is ControlledTermMultipleChoiceFieldSpec =>
   typeof x === 'object' && x !== null &&
-  (x as { kind?: unknown }).kind === 'controlled_term_multiple_choice_field_spec';
+  (x as { kind?: unknown }).kind === 'ControlledTermMultipleChoiceFieldSpec';
 
 export const isSingleChoiceFieldSpec = (x: unknown): x is SingleChoiceFieldSpec =>
   isLiteralSingleChoiceFieldSpec(x) || isControlledTermSingleChoiceFieldSpec(x);

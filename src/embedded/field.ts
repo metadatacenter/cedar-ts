@@ -110,7 +110,7 @@ import { type Property, type PropertyInput, property } from './property.js';
 
 // EmbeddedField — see grammar.md §Embedded Artifacts.
 // Contextualises a reusable Field within a specific Template. Each concrete
-// EmbeddedXxxField interface shares the same outer `kind: 'embedded_field'`
+// EmbeddedXxxField interface shares the same outer `kind: 'EmbeddedField'`
 // discriminant; the inner `fieldKind` discriminant keeps the eighteen
 // families distinct, and the `reference` and (where permitted) `defaultValue`
 // types are pinned per family for compile-time alignment. Writing the
@@ -123,7 +123,7 @@ import { type Property, type PropertyInput, property } from './property.js';
 // ---- Properties shared by every EmbeddedField interface ---------------
 
 interface EmbeddedFieldCommon {
-  readonly kind: 'embedded_field';
+  readonly kind: 'EmbeddedField';
   readonly key: string;
   readonly valueRequirement?: ValueRequirement;
   readonly cardinality?: Cardinality;
@@ -135,109 +135,109 @@ interface EmbeddedFieldCommon {
 // ---- Concrete EmbeddedField interfaces --------------------------------
 
 export interface EmbeddedTextField extends EmbeddedFieldCommon {
-  readonly fieldKind: 'text';
+  readonly fieldKind: 'Text';
   readonly reference: TextFieldReference;
   readonly defaultValue?: TextDefaultValue;
 }
 
 export interface EmbeddedNumericField extends EmbeddedFieldCommon {
-  readonly fieldKind: 'numeric';
+  readonly fieldKind: 'Numeric';
   readonly reference: NumericFieldReference;
   readonly defaultValue?: NumericDefaultValue;
 }
 
 export interface EmbeddedDateField extends EmbeddedFieldCommon {
-  readonly fieldKind: 'date';
+  readonly fieldKind: 'Date';
   readonly reference: DateFieldReference;
   readonly defaultValue?: DateDefaultValue;
 }
 
 export interface EmbeddedTimeField extends EmbeddedFieldCommon {
-  readonly fieldKind: 'time';
+  readonly fieldKind: 'Time';
   readonly reference: TimeFieldReference;
   readonly defaultValue?: TimeDefaultValue;
 }
 
 export interface EmbeddedDateTimeField extends EmbeddedFieldCommon {
-  readonly fieldKind: 'date_time';
+  readonly fieldKind: 'DateTime';
   readonly reference: DateTimeFieldReference;
   readonly defaultValue?: DateTimeDefaultValue;
 }
 
 export interface EmbeddedControlledTermField extends EmbeddedFieldCommon {
-  readonly fieldKind: 'controlled_term';
+  readonly fieldKind: 'ControlledTerm';
   readonly reference: ControlledTermFieldReference;
   readonly defaultValue?: ControlledTermDefaultValue;
 }
 
 export interface EmbeddedSingleChoiceField extends EmbeddedFieldCommon {
-  readonly fieldKind: 'single_choice';
+  readonly fieldKind: 'SingleChoice';
   readonly reference: SingleChoiceFieldReference;
   readonly defaultValue?: ChoiceDefaultValue;
 }
 
 export interface EmbeddedMultipleChoiceField extends EmbeddedFieldCommon {
-  readonly fieldKind: 'multiple_choice';
+  readonly fieldKind: 'MultipleChoice';
   readonly reference: MultipleChoiceFieldReference;
   readonly defaultValue?: ChoiceDefaultValue;
 }
 
 export interface EmbeddedLinkField extends EmbeddedFieldCommon {
-  readonly fieldKind: 'link';
+  readonly fieldKind: 'Link';
   readonly reference: LinkFieldReference;
   readonly defaultValue?: LinkDefaultValue;
 }
 
 export interface EmbeddedEmailField extends EmbeddedFieldCommon {
-  readonly fieldKind: 'email';
+  readonly fieldKind: 'Email';
   readonly reference: EmailFieldReference;
   readonly defaultValue?: EmailDefaultValue;
 }
 
 export interface EmbeddedPhoneNumberField extends EmbeddedFieldCommon {
-  readonly fieldKind: 'phone_number';
+  readonly fieldKind: 'PhoneNumber';
   readonly reference: PhoneNumberFieldReference;
   readonly defaultValue?: PhoneNumberDefaultValue;
 }
 
 export interface EmbeddedOrcidField extends EmbeddedFieldCommon {
-  readonly fieldKind: 'orcid';
+  readonly fieldKind: 'Orcid';
   readonly reference: OrcidFieldReference;
   readonly defaultValue?: OrcidDefaultValue;
 }
 
 export interface EmbeddedRorField extends EmbeddedFieldCommon {
-  readonly fieldKind: 'ror';
+  readonly fieldKind: 'Ror';
   readonly reference: RorFieldReference;
   readonly defaultValue?: RorDefaultValue;
 }
 
 export interface EmbeddedDoiField extends EmbeddedFieldCommon {
-  readonly fieldKind: 'doi';
+  readonly fieldKind: 'Doi';
   readonly reference: DoiFieldReference;
   readonly defaultValue?: DoiDefaultValue;
 }
 
 export interface EmbeddedPubMedIdField extends EmbeddedFieldCommon {
-  readonly fieldKind: 'pub_med_id';
+  readonly fieldKind: 'PubMedId';
   readonly reference: PubMedIdFieldReference;
   readonly defaultValue?: PubMedIdDefaultValue;
 }
 
 export interface EmbeddedRridField extends EmbeddedFieldCommon {
-  readonly fieldKind: 'rrid';
+  readonly fieldKind: 'Rrid';
   readonly reference: RridFieldReference;
   readonly defaultValue?: RridDefaultValue;
 }
 
 export interface EmbeddedNihGrantIdField extends EmbeddedFieldCommon {
-  readonly fieldKind: 'nih_grant_id';
+  readonly fieldKind: 'NihGrantId';
   readonly reference: NihGrantIdFieldReference;
   readonly defaultValue?: NihGrantIdDefaultValue;
 }
 
 export interface EmbeddedAttributeValueField extends EmbeddedFieldCommon {
-  readonly fieldKind: 'attribute_value';
+  readonly fieldKind: 'AttributeValue';
   readonly reference: AttributeValueFieldReference;
   // Grammar prohibits a default value here.
 }
@@ -408,7 +408,7 @@ export interface EmbeddedAttributeValueFieldInit extends EmbeddedFieldInitCommon
 // ---- Constructor common-property assembly ------------------------------
 
 type AssembledCommon = {
-  kind: 'embedded_field';
+  kind: 'EmbeddedField';
   key: string;
   valueRequirement?: ValueRequirement;
   cardinality?: Cardinality;
@@ -419,7 +419,7 @@ type AssembledCommon = {
 
 function assembleCommon(init: EmbeddedFieldInitCommon): AssembledCommon {
   const out: AssembledCommon = {
-    kind: 'embedded_field',
+    kind: 'EmbeddedField',
     key: parseAsciiIdentifier(init.key),
   };
   if (init.valueRequirement !== undefined) out.valueRequirement = init.valueRequirement;
@@ -435,10 +435,10 @@ function assembleCommon(init: EmbeddedFieldInitCommon): AssembledCommon {
 // can write `reference: fullName` instead of `reference: fullName.id`. The
 // conditional return type carries the per-family precision through to the
 // caller (e.g. fieldRef(TextField | TextFieldReference) → TextFieldReference).
-type FieldRefOf<T> = T extends { kind: 'field'; id: infer R } ? R : T;
+type FieldRefOf<T> = T extends { kind: 'Field'; id: infer R } ? R : T;
 
-function fieldRef<T extends { kind: 'field' | 'field_id' }>(input: T): FieldRefOf<T> {
-  return (input.kind === 'field'
+function fieldRef<T extends { kind: 'Field' | 'FieldId' }>(input: T): FieldRefOf<T> {
+  return (input.kind === 'Field'
     ? (input as unknown as { id: unknown }).id
     : input) as FieldRefOf<T>;
 }
@@ -448,7 +448,7 @@ function fieldRef<T extends { kind: 'field' | 'field_id' }>(input: T): FieldRefO
 export function embeddedTextField(init: EmbeddedTextFieldInit): EmbeddedTextField {
   const out: EmbeddedTextField = {
     ...assembleCommon(init),
-    fieldKind: 'text',
+    fieldKind: 'Text',
     reference: fieldRef(init.reference),
     ...(init.defaultValue !== undefined && {
       defaultValue: textDefaultValue(init.defaultValue),
@@ -462,7 +462,7 @@ export function embeddedNumericField(
 ): EmbeddedNumericField {
   const out: EmbeddedNumericField = {
     ...assembleCommon(init),
-    fieldKind: 'numeric',
+    fieldKind: 'Numeric',
     reference: fieldRef(init.reference),
     ...(init.defaultValue !== undefined && { defaultValue: init.defaultValue }),
   };
@@ -472,7 +472,7 @@ export function embeddedNumericField(
 export function embeddedDateField(init: EmbeddedDateFieldInit): EmbeddedDateField {
   const out: EmbeddedDateField = {
     ...assembleCommon(init),
-    fieldKind: 'date',
+    fieldKind: 'Date',
     reference: fieldRef(init.reference),
     ...(init.defaultValue !== undefined && {
       defaultValue: dateDefaultValue(init.defaultValue),
@@ -484,7 +484,7 @@ export function embeddedDateField(init: EmbeddedDateFieldInit): EmbeddedDateFiel
 export function embeddedTimeField(init: EmbeddedTimeFieldInit): EmbeddedTimeField {
   const out: EmbeddedTimeField = {
     ...assembleCommon(init),
-    fieldKind: 'time',
+    fieldKind: 'Time',
     reference: fieldRef(init.reference),
     ...(init.defaultValue !== undefined && {
       defaultValue: timeDefaultValue(init.defaultValue),
@@ -498,7 +498,7 @@ export function embeddedDateTimeField(
 ): EmbeddedDateTimeField {
   const out: EmbeddedDateTimeField = {
     ...assembleCommon(init),
-    fieldKind: 'date_time',
+    fieldKind: 'DateTime',
     reference: fieldRef(init.reference),
     ...(init.defaultValue !== undefined && {
       defaultValue: dateTimeDefaultValue(init.defaultValue),
@@ -512,7 +512,7 @@ export function embeddedControlledTermField(
 ): EmbeddedControlledTermField {
   const out: EmbeddedControlledTermField = {
     ...assembleCommon(init),
-    fieldKind: 'controlled_term',
+    fieldKind: 'ControlledTerm',
     reference: fieldRef(init.reference),
     ...(init.defaultValue !== undefined && { defaultValue: init.defaultValue }),
   };
@@ -524,7 +524,7 @@ export function embeddedSingleChoiceField(
 ): EmbeddedSingleChoiceField {
   const out: EmbeddedSingleChoiceField = {
     ...assembleCommon(init),
-    fieldKind: 'single_choice',
+    fieldKind: 'SingleChoice',
     reference: fieldRef(init.reference),
     ...(init.defaultValue !== undefined && { defaultValue: init.defaultValue }),
   };
@@ -536,7 +536,7 @@ export function embeddedMultipleChoiceField(
 ): EmbeddedMultipleChoiceField {
   const out: EmbeddedMultipleChoiceField = {
     ...assembleCommon(init),
-    fieldKind: 'multiple_choice',
+    fieldKind: 'MultipleChoice',
     reference: fieldRef(init.reference),
     ...(init.defaultValue !== undefined && { defaultValue: init.defaultValue }),
   };
@@ -546,7 +546,7 @@ export function embeddedMultipleChoiceField(
 export function embeddedLinkField(init: EmbeddedLinkFieldInit): EmbeddedLinkField {
   const out: EmbeddedLinkField = {
     ...assembleCommon(init),
-    fieldKind: 'link',
+    fieldKind: 'Link',
     reference: fieldRef(init.reference),
     ...(init.defaultValue !== undefined && { defaultValue: init.defaultValue }),
   };
@@ -556,7 +556,7 @@ export function embeddedLinkField(init: EmbeddedLinkFieldInit): EmbeddedLinkFiel
 export function embeddedEmailField(init: EmbeddedEmailFieldInit): EmbeddedEmailField {
   const out: EmbeddedEmailField = {
     ...assembleCommon(init),
-    fieldKind: 'email',
+    fieldKind: 'Email',
     reference: fieldRef(init.reference),
     ...(init.defaultValue !== undefined && {
       defaultValue: emailDefaultValue(init.defaultValue),
@@ -570,7 +570,7 @@ export function embeddedPhoneNumberField(
 ): EmbeddedPhoneNumberField {
   const out: EmbeddedPhoneNumberField = {
     ...assembleCommon(init),
-    fieldKind: 'phone_number',
+    fieldKind: 'PhoneNumber',
     reference: fieldRef(init.reference),
     ...(init.defaultValue !== undefined && {
       defaultValue: phoneNumberDefaultValue(init.defaultValue),
@@ -582,7 +582,7 @@ export function embeddedPhoneNumberField(
 export function embeddedOrcidField(init: EmbeddedOrcidFieldInit): EmbeddedOrcidField {
   const out: EmbeddedOrcidField = {
     ...assembleCommon(init),
-    fieldKind: 'orcid',
+    fieldKind: 'Orcid',
     reference: fieldRef(init.reference),
     ...(init.defaultValue !== undefined && {
       defaultValue: orcidDefaultValue(init.defaultValue),
@@ -594,7 +594,7 @@ export function embeddedOrcidField(init: EmbeddedOrcidFieldInit): EmbeddedOrcidF
 export function embeddedRorField(init: EmbeddedRorFieldInit): EmbeddedRorField {
   const out: EmbeddedRorField = {
     ...assembleCommon(init),
-    fieldKind: 'ror',
+    fieldKind: 'Ror',
     reference: fieldRef(init.reference),
     ...(init.defaultValue !== undefined && {
       defaultValue: rorDefaultValue(init.defaultValue),
@@ -606,7 +606,7 @@ export function embeddedRorField(init: EmbeddedRorFieldInit): EmbeddedRorField {
 export function embeddedDoiField(init: EmbeddedDoiFieldInit): EmbeddedDoiField {
   const out: EmbeddedDoiField = {
     ...assembleCommon(init),
-    fieldKind: 'doi',
+    fieldKind: 'Doi',
     reference: fieldRef(init.reference),
     ...(init.defaultValue !== undefined && {
       defaultValue: doiDefaultValue(init.defaultValue),
@@ -620,7 +620,7 @@ export function embeddedPubMedIdField(
 ): EmbeddedPubMedIdField {
   const out: EmbeddedPubMedIdField = {
     ...assembleCommon(init),
-    fieldKind: 'pub_med_id',
+    fieldKind: 'PubMedId',
     reference: fieldRef(init.reference),
     ...(init.defaultValue !== undefined && {
       defaultValue: pubMedIdDefaultValue(init.defaultValue),
@@ -632,7 +632,7 @@ export function embeddedPubMedIdField(
 export function embeddedRridField(init: EmbeddedRridFieldInit): EmbeddedRridField {
   const out: EmbeddedRridField = {
     ...assembleCommon(init),
-    fieldKind: 'rrid',
+    fieldKind: 'Rrid',
     reference: fieldRef(init.reference),
     ...(init.defaultValue !== undefined && {
       defaultValue: rridDefaultValue(init.defaultValue),
@@ -646,7 +646,7 @@ export function embeddedNihGrantIdField(
 ): EmbeddedNihGrantIdField {
   const out: EmbeddedNihGrantIdField = {
     ...assembleCommon(init),
-    fieldKind: 'nih_grant_id',
+    fieldKind: 'NihGrantId',
     reference: fieldRef(init.reference),
     ...(init.defaultValue !== undefined && {
       defaultValue: nihGrantIdDefaultValue(init.defaultValue),
@@ -660,7 +660,7 @@ export function embeddedAttributeValueField(
 ): EmbeddedAttributeValueField {
   return {
     ...assembleCommon(init),
-    fieldKind: 'attribute_value',
+    fieldKind: 'AttributeValue',
     reference: fieldRef(init.reference),
   };
 }
@@ -670,7 +670,7 @@ export function embeddedAttributeValueField(
 export function isEmbeddedField(x: unknown): x is EmbeddedField {
   return (
     typeof x === 'object' && x !== null &&
-    (x as { kind?: unknown }).kind === 'embedded_field'
+    (x as { kind?: unknown }).kind === 'EmbeddedField'
   );
 }
 

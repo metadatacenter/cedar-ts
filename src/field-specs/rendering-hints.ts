@@ -43,43 +43,43 @@ export const TIME_FORMATS: readonly TimeFormat[] = Object.freeze([
 // widget kind with an optional format component.
 
 export interface DateRenderingHint {
-  readonly kind: 'date_rendering_hint';
+  readonly kind: 'DateRenderingHint';
   readonly widget: 'date_picker';
   readonly format?: DateComponentOrder;
 }
 
 export function dateRenderingHint(format?: DateComponentOrder): DateRenderingHint {
-  const out: { kind: 'date_rendering_hint'; widget: 'date_picker'; format?: DateComponentOrder } =
-    { kind: 'date_rendering_hint', widget: 'date_picker' };
+  const out: { kind: 'DateRenderingHint'; widget: 'date_picker'; format?: DateComponentOrder } =
+    { kind: 'DateRenderingHint', widget: 'date_picker' };
   if (format !== undefined) out.format = format;
   return out;
 }
 
 export interface TimeRenderingHint {
-  readonly kind: 'time_rendering_hint';
+  readonly kind: 'TimeRenderingHint';
   readonly widget: 'time_picker';
   readonly format?: TimeFormat;
 }
 
 export function timeRenderingHint(format?: TimeFormat): TimeRenderingHint {
-  const out: { kind: 'time_rendering_hint'; widget: 'time_picker'; format?: TimeFormat } =
-    { kind: 'time_rendering_hint', widget: 'time_picker' };
+  const out: { kind: 'TimeRenderingHint'; widget: 'time_picker'; format?: TimeFormat } =
+    { kind: 'TimeRenderingHint', widget: 'time_picker' };
   if (format !== undefined) out.format = format;
   return out;
 }
 
 export interface DateTimeRenderingHint {
-  readonly kind: 'date_time_rendering_hint';
+  readonly kind: 'DateTimeRenderingHint';
   readonly widget: 'date_time_picker';
   readonly format?: TimeFormat;
 }
 
 export function dateTimeRenderingHint(format?: TimeFormat): DateTimeRenderingHint {
   const out: {
-    kind: 'date_time_rendering_hint';
+    kind: 'DateTimeRenderingHint';
     widget: 'date_time_picker';
     format?: TimeFormat;
-  } = { kind: 'date_time_rendering_hint', widget: 'date_time_picker' };
+  } = { kind: 'DateTimeRenderingHint', widget: 'date_time_picker' };
   if (format !== undefined) out.format = format;
   return out;
 }

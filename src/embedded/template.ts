@@ -13,7 +13,7 @@ import { type Property, type PropertyInput, property } from './property.js';
 // otherwise mirrors EmbeddedField's embedding properties.
 
 export interface EmbeddedTemplate {
-  readonly kind: 'embedded_template';
+  readonly kind: 'EmbeddedTemplate';
   readonly key: string;
   readonly reference: TemplateReference;
   readonly valueRequirement?: ValueRequirement;
@@ -37,7 +37,7 @@ export interface EmbeddedTemplateInit {
 
 export function embeddedTemplate(init: EmbeddedTemplateInit): EmbeddedTemplate {
   const out: {
-    kind: 'embedded_template';
+    kind: 'EmbeddedTemplate';
     key: string;
     reference: TemplateReference;
     valueRequirement?: ValueRequirement;
@@ -46,9 +46,9 @@ export function embeddedTemplate(init: EmbeddedTemplateInit): EmbeddedTemplate {
     labelOverride?: LabelOverride;
     property?: Property;
   } = {
-    kind: 'embedded_template',
+    kind: 'EmbeddedTemplate',
     key: parseAsciiIdentifier(init.key),
-    reference: init.reference.kind === 'template' ? init.reference.id : init.reference,
+    reference: init.reference.kind === 'Template' ? init.reference.id : init.reference,
   };
   if (init.valueRequirement !== undefined) out.valueRequirement = init.valueRequirement;
   if (init.cardinality !== undefined) out.cardinality = init.cardinality;
@@ -60,4 +60,4 @@ export function embeddedTemplate(init: EmbeddedTemplateInit): EmbeddedTemplate {
 
 export const isEmbeddedTemplate = (x: unknown): x is EmbeddedTemplate =>
   typeof x === 'object' && x !== null &&
-  (x as { kind?: unknown }).kind === 'embedded_template';
+  (x as { kind?: unknown }).kind === 'EmbeddedTemplate';

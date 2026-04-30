@@ -40,8 +40,8 @@ describe('FieldKind enumeration', () => {
   });
 
   it('isFieldKind narrows from string', () => {
-    expect(isFieldKind('text')).toBe(true);
-    expect(isFieldKind('attribute_value')).toBe(true);
+    expect(isFieldKind('Text')).toBe(true);
+    expect(isFieldKind('AttributeValue')).toBe(true);
     expect(isFieldKind('not_a_kind')).toBe(false);
     expect(isFieldKind(42)).toBe(false);
   });
@@ -50,8 +50,8 @@ describe('FieldKind enumeration', () => {
 describe('FieldId basics', () => {
   it('produces a tagged object with the requested fieldKind', () => {
     const id = textFieldId('https://example.org/fields/title');
-    expect(id.kind).toBe('field_id');
-    expect(id.fieldKind).toBe('text');
+    expect(id.kind).toBe('FieldId');
+    expect(id.fieldKind).toBe('Text');
     expect(id.iri.value).toBe('https://example.org/fields/title');
     expect(isFieldId(id)).toBe(true);
   });
@@ -62,31 +62,31 @@ describe('FieldId basics', () => {
 
   it('isFieldIdOf narrows by family', () => {
     const id = dateFieldId('https://example.org/fields/dob');
-    expect(isFieldIdOf(id, 'date')).toBe(true);
-    expect(isFieldIdOf(id, 'text')).toBe(false);
+    expect(isFieldIdOf(id, 'Date')).toBe(true);
+    expect(isFieldIdOf(id, 'Text')).toBe(false);
   });
 });
 
 describe('FieldId — convenience helpers', () => {
   const helpers: Array<[FieldKind, (v: string) => { fieldKind: FieldKind }]> = [
-    ['text', textFieldId],
-    ['numeric', numericFieldId],
-    ['date', dateFieldId],
-    ['time', timeFieldId],
-    ['date_time', dateTimeFieldId],
-    ['controlled_term', controlledTermFieldId],
-    ['single_choice', singleChoiceFieldId],
-    ['multiple_choice', multipleChoiceFieldId],
-    ['link', linkFieldId],
-    ['email', emailFieldId],
-    ['phone_number', phoneNumberFieldId],
-    ['orcid', orcidFieldId],
-    ['ror', rorFieldId],
-    ['doi', doiFieldId],
-    ['pub_med_id', pubMedIdFieldId],
-    ['rrid', rridFieldId],
-    ['nih_grant_id', nihGrantIdFieldId],
-    ['attribute_value', attributeValueFieldId],
+    ['Text', textFieldId],
+    ['Numeric', numericFieldId],
+    ['Date', dateFieldId],
+    ['Time', timeFieldId],
+    ['DateTime', dateTimeFieldId],
+    ['ControlledTerm', controlledTermFieldId],
+    ['SingleChoice', singleChoiceFieldId],
+    ['MultipleChoice', multipleChoiceFieldId],
+    ['Link', linkFieldId],
+    ['Email', emailFieldId],
+    ['PhoneNumber', phoneNumberFieldId],
+    ['Orcid', orcidFieldId],
+    ['Ror', rorFieldId],
+    ['Doi', doiFieldId],
+    ['PubMedId', pubMedIdFieldId],
+    ['Rrid', rridFieldId],
+    ['NihGrantId', nihGrantIdFieldId],
+    ['AttributeValue', attributeValueFieldId],
   ];
 
   it.each(helpers)('%s helper sets the right fieldKind', (kind, helper) => {
@@ -102,7 +102,7 @@ describe('Type-system separation between field families', () => {
     // @ts-expect-error
     const d: DateFieldId = t;
     void d;
-    expect(t.fieldKind).toBe('text');
+    expect(t.fieldKind).toBe('Text');
   });
 });
 
@@ -111,9 +111,9 @@ describe('Other artifact identifiers', () => {
     const t = templateId('https://example.org/t/1');
     const pc = presentationComponentId('https://example.org/pc/1');
     const ti = templateInstanceId('https://example.org/ti/1');
-    expect(t.kind).toBe('template_id');
-    expect(pc.kind).toBe('presentation_component_id');
-    expect(ti.kind).toBe('template_instance_id');
+    expect(t.kind).toBe('TemplateId');
+    expect(pc.kind).toBe('PresentationComponentId');
+    expect(ti.kind).toBe('TemplateInstanceId');
     expect(isTemplateId(t)).toBe(true);
     expect(isPresentationComponentId(pc)).toBe(true);
     expect(isTemplateInstanceId(ti)).toBe(true);

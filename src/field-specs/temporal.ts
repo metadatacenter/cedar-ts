@@ -47,7 +47,7 @@ export const TIMEZONE_REQUIREMENTS: readonly TimezoneRequirement[] = Object.free
 // ----- DateFieldSpec -----
 
 export interface DateFieldSpec {
-  readonly kind: 'date_field_spec';
+  readonly kind: 'DateFieldSpec';
   readonly dateValueType: DateValueType;
   readonly renderingHint?: DateRenderingHint;
 }
@@ -59,22 +59,22 @@ export interface DateFieldSpecInit {
 
 export function dateFieldSpec(init: DateFieldSpecInit): DateFieldSpec {
   const out: {
-    kind: 'date_field_spec';
+    kind: 'DateFieldSpec';
     dateValueType: DateValueType;
     renderingHint?: DateRenderingHint;
-  } = { kind: 'date_field_spec', dateValueType: init.dateValueType };
+  } = { kind: 'DateFieldSpec', dateValueType: init.dateValueType };
   if (init.renderingHint !== undefined) out.renderingHint = init.renderingHint;
   return out;
 }
 
 export const isDateFieldSpec = (x: unknown): x is DateFieldSpec =>
   typeof x === 'object' && x !== null &&
-  (x as { kind?: unknown }).kind === 'date_field_spec';
+  (x as { kind?: unknown }).kind === 'DateFieldSpec';
 
 // ----- TimeFieldSpec -----
 
 export interface TimeFieldSpec {
-  readonly kind: 'time_field_spec';
+  readonly kind: 'TimeFieldSpec';
   readonly timePrecision?: TimePrecision;
   readonly timezoneRequirement?: TimezoneRequirement;
   readonly renderingHint?: TimeRenderingHint;
@@ -88,11 +88,11 @@ export interface TimeFieldSpecInit {
 
 export function timeFieldSpec(init: TimeFieldSpecInit = {}): TimeFieldSpec {
   const out: {
-    kind: 'time_field_spec';
+    kind: 'TimeFieldSpec';
     timePrecision?: TimePrecision;
     timezoneRequirement?: TimezoneRequirement;
     renderingHint?: TimeRenderingHint;
-  } = { kind: 'time_field_spec' };
+  } = { kind: 'TimeFieldSpec' };
   if (init.timePrecision !== undefined) out.timePrecision = init.timePrecision;
   if (init.timezoneRequirement !== undefined)
     out.timezoneRequirement = init.timezoneRequirement;
@@ -102,12 +102,12 @@ export function timeFieldSpec(init: TimeFieldSpecInit = {}): TimeFieldSpec {
 
 export const isTimeFieldSpec = (x: unknown): x is TimeFieldSpec =>
   typeof x === 'object' && x !== null &&
-  (x as { kind?: unknown }).kind === 'time_field_spec';
+  (x as { kind?: unknown }).kind === 'TimeFieldSpec';
 
 // ----- DateTimeFieldSpec -----
 
 export interface DateTimeFieldSpec {
-  readonly kind: 'date_time_field_spec';
+  readonly kind: 'DateTimeFieldSpec';
   readonly dateTimeValueType: DateTimeValueType;
   readonly timezoneRequirement?: TimezoneRequirement;
   readonly renderingHint?: DateTimeRenderingHint;
@@ -121,11 +121,11 @@ export interface DateTimeFieldSpecInit {
 
 export function dateTimeFieldSpec(init: DateTimeFieldSpecInit): DateTimeFieldSpec {
   const out: {
-    kind: 'date_time_field_spec';
+    kind: 'DateTimeFieldSpec';
     dateTimeValueType: DateTimeValueType;
     timezoneRequirement?: TimezoneRequirement;
     renderingHint?: DateTimeRenderingHint;
-  } = { kind: 'date_time_field_spec', dateTimeValueType: init.dateTimeValueType };
+  } = { kind: 'DateTimeFieldSpec', dateTimeValueType: init.dateTimeValueType };
   if (init.timezoneRequirement !== undefined)
     out.timezoneRequirement = init.timezoneRequirement;
   if (init.renderingHint !== undefined) out.renderingHint = init.renderingHint;
@@ -134,6 +134,6 @@ export function dateTimeFieldSpec(init: DateTimeFieldSpecInit): DateTimeFieldSpe
 
 export const isDateTimeFieldSpec = (x: unknown): x is DateTimeFieldSpec =>
   typeof x === 'object' && x !== null &&
-  (x as { kind?: unknown }).kind === 'date_time_field_spec';
+  (x as { kind?: unknown }).kind === 'DateTimeFieldSpec';
 
 export type TemporalFieldSpec = DateFieldSpec | TimeFieldSpec | DateTimeFieldSpec;

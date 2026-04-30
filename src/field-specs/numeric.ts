@@ -6,7 +6,6 @@ import type { NumericRenderingHint } from './rendering-hints.js';
 // Unit denotes a measurement or quantity unit. The grammar pairs an Iri with
 // an optional Label; we model Label as a plain optional string.
 export interface Unit {
-  readonly kind: 'unit';
   readonly iri: Iri;
   readonly label?: string;
 }
@@ -17,8 +16,7 @@ export interface UnitInit {
 }
 
 export function unit(init: UnitInit): Unit {
-  const out: { kind: 'unit'; iri: Iri; label?: string } = {
-    kind: 'unit',
+  const out: { iri: Iri; label?: string } = {
     iri: typeof init.iri === 'string' ? iri(init.iri) : init.iri,
   };
   if (init.label !== undefined) out.label = init.label;
@@ -33,7 +31,7 @@ export function unit(init: UnitInit): Unit {
 // note in grammar.md about a possible future QuantityFieldSpec.
 
 export interface NumericFieldSpec {
-  readonly kind: 'numeric_field_spec';
+  readonly kind: 'NumericFieldSpec';
   readonly datatype: NumericDatatypeKind;
   readonly unit?: Unit;
   readonly numericPrecision?: number;
@@ -53,14 +51,14 @@ export interface NumericFieldSpecInit {
 
 export function numericFieldSpec(init: NumericFieldSpecInit): NumericFieldSpec {
   const out: {
-    kind: 'numeric_field_spec';
+    kind: 'NumericFieldSpec';
     datatype: NumericDatatypeKind;
     unit?: Unit;
     numericPrecision?: number;
     minValue?: NumericValue;
     maxValue?: NumericValue;
     renderingHint?: NumericRenderingHint;
-  } = { kind: 'numeric_field_spec', datatype: init.datatype };
+  } = { kind: 'NumericFieldSpec', datatype: init.datatype };
   if (init.unit !== undefined) out.unit = init.unit;
   if (init.numericPrecision !== undefined)
     out.numericPrecision = assertNonNegativeInteger(init.numericPrecision);
@@ -72,4 +70,4 @@ export function numericFieldSpec(init: NumericFieldSpecInit): NumericFieldSpec {
 
 export const isNumericFieldSpec = (x: unknown): x is NumericFieldSpec =>
   typeof x === 'object' && x !== null &&
-  (x as { kind?: unknown }).kind === 'numeric_field_spec';
+  (x as { kind?: unknown }).kind === 'NumericFieldSpec';

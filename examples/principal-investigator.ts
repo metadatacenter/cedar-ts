@@ -26,12 +26,15 @@ import {
   artifactMetadata,
   cardinality,
   controlledTermChoiceOption,
+  controlledTermField,
+  controlledTermFieldSpec,
   controlledTermSingleChoiceFieldSpec,
   controlledTermValue,
   dateField,
   dateFieldSpec,
   DEFAULT_VALUE_REQUIREMENT,
   descriptiveMetadata,
+  embeddedControlledTermField,
   embeddedDateField,
   embeddedEmailField,
   embeddedOrcidField,
@@ -50,6 +53,9 @@ import {
   literalChoiceOption,
   literalChoiceValue,
   literalSingleChoiceFieldSpec,
+  ontologyDisplayHint,
+  ontologyReference,
+  ontologySource,
   orcidField as makeOrcidField,
   orcidFieldSpec,
   orcidValue,
@@ -98,6 +104,11 @@ const COMPONENTS = `${BASE}components/`;
 const ROLEO_FULL_PROFESSOR = 'http://purl.obolibrary.org/obo/RoleO_0000677';
 const ROLEO_ASSISTANT_PROFESSOR = 'http://purl.obolibrary.org/obo/RoleO_0000678';
 const ROLEO_ASSOCIATE_PROFESSOR = 'http://purl.obolibrary.org/obo/RoleO_0000679';
+
+// MeSH (Medical Subject Headings) ontology and an example term IRI used in
+// the open-lookup controlled-term field below.
+const MESH_ONTOLOGY_IRI = 'http://id.nlm.nih.gov/mesh/';
+const MESH_MEDICAL_INFORMATICS_TERM_IRI = `${MESH_ONTOLOGY_IRI}D008490`;
 
 // ---- Shared metadata --------------------------------------------------
 //
@@ -283,6 +294,38 @@ const researchInterestField = textField({
   fieldSpec: textFieldSpec(),
 });
 
+// Controlled-term FIELD (not single-choice) — the user looks up any term
+// from a configured ontology source. Compare with `academicRankField`
+// above: there, the option set is enumerated up front; here, the option
+// set IS the ontology, and the rendered widget typically offers
+// type-ahead lookup against an ontology service.
+//
+// `controlledTermFieldSpec` accepts one or more sources. The source
+// variants are: OntologySource (any term in the ontology), BranchSource
+// (any term in a sub-branch), ClassSource (any term among an enumerated
+// set of classes), and ValueSetSource (any term in a named value set).
+// Here we use a single OntologySource over MeSH.
+const primaryResearchAreaField = controlledTermField({
+  id: `${FIELDS}primary-research-area`,
+  metadata: meta(
+    'Primary Research Area',
+    "The PI's primary research area, looked up from MeSH.",
+  ),
+  fieldSpec: controlledTermFieldSpec(
+    ontologySource(
+      ontologyReference({
+        iri: MESH_ONTOLOGY_IRI,
+        // displayHint surfaces an acronym and/or human-readable name to
+        // the rendering UI; at least one of acronym/name is required.
+        displayHint: ontologyDisplayHint({
+          acronym: 'MeSH',
+          name: 'Medical Subject Headings',
+        }),
+      }),
+    ),
+  ),
+});
+
 // ---- Presentation component (rich-text intro) -------------------------
 //
 // PresentationComponents contribute presentational structure to a rendered
@@ -439,6 +482,15 @@ export const principalInvestigatorTemplate: Template = template({
       property: 'https://schema.org/startDate',
     }),
 
+    // Open-lookup controlled-term field — instance values reference any
+    // term in the configured ontology, not a curated list.
+    embeddedControlledTermField({
+      key: 'primary_research_area',
+      reference: primaryResearchAreaField,
+      valueRequirement: 'recommended',
+      property: 'http://purl.org/dc/terms/subject',
+    }),
+
     // Multi-valued: zero or more research interests, no upper bound.
     // Cardinality.max omitted ⇒ unbounded (grammar §Cardinality).
     embeddedTextField({
@@ -543,6 +595,16 @@ export const exampleInstance: TemplateInstance = templateInstance({
     fieldValue(
       'appointment_date',
       fullDateValue('2018-09-01'),
+    ),
+    // Open-lookup controlled-term value: a MeSH descriptor IRI plus its
+    // English label. The `term` IRI here is the MeSH descriptor for
+    // "Medical Informatics".
+    fieldValue(
+      'primary_research_area',
+      controlledTermValue({
+        term: MESH_MEDICAL_INFORMATICS_TERM_IRI,
+        label: 'Medical Informatics',
+      }),
     ),
     // Multi-valued field — three TextValues collected in one FieldValue.
     fieldValue(

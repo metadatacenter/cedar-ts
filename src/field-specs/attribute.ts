@@ -1,10 +1,10 @@
 export interface AttributeValueFieldSpec {
-  readonly kind: 'attribute_value_field_spec';
+  readonly kind: 'AttributeValueFieldSpec';
 }
 
 export const attributeValueFieldSpec = (): AttributeValueFieldSpec =>
-  ({ kind: 'attribute_value_field_spec' });
+  ({ kind: 'AttributeValueFieldSpec' });
 
 export const isAttributeValueFieldSpec = (x: unknown): x is AttributeValueFieldSpec =>
   typeof x === 'object' && x !== null &&
-  (x as { kind?: unknown }).kind === 'attribute_value_field_spec';
+  (x as { kind?: unknown }).kind === 'AttributeValueFieldSpec';

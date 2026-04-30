@@ -12,7 +12,6 @@ export function isStatus(x: unknown): x is Status {
 }
 
 export interface SchemaVersioning {
-  readonly kind: 'schema_versioning';
   readonly version: string;
   readonly status: Status;
   readonly modelVersion: string;
@@ -30,14 +29,12 @@ export interface SchemaVersioningInit {
 
 export function schemaVersioning(init: SchemaVersioningInit): SchemaVersioning {
   const out: {
-    kind: 'schema_versioning';
     version: string;
     status: Status;
     modelVersion: string;
     previousVersion?: Iri;
     derivedFrom?: Iri;
   } = {
-    kind: 'schema_versioning',
     version: parseSemanticVersion(init.version),
     status: init.status,
     modelVersion: parseSemanticVersion(init.modelVersion),
@@ -51,11 +48,4 @@ export function schemaVersioning(init: SchemaVersioningInit): SchemaVersioning {
       typeof init.derivedFrom === 'string' ? iri(init.derivedFrom) : init.derivedFrom;
   }
   return out;
-}
-
-export function isSchemaVersioning(x: unknown): x is SchemaVersioning {
-  return (
-    typeof x === 'object' && x !== null &&
-    (x as { kind?: unknown }).kind === 'schema_versioning'
-  );
 }

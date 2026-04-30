@@ -9,7 +9,7 @@ import {
 
 // DatatypeIriLiteral pairs a lexical form with an explicit datatype IRI.
 export interface DatatypeIriLiteral {
-  readonly kind: 'datatype_iri_literal';
+  readonly kind: 'DatatypeIriLiteral';
   readonly lexicalForm: string;
   readonly datatype: Iri;
 }
@@ -19,7 +19,7 @@ export function datatypeIriLiteral(
   datatype: Iri | string,
 ): DatatypeIriLiteral {
   return {
-    kind: 'datatype_iri_literal',
+    kind: 'DatatypeIriLiteral',
     lexicalForm,
     datatype: typeof datatype === 'string' ? iri(datatype) : datatype,
   };
@@ -27,7 +27,7 @@ export function datatypeIriLiteral(
 
 // LangStringLiteral pairs a lexical form with a non-empty BCP 47 language tag.
 export interface LangStringLiteral {
-  readonly kind: 'lang_string_literal';
+  readonly kind: 'LangStringLiteral';
   readonly lexicalForm: string;
   readonly lang: LanguageTag;
 }
@@ -37,7 +37,7 @@ export function langStringLiteral(
   tag: LanguageTag | string,
 ): LangStringLiteral {
   return {
-    kind: 'lang_string_literal',
+    kind: 'LangStringLiteral',
     lexicalForm,
     lang: typeof tag === 'string' ? languageTag(tag) : tag,
   };
@@ -47,19 +47,19 @@ export function langStringLiteral(
 // Modeled here as its own kind for ergonomics; convertible to a DatatypeIriLiteral
 // via stringLiteralToDatatypeIriLiteral.
 export interface StringLiteral {
-  readonly kind: 'string_literal';
+  readonly kind: 'StringLiteral';
   readonly lexicalForm: string;
 }
 
 export function stringLiteral(lexicalForm: string): StringLiteral {
-  return { kind: 'string_literal', lexicalForm };
+  return { kind: 'StringLiteral', lexicalForm };
 }
 
 export function stringLiteralToDatatypeIriLiteral(s: StringLiteral): DatatypeIriLiteral {
   return {
-    kind: 'datatype_iri_literal',
+    kind: 'DatatypeIriLiteral',
     lexicalForm: s.lexicalForm,
-    datatype: { kind: 'iri', value: XsdStringDatatypeIri },
+    datatype: { kind: 'Iri', value: XsdStringDatatypeIri },
   };
 }
 
@@ -76,19 +76,19 @@ export const LANG_STRING_DATATYPE_IRI = RdfLangStringDatatypeIri;
 export function isDatatypeIriLiteral(x: unknown): x is DatatypeIriLiteral {
   return (
     typeof x === 'object' && x !== null &&
-    (x as { kind?: unknown }).kind === 'datatype_iri_literal'
+    (x as { kind?: unknown }).kind === 'DatatypeIriLiteral'
   );
 }
 export function isLangStringLiteral(x: unknown): x is LangStringLiteral {
   return (
     typeof x === 'object' && x !== null &&
-    (x as { kind?: unknown }).kind === 'lang_string_literal'
+    (x as { kind?: unknown }).kind === 'LangStringLiteral'
   );
 }
 export function isStringLiteral(x: unknown): x is StringLiteral {
   return (
     typeof x === 'object' && x !== null &&
-    (x as { kind?: unknown }).kind === 'string_literal'
+    (x as { kind?: unknown }).kind === 'StringLiteral'
   );
 }
 export function isTextLiteral(x: unknown): x is TextLiteral {

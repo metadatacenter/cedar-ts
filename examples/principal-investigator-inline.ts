@@ -17,13 +17,19 @@
 
 import {
   artifactMetadata,
+  type ArtifactMetadata,
   cardinality,
   controlledTermChoiceOption,
+  controlledTermField,
+  controlledTermFieldSpec,
   controlledTermSingleChoiceFieldSpec,
   controlledTermValue,
   dateField,
   dateFieldSpec,
   descriptiveMetadata,
+  emailField,
+  emailFieldSpec,
+  embeddedControlledTermField,
   embeddedDateField,
   embeddedEmailField,
   embeddedOrcidField,
@@ -32,11 +38,12 @@ import {
   embeddedRorField,
   embeddedSingleChoiceField,
   embeddedTextField,
-  emailField,
-  emailFieldSpec,
   labelOverride,
   literalChoiceOption,
   literalSingleChoiceFieldSpec,
+  ontologyDisplayHint,
+  ontologyReference,
+  ontologySource,
   orcidField,
   orcidFieldSpec,
   phoneNumberField,
@@ -45,15 +52,14 @@ import {
   rorField,
   rorFieldSpec,
   schemaArtifactMetadata,
+  type SchemaArtifactMetadata,
   schemaVersioning,
   singleChoiceField,
   template,
+  type Template,
   temporalProvenance,
   textField,
   textFieldSpec,
-  type ArtifactMetadata,
-  type SchemaArtifactMetadata,
-  type Template,
 } from '../src/index.js';
 
 // ---- IRI bases --------------------------------------------------------
@@ -67,6 +73,9 @@ const COMPONENTS = `${BASE}components/`;
 const ROLEO_FULL_PROFESSOR = 'http://purl.obolibrary.org/obo/RoleO_0000677';
 const ROLEO_ASSISTANT_PROFESSOR = 'http://purl.obolibrary.org/obo/RoleO_0000678';
 const ROLEO_ASSOCIATE_PROFESSOR = 'http://purl.obolibrary.org/obo/RoleO_0000679';
+
+// MeSH ontology, used by the open-lookup controlled-term field below.
+const MESH_ONTOLOGY = 'http://id.nlm.nih.gov/mesh/';
 
 // ---- Shared metadata helpers ------------------------------------------
 //
@@ -313,6 +322,33 @@ export const principalInvestigatorTemplate: Template = template({
       }),
       valueRequirement: 'optional',
       property: 'https://schema.org/startDate',
+    }),
+
+    // Open-lookup controlled-term field — instance values reference any
+    // term in the configured ontology (here MeSH), not a curated list.
+    // Compare with `academic_rank` above, which enumerates its options.
+    embeddedControlledTermField({
+      key: 'primary_research_area',
+      reference: controlledTermField({
+        id: `${FIELDS}primary-research-area`,
+        metadata: meta(
+            'Primary Research Area',
+            "The PI's primary research area, looked up from MeSH.",
+        ),
+        fieldSpec: controlledTermFieldSpec(
+            ontologySource(
+                ontologyReference({
+                  iri: MESH_ONTOLOGY,
+                  displayHint: ontologyDisplayHint({
+                    acronym: 'MeSH',
+                    name: 'Medical Subject Headings',
+                  }),
+                }),
+            ),
+        ),
+      }),
+      valueRequirement: 'recommended',
+      property: 'http://purl.org/dc/terms/subject',
     }),
 
     // Multi-valued: zero or more research interests, no upper bound.

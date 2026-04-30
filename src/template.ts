@@ -13,11 +13,11 @@ import type { Field } from './fields.js';
 // (see metadata/descriptive.ts), Header and Footer are kept as plain optional
 // string properties; the property names preserve the grammar distinction.
 //
-// `kind: 'template'` is the discriminant against other artifact unions
+// `kind: 'Template'` is the discriminant against other artifact unions
 // (Field, PresentationComponent, TemplateInstance).
 
 export interface Template {
-  readonly kind: 'template';
+  readonly kind: 'Template';
   readonly id: TemplateId;
   readonly metadata: SchemaArtifactMetadata;
   readonly header?: string;
@@ -41,14 +41,14 @@ export function template(init: TemplateInit): Template {
   const embedded = init.embedded ?? [];
   assertUniqueEmbeddedArtifactKeys(embedded);
   const out: {
-    kind: 'template';
+    kind: 'Template';
     id: TemplateId;
     metadata: SchemaArtifactMetadata;
     header?: string;
     footer?: string;
     embedded: readonly EmbeddedArtifact[];
   } = {
-    kind: 'template',
+    kind: 'Template',
     id: typeof init.id === 'string' ? templateId(init.id) : init.id,
     metadata: init.metadata,
     embedded,
@@ -76,7 +76,7 @@ function assertUniqueEmbeddedArtifactKeys(
 export function isTemplate(x: unknown): x is Template {
   return (
     typeof x === 'object' && x !== null &&
-    (x as { kind?: unknown }).kind === 'template'
+    (x as { kind?: unknown }).kind === 'Template'
   );
 }
 
@@ -87,5 +87,5 @@ export type SchemaArtifact = Field | Template;
 export const isSchemaArtifact = (x: unknown): x is SchemaArtifact => {
   if (typeof x !== 'object' || x === null) return false;
   const k = (x as { kind?: unknown }).kind;
-  return k === 'field' || k === 'template';
+  return k === 'Field' || k === 'Template';
 };
