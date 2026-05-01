@@ -1,0 +1,161 @@
+import { type Iri, iri } from '../leaves/index.js';
+import type { SchemaArtifactMetadata } from '../metadata/index.js';
+import type { ValueRequirement } from '../embedded/requirement.js';
+import type { Cardinality } from '../embedded/cardinality.js';
+import type { Visibility } from '../embedded/visibility.js';
+import type { LabelOverride } from '../embedded/label-override.js';
+import type { Property } from '../embedded/property.js';
+import {
+  type AuthorityValueInput,
+  type AuthorityDefaultValueInput,
+  authorityValueFromInput,
+  isTaggedKind,
+} from './external-authority-shared.js';
+import {
+  type EmbeddedFieldInitCommon,
+  assembleCommon,
+  fieldRef,
+} from './embedded-field-common.js';
+
+// =====================================================================
+// 1. Identifier
+// =====================================================================
+
+export interface RorFieldId {
+  readonly kind: 'FieldId';
+  readonly fieldKind: 'Ror';
+  readonly iri: Iri;
+}
+
+export type RorFieldReference = RorFieldId;
+
+export const rorFieldId = (
+  v: RorFieldId | Iri | string,
+): RorFieldId => {
+  if (typeof v !== 'string' && (v as { kind?: unknown }).kind === 'FieldId') {
+    return v as RorFieldId;
+  }
+  return {
+    kind: 'FieldId',
+    fieldKind: 'Ror',
+    iri: typeof v === 'string' ? iri(v) : (v as Iri),
+  };
+};
+
+// =====================================================================
+// 2. Value
+// =====================================================================
+
+export interface RorIri {
+  readonly kind: 'RorIri';
+  readonly value: Iri;
+}
+
+const wrapIri = (raw: Iri | string): Iri =>
+  typeof raw === 'string' ? iri(raw) : raw;
+
+export const rorIri = (v: Iri | string): RorIri =>
+  ({ kind: 'RorIri', value: wrapIri(v) });
+
+export interface RorValue {
+  readonly kind: 'RorValue';
+  readonly iri: RorIri;
+  readonly label?: string;
+}
+
+function toRorIri(v: RorIri | Iri | string): RorIri {
+  if (isTaggedKind(v, 'RorIri')) return v as RorIri;
+  return rorIri(v as Iri | string);
+}
+
+export const rorValue = (input: AuthorityValueInput<RorIri>): RorValue =>
+  authorityValueFromInput('RorValue', toRorIri, input);
+
+export const isRorValue = (x: unknown): x is RorValue =>
+  isTaggedKind(x, 'RorValue');
+
+// =====================================================================
+// 3. FieldSpec
+// =====================================================================
+
+export interface RorFieldSpec { readonly kind: 'RorFieldSpec'; }
+
+export const rorFieldSpec = (): RorFieldSpec => ({ kind: 'RorFieldSpec' });
+
+export const isRorFieldSpec = (x: unknown): x is RorFieldSpec =>
+  isTaggedKind(x, 'RorFieldSpec');
+
+// =====================================================================
+// 4. Field artifact
+// =====================================================================
+
+export interface RorField {
+  readonly kind: 'RorField';
+  readonly id: RorFieldId;
+  readonly metadata: SchemaArtifactMetadata;
+  readonly fieldSpec: RorFieldSpec;
+}
+
+export interface RorFieldInit {
+  readonly id: RorFieldId | Iri | string;
+  readonly metadata: SchemaArtifactMetadata;
+  readonly fieldSpec: RorFieldSpec;
+}
+
+export const rorField = (init: RorFieldInit): RorField =>
+  ({ kind: 'RorField', id: rorFieldId(init.id), metadata: init.metadata, fieldSpec: init.fieldSpec });
+
+// =====================================================================
+// 5. DefaultValue
+// =====================================================================
+
+export interface RorDefaultValue {
+  readonly kind: 'RorDefaultValue';
+  readonly value: RorValue;
+}
+export function rorDefaultValue(
+  input: RorDefaultValue | AuthorityDefaultValueInput<RorIri, RorValue>,
+): RorDefaultValue {
+  if (typeof input === 'object' && 'kind' in input && input.kind === 'RorDefaultValue') {
+    return input;
+  }
+  return {
+    kind: 'RorDefaultValue',
+    value: isRorValue(input) ? input : rorValue(input),
+  };
+}
+
+// =====================================================================
+// 6. EmbeddedField
+// =====================================================================
+
+export interface EmbeddedRorField {
+  readonly kind: 'EmbeddedRorField';
+  readonly key: string;
+  readonly reference: RorFieldReference;
+  readonly valueRequirement?: ValueRequirement;
+  readonly cardinality?: Cardinality;
+  readonly visibility?: Visibility;
+  readonly labelOverride?: LabelOverride;
+  readonly property?: Property;
+  readonly defaultValue?: RorDefaultValue;
+}
+
+export interface EmbeddedRorFieldInit extends EmbeddedFieldInitCommon {
+  readonly reference: RorFieldReference | RorField;
+  readonly defaultValue?:
+    | RorDefaultValue
+    | AuthorityDefaultValueInput<RorIri, RorValue>;
+}
+
+export function embeddedRorField(init: EmbeddedRorFieldInit): EmbeddedRorField {
+  const out: EmbeddedRorField = {
+    ...assembleCommon(init),
+    kind: 'EmbeddedRorField',
+    reference: fieldRef(init.reference),
+    ...(init.defaultValue !== undefined && {
+      defaultValue: rorDefaultValue(init.defaultValue),
+    }),
+  };
+  return out;
+}

@@ -32,11 +32,11 @@ export const isInstanceValue = (x: unknown): x is InstanceValue =>
 // PresentationComponent, and TemplateInstance. Defined here, alongside
 // TemplateInstance, because it is the last layer needed to express the union.
 
-import type { Field } from '../field-artifacts.js';
+import type { Field } from '../field-families/index.js';
 import type { Template } from '../template.js';
 import type { PresentationComponent } from '../presentation/index.js';
 import type { TemplateInstance } from './template-instance.js';
-import { isField } from '../field-artifacts.js';
+import { isField } from '../field-families/index.js';
 import { isTemplate } from '../template.js';
 import { isPresentationComponent } from '../presentation/index.js';
 import { isTemplateInstance } from './template-instance.js';

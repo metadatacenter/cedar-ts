@@ -1,5 +1,5 @@
 import { parseAsciiIdentifier } from '../leaves/index.js';
-import type { Value } from '../values/index.js';
+import type { Value } from '../field-families/index.js';
 
 // FieldValue — see grammar.md §Instances.
 // Carries one or more typed Values for an EmbeddedField in the referenced

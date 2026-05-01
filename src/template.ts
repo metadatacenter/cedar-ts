@@ -2,7 +2,7 @@ import { CedarConstructionError } from './leaves/index.js';
 import { type TemplateId, templateId } from './identifiers.js';
 import type { SchemaArtifactMetadata } from './metadata/index.js';
 import type { EmbeddedArtifact } from './embedded/index.js';
-import { type Field, isField } from './field-artifacts.js';
+import { type Field, isField } from './field-families/index.js';
 import {
   type MultilingualString,
   type MultilingualStringInput,
