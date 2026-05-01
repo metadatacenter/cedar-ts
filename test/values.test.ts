@@ -281,7 +281,8 @@ describe('Value-constructor input widening', () => {
   it('fullDateValue accepts a lexical-form string', () => {
     const v = fullDateValue('2024-06-15');
     expect(v.kind).toBe('FullDateValue');
-    expect(v.literal.kind).toBe('FullDateLiteral');
+    expect(v.literal.kind).toBe('TypedLiteral');
+    expect(v.literal.datatype.value).toBe('http://www.w3.org/2001/XMLSchema#date');
     expect(v.literal.lexicalForm).toBe('2024-06-15');
   });
 

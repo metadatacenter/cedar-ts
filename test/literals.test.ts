@@ -97,11 +97,11 @@ describe('literalsTermEqual', () => {
 });
 
 describe('NumericLiteral', () => {
-  it('carries a kind name resolving to the canonical XSD IRI', () => {
+  it('is a TypedLiteral with a numeric XSD datatype IRI', () => {
     const lit = numericLiteral('42', 'integer');
-    expect(lit.kind).toBe('NumericLiteral');
+    expect(lit.kind).toBe('TypedLiteral');
     expect(lit.lexicalForm).toBe('42');
-    expect(lit.datatype).toBe('integer');
+    expect(lit.datatype.value).toBe('http://www.w3.org/2001/XMLSchema#integer');
     expect(numericLiteralDatatypeIri(lit)).toBe(
       'http://www.w3.org/2001/XMLSchema#integer',
     );
@@ -114,10 +114,16 @@ describe('NumericLiteral', () => {
 });
 
 describe('Temporal literals', () => {
-  it('are tagged objects with a fixed implicit datatype', () => {
+  it('are TypedLiterals with a fixed XSD temporal datatype', () => {
     const d = fullDateLiteral('2024-06-15');
     const t = timeLiteral('10:30:00');
     const dt = dateTimeLiteral('2024-06-15T10:30:00');
+    expect(d.kind).toBe('TypedLiteral');
+    expect(t.kind).toBe('TypedLiteral');
+    expect(dt.kind).toBe('TypedLiteral');
+    expect(d.datatype.value).toBe('http://www.w3.org/2001/XMLSchema#date');
+    expect(t.datatype.value).toBe('http://www.w3.org/2001/XMLSchema#time');
+    expect(dt.datatype.value).toBe('http://www.w3.org/2001/XMLSchema#dateTime');
     expect(isFullDateLiteral(d)).toBe(true);
     expect(isTimeLiteral(t)).toBe(true);
     expect(isDateTimeLiteral(dt)).toBe(true);
