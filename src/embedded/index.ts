@@ -95,21 +95,21 @@ export {
   type EmbeddedTemplateInit,
   embeddedTemplate,
   isEmbeddedTemplate,
-} from './template.js';
+} from './embedded-template.js';
 
 export {
   type EmbeddedPresentationComponent,
   type EmbeddedPresentationComponentInit,
   embeddedPresentationComponent,
   isEmbeddedPresentationComponent,
-} from './presentation.js';
+} from './embedded-presentation-component.js';
 
 import type { EmbeddedField } from './embedded-fields.js';
-import type { EmbeddedTemplate } from './template.js';
-import type { EmbeddedPresentationComponent } from './presentation.js';
+import type { EmbeddedTemplate } from './embedded-template.js';
+import type { EmbeddedPresentationComponent } from './embedded-presentation-component.js';
 import { isEmbeddedField } from './embedded-fields.js';
-import { isEmbeddedTemplate } from './template.js';
-import { isEmbeddedPresentationComponent } from './presentation.js';
+import { isEmbeddedTemplate } from './embedded-template.js';
+import { isEmbeddedPresentationComponent } from './embedded-presentation-component.js';
 
 // EmbeddedArtifact — see grammar.md §Embedded Artifacts.
 // Union of the three embedding forms; discriminated on the top-level `kind`.
