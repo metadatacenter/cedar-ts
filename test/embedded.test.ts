@@ -78,8 +78,7 @@ describe('Inline Field/Template/PresentationComponent reference inputs', () => {
     });
     const ef = embeddedTextField({ key: 'title', reference: artifact });
     expect(ef.reference).toBe(artifact.id);
-    expect(ef.reference.kind).toBe('FieldId');
-    expect(ef.reference.fieldKind).toBe('Text');
+    expect(ef.reference.kind).toBe('TextFieldId');
   });
 
   it('embeddedTextField passes the FieldReference through', () => {
@@ -256,7 +255,7 @@ describe('EmbeddedField constructors', () => {
       reference: txtRef,
     });
     expect(ef.kind).toBe('EmbeddedTextField');
-    expect(ef.reference.fieldKind).toBe('Text');
+    expect(ef.reference.kind).toBe('TextFieldId');
     expect(isEmbeddedField(ef)).toBe(true);
   });
 

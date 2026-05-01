@@ -428,41 +428,30 @@ export type FieldId =
 // expresses the intention to embed it).
 export type FieldReference = FieldId;
 
+const FIELD_ID_KINDS: ReadonlySet<string> = new Set([
+  'TextFieldId',
+  'NumericFieldId',
+  'DateFieldId',
+  'TimeFieldId',
+  'DateTimeFieldId',
+  'ControlledTermFieldId',
+  'SingleChoiceFieldId',
+  'MultipleChoiceFieldId',
+  'LinkFieldId',
+  'EmailFieldId',
+  'PhoneNumberFieldId',
+  'OrcidFieldId',
+  'RorFieldId',
+  'DoiFieldId',
+  'PubMedIdFieldId',
+  'RridFieldId',
+  'NihGrantIdFieldId',
+  'AttributeValueFieldId',
+]);
+
 export function isFieldId(x: unknown): x is FieldId {
   return (
     typeof x === 'object' && x !== null &&
-    (x as { kind?: unknown }).kind === 'FieldId'
+    FIELD_ID_KINDS.has((x as { kind?: unknown }).kind as string)
   );
-}
-
-// Internal enumeration of the 18 concrete field families. Used only as the
-// type parameter constraint on isFieldIdOf below; not part of the public
-// API. The Field and EmbeddedField families discriminate on a per-variant
-// `kind` value (TextField, NumericField, …) rather than this enumeration.
-type FieldKind =
-  | 'Text'
-  | 'Numeric'
-  | 'Date'
-  | 'Time'
-  | 'DateTime'
-  | 'ControlledTerm'
-  | 'SingleChoice'
-  | 'MultipleChoice'
-  | 'Link'
-  | 'Email'
-  | 'PhoneNumber'
-  | 'Orcid'
-  | 'Ror'
-  | 'Doi'
-  | 'PubMedId'
-  | 'Rrid'
-  | 'NihGrantId'
-  | 'AttributeValue';
-
-// Narrows a FieldId to the concrete family identified by `fieldKind`.
-export function isFieldIdOf<K extends FieldKind>(
-  x: unknown,
-  fieldKind: K,
-): x is Extract<FieldId, { fieldKind: K }> {
-  return isFieldId(x) && x.fieldKind === fieldKind;
 }

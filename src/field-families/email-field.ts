@@ -17,8 +17,7 @@ import {
 // =====================================================================
 
 export interface EmailFieldId {
-  readonly kind: 'FieldId';
-  readonly fieldKind: 'Email';
+  readonly kind: 'EmailFieldId';
   readonly iri: Iri;
 }
 
@@ -31,8 +30,7 @@ export const emailFieldId = (
     return v as EmailFieldId;
   }
   return {
-    kind: 'FieldId',
-    fieldKind: 'Email',
+    kind: 'EmailFieldId',
     iri: typeof v === 'string' ? iri(v) : (v as Iri),
   };
 };

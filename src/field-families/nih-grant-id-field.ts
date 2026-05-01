@@ -22,8 +22,7 @@ import {
 // =====================================================================
 
 export interface NihGrantIdFieldId {
-  readonly kind: 'FieldId';
-  readonly fieldKind: 'NihGrantId';
+  readonly kind: 'NihGrantIdFieldId';
   readonly iri: Iri;
 }
 
@@ -36,8 +35,7 @@ export const nihGrantIdFieldId = (
     return v as NihGrantIdFieldId;
   }
   return {
-    kind: 'FieldId',
-    fieldKind: 'NihGrantId',
+    kind: 'NihGrantIdFieldId',
     iri: typeof v === 'string' ? iri(v) : (v as Iri),
   };
 };

@@ -2,7 +2,6 @@ import { describe, expect, it } from 'vitest';
 import {
   CedarConstructionError,
   isFieldId,
-  isFieldIdOf,
   textFieldId,
   numericFieldId,
   dateFieldId,
@@ -32,10 +31,9 @@ import {
 } from '../src/index.js';
 
 describe('FieldId basics', () => {
-  it('produces a tagged object with the requested fieldKind', () => {
+  it('produces a tagged object with the per-variant kind', () => {
     const id = textFieldId('https://example.org/fields/title');
-    expect(id.kind).toBe('FieldId');
-    expect(id.fieldKind).toBe('Text');
+    expect(id.kind).toBe('TextFieldId');
     expect(id.iri.value).toBe('https://example.org/fields/title');
     expect(isFieldId(id)).toBe(true);
   });
@@ -44,49 +42,49 @@ describe('FieldId basics', () => {
     expect(() => textFieldId('not an iri')).toThrow(CedarConstructionError);
   });
 
-  it('isFieldIdOf narrows by family', () => {
+  it('narrows by per-variant kind', () => {
     const id = dateFieldId('https://example.org/fields/dob');
-    expect(isFieldIdOf(id, 'Date')).toBe(true);
-    expect(isFieldIdOf(id, 'Text')).toBe(false);
+    expect(id.kind === 'DateFieldId').toBe(true);
+    expect((id.kind as string) === 'TextFieldId').toBe(false);
   });
 });
 
 describe('FieldId — convenience helpers', () => {
-  const helpers: Array<[string, (v: string) => { fieldKind: string }]> = [
-    ['Text', textFieldId],
-    ['Numeric', numericFieldId],
-    ['Date', dateFieldId],
-    ['Time', timeFieldId],
-    ['DateTime', dateTimeFieldId],
-    ['ControlledTerm', controlledTermFieldId],
-    ['SingleChoice', singleChoiceFieldId],
-    ['MultipleChoice', multipleChoiceFieldId],
-    ['Link', linkFieldId],
-    ['Email', emailFieldId],
-    ['PhoneNumber', phoneNumberFieldId],
-    ['Orcid', orcidFieldId],
-    ['Ror', rorFieldId],
-    ['Doi', doiFieldId],
-    ['PubMedId', pubMedIdFieldId],
-    ['Rrid', rridFieldId],
-    ['NihGrantId', nihGrantIdFieldId],
-    ['AttributeValue', attributeValueFieldId],
+  const helpers: Array<[string, (v: string) => { kind: string }]> = [
+    ['TextFieldId', textFieldId],
+    ['NumericFieldId', numericFieldId],
+    ['DateFieldId', dateFieldId],
+    ['TimeFieldId', timeFieldId],
+    ['DateTimeFieldId', dateTimeFieldId],
+    ['ControlledTermFieldId', controlledTermFieldId],
+    ['SingleChoiceFieldId', singleChoiceFieldId],
+    ['MultipleChoiceFieldId', multipleChoiceFieldId],
+    ['LinkFieldId', linkFieldId],
+    ['EmailFieldId', emailFieldId],
+    ['PhoneNumberFieldId', phoneNumberFieldId],
+    ['OrcidFieldId', orcidFieldId],
+    ['RorFieldId', rorFieldId],
+    ['DoiFieldId', doiFieldId],
+    ['PubMedIdFieldId', pubMedIdFieldId],
+    ['RridFieldId', rridFieldId],
+    ['NihGrantIdFieldId', nihGrantIdFieldId],
+    ['AttributeValueFieldId', attributeValueFieldId],
   ];
 
-  it.each(helpers)('%s helper sets the right fieldKind', (kind, helper) => {
+  it.each(helpers)('%s helper sets the right kind', (kind, helper) => {
     const id = helper('https://example.org/x');
-    expect(id.fieldKind).toBe(kind);
+    expect(id.kind).toBe(kind);
   });
 });
 
 describe('Type-system separation between field families', () => {
-  it('a TextFieldId is structurally a FieldId<"text"> and not a FieldId<"date">', () => {
+  it('a TextFieldId is structurally distinct from a DateFieldId', () => {
     const t: TextFieldId = textFieldId('https://example.org/t');
     // Compile-time check: assigning t to DateFieldId would error.
     // @ts-expect-error
     const d: DateFieldId = t;
     void d;
-    expect(t.fieldKind).toBe('Text');
+    expect(t.kind).toBe('TextFieldId');
   });
 });
 

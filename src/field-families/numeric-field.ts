@@ -28,8 +28,7 @@ import {
 // =====================================================================
 
 export interface NumericFieldId {
-  readonly kind: 'FieldId';
-  readonly fieldKind: 'Numeric';
+  readonly kind: 'NumericFieldId';
   readonly iri: Iri;
 }
 
@@ -42,8 +41,7 @@ export const numericFieldId = (
     return v as NumericFieldId;
   }
   return {
-    kind: 'FieldId',
-    fieldKind: 'Numeric',
+    kind: 'NumericFieldId',
     iri: typeof v === 'string' ? iri(v) : (v as Iri),
   };
 };

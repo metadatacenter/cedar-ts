@@ -16,8 +16,7 @@ import {
 // =====================================================================
 
 export interface LinkFieldId {
-  readonly kind: 'FieldId';
-  readonly fieldKind: 'Link';
+  readonly kind: 'LinkFieldId';
   readonly iri: Iri;
 }
 
@@ -30,8 +29,7 @@ export const linkFieldId = (
     return v as LinkFieldId;
   }
   return {
-    kind: 'FieldId',
-    fieldKind: 'Link',
+    kind: 'LinkFieldId',
     iri: typeof v === 'string' ? iri(v) : (v as Iri),
   };
 };

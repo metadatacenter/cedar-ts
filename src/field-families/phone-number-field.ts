@@ -17,8 +17,7 @@ import {
 // =====================================================================
 
 export interface PhoneNumberFieldId {
-  readonly kind: 'FieldId';
-  readonly fieldKind: 'PhoneNumber';
+  readonly kind: 'PhoneNumberFieldId';
   readonly iri: Iri;
 }
 
@@ -31,8 +30,7 @@ export const phoneNumberFieldId = (
     return v as PhoneNumberFieldId;
   }
   return {
-    kind: 'FieldId',
-    fieldKind: 'PhoneNumber',
+    kind: 'PhoneNumberFieldId',
     iri: typeof v === 'string' ? iri(v) : (v as Iri),
   };
 };

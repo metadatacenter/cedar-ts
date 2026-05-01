@@ -22,8 +22,7 @@ import {
 // =====================================================================
 
 export interface PubMedIdFieldId {
-  readonly kind: 'FieldId';
-  readonly fieldKind: 'PubMedId';
+  readonly kind: 'PubMedIdFieldId';
   readonly iri: Iri;
 }
 
@@ -36,8 +35,7 @@ export const pubMedIdFieldId = (
     return v as PubMedIdFieldId;
   }
   return {
-    kind: 'FieldId',
-    fieldKind: 'PubMedId',
+    kind: 'PubMedIdFieldId',
     iri: typeof v === 'string' ? iri(v) : (v as Iri),
   };
 };

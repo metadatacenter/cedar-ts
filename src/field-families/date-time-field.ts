@@ -24,8 +24,7 @@ import {
 // =====================================================================
 
 export interface DateTimeFieldId {
-  readonly kind: 'FieldId';
-  readonly fieldKind: 'DateTime';
+  readonly kind: 'DateTimeFieldId';
   readonly iri: Iri;
 }
 
@@ -38,8 +37,7 @@ export const dateTimeFieldId = (
     return v as DateTimeFieldId;
   }
   return {
-    kind: 'FieldId',
-    fieldKind: 'DateTime',
+    kind: 'DateTimeFieldId',
     iri: typeof v === 'string' ? iri(v) : (v as Iri),
   };
 };

@@ -30,8 +30,7 @@ import {
 // =====================================================================
 
 export interface MultipleChoiceFieldId {
-  readonly kind: 'FieldId';
-  readonly fieldKind: 'MultipleChoice';
+  readonly kind: 'MultipleChoiceFieldId';
   readonly iri: Iri;
 }
 
@@ -44,8 +43,7 @@ export const multipleChoiceFieldId = (
     return v as MultipleChoiceFieldId;
   }
   return {
-    kind: 'FieldId',
-    fieldKind: 'MultipleChoice',
+    kind: 'MultipleChoiceFieldId',
     iri: typeof v === 'string' ? iri(v) : (v as Iri),
   };
 };

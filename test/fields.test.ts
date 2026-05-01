@@ -98,7 +98,7 @@ describe('Field constructors', () => {
       fieldSpec: textFieldSpec(),
     });
     expect(f.kind).toBe('TextField');
-    expect(f.id.fieldKind).toBe('Text');
+    expect(f.id.kind).toBe('TextFieldId');
     expect(f.fieldSpec.kind).toBe('TextFieldSpec');
     expect(isField(f)).toBe(true);
   });

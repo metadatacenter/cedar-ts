@@ -21,8 +21,7 @@ import type { Value } from './index.js';
 // =====================================================================
 
 export interface AttributeValueFieldId {
-  readonly kind: 'FieldId';
-  readonly fieldKind: 'AttributeValue';
+  readonly kind: 'AttributeValueFieldId';
   readonly iri: Iri;
 }
 
@@ -35,8 +34,7 @@ export const attributeValueFieldId = (
     return v as AttributeValueFieldId;
   }
   return {
-    kind: 'FieldId',
-    fieldKind: 'AttributeValue',
+    kind: 'AttributeValueFieldId',
     iri: typeof v === 'string' ? iri(v) : (v as Iri),
   };
 };

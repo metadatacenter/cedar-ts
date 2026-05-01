@@ -27,8 +27,7 @@ import {
 // =====================================================================
 
 export interface ControlledTermFieldId {
-  readonly kind: 'FieldId';
-  readonly fieldKind: 'ControlledTerm';
+  readonly kind: 'ControlledTermFieldId';
   readonly iri: Iri;
 }
 
@@ -41,8 +40,7 @@ export const controlledTermFieldId = (
     return v as ControlledTermFieldId;
   }
   return {
-    kind: 'FieldId',
-    fieldKind: 'ControlledTerm',
+    kind: 'ControlledTermFieldId',
     iri: typeof v === 'string' ? iri(v) : (v as Iri),
   };
 };

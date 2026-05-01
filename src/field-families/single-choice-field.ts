@@ -22,8 +22,7 @@ import {
 // =====================================================================
 
 export interface SingleChoiceFieldId {
-  readonly kind: 'FieldId';
-  readonly fieldKind: 'SingleChoice';
+  readonly kind: 'SingleChoiceFieldId';
   readonly iri: Iri;
 }
 
@@ -36,8 +35,7 @@ export const singleChoiceFieldId = (
     return v as SingleChoiceFieldId;
   }
   return {
-    kind: 'FieldId',
-    fieldKind: 'SingleChoice',
+    kind: 'SingleChoiceFieldId',
     iri: typeof v === 'string' ? iri(v) : (v as Iri),
   };
 };

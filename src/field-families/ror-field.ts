@@ -22,8 +22,7 @@ import {
 // =====================================================================
 
 export interface RorFieldId {
-  readonly kind: 'FieldId';
-  readonly fieldKind: 'Ror';
+  readonly kind: 'RorFieldId';
   readonly iri: Iri;
 }
 
@@ -36,8 +35,7 @@ export const rorFieldId = (
     return v as RorFieldId;
   }
   return {
-    kind: 'FieldId',
-    fieldKind: 'Ror',
+    kind: 'RorFieldId',
     iri: typeof v === 'string' ? iri(v) : (v as Iri),
   };
 };

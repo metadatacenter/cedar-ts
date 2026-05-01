@@ -22,8 +22,7 @@ import {
 // =====================================================================
 
 export interface DoiFieldId {
-  readonly kind: 'FieldId';
-  readonly fieldKind: 'Doi';
+  readonly kind: 'DoiFieldId';
   readonly iri: Iri;
 }
 
@@ -36,8 +35,7 @@ export const doiFieldId = (
     return v as DoiFieldId;
   }
   return {
-    kind: 'FieldId',
-    fieldKind: 'Doi',
+    kind: 'DoiFieldId',
     iri: typeof v === 'string' ? iri(v) : (v as Iri),
   };
 };
