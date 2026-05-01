@@ -21,4 +21,4 @@ export {
   isSectionBreakComponent,
   isPageBreakComponent,
   isPresentationComponent,
-} from './components.js';
+} from './presentation-components.js';
