@@ -63,11 +63,18 @@ export function simpleLiteralToTypedLiteral(s: SimpleLiteral): TypedLiteral {
   };
 }
 
-// TextLiteral is the union admitted in TextValue.
+// TextLiteral is the union admitted in TextValue: plain strings and
+// language-tagged strings, but NOT arbitrarily-typed literals.
 export type TextLiteral = SimpleLiteral | LangTaggedLiteral;
 
-// Literal is the base RDF literal category.
-export type Literal = TypedLiteral | LangTaggedLiteral;
+// Literal is the base category for all RDF literals: SimpleLiteral
+// (implicit xsd:string), LangTaggedLiteral (implicit rdf:langString),
+// and TypedLiteral (explicit datatype). At any Literal position a
+// plain string MAY be expressed as a SimpleLiteral or as a TypedLiteral
+// with datatype xsd:string; both denote the same RDF literal but the
+// abstract syntax preserves the distinction so authorial intent
+// round-trips.
+export type Literal = SimpleLiteral | LangTaggedLiteral | TypedLiteral;
 
 // Implicit datatype IRI for a LangTaggedLiteral.
 // Encodes the W3C-defined IRI rdf:langString (normative RDF terminology).
@@ -96,19 +103,17 @@ export function isTextLiteral(x: unknown): x is TextLiteral {
   return isSimpleLiteral(x) || isLangTaggedLiteral(x);
 }
 export function isLiteral(x: unknown): x is Literal {
-  return isTypedLiteral(x) || isLangTaggedLiteral(x);
+  return isSimpleLiteral(x) || isLangTaggedLiteral(x) || isTypedLiteral(x);
 }
 
 // Term equality per grammar §Literal Value Semantics.
-export function literalsTermEqual(
-  a: Literal | SimpleLiteral,
-  b: Literal | SimpleLiteral,
-): boolean {
+export function literalsTermEqual(a: Literal, b: Literal): boolean {
   if (isLangTaggedLiteral(a) && isLangTaggedLiteral(b)) {
     return a.lexicalForm === b.lexicalForm && a.lang.value === b.lang.value;
   }
   if (isLangTaggedLiteral(a) || isLangTaggedLiteral(b)) return false;
-  // Both are typed string literals. Normalize SimpleLiteral to xsd:string.
+  // Both are non-lang literals (SimpleLiteral or TypedLiteral). Normalize a
+  // SimpleLiteral to its implicit datatype xsd:string for comparison.
   const aDt = isSimpleLiteral(a) ? XsdStringDatatypeIri : a.datatype.value;
   const bDt = isSimpleLiteral(b) ? XsdStringDatatypeIri : b.datatype.value;
   return a.lexicalForm === b.lexicalForm && aDt === bDt;
