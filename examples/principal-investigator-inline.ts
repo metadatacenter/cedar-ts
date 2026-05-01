@@ -87,7 +87,7 @@ const MESH_ONTOLOGY = 'http://id.nlm.nih.gov/mesh/';
 //   - meta:         SchemaArtifactMetadata (artifact metadata + versioning).
 //                   Required by Field and Template.
 
-const author = 'https://orcid.org/0000-0001-2345-6789';
+const author = 'https://orcid.org/0000-0002-1825-0097';
 const provenanceTimestamps = {
   createdOn: '2026-04-29T10:00:00Z',
   createdBy: author,

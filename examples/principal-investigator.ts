@@ -43,7 +43,7 @@ import {
   embeddedRorField,
   embeddedSingleChoiceField,
   embeddedTextField,
-  emailField as makeEmailField,
+  emailField,
   emailFieldSpec,
   emailValue,
   fieldValue,
@@ -56,7 +56,7 @@ import {
   ontologyDisplayHint,
   ontologyReference,
   ontologySource,
-  orcidField as makeOrcidField,
+  orcidField,
   orcidFieldSpec,
   orcidValue,
   phoneNumberField,
@@ -81,10 +81,6 @@ import {
   type TemplateInstance,
   type ValueRequirement,
 } from '../src/index.js';
-
-// `emailField` and `orcidField` are imported under aliases because, with the
-// "Field"-suffixed variable convention used below, the local Field-artifact
-// constants would otherwise shadow the constructor functions of the same name.
 
 // ---- IRI bases --------------------------------------------------------
 //
@@ -128,7 +124,7 @@ const MESH_MEDICAL_INFORMATICS_TERM_IRI = `${MESH_ONTOLOGY_IRI}D008490`;
 // flavor — see the `intro` PresentationComponent and `exampleInstance`
 // below.
 
-const author = 'https://orcid.org/0000-0001-2345-6789';
+const author = 'https://orcid.org/0000-0002-1825-0097';
 const provenanceTimestamps = {
   createdOn: '2026-04-29T10:00:00Z',
   createdBy: author,
@@ -165,7 +161,7 @@ function meta(name: string, description: string): SchemaArtifactMetadata {
 
 // Plain text field with a minimum length of 1. `textFieldSpec()` accepts an
 // optional init object (omit it to allow any non-empty string).
-const fullNameField = textField({
+const fullName = textField({
   id: `${FIELDS}full-name`,
   metadata: meta('Full Name', 'Full legal name of the principal investigator.'),
   fieldSpec: textFieldSpec({
@@ -179,9 +175,9 @@ const fullNameField = textField({
 // flag marks the entry preselected when the field is rendered.
 //
 // Use literal-choice when the option set is small, ad-hoc, and not drawn
-// from a published vocabulary. Compare with `academicRankField` below,
+// from a published vocabulary. Compare with `academicRank` below,
 // which is backed by an ontology.
-const academicTitleField = singleChoiceField({
+const academicTitle = singleChoiceField({
   id: `${FIELDS}academic-title`,
   metadata: meta('Academic Title', 'Academic rank or position (literal label).'),
   fieldSpec: literalSingleChoiceFieldSpec({
@@ -201,7 +197,7 @@ const academicTitleField = singleChoiceField({
 // at the instance, not a plain string — see `exampleInstance` below.
 //
 // The IRIs here resolve to terms in the OBO Role Ontology (RoleO).
-const academicRankField = singleChoiceField({
+const academicRank = singleChoiceField({
   id: `${FIELDS}academic-rank`,
   metadata: meta(
     'Academic Rank',
@@ -237,19 +233,19 @@ const academicRankField = singleChoiceField({
 // Their FieldSpec constructors are nullary because the family itself fixes
 // the value shape (e.g., an EmailValue is a syntactically valid email).
 
-const emailField = makeEmailField({
+const email = emailField({
   id: `${FIELDS}email`,
   metadata: meta('Email Address', 'Primary work email.'),
   fieldSpec: emailFieldSpec(),
 });
 
-const phoneField = phoneNumberField({
+const phone = phoneNumberField({
   id: `${FIELDS}phone`,
   metadata: meta('Phone Number', 'Primary work phone, in international format.'),
   fieldSpec: phoneNumberFieldSpec(),
 });
 
-const orcidField = makeOrcidField({
+const orcid = orcidField({
   id: `${FIELDS}orcid`,
   metadata: meta('ORCID iD', 'ORCID identifier (https://orcid.org/...).'),
   fieldSpec: orcidFieldSpec(),
@@ -257,13 +253,13 @@ const orcidField = makeOrcidField({
 
 // Plain text again — no length constraint here, because the institution
 // name field happens to have no validation requirement of its own.
-const institutionNameField = textField({
+const institutionName = textField({
   id: `${FIELDS}institution-name`,
   metadata: meta('Institution Name', 'Name of the home institution.'),
   fieldSpec: textFieldSpec(),
 });
 
-const institutionRorField = rorField({
+const institutionRor = rorField({
   id: `${FIELDS}institution-ror`,
   metadata: meta(
     'Institution ROR',
@@ -272,7 +268,7 @@ const institutionRorField = rorField({
   fieldSpec: rorFieldSpec(),
 });
 
-const departmentField = textField({
+const department = textField({
   id: `${FIELDS}department`,
   metadata: meta('Department', 'Department or division within the institution.'),
   fieldSpec: textFieldSpec(),
@@ -280,7 +276,7 @@ const departmentField = textField({
 
 // Date field constrained to FULL dates (xsd:date). Other DateFieldSpec
 // values can pin partial dates (year, year+month) — see grammar §Field Specs.
-const appointmentDateField = dateField({
+const appointmentDate = dateField({
   id: `${FIELDS}appointment-date`,
   metadata: meta('Appointment Date', 'Start date of current appointment.'),
   fieldSpec: dateFieldSpec({ dateValueType: 'fullDate' }),
@@ -288,14 +284,14 @@ const appointmentDateField = dateField({
 
 // This single Field is embedded with min=0 / max=∞ cardinality below to
 // produce a multi-valued embedding from a single-valued reusable Field.
-const researchInterestField = textField({
+const researchInterest = textField({
   id: `${FIELDS}research-interest`,
   metadata: meta('Research Interest', 'A single research interest or keyword.'),
   fieldSpec: textFieldSpec(),
 });
 
 // Controlled-term FIELD (not single-choice) — the user looks up any term
-// from a configured ontology source. Compare with `academicRankField`
+// from a configured ontology source. Compare with `academicRank`
 // above: there, the option set is enumerated up front; here, the option
 // set IS the ontology, and the rendered widget typically offers
 // type-ahead lookup against an ontology service.
@@ -305,7 +301,7 @@ const researchInterestField = textField({
 // (any term in a sub-branch), ClassSource (any term among an enumerated
 // set of classes), and ValueSetSource (any term in a named value set).
 // Here we use a single OntologySource over MeSH.
-const primaryResearchAreaField = controlledTermField({
+const primaryResearchArea = controlledTermField({
   id: `${FIELDS}primary-research-area`,
   metadata: meta(
     'Primary Research Area',
@@ -337,7 +333,7 @@ const primaryResearchAreaField = controlledTermField({
 // `meta` (SchemaArtifactMetadata). PresentationComponents are Artifacts
 // but NOT SchemaArtifacts — they have no version / status / model-version.
 
-const introComponent = richTextComponent({
+const intro = richTextComponent({
   id: `${COMPONENTS}pi-intro`,
   metadata: artifactMeta('PI Intro', 'Introductory text shown above the PI form.'),
   html:
@@ -392,12 +388,12 @@ export const principalInvestigatorTemplate: Template = template({
   embedded: [
     embeddedPresentationComponent({
       key: 'intro',
-      reference: introComponent,
+      reference: intro,
     }),
 
     embeddedTextField({
       key: 'full_name',
-      reference: fullNameField,
+      reference: fullName,
       valueRequirement: 'required',
       property: 'https://schema.org/name',
     }),
@@ -406,7 +402,7 @@ export const principalInvestigatorTemplate: Template = template({
     // values as langTaggedLiterals.
     embeddedSingleChoiceField({
       key: 'academic_title',
-      reference: academicTitleField,
+      reference: academicTitle,
       valueRequirement: 'required',
       // The `property` slot accepts a bare-string IRI; the (iri, label)
       // object form below adds an optional human-readable label for the
@@ -423,7 +419,7 @@ export const principalInvestigatorTemplate: Template = template({
     // label) rather than a literal string.
     embeddedSingleChoiceField({
       key: 'academic_rank',
-      reference: academicRankField,
+      reference: academicRank,
       valueRequirement: 'recommended',
       property: 'https://schema.org/Role',
       labelOverride: labelOverride({ label: 'Academic Rank' }),
@@ -431,19 +427,19 @@ export const principalInvestigatorTemplate: Template = template({
 
     embeddedEmailField({
       key: 'email',
-      reference: emailField,
+      reference: email,
       valueRequirement: 'required',
       property: 'https://schema.org/email',
     }),
     embeddedPhoneNumberField({
       key: 'phone',
-      reference: phoneField,
+      reference: phone,
       valueRequirement: 'optional',
       property: 'https://schema.org/telephone',
     }),
     embeddedOrcidField({
       key: 'orcid',
-      reference: orcidField,
+      reference: orcid,
       valueRequirement: 'recommended',
       property: 'https://schema.org/identifier',
       // labelOverride supplies template-local labels that override the
@@ -461,14 +457,14 @@ export const principalInvestigatorTemplate: Template = template({
     // TextDefaultValue at construction time.
     embeddedTextField({
       key: 'institution_name',
-      reference: institutionNameField,
+      reference: institutionName,
       valueRequirement: 'required',
       defaultValue: 'Stanford University',
       property: 'https://schema.org/affiliation',
     }),
     embeddedRorField({
       key: 'institution_ror',
-      reference: institutionRorField,
+      reference: institutionRor,
       valueRequirement: 'recommended',
       property: {
         iri: 'https://schema.org/affiliation',
@@ -477,14 +473,14 @@ export const principalInvestigatorTemplate: Template = template({
     }),
     embeddedTextField({
       key: 'department',
-      reference: departmentField,
+      reference: department,
       valueRequirement: 'optional',
       property: 'https://schema.org/department',
     }),
 
     embeddedDateField({
       key: 'appointment_date',
-      reference: appointmentDateField,
+      reference: appointmentDate,
       valueRequirement: 'optional',
       property: 'https://schema.org/startDate',
     }),
@@ -493,7 +489,7 @@ export const principalInvestigatorTemplate: Template = template({
     // term in the configured ontology, not a curated list.
     embeddedControlledTermField({
       key: 'primary_research_area',
-      reference: primaryResearchAreaField,
+      reference: primaryResearchArea,
       valueRequirement: 'recommended',
       property: 'http://purl.org/dc/terms/subject',
     }),
@@ -502,7 +498,7 @@ export const principalInvestigatorTemplate: Template = template({
     // Cardinality.max omitted ⇒ unbounded (grammar §Cardinality).
     embeddedTextField({
       key: 'research_interests',
-      reference: researchInterestField,
+      reference: researchInterest,
       valueRequirement: 'optional',
       cardinality: cardinality({ min: 0 }),
       labelOverride: labelOverride({ label: 'Research Interests' }),
