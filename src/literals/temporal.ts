@@ -1,5 +1,5 @@
 import { XsdTemporalDatatypeIri } from '../leaves/index.js';
-import { type TypedLiteral, typedLiteral, isTypedLiteral } from './base.js';
+import { type TypedLiteral, typedLiteral, isTypedLiteral } from './literals.js';
 
 // FullDateLiteral / TimeLiteral / DateTimeLiteral are TypedLiterals whose
 // `datatype` IRI is fixed to xsd:date, xsd:time, or xsd:dateTime

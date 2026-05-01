@@ -9,7 +9,7 @@ export {
   type NestedTemplateInstance,
   nestedTemplateInstance,
   isNestedTemplateInstance,
-} from './nested.js';
+} from './nested-template-instance.js';
 
 export {
   type TemplateInstance,
@@ -19,7 +19,10 @@ export {
 } from './template-instance.js';
 
 import { isFieldValue } from './field-value.js';
-import { isNestedTemplateInstance, type InstanceValue } from './nested.js';
+import {
+  isNestedTemplateInstance,
+  type InstanceValue,
+} from './nested-template-instance.js';
 
 export const isInstanceValue = (x: unknown): x is InstanceValue =>
   isFieldValue(x) || isNestedTemplateInstance(x);
@@ -29,11 +32,11 @@ export const isInstanceValue = (x: unknown): x is InstanceValue =>
 // PresentationComponent, and TemplateInstance. Defined here, alongside
 // TemplateInstance, because it is the last layer needed to express the union.
 
-import type { Field } from '../fields.js';
+import type { Field } from '../field-artifacts.js';
 import type { Template } from '../template.js';
 import type { PresentationComponent } from '../presentation/index.js';
 import type { TemplateInstance } from './template-instance.js';
-import { isField } from '../fields.js';
+import { isField } from '../field-artifacts.js';
 import { isTemplate } from '../template.js';
 import { isPresentationComponent } from '../presentation/index.js';
 import { isTemplateInstance } from './template-instance.js';

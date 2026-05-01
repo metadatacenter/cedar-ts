@@ -35,7 +35,7 @@ import {
   rridFieldId,
   nihGrantIdFieldId,
   attributeValueFieldId,
-} from './identity.js';
+} from './identifiers.js';
 import type { Iri } from './leaves/index.js';
 import type { SchemaArtifactMetadata } from './metadata/index.js';
 import type {

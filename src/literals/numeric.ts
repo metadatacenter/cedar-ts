@@ -2,7 +2,7 @@ import {
   type NumericDatatypeKind,
   XsdNumericDatatypeIri,
 } from '../leaves/index.js';
-import { type TypedLiteral, typedLiteral, isTypedLiteral } from './base.js';
+import { type TypedLiteral, typedLiteral, isTypedLiteral } from './literals.js';
 
 // NumericLiteral is a TypedLiteral whose `datatype` IRI is one of the XSD
 // numeric datatype IRIs (xsd:integer, xsd:decimal, xsd:float, …). It is a

@@ -1,8 +1,8 @@
 import { CedarConstructionError } from './leaves/index.js';
-import { type TemplateId, templateId } from './identity.js';
+import { type TemplateId, templateId } from './identifiers.js';
 import type { SchemaArtifactMetadata } from './metadata/index.js';
 import type { EmbeddedArtifact } from './embedded/index.js';
-import { type Field, isField } from './fields.js';
+import { type Field, isField } from './field-artifacts.js';
 import {
   type MultilingualString,
   type MultilingualStringInput,

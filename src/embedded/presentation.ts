@@ -1,5 +1,5 @@
 import { parseAsciiIdentifier } from '../leaves/index.js';
-import type { PresentationComponentReference } from '../identity.js';
+import type { PresentationComponentReference } from '../identifiers.js';
 import type { PresentationComponent } from '../presentation/index.js';
 import type { Visibility } from './visibility.js';
 import type { LabelOverride } from './label-override.js';

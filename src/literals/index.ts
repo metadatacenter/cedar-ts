@@ -15,7 +15,7 @@ export {
   isTextLiteral,
   isLiteral,
   LANG_STRING_DATATYPE_IRI,
-} from './base.js';
+} from './literals.js';
 export {
   type NumericLiteral,
   numericLiteral,

@@ -1,6 +1,6 @@
 import { type Iri, iri } from '../leaves/index.js';
 import type { ArtifactMetadata } from '../metadata/index.js';
-import { type PresentationComponentId, presentationComponentId } from '../identity.js';
+import { type PresentationComponentId, presentationComponentId } from '../identifiers.js';
 
 // Idempotent: accepts a typed PresentationComponentId, an Iri, or a bare
 // string IRI. Used by every component constructor below so callers can pass

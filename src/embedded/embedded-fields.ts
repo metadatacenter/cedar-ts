@@ -17,7 +17,7 @@ import type {
   RridFieldReference,
   NihGrantIdFieldReference,
   AttributeValueFieldReference,
-} from '../identity.js';
+} from '../identifiers.js';
 import type {
   TextField,
   NumericField,
@@ -37,7 +37,7 @@ import type {
   RridField,
   NihGrantIdField,
   AttributeValueField,
-} from '../fields.js';
+} from '../field-artifacts.js';
 import type {
   TextLiteral,
   TimeLiteral,
@@ -99,7 +99,7 @@ import {
   pubMedIdDefaultValue,
   rridDefaultValue,
   nihGrantIdDefaultValue,
-} from '../defaults.js';
+} from '../default-values.js';
 import { parseAsciiIdentifier } from '../leaves/index.js';
 import type { ValueRequirement } from './requirement.js';
 import type { Cardinality } from './cardinality.js';

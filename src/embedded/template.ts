@@ -1,5 +1,5 @@
 import { parseAsciiIdentifier } from '../leaves/index.js';
-import type { TemplateReference } from '../identity.js';
+import type { TemplateReference } from '../identifiers.js';
 import type { Template } from '../template.js';
 import type { ValueRequirement } from './requirement.js';
 import type { Cardinality } from './cardinality.js';

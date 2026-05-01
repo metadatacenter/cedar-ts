@@ -1,5 +1,5 @@
 import { assertNonNegativeInteger } from '../leaves/index.js';
-import type { TextDefaultValue } from '../defaults.js';
+import type { TextDefaultValue } from '../default-values.js';
 import type { TextRenderingHint } from './rendering-hints.js';
 
 // TextFieldSpec — see grammar.md §Field Specs.

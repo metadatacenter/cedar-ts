@@ -4,10 +4,13 @@ import {
   type TemplateReference,
   templateInstanceId,
   templateId,
-} from '../identity.js';
+} from '../identifiers.js';
 import type { ArtifactMetadata } from '../metadata/index.js';
 import { isFieldValue } from './field-value.js';
-import { isNestedTemplateInstance, type InstanceValue } from './nested.js';
+import {
+  isNestedTemplateInstance,
+  type InstanceValue,
+} from './nested-template-instance.js';
 
 // TemplateInstance — see grammar.md §Instances.
 // An Artifact recording data conforming to a specific Template. Carries

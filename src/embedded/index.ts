@@ -88,7 +88,7 @@ export {
   embeddedRridField,
   embeddedNihGrantIdField,
   embeddedAttributeValueField,
-} from './field.js';
+} from './embedded-fields.js';
 
 export {
   type EmbeddedTemplate,
@@ -104,10 +104,10 @@ export {
   isEmbeddedPresentationComponent,
 } from './presentation.js';
 
-import type { EmbeddedField } from './field.js';
+import type { EmbeddedField } from './embedded-fields.js';
 import type { EmbeddedTemplate } from './template.js';
 import type { EmbeddedPresentationComponent } from './presentation.js';
-import { isEmbeddedField } from './field.js';
+import { isEmbeddedField } from './embedded-fields.js';
 import { isEmbeddedTemplate } from './template.js';
 import { isEmbeddedPresentationComponent } from './presentation.js';
 
