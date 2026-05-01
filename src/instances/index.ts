@@ -1,3 +1,25 @@
+// =====================================================================
+// Instances — public surface for instance-side artifact types
+// =====================================================================
+//
+// Re-exports:
+//
+//   - FieldValue                          (field-value.ts):
+//       carries one or more typed Values for an embedded-field key
+//   - NestedTemplateInstance + InstanceValue union
+//                                         (nested-template-instance.ts):
+//       recursive instance-side construct for embedded sub-templates;
+//       InstanceValue is the FieldValue | NestedTemplateInstance union
+//   - TemplateInstance                    (template-instance.ts):
+//       top-level instance-side artifact; conforms to a Template
+//   - isInstanceValue (this file)         predicate over the InstanceValue
+//                                         union
+//   - Artifact union and isArtifact (this file):
+//       top-level union of every artifact kind:
+//       Field | Template | PresentationComponent | TemplateInstance.
+//       Defined here, alongside TemplateInstance, because it is the
+//       last layer needed to express the union.
+
 export {
   type FieldValue,
   fieldValue,

@@ -1,3 +1,36 @@
+// =====================================================================
+// Embedded — public surface for per-embedding configuration plus the
+// non-field embedded artifact types
+// =====================================================================
+//
+// "Embedding" = the act of placing a reusable artifact (Field, Template,
+// PresentationComponent) into a specific Template's `embedded` list.
+// Each embedding pins per-context properties (requirement, cardinality,
+// label override, semantic property IRI, default value, visibility) at
+// the embedding site rather than on the reusable artifact itself.
+//
+// Re-exports:
+//
+//   - ValueRequirement enum and constants     (requirement.ts):
+//       'required' | 'recommended' | 'optional'
+//   - Visibility enum and constants           (visibility.ts):
+//       'visible' | 'hidden'
+//   - Cardinality                             (cardinality.ts):
+//       per-embedding count bounds
+//   - LabelOverride                           (label-override.ts):
+//       template-local label override for an embedding
+//   - Property                                (property.ts):
+//       semantic property IRI association for an embedding
+//   - EmbeddedTemplate                        (embedded-template.ts):
+//       wrapper that nests a reusable Template
+//   - EmbeddedPresentationComponent           (embedded-presentation-component.ts):
+//       wrapper that places a PresentationComponent in a Template
+//   - EmbeddedArtifact union                  (this file): the union of
+//       EmbeddedField | EmbeddedTemplate | EmbeddedPresentationComponent
+//
+// The 18 EmbeddedField family variants live in src/field-families/ and
+// are union-imported here for the EmbeddedArtifact union.
+
 export {
   type ValueRequirement,
   VALUE_REQUIREMENTS,

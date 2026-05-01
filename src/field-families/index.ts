@@ -1,12 +1,39 @@
-// Re-exports for the 18 field families plus the cross-family unions and
-// predicates. Every type and constructor declared in the per-family files
-// is re-exported here; downstream code (and the package barrel in
+// =====================================================================
+// Field families — public surface for the 18 per-family vertical
+// slices plus the cross-family unions and predicates
+// =====================================================================
+//
+// Every type and constructor declared in the per-family files is
+// re-exported here; downstream code (and the package barrel in
 // src/index.ts) imports the public surface from this module.
 //
-// Internal helpers that are not part of the public API:
-//   - ./embedded-field-common.ts (assembleCommon, fieldRef)
-//   - ./external-authority-shared.ts (WithLabel, authorityValueFromInput, ...)
-// These are intentionally NOT re-exported here.
+// Re-exports:
+//
+//   - all 18 per-family slices (text-field.ts, numeric-field.ts, …,
+//     attribute-value-field.ts) — each contributes a FieldId, Value,
+//     FieldSpec, Field, DefaultValue (where applicable) and
+//     EmbeddedField type
+//   - rendering hints                 (rendering-hints.ts)
+//   - choice-shared types             (choice-shared.ts):
+//       LiteralChoiceOption, ControlledTermChoiceOption,
+//       LiteralChoiceValue, ControlledTermChoiceValue,
+//       ChoiceValue (union), ChoiceDefaultValue
+//
+// Plus this file defines:
+//
+//   - the cross-family unions: Field, EmbeddedField, Value, FieldSpec,
+//     DefaultValue, FieldId
+//   - the union-level predicates: isField, isEmbeddedField, isValue,
+//     isFieldSpec, isDefaultValue, isFieldId
+//   - reference-alias types: FieldReference (= FieldId)
+//
+// Internal helpers that are NOT re-exported (private to this folder):
+//
+//   - ./embedded-field-common.ts (assembleCommon, fieldRef): support
+//     for the 18 EmbeddedField constructors
+//   - ./external-authority-shared.ts (WithLabel, authorityValueFromInput,
+//     isTaggedKind): shape and helper for the 6 external-authority
+//     families
 
 export * from './rendering-hints.js';
 export * from './choice-shared.js';

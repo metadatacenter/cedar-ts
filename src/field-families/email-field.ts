@@ -33,6 +33,14 @@ import {
 // 1. Identifier
 // =====================================================================
 
+// Identifier for a `EmailField` reusable schema artifact: a typed wrapper
+// around the field's IRI. Distinguished at compile time and runtime from
+// sibling field-id types (e.g. `NumericFieldId`, `EmailFieldId`) so a caller
+// can't accidentally pass a `EmailField`'s IRI where (say) a
+// `NumericField`'s IRI is expected.
+//
+// On the wire this collapses to a plain JSON string IRI; the typed
+// wrapper exists only in memory.
 export interface EmailFieldId {
   readonly kind: 'EmailFieldId';
   readonly iri: Iri;

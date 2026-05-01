@@ -1,3 +1,25 @@
+// =====================================================================
+// Literals — public surface for RDF literal types
+// =====================================================================
+//
+// Re-exports:
+//
+//   - the three base RDF literal forms          (literals.ts):
+//       SimpleLiteral, LangTaggedLiteral, TypedLiteral
+//   - the Literal and TextLiteral unions
+//   - constructors and predicates for each form
+//   - simpleLiteralToTypedLiteral and literalsTermEqual
+//   - LANG_STRING_DATATYPE_IRI (the rdf:langString IRI)
+//   - NumericLiteral and helpers                (numeric-literals.ts)
+//   - FullDateLiteral / TimeLiteral / DateTimeLiteral and the
+//     TemporalLiteral union                     (temporal-literals.ts)
+//   - FULL_DATE_DATATYPE_IRI / TIME_DATATYPE_IRI / DATE_TIME_DATATYPE_IRI
+//
+// NumericLiteral and the temporal-literal types are TypedLiteral type
+// aliases with constraint that the datatype IRI matches the family;
+// constructors set the right datatype, and predicates check it on a
+// TypedLiteral.
+
 export {
   type TypedLiteral,
   type LangTaggedLiteral,
