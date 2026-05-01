@@ -24,7 +24,7 @@ export {
   type TextFieldSpecInit,
   textFieldSpec,
   isTextFieldSpec,
-} from './text.js';
+} from './text-field-specs.js';
 
 export {
   type Unit,
@@ -34,7 +34,7 @@ export {
   type NumericFieldSpecInit,
   numericFieldSpec,
   isNumericFieldSpec,
-} from './numeric.js';
+} from './numeric-field-specs.js';
 
 export {
   type DateValueType,
@@ -58,7 +58,7 @@ export {
   dateTimeFieldSpec,
   isDateTimeFieldSpec,
   type TemporalFieldSpec,
-} from './temporal.js';
+} from './temporal-field-specs.js';
 
 export {
   type OntologyDisplayHint,
@@ -84,7 +84,7 @@ export {
   type ControlledTermFieldSpec,
   controlledTermFieldSpec,
   isControlledTermFieldSpec,
-} from './controlled-term.js';
+} from './controlled-term-field-specs.js';
 
 export {
   type LiteralChoiceOption,
@@ -109,13 +109,13 @@ export {
   isSingleChoiceFieldSpec,
   isMultipleChoiceFieldSpec,
   isChoiceFieldSpec,
-} from './choice.js';
+} from './choice-field-specs.js';
 
 export {
   type LinkFieldSpec,
   linkFieldSpec,
   isLinkFieldSpec,
-} from './link.js';
+} from './link-field-specs.js';
 
 export {
   type EmailFieldSpec,
@@ -125,7 +125,7 @@ export {
   phoneNumberFieldSpec,
   isPhoneNumberFieldSpec,
   type ContactFieldSpec,
-} from './contact.js';
+} from './contact-field-specs.js';
 
 export {
   type OrcidFieldSpec,
@@ -148,30 +148,30 @@ export {
   isNihGrantIdFieldSpec,
   type ExternalAuthorityFieldSpec,
   isExternalAuthorityFieldSpec,
-} from './external-authority.js';
+} from './external-authority-field-specs.js';
 
 export {
   type AttributeValueFieldSpec,
   attributeValueFieldSpec,
   isAttributeValueFieldSpec,
-} from './attribute.js';
+} from './attribute-field-specs.js';
 
-import type { TextFieldSpec } from './text.js';
-import type { NumericFieldSpec } from './numeric.js';
+import type { TextFieldSpec } from './text-field-specs.js';
+import type { NumericFieldSpec } from './numeric-field-specs.js';
 import type {
   DateFieldSpec,
   TimeFieldSpec,
   DateTimeFieldSpec,
-} from './temporal.js';
-import type { ControlledTermFieldSpec } from './controlled-term.js';
+} from './temporal-field-specs.js';
+import type { ControlledTermFieldSpec } from './controlled-term-field-specs.js';
 import type {
   LiteralSingleChoiceFieldSpec,
   ControlledTermSingleChoiceFieldSpec,
   LiteralMultipleChoiceFieldSpec,
   ControlledTermMultipleChoiceFieldSpec,
-} from './choice.js';
-import type { LinkFieldSpec } from './link.js';
-import type { EmailFieldSpec, PhoneNumberFieldSpec } from './contact.js';
+} from './choice-field-specs.js';
+import type { LinkFieldSpec } from './link-field-specs.js';
+import type { EmailFieldSpec, PhoneNumberFieldSpec } from './contact-field-specs.js';
 import type {
   OrcidFieldSpec,
   RorFieldSpec,
@@ -179,8 +179,8 @@ import type {
   PubMedIdFieldSpec,
   RridFieldSpec,
   NihGrantIdFieldSpec,
-} from './external-authority.js';
-import type { AttributeValueFieldSpec } from './attribute.js';
+} from './external-authority-field-specs.js';
+import type { AttributeValueFieldSpec } from './attribute-field-specs.js';
 
 // FieldSpec union — every concrete spec discriminated on `kind`.
 // SingleChoiceFieldSpec and MultipleChoiceFieldSpec each hold two concrete
