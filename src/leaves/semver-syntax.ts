@@ -1,4 +1,4 @@
-import { CedarConstructionError } from './errors.js';
+import { CedarConstructionError } from './cedar-construction-error.js';
 
 // Semantic Versioning 2.0.0 — https://semver.org
 // MAJOR.MINOR.PATCH with optional pre-release and build metadata.

@@ -1,23 +1,23 @@
-export { CedarConstructionError } from './errors.js';
-export { isIriString, parseIriString, tryParseIriString } from './iri.js';
-export { isBcp47Tag, parseBcp47Tag, tryParseBcp47Tag } from './lang.js';
+export { CedarConstructionError } from './cedar-construction-error.js';
+export { isIriString, parseIriString, tryParseIriString } from './iri-syntax.js';
+export { isBcp47Tag, parseBcp47Tag, tryParseBcp47Tag } from './bcp47-syntax.js';
 export {
   isAsciiIdentifier,
   parseAsciiIdentifier,
   tryParseAsciiIdentifier,
-} from './ascii-id.js';
+} from './ascii-identifier-syntax.js';
 export {
   isSemanticVersion,
   parseSemanticVersion,
   tryParseSemanticVersion,
-} from './semver.js';
+} from './semver-syntax.js';
 export {
   isIso8601DateTimeLexicalForm,
   parseIso8601DateTimeLexicalForm,
   tryParseIso8601DateTimeLexicalForm,
   isXsdDateLexicalForm,
   isXsdTimeLexicalForm,
-} from './datetime.js';
+} from './datetime-syntax.js';
 export {
   isIntegerLexicalForm,
   parseIntegerLexicalForm,
@@ -25,8 +25,8 @@ export {
   integerLexicalFormFromNumber,
   integerLexicalFormFromBigInt,
   assertNonNegativeInteger,
-} from './integer.js';
-export { toNfc } from './lexical.js';
+} from './integer-syntax.js';
+export { toNfc } from './unicode-nfc.js';
 export {
   XsdNumericDatatypeIri,
   XsdTemporalDatatypeIri,
@@ -45,4 +45,4 @@ export {
   languageTag,
   type IsoDateTimeStamp,
   isoDateTimeStamp,
-} from './wrappers.js';
+} from './leaf-types.js';

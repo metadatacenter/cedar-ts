@@ -1,4 +1,4 @@
-import { CedarConstructionError } from './errors.js';
+import { CedarConstructionError } from './cedar-construction-error.js';
 
 const ASCII_IDENTIFIER_REGEX = /^[A-Za-z][A-Za-z0-9_-]*$/;
 

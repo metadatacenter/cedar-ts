@@ -1,4 +1,4 @@
-import { CedarConstructionError } from './errors.js';
+import { CedarConstructionError } from './cedar-construction-error.js';
 
 // xsd:dateTime lexical form (subset of ISO 8601):
 //   YYYY-MM-DDThh:mm:ss(.fraction)?(Z | [+-]HH:MM)?

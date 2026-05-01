@@ -1,6 +1,6 @@
-import { parseIriString } from './iri.js';
-import { parseBcp47Tag } from './lang.js';
-import { parseIso8601DateTimeLexicalForm } from './datetime.js';
+import { parseIriString } from './iri-syntax.js';
+import { parseBcp47Tag } from './bcp47-syntax.js';
+import { parseIso8601DateTimeLexicalForm } from './datetime-syntax.js';
 
 // ----- Iri -----
 
