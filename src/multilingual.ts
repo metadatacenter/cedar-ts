@@ -11,13 +11,13 @@ import { CedarConstructionError, parseBcp47Tag } from './leaves/index.js';
 // represents a set of localizations of one conceptual string, not
 // multiple phrasings within the same language.
 //
-// Distinct from `LangStringLiteral` (RDF-style language-tagged literal,
+// Distinct from `LangTaggedLiteral` (RDF-style language-tagged literal,
 // member of the `Literal` union): `MultilingualString` is an
 // unweighted localization set carried at singleton schema-metadata
 // positions (`Template.header`, `DescriptiveMetadata.name`, etc.) and
 // therefore has no `kind` discriminator. They serialize differently
 // (`MultilingualString` is an array of `{value, lang}` entries; a
-// LangStringLiteral is a single such entry).
+// LangTaggedLiteral is a single such entry).
 //
 // Wire form: an array of property-set objects.
 //

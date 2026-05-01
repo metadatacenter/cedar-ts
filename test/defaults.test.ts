@@ -34,18 +34,18 @@ import {
   pubMedIdValue,
   rridValue,
   nihGrantIdValue,
-  stringLiteral,
+  simpleLiteral,
   numericLiteral,
   fullDateLiteral,
   timeLiteral,
   dateTimeLiteral,
-  datatypeIriLiteral,
+  typedLiteral,
   XsdNumericDatatypeIri,
 } from '../src/index.js';
 
 describe('DefaultValue family', () => {
   it('each default-value constructor produces a tagged object recognised by isDefaultValue', () => {
-    const td = textDefaultValue(textValue(stringLiteral('x')));
+    const td = textDefaultValue(textValue(simpleLiteral('x')));
     const nd = numericDefaultValue(numericValue(numericLiteral('1', 'integer')));
     const dd = dateDefaultValue(yearValue('2024'));
     const dd2 = dateDefaultValue(fullDateValue(fullDateLiteral('2024-06-15')));
@@ -55,7 +55,7 @@ describe('DefaultValue family', () => {
       controlledTermValue({ term: 'http://example.org/t' }),
     );
     const cd = choiceDefaultValue(
-      literalChoiceValue(datatypeIriLiteral('1', XsdNumericDatatypeIri.integer)),
+      literalChoiceValue(typedLiteral('1', XsdNumericDatatypeIri.integer)),
     );
     const lk = linkDefaultValue(linkValue({ iri: 'https://example.org' }));
     const em = emailDefaultValue(emailValue('me@example.org'));
@@ -77,7 +77,7 @@ describe('DefaultValue family', () => {
   });
 
   it('choiceDefaultValue requires at least one ChoiceValue', () => {
-    const cv = literalChoiceValue(datatypeIriLiteral('1', XsdNumericDatatypeIri.integer));
+    const cv = literalChoiceValue(typedLiteral('1', XsdNumericDatatypeIri.integer));
     const cd = choiceDefaultValue(cv);
     expect(cd.values.length).toBe(1);
 
@@ -94,19 +94,19 @@ describe('Default-value-constructor input widening', () => {
     const dv = textDefaultValue('Stanford University');
     expect(dv.kind).toBe('TextDefaultValue');
     expect(dv.value.kind).toBe('TextValue');
-    expect(dv.value.literal.kind).toBe('StringLiteral');
+    expect(dv.value.literal.kind).toBe('SimpleLiteral');
     expect(dv.value.literal.lexicalForm).toBe('Stanford University');
   });
 
   it('textDefaultValue still accepts a TextValue and passes it through', () => {
-    const tv = textValue(stringLiteral('Hello'));
+    const tv = textValue(simpleLiteral('Hello'));
     const dv = textDefaultValue(tv);
     expect(dv.value).toBe(tv);
   });
 
   it('textDefaultValue accepts a TextLiteral directly', () => {
-    const dv = textDefaultValue(stringLiteral('Hi'));
-    expect(dv.value.literal.kind).toBe('StringLiteral');
+    const dv = textDefaultValue(simpleLiteral('Hi'));
+    expect(dv.value.literal.kind).toBe('SimpleLiteral');
     expect(dv.value.literal.lexicalForm).toBe('Hi');
   });
 

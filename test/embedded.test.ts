@@ -37,7 +37,7 @@ import {
   numericDefaultValue,
   textValue,
   numericValue,
-  stringLiteral,
+  simpleLiteral,
   numericLiteral,
   textField,
   textFieldSpec,
@@ -308,7 +308,7 @@ describe('EmbeddedField constructors', () => {
     embeddedAttributeValueField({
       key: 'attr',
       reference: attrRef,
-      defaultValue: textDefaultValue(textValue(stringLiteral('x'))),
+      defaultValue: textDefaultValue(textValue(simpleLiteral('x'))),
     });
   });
 
@@ -319,7 +319,7 @@ describe('EmbeddedField constructors', () => {
       valueRequirement: 'required',
       cardinality: cardinality({ min: 1 }),
       visibility: 'visible',
-      defaultValue: textDefaultValue(textValue(stringLiteral('Untitled'))),
+      defaultValue: textDefaultValue(textValue(simpleLiteral('Untitled'))),
       labelOverride: labelOverride({ label: 'Document Title' }),
       property: property({ iri: 'https://schema.org/name' }),
     });
@@ -360,7 +360,7 @@ describe('EmbeddedField constructors', () => {
     });
     expect(ef.defaultValue?.kind).toBe('TextDefaultValue');
     if (ef.defaultValue?.kind === 'TextDefaultValue') {
-      expect(ef.defaultValue.value.literal.kind).toBe('StringLiteral');
+      expect(ef.defaultValue.value.literal.kind).toBe('SimpleLiteral');
       expect(ef.defaultValue.value.literal.lexicalForm).toBe('Untitled');
     }
 

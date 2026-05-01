@@ -44,7 +44,7 @@ import type {
   TimeLiteral,
   DateTimeLiteral,
   FullDateLiteral,
-  StringLiteral,
+  SimpleLiteral,
 } from '../literals/index.js';
 import type { Iri } from '../leaves/index.js';
 import type {
@@ -346,7 +346,7 @@ export interface EmbeddedLinkFieldInit extends EmbeddedFieldInitCommon {
 
 export interface EmbeddedEmailFieldInit extends EmbeddedFieldInitCommon {
   readonly reference: EmailFieldReference | EmailField;
-  readonly defaultValue?: EmailDefaultValue | EmailValue | StringLiteral | string;
+  readonly defaultValue?: EmailDefaultValue | EmailValue | SimpleLiteral | string;
 }
 
 export interface EmbeddedPhoneNumberFieldInit extends EmbeddedFieldInitCommon {
@@ -354,7 +354,7 @@ export interface EmbeddedPhoneNumberFieldInit extends EmbeddedFieldInitCommon {
   readonly defaultValue?:
     | PhoneNumberDefaultValue
     | PhoneNumberValue
-    | StringLiteral
+    | SimpleLiteral
     | string;
 }
 

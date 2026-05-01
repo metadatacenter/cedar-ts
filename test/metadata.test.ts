@@ -11,7 +11,7 @@ import {
   artifactMetadata,
   schemaArtifactMetadata,
   iri,
-  langStringLiteral,
+  langTaggedLiteral,
 } from '../src/index.js';
 
 describe('DescriptiveMetadata', () => {
@@ -122,11 +122,11 @@ describe('Annotation', () => {
   it('literal-valued annotation', () => {
     const a = annotation(
       'http://purl.org/dc/terms/title',
-      langStringLiteral('A study', 'en'),
+      langTaggedLiteral('A study', 'en'),
     );
     expect(a.property.kind).toBe('Iri');
     expect(a.property.value).toBe('http://purl.org/dc/terms/title');
-    expect(a.body.kind).toBe('LangStringLiteral');
+    expect(a.body.kind).toBe('LangTaggedLiteral');
     expect(isAnnotationValue(a.body)).toBe(true);
   });
 
@@ -162,7 +162,7 @@ describe('ArtifactMetadata and SchemaArtifactMetadata', () => {
       annotations: [
         annotation(
           'http://purl.org/dc/terms/title',
-          langStringLiteral('x', 'en'),
+          langTaggedLiteral('x', 'en'),
         ),
       ],
     });

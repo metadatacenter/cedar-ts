@@ -1,14 +1,14 @@
-import { type StringLiteral, stringLiteral } from '../literals/index.js';
+import { type SimpleLiteral, simpleLiteral } from '../literals/index.js';
 
 export interface EmailValue {
   readonly kind: 'EmailValue';
-  readonly literal: StringLiteral;
+  readonly literal: SimpleLiteral;
 }
 
-export function emailValue(literal: StringLiteral | string): EmailValue {
+export function emailValue(literal: SimpleLiteral | string): EmailValue {
   return {
     kind: 'EmailValue',
-    literal: typeof literal === 'string' ? stringLiteral(literal) : literal,
+    literal: typeof literal === 'string' ? simpleLiteral(literal) : literal,
   };
 }
 
@@ -21,13 +21,13 @@ export function isEmailValue(x: unknown): x is EmailValue {
 
 export interface PhoneNumberValue {
   readonly kind: 'PhoneNumberValue';
-  readonly literal: StringLiteral;
+  readonly literal: SimpleLiteral;
 }
 
-export function phoneNumberValue(literal: StringLiteral | string): PhoneNumberValue {
+export function phoneNumberValue(literal: SimpleLiteral | string): PhoneNumberValue {
   return {
     kind: 'PhoneNumberValue',
-    literal: typeof literal === 'string' ? stringLiteral(literal) : literal,
+    literal: typeof literal === 'string' ? simpleLiteral(literal) : literal,
   };
 }
 

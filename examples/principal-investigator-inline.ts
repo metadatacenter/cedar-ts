@@ -170,7 +170,7 @@ export const principalInvestigatorTemplate: Template = template({
     }),
 
     // Literal single-choice — option labels appear verbatim in instances
-    // as langStringLiterals.
+    // as langTaggedLiterals.
     embeddedSingleChoiceField({
       key: 'academic_title',
       reference: singleChoiceField({

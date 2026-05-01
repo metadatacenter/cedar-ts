@@ -174,7 +174,7 @@ const fullNameField = textField({
 });
 
 // Single-choice field whose options are LITERAL strings. `literalChoiceOption`
-// accepts a (text, lang) shortcut that wraps as a langStringLiteral; pass a
+// accepts a (text, lang) shortcut that wraps as a langTaggedLiteral; pass a
 // fully-built Literal directly for typed-string options. The `default: true`
 // flag marks the entry preselected when the field is rendered.
 //
@@ -403,7 +403,7 @@ export const principalInvestigatorTemplate: Template = template({
     }),
 
     // Literal single-choice — the option labels appear verbatim in instance
-    // values as langStringLiterals.
+    // values as langTaggedLiterals.
     embeddedSingleChoiceField({
       key: 'academic_title',
       reference: academicTitleField,
@@ -568,8 +568,8 @@ export const exampleInstance: TemplateInstance = templateInstance({
       'full_name',
       textValue('Jane Smith'),
     ),
-    // Literal-choice value: a langStringLiteral matching one of the option
-    // labels. The (text, lang) shortcut wraps to a LangStringLiteral.
+    // Literal-choice value: a langTaggedLiteral matching one of the option
+    // labels. The (text, lang) shortcut wraps to a LangTaggedLiteral.
     fieldValue(
       'academic_title',
       literalChoiceValue('Associate Professor', 'en'),

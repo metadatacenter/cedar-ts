@@ -1,4 +1,4 @@
-import { type TextLiteral, stringLiteral } from '../literals/index.js';
+import { type TextLiteral, simpleLiteral } from '../literals/index.js';
 import { type NumericLiteral } from '../literals/index.js';
 
 export interface TextValue {
@@ -6,14 +6,14 @@ export interface TextValue {
   readonly literal: TextLiteral;
 }
 
-// Accepts a TextLiteral, or a plain string (wrapped as a StringLiteral with
+// Accepts a TextLiteral, or a plain string (wrapped as a SimpleLiteral with
 // implicit datatype xsd:string). The string shortcut exists so callers don't
-// have to write textValue(stringLiteral('x')) when xsd:string is what they
-// mean — pass langStringLiteral(...) explicitly when a language tag is needed.
+// have to write textValue(simpleLiteral('x')) when xsd:string is what they
+// mean — pass langTaggedLiteral(...) explicitly when a language tag is needed.
 export function textValue(input: TextLiteral | string): TextValue {
   return {
     kind: 'TextValue',
-    literal: typeof input === 'string' ? stringLiteral(input) : input,
+    literal: typeof input === 'string' ? simpleLiteral(input) : input,
   };
 }
 

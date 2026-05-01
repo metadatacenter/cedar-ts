@@ -1,4 +1,4 @@
-import { type Literal, langStringLiteral } from '../literals/index.js';
+import { type Literal, langTaggedLiteral } from '../literals/index.js';
 import type { ControlledTermValue } from '../values/index.js';
 import type {
   SingleChoiceRenderingHint,
@@ -14,7 +14,7 @@ export interface LiteralChoiceOption {
 }
 
 // Accepts either a fully-built Literal, or a (text, lang) pair that's wrapped
-// as a langStringLiteral. The (text, lang) shortcut covers the very common
+// as a langTaggedLiteral. The (text, lang) shortcut covers the very common
 // case of human-readable choice labels in a specific language.
 export function literalChoiceOption(
   literal: Literal,
@@ -31,7 +31,7 @@ export function literalChoiceOption(
   arg3?: { default?: boolean },
 ): LiteralChoiceOption {
   const literal: Literal =
-    typeof arg1 === 'string' ? langStringLiteral(arg1, arg2 as string) : arg1;
+    typeof arg1 === 'string' ? langTaggedLiteral(arg1, arg2 as string) : arg1;
   const options =
     typeof arg1 === 'string'
       ? arg3

@@ -37,24 +37,24 @@ import {
   attributeValue,
   isAttributeValue,
   isValue,
-  stringLiteral,
-  langStringLiteral,
+  simpleLiteral,
+  langTaggedLiteral,
   numericLiteral,
   fullDateLiteral,
   timeLiteral,
   dateTimeLiteral,
   XsdNumericDatatypeIri,
-  datatypeIriLiteral,
+  typedLiteral,
 } from '../src/index.js';
 
 describe('Scalar values', () => {
   it('TextValue wraps a TextLiteral', () => {
-    const tv = textValue(stringLiteral('hello'));
+    const tv = textValue(simpleLiteral('hello'));
     expect(tv.kind).toBe('TextValue');
-    expect(tv.literal.kind).toBe('StringLiteral');
+    expect(tv.literal.kind).toBe('SimpleLiteral');
 
-    const lv = textValue(langStringLiteral('hello', 'en'));
-    expect(lv.literal.kind).toBe('LangStringLiteral');
+    const lv = textValue(langTaggedLiteral('hello', 'en'));
+    expect(lv.literal.kind).toBe('LangTaggedLiteral');
   });
 
   it('NumericValue wraps a NumericLiteral', () => {
@@ -131,7 +131,7 @@ describe('ControlledTermValue', () => {
 describe('ChoiceValue', () => {
   it('LiteralChoiceValue wraps a Literal', () => {
     const cv = literalChoiceValue(
-      datatypeIriLiteral('1', XsdNumericDatatypeIri.integer),
+      typedLiteral('1', XsdNumericDatatypeIri.integer),
     );
     expect(isLiteralChoiceValue(cv)).toBe(true);
     expect(isChoiceValue(cv)).toBe(true);
@@ -159,13 +159,13 @@ describe('LinkValue', () => {
 });
 
 describe('Contact values', () => {
-  it('EmailValue wraps a StringLiteral', () => {
+  it('EmailValue wraps a SimpleLiteral', () => {
     const ev = emailValue('me@example.org');
-    expect(ev.literal.kind).toBe('StringLiteral');
+    expect(ev.literal.kind).toBe('SimpleLiteral');
     expect(ev.literal.lexicalForm).toBe('me@example.org');
   });
 
-  it('PhoneNumberValue wraps a StringLiteral', () => {
+  it('PhoneNumberValue wraps a SimpleLiteral', () => {
     const pv = phoneNumberValue('+1-415-555-0100');
     expect(pv.literal.lexicalForm).toBe('+1-415-555-0100');
   });
@@ -211,7 +211,7 @@ describe('External authority values', () => {
 
 describe('AttributeValue (recursive)', () => {
   it('can carry a scalar value', () => {
-    const av = attributeValue('color', textValue(stringLiteral('blue')));
+    const av = attributeValue('color', textValue(simpleLiteral('blue')));
     expect(av.kind).toBe('AttributeValue');
     expect(av.name).toBe('color');
     expect(isAttributeValue(av)).toBe(true);
@@ -228,7 +228,7 @@ describe('AttributeValue (recursive)', () => {
 
 describe('Value union recognition', () => {
   it('isValue accepts every concrete Value variant', () => {
-    expect(isValue(textValue(stringLiteral('x')))).toBe(true);
+    expect(isValue(textValue(simpleLiteral('x')))).toBe(true);
     expect(isValue(numericValue(numericLiteral('1', 'integer')))).toBe(true);
     expect(isValue(yearValue('2024'))).toBe(true);
     expect(isValue(yearMonthValue('2024-06'))).toBe(true);
@@ -239,7 +239,7 @@ describe('Value union recognition', () => {
       isValue(controlledTermValue({ term: 'http://example.org/t' })),
     ).toBe(true);
     expect(
-      isValue(literalChoiceValue(datatypeIriLiteral('1', XsdNumericDatatypeIri.integer))),
+      isValue(literalChoiceValue(typedLiteral('1', XsdNumericDatatypeIri.integer))),
     ).toBe(true);
     expect(isValue(linkValue({ iri: 'https://example.org' }))).toBe(true);
     expect(isValue(emailValue('me@example.org'))).toBe(true);
@@ -247,7 +247,7 @@ describe('Value union recognition', () => {
       isValue(orcidValue({ iri: 'https://orcid.org/0000-0002-1825-0097' })),
     ).toBe(true);
     expect(
-      isValue(attributeValue('k', textValue(stringLiteral('v')))),
+      isValue(attributeValue('k', textValue(simpleLiteral('v')))),
     ).toBe(true);
   });
 
@@ -260,20 +260,20 @@ describe('Value union recognition', () => {
 });
 
 describe('Value-constructor input widening', () => {
-  it('textValue accepts a plain string and wraps it as a StringLiteral', () => {
+  it('textValue accepts a plain string and wraps it as a SimpleLiteral', () => {
     const v = textValue('Hello');
     expect(v.kind).toBe('TextValue');
-    expect(v.literal.kind).toBe('StringLiteral');
+    expect(v.literal.kind).toBe('SimpleLiteral');
     expect(v.literal.lexicalForm).toBe('Hello');
   });
 
-  it('textValue still accepts a langStringLiteral and passes it through', () => {
-    const v = textValue(langStringLiteral('Bonjour', 'fr'));
-    expect(v.literal.kind).toBe('LangStringLiteral');
+  it('textValue still accepts a langTaggedLiteral and passes it through', () => {
+    const v = textValue(langTaggedLiteral('Bonjour', 'fr'));
+    expect(v.literal.kind).toBe('LangTaggedLiteral');
   });
 
-  it('textValue still accepts a stringLiteral and passes it through', () => {
-    const lit = stringLiteral('Hi');
+  it('textValue still accepts a simpleLiteral and passes it through', () => {
+    const lit = simpleLiteral('Hi');
     const v = textValue(lit);
     expect(v.literal).toBe(lit);
   });
@@ -378,18 +378,18 @@ describe('External-authority value input widening', () => {
 });
 
 describe('literalChoiceValue input widening', () => {
-  it('accepts (text, lang) and wraps as a langStringLiteral', () => {
+  it('accepts (text, lang) and wraps as a langTaggedLiteral', () => {
     const v = literalChoiceValue('Professor', 'en');
     expect(v.kind).toBe('LiteralChoiceValue');
-    expect(v.literal.kind).toBe('LangStringLiteral');
+    expect(v.literal.kind).toBe('LangTaggedLiteral');
     expect(v.literal.lexicalForm).toBe('Professor');
-    if (v.literal.kind === 'LangStringLiteral') {
+    if (v.literal.kind === 'LangTaggedLiteral') {
       expect(v.literal.lang.value).toBe('en');
     }
   });
 
   it('still accepts a fully-built Literal', () => {
-    const lit = langStringLiteral('Professor', 'en');
+    const lit = langTaggedLiteral('Professor', 'en');
     const v = literalChoiceValue(lit);
     expect(v.literal).toBe(lit);
   });

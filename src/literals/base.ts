@@ -7,108 +7,109 @@ import {
   RdfLangStringDatatypeIri,
 } from '../leaves/index.js';
 
-// DatatypeIriLiteral pairs a lexical form with an explicit datatype IRI.
-export interface DatatypeIriLiteral {
-  readonly kind: 'DatatypeIriLiteral';
+// TypedLiteral pairs a lexical form with an explicit datatype IRI.
+export interface TypedLiteral {
+  readonly kind: 'TypedLiteral';
   readonly lexicalForm: string;
   readonly datatype: Iri;
 }
 
-export function datatypeIriLiteral(
+export function typedLiteral(
   lexicalForm: string,
   datatype: Iri | string,
-): DatatypeIriLiteral {
+): TypedLiteral {
   return {
-    kind: 'DatatypeIriLiteral',
+    kind: 'TypedLiteral',
     lexicalForm,
     datatype: typeof datatype === 'string' ? iri(datatype) : datatype,
   };
 }
 
-// LangStringLiteral pairs a lexical form with a non-empty BCP 47 language tag.
-export interface LangStringLiteral {
-  readonly kind: 'LangStringLiteral';
+// LangTaggedLiteral pairs a lexical form with a non-empty BCP 47 language tag.
+export interface LangTaggedLiteral {
+  readonly kind: 'LangTaggedLiteral';
   readonly lexicalForm: string;
   readonly lang: LanguageTag;
 }
 
-export function langStringLiteral(
+export function langTaggedLiteral(
   lexicalForm: string,
   tag: LanguageTag | string,
-): LangStringLiteral {
+): LangTaggedLiteral {
   return {
-    kind: 'LangStringLiteral',
+    kind: 'LangTaggedLiteral',
     lexicalForm,
     lang: typeof tag === 'string' ? languageTag(tag) : tag,
   };
 }
 
-// StringLiteral is a DatatypeIriLiteral with implicit datatype xsd:string.
-// Modeled here as its own kind for ergonomics; convertible to a DatatypeIriLiteral
-// via stringLiteralToDatatypeIriLiteral.
-export interface StringLiteral {
-  readonly kind: 'StringLiteral';
+// SimpleLiteral is a TypedLiteral with implicit datatype xsd:string.
+// Modeled here as its own kind for ergonomics; convertible to a TypedLiteral
+// via simpleLiteralToTypedLiteral.
+export interface SimpleLiteral {
+  readonly kind: 'SimpleLiteral';
   readonly lexicalForm: string;
 }
 
-export function stringLiteral(lexicalForm: string): StringLiteral {
-  return { kind: 'StringLiteral', lexicalForm };
+export function simpleLiteral(lexicalForm: string): SimpleLiteral {
+  return { kind: 'SimpleLiteral', lexicalForm };
 }
 
-export function stringLiteralToDatatypeIriLiteral(s: StringLiteral): DatatypeIriLiteral {
+export function simpleLiteralToTypedLiteral(s: SimpleLiteral): TypedLiteral {
   return {
-    kind: 'DatatypeIriLiteral',
+    kind: 'TypedLiteral',
     lexicalForm: s.lexicalForm,
     datatype: { kind: 'Iri', value: XsdStringDatatypeIri },
   };
 }
 
 // TextLiteral is the union admitted in TextValue.
-export type TextLiteral = StringLiteral | LangStringLiteral;
+export type TextLiteral = SimpleLiteral | LangTaggedLiteral;
 
 // Literal is the base RDF literal category.
-export type Literal = DatatypeIriLiteral | LangStringLiteral;
+export type Literal = TypedLiteral | LangTaggedLiteral;
 
-// Implicit datatype IRI for a LangStringLiteral.
+// Implicit datatype IRI for a LangTaggedLiteral.
+// Encodes the W3C-defined IRI rdf:langString (normative RDF terminology).
 export const LANG_STRING_DATATYPE_IRI = RdfLangStringDatatypeIri;
 
 // Type guards.
-export function isDatatypeIriLiteral(x: unknown): x is DatatypeIriLiteral {
+export function isTypedLiteral(x: unknown): x is TypedLiteral {
   return (
     typeof x === 'object' && x !== null &&
-    (x as { kind?: unknown }).kind === 'DatatypeIriLiteral'
+    (x as { kind?: unknown }).kind === 'TypedLiteral'
   );
 }
-export function isLangStringLiteral(x: unknown): x is LangStringLiteral {
+export function isLangTaggedLiteral(x: unknown): x is LangTaggedLiteral {
   return (
     typeof x === 'object' && x !== null &&
-    (x as { kind?: unknown }).kind === 'LangStringLiteral'
+    (x as { kind?: unknown }).kind === 'LangTaggedLiteral'
   );
 }
-export function isStringLiteral(x: unknown): x is StringLiteral {
+export function isSimpleLiteral(x: unknown): x is SimpleLiteral {
   return (
     typeof x === 'object' && x !== null &&
-    (x as { kind?: unknown }).kind === 'StringLiteral'
+    (x as { kind?: unknown }).kind === 'SimpleLiteral'
   );
 }
 export function isTextLiteral(x: unknown): x is TextLiteral {
-  return isStringLiteral(x) || isLangStringLiteral(x);
+  return isSimpleLiteral(x) || isLangTaggedLiteral(x);
 }
 export function isLiteral(x: unknown): x is Literal {
-  return isDatatypeIriLiteral(x) || isLangStringLiteral(x);
+  return isTypedLiteral(x) || isLangTaggedLiteral(x);
 }
 
 // Term equality per grammar §Literal Value Semantics.
 export function literalsTermEqual(
-  a: Literal | StringLiteral,
-  b: Literal | StringLiteral,
+  a: Literal | SimpleLiteral,
+  b: Literal | SimpleLiteral,
 ): boolean {
-  if (isLangStringLiteral(a) && isLangStringLiteral(b)) {
+  if (isLangTaggedLiteral(a) && isLangTaggedLiteral(b)) {
     return a.lexicalForm === b.lexicalForm && a.lang.value === b.lang.value;
   }
-  if (isLangStringLiteral(a) || isLangStringLiteral(b)) return false;
-  // Both are typed string literals. Normalize StringLiteral to xsd:string.
-  const aDt = isStringLiteral(a) ? XsdStringDatatypeIri : a.datatype.value;
-  const bDt = isStringLiteral(b) ? XsdStringDatatypeIri : b.datatype.value;
+  if (isLangTaggedLiteral(a) || isLangTaggedLiteral(b)) return false;
+  // Both are typed string literals. Normalize SimpleLiteral to xsd:string.
+  const aDt = isSimpleLiteral(a) ? XsdStringDatatypeIri : a.datatype.value;
+  const bDt = isSimpleLiteral(b) ? XsdStringDatatypeIri : b.datatype.value;
   return a.lexicalForm === b.lexicalForm && aDt === bDt;
 }

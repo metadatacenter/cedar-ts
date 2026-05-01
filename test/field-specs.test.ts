@@ -42,7 +42,7 @@ import {
   controlledTermValue,
   numericValue,
   numericLiteral,
-  datatypeIriLiteral,
+  typedLiteral,
   XsdNumericDatatypeIri,
   isTextFieldSpec,
   isNumericFieldSpec,
@@ -215,10 +215,10 @@ describe('Controlled-term field spec and sources', () => {
 describe('ChoiceFieldSpec', () => {
   it('LiteralSingleChoiceFieldSpec carries one or more LiteralChoiceOption', () => {
     const o1 = literalChoiceOption(
-      datatypeIriLiteral('a', XsdNumericDatatypeIri.integer),
+      typedLiteral('a', XsdNumericDatatypeIri.integer),
       { default: true },
     );
-    const o2 = literalChoiceOption(datatypeIriLiteral('b', XsdNumericDatatypeIri.integer));
+    const o2 = literalChoiceOption(typedLiteral('b', XsdNumericDatatypeIri.integer));
     const fs = literalSingleChoiceFieldSpec({
       options: [o1, o2],
       renderingHint: 'radio',
@@ -244,7 +244,7 @@ describe('ChoiceFieldSpec', () => {
   });
 
   it('LiteralMultipleChoiceFieldSpec uses MultipleChoiceRenderingHint', () => {
-    const o1 = literalChoiceOption(datatypeIriLiteral('a', XsdNumericDatatypeIri.integer));
+    const o1 = literalChoiceOption(typedLiteral('a', XsdNumericDatatypeIri.integer));
     const fs = literalMultipleChoiceFieldSpec({ options: [o1], renderingHint: 'checkbox' });
     expect(fs.kind).toBe('LiteralMultipleChoiceFieldSpec');
     expect(fs.renderingHint).toBe('checkbox');
@@ -262,7 +262,7 @@ describe('ChoiceFieldSpec', () => {
 
   it('literalChoiceOption accepts (text, lang) and (text, lang, options)', () => {
     const plain = literalChoiceOption('Professor', 'en');
-    expect(plain.literal.kind).toBe('LangStringLiteral');
+    expect(plain.literal.kind).toBe('LangTaggedLiteral');
     expect(plain.literal.lexicalForm).toBe('Professor');
     expect(plain.default).toBeUndefined();
 
@@ -271,10 +271,10 @@ describe('ChoiceFieldSpec', () => {
 
     // Existing one-arg Literal form still works.
     const lit = literalChoiceOption(
-      datatypeIriLiteral('a', XsdNumericDatatypeIri.integer),
+      typedLiteral('a', XsdNumericDatatypeIri.integer),
       { default: true },
     );
-    expect(lit.literal.kind).toBe('DatatypeIriLiteral');
+    expect(lit.literal.kind).toBe('TypedLiteral');
   });
 });
 
@@ -314,10 +314,10 @@ describe('FieldSpec union', () => {
         ontologySource(ontologyReference({ iri: 'http://example.org/o' })),
       ),
       literalSingleChoiceFieldSpec({
-        options: [literalChoiceOption(datatypeIriLiteral('a', XsdNumericDatatypeIri.integer))],
+        options: [literalChoiceOption(typedLiteral('a', XsdNumericDatatypeIri.integer))],
       }),
       literalMultipleChoiceFieldSpec({
-        options: [literalChoiceOption(datatypeIriLiteral('a', XsdNumericDatatypeIri.integer))],
+        options: [literalChoiceOption(typedLiteral('a', XsdNumericDatatypeIri.integer))],
       }),
       linkFieldSpec(),
       emailFieldSpec(),
@@ -342,7 +342,7 @@ describe('FieldSpecFor<K> mapped type (compile-time)', () => {
     const n: FieldSpecFor<'numeric'> = numericFieldSpec({ datatype: 'integer' });
     const d: FieldSpecFor<'date'> = dateFieldSpec({ dateValueType: 'fullDate' });
     const sc: FieldSpecFor<'single_choice'> = literalSingleChoiceFieldSpec({
-      options: [literalChoiceOption(datatypeIriLiteral('a', XsdNumericDatatypeIri.integer))],
+      options: [literalChoiceOption(typedLiteral('a', XsdNumericDatatypeIri.integer))],
     });
     expect(t.kind).toBe('TextFieldSpec');
     expect(n.kind).toBe('NumericFieldSpec');

@@ -50,7 +50,7 @@ import type {
   TextLiteral,
   TimeLiteral,
   DateTimeLiteral,
-  StringLiteral,
+  SimpleLiteral,
   FullDateLiteral,
 } from './literals/index.js';
 import type { Iri } from './leaves/index.js';
@@ -80,9 +80,9 @@ export interface TextDefaultValue {
 //   - a fully-built TextDefaultValue (passes through)
 //   - a TextValue (wrapped)
 //   - a TextLiteral (wrapped via textValue)
-//   - a plain string (wrapped via textValue → stringLiteral; xsd:string)
+//   - a plain string (wrapped via textValue → simpleLiteral; xsd:string)
 // The widened input avoids three-layer call sites like
-//   textDefaultValue(textValue(stringLiteral('Hello')))
+//   textDefaultValue(textValue(simpleLiteral('Hello')))
 // for the common case where xsd:string is what's intended.
 export function textDefaultValue(
   input: TextDefaultValue | TextValue | TextLiteral | string,
@@ -194,10 +194,10 @@ export interface EmailDefaultValue {
   readonly kind: 'EmailDefaultValue';
   readonly value: EmailValue;
 }
-// Idempotent. Accepts an EmailDefaultValue, an EmailValue, a StringLiteral,
+// Idempotent. Accepts an EmailDefaultValue, an EmailValue, a SimpleLiteral,
 // or a plain string (the email lexical form).
 export function emailDefaultValue(
-  input: EmailDefaultValue | EmailValue | StringLiteral | string,
+  input: EmailDefaultValue | EmailValue | SimpleLiteral | string,
 ): EmailDefaultValue {
   if (typeof input === 'object' && 'kind' in input && input.kind === 'EmailDefaultValue') {
     return input;
@@ -213,7 +213,7 @@ export interface PhoneNumberDefaultValue {
   readonly value: PhoneNumberValue;
 }
 export function phoneNumberDefaultValue(
-  input: PhoneNumberDefaultValue | PhoneNumberValue | StringLiteral | string,
+  input: PhoneNumberDefaultValue | PhoneNumberValue | SimpleLiteral | string,
 ): PhoneNumberDefaultValue {
   if (typeof input === 'object' && 'kind' in input && input.kind === 'PhoneNumberDefaultValue') {
     return input;

@@ -20,7 +20,7 @@ import {
   richTextComponent,
   schemaArtifactMetadata,
   schemaVersioning,
-  stringLiteral,
+  simpleLiteral,
   template,
   templateId,
   templateInstance,
@@ -47,7 +47,7 @@ const studyArmKey = 'study_arm';
 
 describe('FieldValue', () => {
   it('builds a FieldValue with a single value', () => {
-    const fv = fieldValue(titleKey, textValue(stringLiteral('Hello')));
+    const fv = fieldValue(titleKey, textValue(simpleLiteral('Hello')));
     expect(fv.kind).toBe('FieldValue');
     expect(fv.key).toBe(titleKey);
     expect(fv.values).toHaveLength(1);
@@ -56,16 +56,16 @@ describe('FieldValue', () => {
   });
 
   it('accepts a bare string as the key', () => {
-    const fv = fieldValue('title', textValue(stringLiteral('Hello')));
+    const fv = fieldValue('title', textValue(simpleLiteral('Hello')));
     expect(fv.key).toBe('title');
   });
 
   it('builds a FieldValue with multiple values for a multi-valued field', () => {
     const fv = fieldValue(
       'keywords',
-      textValue(stringLiteral('alpha')),
-      textValue(stringLiteral('beta')),
-      textValue(stringLiteral('gamma')),
+      textValue(simpleLiteral('alpha')),
+      textValue(simpleLiteral('beta')),
+      textValue(simpleLiteral('gamma')),
     );
     expect(fv.values).toHaveLength(3);
   });
@@ -91,7 +91,7 @@ describe('NestedTemplateInstance', () => {
   });
 
   it('supports recursive nesting via InstanceValue', () => {
-    const inner = fieldValue(titleKey, textValue(stringLiteral('Arm A')));
+    const inner = fieldValue(titleKey, textValue(simpleLiteral('Arm A')));
     const nti = nestedTemplateInstance(studyArmKey, [inner]);
     expect(nti.values).toHaveLength(1);
     expect(isFieldValue(nti.values[0])).toBe(true);
@@ -133,9 +133,9 @@ describe('TemplateInstance', () => {
     const ti = templateInstance({
       ...baseInit,
       values: [
-        fieldValue(k1, textValue(stringLiteral('A'))),
+        fieldValue(k1, textValue(simpleLiteral('A'))),
         nestedTemplateInstance(k2),
-        fieldValue(k3, textValue(stringLiteral('C'))),
+        fieldValue(k3, textValue(simpleLiteral('C'))),
       ],
     });
     expect(ti.values.map((v) => v.key)).toEqual(['a', 'b', 'c']);
@@ -146,10 +146,10 @@ describe('TemplateInstance', () => {
       ...baseInit,
       values: [
         nestedTemplateInstance(studyArmKey, [
-          fieldValue(titleKey, textValue(stringLiteral('Arm A'))),
+          fieldValue(titleKey, textValue(simpleLiteral('Arm A'))),
         ]),
         nestedTemplateInstance(studyArmKey, [
-          fieldValue(titleKey, textValue(stringLiteral('Arm B'))),
+          fieldValue(titleKey, textValue(simpleLiteral('Arm B'))),
         ]),
       ],
     });
@@ -162,8 +162,8 @@ describe('TemplateInstance', () => {
       templateInstance({
         ...baseInit,
         values: [
-          fieldValue(titleKey, textValue(stringLiteral('A'))),
-          fieldValue(titleKey, textValue(stringLiteral('B'))),
+          fieldValue(titleKey, textValue(simpleLiteral('A'))),
+          fieldValue(titleKey, textValue(simpleLiteral('B'))),
         ],
       }),
     ).toThrow(/Duplicate FieldValue key/);
@@ -174,7 +174,7 @@ describe('TemplateInstance', () => {
       templateInstance({
         ...baseInit,
         values: [
-          fieldValue(titleKey, textValue(stringLiteral('A'))),
+          fieldValue(titleKey, textValue(simpleLiteral('A'))),
           nestedTemplateInstance(titleKey),
         ],
       }),
@@ -185,7 +185,7 @@ describe('TemplateInstance', () => {
         ...baseInit,
         values: [
           nestedTemplateInstance(titleKey),
-          fieldValue(titleKey, textValue(stringLiteral('A'))),
+          fieldValue(titleKey, textValue(simpleLiteral('A'))),
         ],
       }),
     ).toThrow(/both a FieldValue and a NestedTemplateInstance/);
