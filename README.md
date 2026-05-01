@@ -159,11 +159,13 @@ a new one:
 ## Build, test, typecheck
 
 ```bash
-npm install      # install deps
+npm install        # install deps
 npm run typecheck
 npm run build
-npm test         # vitest, single run
+npm test           # vitest, single run
 npm run test:watch
+npm run example    # run the principal-investigator example (tsx)
+npm run example:inline  # run the inline-Field variant
 ```
 
 The published package (under `dist/`) is built from `src/` via

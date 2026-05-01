@@ -374,3 +374,10 @@ export const principalInvestigatorTemplate: Template = template({
     }),
   ],
 });
+
+// ---- Runnable demo ----------------------------------------------------
+//
+// When this file is executed directly (e.g. via `npm run example:inline`),
+// the constructed Template is printed as JSON to stdout.
+
+console.log(JSON.stringify(principalInvestigatorTemplate, null, 2));

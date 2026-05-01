@@ -618,3 +618,17 @@ export const exampleInstance: TemplateInstance = templateInstance({
     ),
   ],
 });
+
+// ---- Runnable demo ----------------------------------------------------
+//
+// When this file is executed directly (e.g. via `npm run example`), the
+// template, the projected field summary, and the example instance are
+// printed as JSON to stdout. The exports above are also importable
+// programmatically.
+
+console.log('=== Template ===');
+console.log(JSON.stringify(principalInvestigatorTemplate, null, 2));
+console.log('\n=== Field summary ===');
+console.log(JSON.stringify(fieldSummary, null, 2));
+console.log('\n=== Example instance ===');
+console.log(JSON.stringify(exampleInstance, null, 2));
