@@ -51,10 +51,16 @@ export interface DateTimeFieldId {
 
 export type DateTimeFieldReference = DateTimeFieldId;
 
+// Identifier-wrapper constructor for the DateTime field family.
+// Idempotent: an existing DateTimeFieldId passes through unchanged. A bare
+// string IRI is validated and wrapped via `iri()`; a typed `Iri` is wrapped
+// without re-validation. The DateTimeFieldId wrapper is distinguished from
+// sibling field-id types (e.g. `NumericFieldId`, `EmailFieldId`) by the
+// per-variant `kind` discriminator.
 export const dateTimeFieldId = (
   v: DateTimeFieldId | Iri | string,
 ): DateTimeFieldId => {
-  if (typeof v !== 'string' && (v as { kind?: unknown }).kind === 'FieldId') {
+  if (typeof v !== 'string' && (v as { kind?: unknown }).kind === 'DateTimeFieldId') {
     return v as DateTimeFieldId;
   }
   return {

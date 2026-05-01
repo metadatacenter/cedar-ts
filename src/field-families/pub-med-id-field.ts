@@ -49,10 +49,16 @@ export interface PubMedIdFieldId {
 
 export type PubMedIdFieldReference = PubMedIdFieldId;
 
+// Identifier-wrapper constructor for the PubMedId field family.
+// Idempotent: an existing PubMedIdFieldId passes through unchanged. A bare
+// string IRI is validated and wrapped via `iri()`; a typed `Iri` is wrapped
+// without re-validation. The PubMedIdFieldId wrapper is distinguished from
+// sibling field-id types (e.g. `NumericFieldId`, `EmailFieldId`) by the
+// per-variant `kind` discriminator.
 export const pubMedIdFieldId = (
   v: PubMedIdFieldId | Iri | string,
 ): PubMedIdFieldId => {
-  if (typeof v !== 'string' && (v as { kind?: unknown }).kind === 'FieldId') {
+  if (typeof v !== 'string' && (v as { kind?: unknown }).kind === 'PubMedIdFieldId') {
     return v as PubMedIdFieldId;
   }
   return {

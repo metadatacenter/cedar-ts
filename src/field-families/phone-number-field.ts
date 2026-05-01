@@ -40,10 +40,16 @@ export interface PhoneNumberFieldId {
 
 export type PhoneNumberFieldReference = PhoneNumberFieldId;
 
+// Identifier-wrapper constructor for the PhoneNumber field family.
+// Idempotent: an existing PhoneNumberFieldId passes through unchanged. A bare
+// string IRI is validated and wrapped via `iri()`; a typed `Iri` is wrapped
+// without re-validation. The PhoneNumberFieldId wrapper is distinguished from
+// sibling field-id types (e.g. `NumericFieldId`, `EmailFieldId`) by the
+// per-variant `kind` discriminator.
 export const phoneNumberFieldId = (
   v: PhoneNumberFieldId | Iri | string,
 ): PhoneNumberFieldId => {
-  if (typeof v !== 'string' && (v as { kind?: unknown }).kind === 'FieldId') {
+  if (typeof v !== 'string' && (v as { kind?: unknown }).kind === 'PhoneNumberFieldId') {
     return v as PhoneNumberFieldId;
   }
   return {

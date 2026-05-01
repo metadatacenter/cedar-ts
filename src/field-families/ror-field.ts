@@ -49,10 +49,16 @@ export interface RorFieldId {
 
 export type RorFieldReference = RorFieldId;
 
+// Identifier-wrapper constructor for the Ror field family.
+// Idempotent: an existing RorFieldId passes through unchanged. A bare
+// string IRI is validated and wrapped via `iri()`; a typed `Iri` is wrapped
+// without re-validation. The RorFieldId wrapper is distinguished from
+// sibling field-id types (e.g. `NumericFieldId`, `EmailFieldId`) by the
+// per-variant `kind` discriminator.
 export const rorFieldId = (
   v: RorFieldId | Iri | string,
 ): RorFieldId => {
-  if (typeof v !== 'string' && (v as { kind?: unknown }).kind === 'FieldId') {
+  if (typeof v !== 'string' && (v as { kind?: unknown }).kind === 'RorFieldId') {
     return v as RorFieldId;
   }
   return {

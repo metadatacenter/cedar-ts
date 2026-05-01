@@ -49,10 +49,16 @@ export interface OrcidFieldId {
 
 export type OrcidFieldReference = OrcidFieldId;
 
+// Identifier-wrapper constructor for the Orcid field family.
+// Idempotent: an existing OrcidFieldId passes through unchanged. A bare
+// string IRI is validated and wrapped via `iri()`; a typed `Iri` is wrapped
+// without re-validation. The OrcidFieldId wrapper is distinguished from
+// sibling field-id types (e.g. `NumericFieldId`, `EmailFieldId`) by the
+// per-variant `kind` discriminator.
 export const orcidFieldId = (
   v: OrcidFieldId | Iri | string,
 ): OrcidFieldId => {
-  if (typeof v !== 'string' && (v as { kind?: unknown }).kind === 'FieldId') {
+  if (typeof v !== 'string' && (v as { kind?: unknown }).kind === 'OrcidFieldId') {
     return v as OrcidFieldId;
   }
   return {

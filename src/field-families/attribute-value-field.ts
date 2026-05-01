@@ -47,10 +47,16 @@ export interface AttributeValueFieldId {
 
 export type AttributeValueFieldReference = AttributeValueFieldId;
 
+// Identifier-wrapper constructor for the AttributeValue field family.
+// Idempotent: an existing AttributeValueFieldId passes through unchanged. A bare
+// string IRI is validated and wrapped via `iri()`; a typed `Iri` is wrapped
+// without re-validation. The AttributeValueFieldId wrapper is distinguished from
+// sibling field-id types (e.g. `NumericFieldId`, `EmailFieldId`) by the
+// per-variant `kind` discriminator.
 export const attributeValueFieldId = (
   v: AttributeValueFieldId | Iri | string,
 ): AttributeValueFieldId => {
-  if (typeof v !== 'string' && (v as { kind?: unknown }).kind === 'FieldId') {
+  if (typeof v !== 'string' && (v as { kind?: unknown }).kind === 'AttributeValueFieldId') {
     return v as AttributeValueFieldId;
   }
   return {

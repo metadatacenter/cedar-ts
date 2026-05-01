@@ -40,10 +40,16 @@ export interface EmailFieldId {
 
 export type EmailFieldReference = EmailFieldId;
 
+// Identifier-wrapper constructor for the Email field family.
+// Idempotent: an existing EmailFieldId passes through unchanged. A bare
+// string IRI is validated and wrapped via `iri()`; a typed `Iri` is wrapped
+// without re-validation. The EmailFieldId wrapper is distinguished from
+// sibling field-id types (e.g. `NumericFieldId`, `EmailFieldId`) by the
+// per-variant `kind` discriminator.
 export const emailFieldId = (
   v: EmailFieldId | Iri | string,
 ): EmailFieldId => {
-  if (typeof v !== 'string' && (v as { kind?: unknown }).kind === 'FieldId') {
+  if (typeof v !== 'string' && (v as { kind?: unknown }).kind === 'EmailFieldId') {
     return v as EmailFieldId;
   }
   return {

@@ -40,10 +40,16 @@ export interface LinkFieldId {
 
 export type LinkFieldReference = LinkFieldId;
 
+// Identifier-wrapper constructor for the Link field family.
+// Idempotent: an existing LinkFieldId passes through unchanged. A bare
+// string IRI is validated and wrapped via `iri()`; a typed `Iri` is wrapped
+// without re-validation. The LinkFieldId wrapper is distinguished from
+// sibling field-id types (e.g. `NumericFieldId`, `EmailFieldId`) by the
+// per-variant `kind` discriminator.
 export const linkFieldId = (
   v: LinkFieldId | Iri | string,
 ): LinkFieldId => {
-  if (typeof v !== 'string' && (v as { kind?: unknown }).kind === 'FieldId') {
+  if (typeof v !== 'string' && (v as { kind?: unknown }).kind === 'LinkFieldId') {
     return v as LinkFieldId;
   }
   return {

@@ -48,10 +48,16 @@ export interface TimeFieldId {
 
 export type TimeFieldReference = TimeFieldId;
 
+// Identifier-wrapper constructor for the Time field family.
+// Idempotent: an existing TimeFieldId passes through unchanged. A bare
+// string IRI is validated and wrapped via `iri()`; a typed `Iri` is wrapped
+// without re-validation. The TimeFieldId wrapper is distinguished from
+// sibling field-id types (e.g. `NumericFieldId`, `EmailFieldId`) by the
+// per-variant `kind` discriminator.
 export const timeFieldId = (
   v: TimeFieldId | Iri | string,
 ): TimeFieldId => {
-  if (typeof v !== 'string' && (v as { kind?: unknown }).kind === 'FieldId') {
+  if (typeof v !== 'string' && (v as { kind?: unknown }).kind === 'TimeFieldId') {
     return v as TimeFieldId;
   }
   return {

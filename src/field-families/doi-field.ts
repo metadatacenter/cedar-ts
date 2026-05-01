@@ -49,10 +49,16 @@ export interface DoiFieldId {
 
 export type DoiFieldReference = DoiFieldId;
 
+// Identifier-wrapper constructor for the Doi field family.
+// Idempotent: an existing DoiFieldId passes through unchanged. A bare
+// string IRI is validated and wrapped via `iri()`; a typed `Iri` is wrapped
+// without re-validation. The DoiFieldId wrapper is distinguished from
+// sibling field-id types (e.g. `NumericFieldId`, `EmailFieldId`) by the
+// per-variant `kind` discriminator.
 export const doiFieldId = (
   v: DoiFieldId | Iri | string,
 ): DoiFieldId => {
-  if (typeof v !== 'string' && (v as { kind?: unknown }).kind === 'FieldId') {
+  if (typeof v !== 'string' && (v as { kind?: unknown }).kind === 'DoiFieldId') {
     return v as DoiFieldId;
   }
   return {

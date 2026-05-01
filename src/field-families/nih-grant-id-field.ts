@@ -48,10 +48,16 @@ export interface NihGrantIdFieldId {
 
 export type NihGrantIdFieldReference = NihGrantIdFieldId;
 
+// Identifier-wrapper constructor for the NihGrantId field family.
+// Idempotent: an existing NihGrantIdFieldId passes through unchanged. A bare
+// string IRI is validated and wrapped via `iri()`; a typed `Iri` is wrapped
+// without re-validation. The NihGrantIdFieldId wrapper is distinguished from
+// sibling field-id types (e.g. `NumericFieldId`, `EmailFieldId`) by the
+// per-variant `kind` discriminator.
 export const nihGrantIdFieldId = (
   v: NihGrantIdFieldId | Iri | string,
 ): NihGrantIdFieldId => {
-  if (typeof v !== 'string' && (v as { kind?: unknown }).kind === 'FieldId') {
+  if (typeof v !== 'string' && (v as { kind?: unknown }).kind === 'NihGrantIdFieldId') {
     return v as NihGrantIdFieldId;
   }
   return {

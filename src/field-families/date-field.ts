@@ -48,10 +48,16 @@ export interface DateFieldId {
 
 export type DateFieldReference = DateFieldId;
 
+// Identifier-wrapper constructor for the Date field family.
+// Idempotent: an existing DateFieldId passes through unchanged. A bare
+// string IRI is validated and wrapped via `iri()`; a typed `Iri` is wrapped
+// without re-validation. The DateFieldId wrapper is distinguished from
+// sibling field-id types (e.g. `NumericFieldId`, `EmailFieldId`) by the
+// per-variant `kind` discriminator.
 export const dateFieldId = (
   v: DateFieldId | Iri | string,
 ): DateFieldId => {
-  if (typeof v !== 'string' && (v as { kind?: unknown }).kind === 'FieldId') {
+  if (typeof v !== 'string' && (v as { kind?: unknown }).kind === 'DateFieldId') {
     return v as DateFieldId;
   }
   return {

@@ -48,10 +48,16 @@ export interface TextFieldId {
 
 export type TextFieldReference = TextFieldId;
 
+// Identifier-wrapper constructor for the Text field family.
+// Idempotent: an existing TextFieldId passes through unchanged. A bare
+// string IRI is validated and wrapped via `iri()`; a typed `Iri` is wrapped
+// without re-validation. The TextFieldId wrapper is distinguished from
+// sibling field-id types (e.g. `NumericFieldId`, `EmailFieldId`) by the
+// per-variant `kind` discriminator.
 export const textFieldId = (
   v: TextFieldId | Iri | string,
 ): TextFieldId => {
-  if (typeof v !== 'string' && (v as { kind?: unknown }).kind === 'FieldId') {
+  if (typeof v !== 'string' && (v as { kind?: unknown }).kind === 'TextFieldId') {
     return v as TextFieldId;
   }
   return {

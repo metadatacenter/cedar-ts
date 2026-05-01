@@ -54,10 +54,16 @@ export interface NumericFieldId {
 
 export type NumericFieldReference = NumericFieldId;
 
+// Identifier-wrapper constructor for the Numeric field family.
+// Idempotent: an existing NumericFieldId passes through unchanged. A bare
+// string IRI is validated and wrapped via `iri()`; a typed `Iri` is wrapped
+// without re-validation. The NumericFieldId wrapper is distinguished from
+// sibling field-id types (e.g. `NumericFieldId`, `EmailFieldId`) by the
+// per-variant `kind` discriminator.
 export const numericFieldId = (
   v: NumericFieldId | Iri | string,
 ): NumericFieldId => {
-  if (typeof v !== 'string' && (v as { kind?: unknown }).kind === 'FieldId') {
+  if (typeof v !== 'string' && (v as { kind?: unknown }).kind === 'NumericFieldId') {
     return v as NumericFieldId;
   }
   return {
