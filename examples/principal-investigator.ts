@@ -67,6 +67,7 @@ import {
   rorValue,
   schemaArtifactMetadata,
   schemaVersioning,
+  serialize,
   singleChoiceField,
   template,
   templateInstance,
@@ -627,8 +628,8 @@ export const exampleInstance: TemplateInstance = templateInstance({
 // programmatically.
 
 console.log('=== Template ===');
-console.log(JSON.stringify(principalInvestigatorTemplate, null, 2));
+console.log(JSON.stringify(serialize(principalInvestigatorTemplate), null, 2));
 console.log('\n=== Field summary ===');
 console.log(JSON.stringify(fieldSummary, null, 2));
 console.log('\n=== Example instance ===');
-console.log(JSON.stringify(exampleInstance, null, 2));
+console.log(JSON.stringify(serialize(exampleInstance), null, 2));

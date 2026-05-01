@@ -43,3 +43,4 @@ export * from './presentation/index.js';
 export * from './embedded/index.js';
 export * from './template.js';
 export * from './instances/index.js';
+export * from './serialize/index.js';

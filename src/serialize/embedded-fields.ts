@@ -1,0 +1,1007 @@
+// =====================================================================
+// embedded-fields — wire-form serialize/parse for EmbeddedField (18
+// variants), EmbeddedTemplate, EmbeddedPresentationComponent, plus the
+// EmbeddedArtifact union dispatcher.
+// =====================================================================
+
+import { CedarConstructionError } from '../leaves/index.js';
+import {
+  type EmbeddedField,
+  type EmbeddedTextField,
+  type EmbeddedNumericField,
+  type EmbeddedDateField,
+  type EmbeddedTimeField,
+  type EmbeddedDateTimeField,
+  type EmbeddedControlledTermField,
+  type EmbeddedSingleChoiceField,
+  type EmbeddedMultipleChoiceField,
+  type EmbeddedLinkField,
+  type EmbeddedEmailField,
+  type EmbeddedPhoneNumberField,
+  type EmbeddedOrcidField,
+  type EmbeddedRorField,
+  type EmbeddedDoiField,
+  type EmbeddedPubMedIdField,
+  type EmbeddedRridField,
+  type EmbeddedNihGrantIdField,
+  type EmbeddedAttributeValueField,
+  embeddedTextField,
+  embeddedNumericField,
+  embeddedDateField,
+  embeddedTimeField,
+  embeddedDateTimeField,
+  embeddedControlledTermField,
+  embeddedSingleChoiceField,
+  embeddedMultipleChoiceField,
+  embeddedLinkField,
+  embeddedEmailField,
+  embeddedPhoneNumberField,
+  embeddedOrcidField,
+  embeddedRorField,
+  embeddedDoiField,
+  embeddedPubMedIdField,
+  embeddedRridField,
+  embeddedNihGrantIdField,
+  embeddedAttributeValueField,
+} from '../field-families/index.js';
+import {
+  type EmbeddedTemplate,
+  type EmbeddedPresentationComponent,
+  type ValueRequirement,
+  type Cardinality,
+  type Visibility,
+  type LabelOverride,
+  type Property,
+  embeddedTemplate,
+  embeddedPresentationComponent,
+} from '../embedded/index.js';
+import {
+  expectObject,
+  expectString,
+  expectKnownProperties,
+  expectKindOneOf,
+  rejectNullProperty,
+} from './parse-utils.js';
+import {
+  serializeTextFieldId,
+  serializeNumericFieldId,
+  serializeDateFieldId,
+  serializeTimeFieldId,
+  serializeDateTimeFieldId,
+  serializeControlledTermFieldId,
+  serializeSingleChoiceFieldId,
+  serializeMultipleChoiceFieldId,
+  serializeLinkFieldId,
+  serializeEmailFieldId,
+  serializePhoneNumberFieldId,
+  serializeOrcidFieldId,
+  serializeRorFieldId,
+  serializeDoiFieldId,
+  serializePubMedIdFieldId,
+  serializeRridFieldId,
+  serializeNihGrantIdFieldId,
+  serializeAttributeValueFieldId,
+  serializeTemplateId,
+  serializePresentationComponentId,
+  parseTextFieldId,
+  parseNumericFieldId,
+  parseDateFieldId,
+  parseTimeFieldId,
+  parseDateTimeFieldId,
+  parseControlledTermFieldId,
+  parseSingleChoiceFieldId,
+  parseMultipleChoiceFieldId,
+  parseLinkFieldId,
+  parseEmailFieldId,
+  parsePhoneNumberFieldId,
+  parseOrcidFieldId,
+  parseRorFieldId,
+  parseDoiFieldId,
+  parsePubMedIdFieldId,
+  parseRridFieldId,
+  parseNihGrantIdFieldId,
+  parseAttributeValueFieldId,
+  parseTemplateId,
+  parsePresentationComponentId,
+} from './collapsed-wrappers.js';
+import {
+  serializeCardinality,
+  serializeProperty,
+  serializeLabelOverride,
+  serializeValueRequirement,
+  serializeVisibility,
+  parseCardinality,
+  parseProperty,
+  parseLabelOverride,
+  parseValueRequirement,
+  parseVisibility,
+} from './embedded-config.js';
+import {
+  serializeTextDefaultValue,
+  serializeNumericDefaultValue,
+  serializeDateDefaultValue,
+  serializeTimeDefaultValue,
+  serializeDateTimeDefaultValue,
+  serializeControlledTermDefaultValue,
+  serializeChoiceDefaultValue,
+  serializeLinkDefaultValue,
+  serializeEmailDefaultValue,
+  serializePhoneNumberDefaultValue,
+  serializeOrcidDefaultValue,
+  serializeRorDefaultValue,
+  serializeDoiDefaultValue,
+  serializePubMedIdDefaultValue,
+  serializeRridDefaultValue,
+  serializeNihGrantIdDefaultValue,
+  parseTextDefaultValue,
+  parseNumericDefaultValue,
+  parseDateDefaultValue,
+  parseTimeDefaultValue,
+  parseDateTimeDefaultValue,
+  parseControlledTermDefaultValue,
+  parseChoiceDefaultValue,
+  parseLinkDefaultValue,
+  parseEmailDefaultValue,
+  parsePhoneNumberDefaultValue,
+  parseOrcidDefaultValue,
+  parseRorDefaultValue,
+  parseDoiDefaultValue,
+  parsePubMedIdDefaultValue,
+  parseRridDefaultValue,
+  parseNihGrantIdDefaultValue,
+} from './default-values.js';
+
+// ---- Common per-embedding properties ---------------------------------
+
+interface CommonOut {
+  valueRequirement?: ValueRequirement;
+  cardinality?: Cardinality;
+  visibility?: Visibility;
+  labelOverride?: LabelOverride;
+  property?: Property;
+}
+
+function serializeCommonProps(
+  x: {
+    readonly valueRequirement?: ValueRequirement;
+    readonly cardinality?: Cardinality;
+    readonly visibility?: Visibility;
+    readonly labelOverride?: LabelOverride;
+    readonly property?: Property;
+  },
+  out: Record<string, unknown>,
+): void {
+  if (x.valueRequirement !== undefined)
+    out['valueRequirement'] = serializeValueRequirement(x.valueRequirement);
+  if (x.cardinality !== undefined)
+    out['cardinality'] = serializeCardinality(x.cardinality);
+  if (x.visibility !== undefined)
+    out['visibility'] = serializeVisibility(x.visibility);
+  if (x.labelOverride !== undefined)
+    out['labelOverride'] = serializeLabelOverride(x.labelOverride);
+  if (x.property !== undefined) out['property'] = serializeProperty(x.property);
+}
+
+function parseCommonProps(
+  o: { readonly [k: string]: unknown },
+  where: string,
+): CommonOut {
+  rejectNullProperty(o, 'valueRequirement');
+  rejectNullProperty(o, 'cardinality');
+  rejectNullProperty(o, 'visibility');
+  rejectNullProperty(o, 'labelOverride');
+  rejectNullProperty(o, 'property');
+  const out: CommonOut = {};
+  if ('valueRequirement' in o)
+    out.valueRequirement = parseValueRequirement(
+      o['valueRequirement'],
+      `${where}.valueRequirement`,
+    );
+  if ('cardinality' in o)
+    out.cardinality = parseCardinality(o['cardinality'], `${where}.cardinality`);
+  if ('visibility' in o)
+    out.visibility = parseVisibility(o['visibility'], `${where}.visibility`);
+  if ('labelOverride' in o)
+    out.labelOverride = parseLabelOverride(
+      o['labelOverride'],
+      `${where}.labelOverride`,
+    );
+  if ('property' in o)
+    out.property = parseProperty(o['property'], `${where}.property`);
+  return out;
+}
+
+// Allowed-property lists used by the per-family parsers.
+const COMMON_FIELD_PROPS = [
+  'kind',
+  'key',
+  'reference',
+  'valueRequirement',
+  'cardinality',
+  'visibility',
+  'labelOverride',
+  'property',
+];
+const COMMON_FIELD_PROPS_WITH_DEFAULT = [...COMMON_FIELD_PROPS, 'defaultValue'];
+
+function readShell(
+  x: unknown,
+  expectedKind: string,
+  where: string,
+  allowDefault: boolean,
+): {
+  o: { readonly [k: string]: unknown };
+  key: string;
+  reference: unknown;
+  defaultRaw?: unknown;
+  common: CommonOut;
+} {
+  const o = expectObject(x, where);
+  expectKnownProperties(
+    o,
+    allowDefault ? COMMON_FIELD_PROPS_WITH_DEFAULT : COMMON_FIELD_PROPS,
+  );
+  if (allowDefault) rejectNullProperty(o, 'defaultValue');
+  if (o['kind'] !== expectedKind) {
+    throw new CedarConstructionError(
+      `${where}: expected kind ${JSON.stringify(expectedKind)}; got ${JSON.stringify(o['kind'])}`,
+    );
+  }
+  if (!('key' in o)) {
+    throw new CedarConstructionError(`${where}: missing required "key"`);
+  }
+  if (!('reference' in o)) {
+    throw new CedarConstructionError(`${where}: missing required "reference"`);
+  }
+  const out: {
+    o: { readonly [k: string]: unknown };
+    key: string;
+    reference: unknown;
+    defaultRaw?: unknown;
+    common: CommonOut;
+  } = {
+    o,
+    key: expectString(o['key'], `${where}.key`),
+    reference: o['reference'],
+    common: parseCommonProps(o, where),
+  };
+  if (allowDefault && 'defaultValue' in o) out.defaultRaw = o['defaultValue'];
+  return out;
+}
+
+// ---- Per-family EmbeddedField serializers ---------------------------
+
+export function serializeEmbeddedTextField(x: EmbeddedTextField): unknown {
+  const out: Record<string, unknown> = {
+    kind: 'EmbeddedTextField',
+    key: x.key,
+    reference: serializeTextFieldId(x.reference),
+  };
+  serializeCommonProps(x, out);
+  if (x.defaultValue !== undefined)
+    out['defaultValue'] = serializeTextDefaultValue(x.defaultValue);
+  return out;
+}
+
+export function parseEmbeddedTextField(
+  x: unknown,
+  where = 'EmbeddedTextField',
+): EmbeddedTextField {
+  const s = readShell(x, 'EmbeddedTextField', where, true);
+  return embeddedTextField({
+    key: s.key,
+    reference: parseTextFieldId(s.reference, `${where}.reference`),
+    ...s.common,
+    ...(s.defaultRaw !== undefined && {
+      defaultValue: parseTextDefaultValue(s.defaultRaw, `${where}.defaultValue`),
+    }),
+  });
+}
+
+export function serializeEmbeddedNumericField(x: EmbeddedNumericField): unknown {
+  const out: Record<string, unknown> = {
+    kind: 'EmbeddedNumericField',
+    key: x.key,
+    reference: serializeNumericFieldId(x.reference),
+  };
+  serializeCommonProps(x, out);
+  if (x.defaultValue !== undefined)
+    out['defaultValue'] = serializeNumericDefaultValue(x.defaultValue);
+  return out;
+}
+
+export function parseEmbeddedNumericField(
+  x: unknown,
+  where = 'EmbeddedNumericField',
+): EmbeddedNumericField {
+  const s = readShell(x, 'EmbeddedNumericField', where, true);
+  return embeddedNumericField({
+    key: s.key,
+    reference: parseNumericFieldId(s.reference, `${where}.reference`),
+    ...s.common,
+    ...(s.defaultRaw !== undefined && {
+      defaultValue: parseNumericDefaultValue(s.defaultRaw, `${where}.defaultValue`),
+    }),
+  });
+}
+
+export function serializeEmbeddedDateField(x: EmbeddedDateField): unknown {
+  const out: Record<string, unknown> = {
+    kind: 'EmbeddedDateField',
+    key: x.key,
+    reference: serializeDateFieldId(x.reference),
+  };
+  serializeCommonProps(x, out);
+  if (x.defaultValue !== undefined)
+    out['defaultValue'] = serializeDateDefaultValue(x.defaultValue);
+  return out;
+}
+
+export function parseEmbeddedDateField(
+  x: unknown,
+  where = 'EmbeddedDateField',
+): EmbeddedDateField {
+  const s = readShell(x, 'EmbeddedDateField', where, true);
+  return embeddedDateField({
+    key: s.key,
+    reference: parseDateFieldId(s.reference, `${where}.reference`),
+    ...s.common,
+    ...(s.defaultRaw !== undefined && {
+      defaultValue: parseDateDefaultValue(s.defaultRaw, `${where}.defaultValue`),
+    }),
+  });
+}
+
+export function serializeEmbeddedTimeField(x: EmbeddedTimeField): unknown {
+  const out: Record<string, unknown> = {
+    kind: 'EmbeddedTimeField',
+    key: x.key,
+    reference: serializeTimeFieldId(x.reference),
+  };
+  serializeCommonProps(x, out);
+  if (x.defaultValue !== undefined)
+    out['defaultValue'] = serializeTimeDefaultValue(x.defaultValue);
+  return out;
+}
+
+export function parseEmbeddedTimeField(
+  x: unknown,
+  where = 'EmbeddedTimeField',
+): EmbeddedTimeField {
+  const s = readShell(x, 'EmbeddedTimeField', where, true);
+  return embeddedTimeField({
+    key: s.key,
+    reference: parseTimeFieldId(s.reference, `${where}.reference`),
+    ...s.common,
+    ...(s.defaultRaw !== undefined && {
+      defaultValue: parseTimeDefaultValue(s.defaultRaw, `${where}.defaultValue`),
+    }),
+  });
+}
+
+export function serializeEmbeddedDateTimeField(
+  x: EmbeddedDateTimeField,
+): unknown {
+  const out: Record<string, unknown> = {
+    kind: 'EmbeddedDateTimeField',
+    key: x.key,
+    reference: serializeDateTimeFieldId(x.reference),
+  };
+  serializeCommonProps(x, out);
+  if (x.defaultValue !== undefined)
+    out['defaultValue'] = serializeDateTimeDefaultValue(x.defaultValue);
+  return out;
+}
+
+export function parseEmbeddedDateTimeField(
+  x: unknown,
+  where = 'EmbeddedDateTimeField',
+): EmbeddedDateTimeField {
+  const s = readShell(x, 'EmbeddedDateTimeField', where, true);
+  return embeddedDateTimeField({
+    key: s.key,
+    reference: parseDateTimeFieldId(s.reference, `${where}.reference`),
+    ...s.common,
+    ...(s.defaultRaw !== undefined && {
+      defaultValue: parseDateTimeDefaultValue(s.defaultRaw, `${where}.defaultValue`),
+    }),
+  });
+}
+
+export function serializeEmbeddedControlledTermField(
+  x: EmbeddedControlledTermField,
+): unknown {
+  const out: Record<string, unknown> = {
+    kind: 'EmbeddedControlledTermField',
+    key: x.key,
+    reference: serializeControlledTermFieldId(x.reference),
+  };
+  serializeCommonProps(x, out);
+  if (x.defaultValue !== undefined)
+    out['defaultValue'] = serializeControlledTermDefaultValue(x.defaultValue);
+  return out;
+}
+
+export function parseEmbeddedControlledTermField(
+  x: unknown,
+  where = 'EmbeddedControlledTermField',
+): EmbeddedControlledTermField {
+  const s = readShell(x, 'EmbeddedControlledTermField', where, true);
+  return embeddedControlledTermField({
+    key: s.key,
+    reference: parseControlledTermFieldId(s.reference, `${where}.reference`),
+    ...s.common,
+    ...(s.defaultRaw !== undefined && {
+      defaultValue: parseControlledTermDefaultValue(
+        s.defaultRaw,
+        `${where}.defaultValue`,
+      ),
+    }),
+  });
+}
+
+export function serializeEmbeddedSingleChoiceField(
+  x: EmbeddedSingleChoiceField,
+): unknown {
+  const out: Record<string, unknown> = {
+    kind: 'EmbeddedSingleChoiceField',
+    key: x.key,
+    reference: serializeSingleChoiceFieldId(x.reference),
+  };
+  serializeCommonProps(x, out);
+  if (x.defaultValue !== undefined)
+    out['defaultValue'] = serializeChoiceDefaultValue(x.defaultValue);
+  return out;
+}
+
+export function parseEmbeddedSingleChoiceField(
+  x: unknown,
+  where = 'EmbeddedSingleChoiceField',
+): EmbeddedSingleChoiceField {
+  const s = readShell(x, 'EmbeddedSingleChoiceField', where, true);
+  return embeddedSingleChoiceField({
+    key: s.key,
+    reference: parseSingleChoiceFieldId(s.reference, `${where}.reference`),
+    ...s.common,
+    ...(s.defaultRaw !== undefined && {
+      defaultValue: parseChoiceDefaultValue(s.defaultRaw, `${where}.defaultValue`),
+    }),
+  });
+}
+
+export function serializeEmbeddedMultipleChoiceField(
+  x: EmbeddedMultipleChoiceField,
+): unknown {
+  const out: Record<string, unknown> = {
+    kind: 'EmbeddedMultipleChoiceField',
+    key: x.key,
+    reference: serializeMultipleChoiceFieldId(x.reference),
+  };
+  serializeCommonProps(x, out);
+  if (x.defaultValue !== undefined)
+    out['defaultValue'] = serializeChoiceDefaultValue(x.defaultValue);
+  return out;
+}
+
+export function parseEmbeddedMultipleChoiceField(
+  x: unknown,
+  where = 'EmbeddedMultipleChoiceField',
+): EmbeddedMultipleChoiceField {
+  const s = readShell(x, 'EmbeddedMultipleChoiceField', where, true);
+  return embeddedMultipleChoiceField({
+    key: s.key,
+    reference: parseMultipleChoiceFieldId(s.reference, `${where}.reference`),
+    ...s.common,
+    ...(s.defaultRaw !== undefined && {
+      defaultValue: parseChoiceDefaultValue(s.defaultRaw, `${where}.defaultValue`),
+    }),
+  });
+}
+
+export function serializeEmbeddedLinkField(x: EmbeddedLinkField): unknown {
+  const out: Record<string, unknown> = {
+    kind: 'EmbeddedLinkField',
+    key: x.key,
+    reference: serializeLinkFieldId(x.reference),
+  };
+  serializeCommonProps(x, out);
+  if (x.defaultValue !== undefined)
+    out['defaultValue'] = serializeLinkDefaultValue(x.defaultValue);
+  return out;
+}
+
+export function parseEmbeddedLinkField(
+  x: unknown,
+  where = 'EmbeddedLinkField',
+): EmbeddedLinkField {
+  const s = readShell(x, 'EmbeddedLinkField', where, true);
+  return embeddedLinkField({
+    key: s.key,
+    reference: parseLinkFieldId(s.reference, `${where}.reference`),
+    ...s.common,
+    ...(s.defaultRaw !== undefined && {
+      defaultValue: parseLinkDefaultValue(s.defaultRaw, `${where}.defaultValue`),
+    }),
+  });
+}
+
+export function serializeEmbeddedEmailField(x: EmbeddedEmailField): unknown {
+  const out: Record<string, unknown> = {
+    kind: 'EmbeddedEmailField',
+    key: x.key,
+    reference: serializeEmailFieldId(x.reference),
+  };
+  serializeCommonProps(x, out);
+  if (x.defaultValue !== undefined)
+    out['defaultValue'] = serializeEmailDefaultValue(x.defaultValue);
+  return out;
+}
+
+export function parseEmbeddedEmailField(
+  x: unknown,
+  where = 'EmbeddedEmailField',
+): EmbeddedEmailField {
+  const s = readShell(x, 'EmbeddedEmailField', where, true);
+  return embeddedEmailField({
+    key: s.key,
+    reference: parseEmailFieldId(s.reference, `${where}.reference`),
+    ...s.common,
+    ...(s.defaultRaw !== undefined && {
+      defaultValue: parseEmailDefaultValue(s.defaultRaw, `${where}.defaultValue`),
+    }),
+  });
+}
+
+export function serializeEmbeddedPhoneNumberField(
+  x: EmbeddedPhoneNumberField,
+): unknown {
+  const out: Record<string, unknown> = {
+    kind: 'EmbeddedPhoneNumberField',
+    key: x.key,
+    reference: serializePhoneNumberFieldId(x.reference),
+  };
+  serializeCommonProps(x, out);
+  if (x.defaultValue !== undefined)
+    out['defaultValue'] = serializePhoneNumberDefaultValue(x.defaultValue);
+  return out;
+}
+
+export function parseEmbeddedPhoneNumberField(
+  x: unknown,
+  where = 'EmbeddedPhoneNumberField',
+): EmbeddedPhoneNumberField {
+  const s = readShell(x, 'EmbeddedPhoneNumberField', where, true);
+  return embeddedPhoneNumberField({
+    key: s.key,
+    reference: parsePhoneNumberFieldId(s.reference, `${where}.reference`),
+    ...s.common,
+    ...(s.defaultRaw !== undefined && {
+      defaultValue: parsePhoneNumberDefaultValue(
+        s.defaultRaw,
+        `${where}.defaultValue`,
+      ),
+    }),
+  });
+}
+
+export function serializeEmbeddedOrcidField(x: EmbeddedOrcidField): unknown {
+  const out: Record<string, unknown> = {
+    kind: 'EmbeddedOrcidField',
+    key: x.key,
+    reference: serializeOrcidFieldId(x.reference),
+  };
+  serializeCommonProps(x, out);
+  if (x.defaultValue !== undefined)
+    out['defaultValue'] = serializeOrcidDefaultValue(x.defaultValue);
+  return out;
+}
+
+export function parseEmbeddedOrcidField(
+  x: unknown,
+  where = 'EmbeddedOrcidField',
+): EmbeddedOrcidField {
+  const s = readShell(x, 'EmbeddedOrcidField', where, true);
+  return embeddedOrcidField({
+    key: s.key,
+    reference: parseOrcidFieldId(s.reference, `${where}.reference`),
+    ...s.common,
+    ...(s.defaultRaw !== undefined && {
+      defaultValue: parseOrcidDefaultValue(s.defaultRaw, `${where}.defaultValue`),
+    }),
+  });
+}
+
+export function serializeEmbeddedRorField(x: EmbeddedRorField): unknown {
+  const out: Record<string, unknown> = {
+    kind: 'EmbeddedRorField',
+    key: x.key,
+    reference: serializeRorFieldId(x.reference),
+  };
+  serializeCommonProps(x, out);
+  if (x.defaultValue !== undefined)
+    out['defaultValue'] = serializeRorDefaultValue(x.defaultValue);
+  return out;
+}
+
+export function parseEmbeddedRorField(
+  x: unknown,
+  where = 'EmbeddedRorField',
+): EmbeddedRorField {
+  const s = readShell(x, 'EmbeddedRorField', where, true);
+  return embeddedRorField({
+    key: s.key,
+    reference: parseRorFieldId(s.reference, `${where}.reference`),
+    ...s.common,
+    ...(s.defaultRaw !== undefined && {
+      defaultValue: parseRorDefaultValue(s.defaultRaw, `${where}.defaultValue`),
+    }),
+  });
+}
+
+export function serializeEmbeddedDoiField(x: EmbeddedDoiField): unknown {
+  const out: Record<string, unknown> = {
+    kind: 'EmbeddedDoiField',
+    key: x.key,
+    reference: serializeDoiFieldId(x.reference),
+  };
+  serializeCommonProps(x, out);
+  if (x.defaultValue !== undefined)
+    out['defaultValue'] = serializeDoiDefaultValue(x.defaultValue);
+  return out;
+}
+
+export function parseEmbeddedDoiField(
+  x: unknown,
+  where = 'EmbeddedDoiField',
+): EmbeddedDoiField {
+  const s = readShell(x, 'EmbeddedDoiField', where, true);
+  return embeddedDoiField({
+    key: s.key,
+    reference: parseDoiFieldId(s.reference, `${where}.reference`),
+    ...s.common,
+    ...(s.defaultRaw !== undefined && {
+      defaultValue: parseDoiDefaultValue(s.defaultRaw, `${where}.defaultValue`),
+    }),
+  });
+}
+
+export function serializeEmbeddedPubMedIdField(
+  x: EmbeddedPubMedIdField,
+): unknown {
+  const out: Record<string, unknown> = {
+    kind: 'EmbeddedPubMedIdField',
+    key: x.key,
+    reference: serializePubMedIdFieldId(x.reference),
+  };
+  serializeCommonProps(x, out);
+  if (x.defaultValue !== undefined)
+    out['defaultValue'] = serializePubMedIdDefaultValue(x.defaultValue);
+  return out;
+}
+
+export function parseEmbeddedPubMedIdField(
+  x: unknown,
+  where = 'EmbeddedPubMedIdField',
+): EmbeddedPubMedIdField {
+  const s = readShell(x, 'EmbeddedPubMedIdField', where, true);
+  return embeddedPubMedIdField({
+    key: s.key,
+    reference: parsePubMedIdFieldId(s.reference, `${where}.reference`),
+    ...s.common,
+    ...(s.defaultRaw !== undefined && {
+      defaultValue: parsePubMedIdDefaultValue(
+        s.defaultRaw,
+        `${where}.defaultValue`,
+      ),
+    }),
+  });
+}
+
+export function serializeEmbeddedRridField(x: EmbeddedRridField): unknown {
+  const out: Record<string, unknown> = {
+    kind: 'EmbeddedRridField',
+    key: x.key,
+    reference: serializeRridFieldId(x.reference),
+  };
+  serializeCommonProps(x, out);
+  if (x.defaultValue !== undefined)
+    out['defaultValue'] = serializeRridDefaultValue(x.defaultValue);
+  return out;
+}
+
+export function parseEmbeddedRridField(
+  x: unknown,
+  where = 'EmbeddedRridField',
+): EmbeddedRridField {
+  const s = readShell(x, 'EmbeddedRridField', where, true);
+  return embeddedRridField({
+    key: s.key,
+    reference: parseRridFieldId(s.reference, `${where}.reference`),
+    ...s.common,
+    ...(s.defaultRaw !== undefined && {
+      defaultValue: parseRridDefaultValue(s.defaultRaw, `${where}.defaultValue`),
+    }),
+  });
+}
+
+export function serializeEmbeddedNihGrantIdField(
+  x: EmbeddedNihGrantIdField,
+): unknown {
+  const out: Record<string, unknown> = {
+    kind: 'EmbeddedNihGrantIdField',
+    key: x.key,
+    reference: serializeNihGrantIdFieldId(x.reference),
+  };
+  serializeCommonProps(x, out);
+  if (x.defaultValue !== undefined)
+    out['defaultValue'] = serializeNihGrantIdDefaultValue(x.defaultValue);
+  return out;
+}
+
+export function parseEmbeddedNihGrantIdField(
+  x: unknown,
+  where = 'EmbeddedNihGrantIdField',
+): EmbeddedNihGrantIdField {
+  const s = readShell(x, 'EmbeddedNihGrantIdField', where, true);
+  return embeddedNihGrantIdField({
+    key: s.key,
+    reference: parseNihGrantIdFieldId(s.reference, `${where}.reference`),
+    ...s.common,
+    ...(s.defaultRaw !== undefined && {
+      defaultValue: parseNihGrantIdDefaultValue(
+        s.defaultRaw,
+        `${where}.defaultValue`,
+      ),
+    }),
+  });
+}
+
+export function serializeEmbeddedAttributeValueField(
+  x: EmbeddedAttributeValueField,
+): unknown {
+  const out: Record<string, unknown> = {
+    kind: 'EmbeddedAttributeValueField',
+    key: x.key,
+    reference: serializeAttributeValueFieldId(x.reference),
+  };
+  serializeCommonProps(x, out);
+  // No defaultValue (grammar prohibits).
+  return out;
+}
+
+export function parseEmbeddedAttributeValueField(
+  x: unknown,
+  where = 'EmbeddedAttributeValueField',
+): EmbeddedAttributeValueField {
+  const s = readShell(x, 'EmbeddedAttributeValueField', where, false);
+  return embeddedAttributeValueField({
+    key: s.key,
+    reference: parseAttributeValueFieldId(s.reference, `${where}.reference`),
+    ...s.common,
+  });
+}
+
+// ---- EmbeddedTemplate / EmbeddedPresentationComponent ---------------
+
+export function serializeEmbeddedTemplate(x: EmbeddedTemplate): unknown {
+  const out: Record<string, unknown> = {
+    kind: 'EmbeddedTemplate',
+    key: x.key,
+    reference: serializeTemplateId(x.reference),
+  };
+  serializeCommonProps(x, out);
+  return out;
+}
+
+export function parseEmbeddedTemplate(
+  x: unknown,
+  where = 'EmbeddedTemplate',
+): EmbeddedTemplate {
+  const s = readShell(x, 'EmbeddedTemplate', where, false);
+  return embeddedTemplate({
+    key: s.key,
+    reference: parseTemplateId(s.reference, `${where}.reference`),
+    ...s.common,
+  });
+}
+
+export function serializeEmbeddedPresentationComponent(
+  x: EmbeddedPresentationComponent,
+): unknown {
+  const out: Record<string, unknown> = {
+    kind: 'EmbeddedPresentationComponent',
+    key: x.key,
+    reference: serializePresentationComponentId(x.reference),
+  };
+  if (x.visibility !== undefined)
+    out['visibility'] = serializeVisibility(x.visibility);
+  if (x.labelOverride !== undefined)
+    out['labelOverride'] = serializeLabelOverride(x.labelOverride);
+  return out;
+}
+
+export function parseEmbeddedPresentationComponent(
+  x: unknown,
+  where = 'EmbeddedPresentationComponent',
+): EmbeddedPresentationComponent {
+  const o = expectObject(x, where);
+  expectKnownProperties(o, [
+    'kind',
+    'key',
+    'reference',
+    'visibility',
+    'labelOverride',
+  ]);
+  rejectNullProperty(o, 'visibility');
+  rejectNullProperty(o, 'labelOverride');
+  if (o['kind'] !== 'EmbeddedPresentationComponent') {
+    throw new CedarConstructionError(
+      `${where}: expected kind "EmbeddedPresentationComponent"`,
+    );
+  }
+  if (!('key' in o)) {
+    throw new CedarConstructionError(`${where}: missing required "key"`);
+  }
+  if (!('reference' in o)) {
+    throw new CedarConstructionError(`${where}: missing required "reference"`);
+  }
+  const init: {
+    key: string;
+    reference: ReturnType<typeof parsePresentationComponentId>;
+    visibility?: Visibility;
+    labelOverride?: LabelOverride;
+  } = {
+    key: expectString(o['key'], `${where}.key`),
+    reference: parsePresentationComponentId(
+      o['reference'],
+      `${where}.reference`,
+    ),
+  };
+  if ('visibility' in o)
+    init.visibility = parseVisibility(o['visibility'], `${where}.visibility`);
+  if ('labelOverride' in o)
+    init.labelOverride = parseLabelOverride(
+      o['labelOverride'],
+      `${where}.labelOverride`,
+    );
+  return embeddedPresentationComponent(init);
+}
+
+// ---- EmbeddedField union --------------------------------------------
+
+const EMBEDDED_FIELD_KINDS = [
+  'EmbeddedTextField',
+  'EmbeddedNumericField',
+  'EmbeddedDateField',
+  'EmbeddedTimeField',
+  'EmbeddedDateTimeField',
+  'EmbeddedControlledTermField',
+  'EmbeddedSingleChoiceField',
+  'EmbeddedMultipleChoiceField',
+  'EmbeddedLinkField',
+  'EmbeddedEmailField',
+  'EmbeddedPhoneNumberField',
+  'EmbeddedOrcidField',
+  'EmbeddedRorField',
+  'EmbeddedDoiField',
+  'EmbeddedPubMedIdField',
+  'EmbeddedRridField',
+  'EmbeddedNihGrantIdField',
+  'EmbeddedAttributeValueField',
+] as const;
+
+export function serializeEmbeddedField(x: EmbeddedField): unknown {
+  switch (x.kind) {
+    case 'EmbeddedTextField':
+      return serializeEmbeddedTextField(x);
+    case 'EmbeddedNumericField':
+      return serializeEmbeddedNumericField(x);
+    case 'EmbeddedDateField':
+      return serializeEmbeddedDateField(x);
+    case 'EmbeddedTimeField':
+      return serializeEmbeddedTimeField(x);
+    case 'EmbeddedDateTimeField':
+      return serializeEmbeddedDateTimeField(x);
+    case 'EmbeddedControlledTermField':
+      return serializeEmbeddedControlledTermField(x);
+    case 'EmbeddedSingleChoiceField':
+      return serializeEmbeddedSingleChoiceField(x);
+    case 'EmbeddedMultipleChoiceField':
+      return serializeEmbeddedMultipleChoiceField(x);
+    case 'EmbeddedLinkField':
+      return serializeEmbeddedLinkField(x);
+    case 'EmbeddedEmailField':
+      return serializeEmbeddedEmailField(x);
+    case 'EmbeddedPhoneNumberField':
+      return serializeEmbeddedPhoneNumberField(x);
+    case 'EmbeddedOrcidField':
+      return serializeEmbeddedOrcidField(x);
+    case 'EmbeddedRorField':
+      return serializeEmbeddedRorField(x);
+    case 'EmbeddedDoiField':
+      return serializeEmbeddedDoiField(x);
+    case 'EmbeddedPubMedIdField':
+      return serializeEmbeddedPubMedIdField(x);
+    case 'EmbeddedRridField':
+      return serializeEmbeddedRridField(x);
+    case 'EmbeddedNihGrantIdField':
+      return serializeEmbeddedNihGrantIdField(x);
+    case 'EmbeddedAttributeValueField':
+      return serializeEmbeddedAttributeValueField(x);
+  }
+}
+
+export function parseEmbeddedField(
+  x: unknown,
+  where = 'EmbeddedField',
+): EmbeddedField {
+  const o = expectObject(x, where);
+  const k = expectKindOneOf(o, EMBEDDED_FIELD_KINDS, where);
+  switch (k) {
+    case 'EmbeddedTextField':
+      return parseEmbeddedTextField(x, where);
+    case 'EmbeddedNumericField':
+      return parseEmbeddedNumericField(x, where);
+    case 'EmbeddedDateField':
+      return parseEmbeddedDateField(x, where);
+    case 'EmbeddedTimeField':
+      return parseEmbeddedTimeField(x, where);
+    case 'EmbeddedDateTimeField':
+      return parseEmbeddedDateTimeField(x, where);
+    case 'EmbeddedControlledTermField':
+      return parseEmbeddedControlledTermField(x, where);
+    case 'EmbeddedSingleChoiceField':
+      return parseEmbeddedSingleChoiceField(x, where);
+    case 'EmbeddedMultipleChoiceField':
+      return parseEmbeddedMultipleChoiceField(x, where);
+    case 'EmbeddedLinkField':
+      return parseEmbeddedLinkField(x, where);
+    case 'EmbeddedEmailField':
+      return parseEmbeddedEmailField(x, where);
+    case 'EmbeddedPhoneNumberField':
+      return parseEmbeddedPhoneNumberField(x, where);
+    case 'EmbeddedOrcidField':
+      return parseEmbeddedOrcidField(x, where);
+    case 'EmbeddedRorField':
+      return parseEmbeddedRorField(x, where);
+    case 'EmbeddedDoiField':
+      return parseEmbeddedDoiField(x, where);
+    case 'EmbeddedPubMedIdField':
+      return parseEmbeddedPubMedIdField(x, where);
+    case 'EmbeddedRridField':
+      return parseEmbeddedRridField(x, where);
+    case 'EmbeddedNihGrantIdField':
+      return parseEmbeddedNihGrantIdField(x, where);
+    case 'EmbeddedAttributeValueField':
+      return parseEmbeddedAttributeValueField(x, where);
+  }
+}
+
+// ---- EmbeddedArtifact union -----------------------------------------
+
+const EMBEDDED_ARTIFACT_KINDS = [
+  ...EMBEDDED_FIELD_KINDS,
+  'EmbeddedTemplate',
+  'EmbeddedPresentationComponent',
+] as const;
+
+import type { EmbeddedArtifact } from '../embedded/index.js';
+
+export function serializeEmbeddedArtifact(x: EmbeddedArtifact): unknown {
+  if (x.kind === 'EmbeddedTemplate') return serializeEmbeddedTemplate(x);
+  if (x.kind === 'EmbeddedPresentationComponent')
+    return serializeEmbeddedPresentationComponent(x);
+  return serializeEmbeddedField(x);
+}
+
+export function parseEmbeddedArtifact(
+  x: unknown,
+  where = 'EmbeddedArtifact',
+): EmbeddedArtifact {
+  const o = expectObject(x, where);
+  const k = expectKindOneOf(o, EMBEDDED_ARTIFACT_KINDS, where);
+  if (k === 'EmbeddedTemplate') return parseEmbeddedTemplate(x, where);
+  if (k === 'EmbeddedPresentationComponent')
+    return parseEmbeddedPresentationComponent(x, where);
+  return parseEmbeddedField(x, where);
+}
