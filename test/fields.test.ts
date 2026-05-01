@@ -24,7 +24,6 @@ import {
   emailFieldId,
   emailFieldSpec,
   isField,
-  isFieldOfKind,
   linkField,
   linkFieldId,
   linkFieldSpec,
@@ -69,7 +68,6 @@ import {
   timeFieldSpec,
   typedLiteral,
   XsdNumericDatatypeIri,
-  type FieldKind,
   type Field,
   type TextField,
   type DateField,
@@ -99,13 +97,10 @@ describe('Field constructors', () => {
       metadata: meta,
       fieldSpec: textFieldSpec(),
     });
-    expect(f.kind).toBe('Field');
-    expect(f.fieldKind).toBe('Text');
+    expect(f.kind).toBe('TextField');
     expect(f.id.fieldKind).toBe('Text');
     expect(f.fieldSpec.kind).toBe('TextFieldSpec');
     expect(isField(f)).toBe(true);
-    expect(isFieldOfKind(f, 'Text')).toBe(true);
-    expect(isFieldOfKind(f, 'Numeric')).toBe(false);
   });
 
   it('rejects a misaligned id at the type level', () => {
@@ -134,7 +129,7 @@ describe('Per-family helpers', () => {
       metadata: meta,
       fieldSpec: textFieldSpec(),
     });
-    expect(f.fieldKind).toBe('Text');
+    expect(f.kind).toBe('TextField');
 
     // @ts-expect-error TextField is not assignable to DateField
     const d: DateField = f;
@@ -234,14 +229,14 @@ describe('Per-family helpers', () => {
   });
 });
 
-describe('isFieldOfKind narrows correctly', () => {
-  it('narrows the FieldSpec type along with the field family', () => {
+describe('Field kind narrowing', () => {
+  it('narrows the FieldSpec type via the per-variant `kind` discriminant', () => {
     const f: Field = numericField({
       id: numericFieldId('https://example.org/n'),
       metadata: meta,
       fieldSpec: numericFieldSpec({ datatype: 'integer' }),
     });
-    if (isFieldOfKind(f, 'Numeric')) {
+    if (f.kind === 'NumericField') {
       const spec: NumericFieldSpec = f.fieldSpec;
       expect(spec.datatype).toBe('integer');
     } else {
@@ -249,14 +244,15 @@ describe('isFieldOfKind narrows correctly', () => {
     }
   });
 
-  it('FIELD_KINDS-style table check that every family round-trips', () => {
-    const kinds: FieldKind[] = [
-      'Text', 'Numeric', 'Date', 'Time', 'DateTime',
-      'ControlledTerm', 'SingleChoice', 'MultipleChoice',
-      'Link', 'Email', 'PhoneNumber',
-      'Orcid', 'Ror', 'Doi', 'PubMedId', 'Rrid', 'NihGrantId',
-      'AttributeValue',
+  it('table check that every family kind discriminant is unique and complete', () => {
+    const kinds: Field['kind'][] = [
+      'TextField', 'NumericField', 'DateField', 'TimeField', 'DateTimeField',
+      'ControlledTermField', 'SingleChoiceField', 'MultipleChoiceField',
+      'LinkField', 'EmailField', 'PhoneNumberField',
+      'OrcidField', 'RorField', 'DoiField', 'PubMedIdField', 'RridField', 'NihGrantIdField',
+      'AttributeValueField',
     ];
     expect(kinds.length).toBe(18);
+    expect(new Set(kinds).size).toBe(18);
   });
 });

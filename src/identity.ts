@@ -1,10 +1,10 @@
 import { type Iri, iri } from './leaves/index.js';
 
-// FieldKind enumerates the 18 concrete field families. Used as the inner
-// discriminant on FieldId and downstream structures (FieldSpec, EmbeddedField,
-// DefaultValue) so the type system can keep families aligned without 18
-// hand-written near-duplicate types per layer.
-export type FieldKind =
+// Internal enumeration of the 18 concrete field families. Used only as the
+// type parameter constraint on isFieldIdOf below; not part of the public
+// API. The Field and EmbeddedField families discriminate on a per-variant
+// `kind` value (TextField, NumericField, …) rather than this enumeration.
+type FieldKind =
   | 'Text'
   | 'Numeric'
   | 'Date'
@@ -23,31 +23,6 @@ export type FieldKind =
   | 'Rrid'
   | 'NihGrantId'
   | 'AttributeValue';
-
-export const FIELD_KINDS: readonly FieldKind[] = Object.freeze([
-  'Text',
-  'Numeric',
-  'Date',
-  'Time',
-  'DateTime',
-  'ControlledTerm',
-  'SingleChoice',
-  'MultipleChoice',
-  'Link',
-  'Email',
-  'PhoneNumber',
-  'Orcid',
-  'Ror',
-  'Doi',
-  'PubMedId',
-  'Rrid',
-  'NihGrantId',
-  'AttributeValue',
-]);
-
-export function isFieldKind(x: unknown): x is FieldKind {
-  return typeof x === 'string' && (FIELD_KINDS as readonly string[]).includes(x);
-}
 
 // Each concrete FieldId interface carries the same outer `kind: 'FieldId'`
 // discriminant (distinguishing FieldId from TemplateId, etc.) plus an inner

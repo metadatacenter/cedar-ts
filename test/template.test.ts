@@ -145,7 +145,7 @@ describe('SchemaArtifact union', () => {
     const all: SchemaArtifact[] = [f, t];
     for (const a of all) expect(isSchemaArtifact(a)).toBe(true);
 
-    expect(isSchemaArtifact({ kind: 'EmbeddedField' })).toBe(false);
+    expect(isSchemaArtifact({ kind: 'EmbeddedTextField' })).toBe(false);
     expect(isSchemaArtifact(null)).toBe(false);
   });
 });

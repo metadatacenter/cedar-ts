@@ -1,10 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import {
   CedarConstructionError,
-  FIELD_KINDS,
   isFieldId,
   isFieldIdOf,
-  isFieldKind,
   textFieldId,
   numericFieldId,
   dateFieldId,
@@ -29,23 +27,9 @@ import {
   isTemplateId,
   isPresentationComponentId,
   isTemplateInstanceId,
-  type FieldKind,
   type TextFieldId,
   type DateFieldId,
 } from '../src/index.js';
-
-describe('FieldKind enumeration', () => {
-  it('contains exactly 18 kinds', () => {
-    expect(FIELD_KINDS).toHaveLength(18);
-  });
-
-  it('isFieldKind narrows from string', () => {
-    expect(isFieldKind('Text')).toBe(true);
-    expect(isFieldKind('AttributeValue')).toBe(true);
-    expect(isFieldKind('not_a_kind')).toBe(false);
-    expect(isFieldKind(42)).toBe(false);
-  });
-});
 
 describe('FieldId basics', () => {
   it('produces a tagged object with the requested fieldKind', () => {
@@ -68,7 +52,7 @@ describe('FieldId basics', () => {
 });
 
 describe('FieldId — convenience helpers', () => {
-  const helpers: Array<[FieldKind, (v: string) => { fieldKind: FieldKind }]> = [
+  const helpers: Array<[string, (v: string) => { fieldKind: string }]> = [
     ['Text', textFieldId],
     ['Numeric', numericFieldId],
     ['Date', dateFieldId],

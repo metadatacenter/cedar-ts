@@ -238,7 +238,7 @@ describe('Artifact union', () => {
     const all: Artifact[] = [f, t, pc, ti];
     for (const a of all) expect(isArtifact(a)).toBe(true);
 
-    expect(isArtifact({ kind: 'EmbeddedField' })).toBe(false);
+    expect(isArtifact({ kind: 'EmbeddedTextField' })).toBe(false);
     expect(isArtifact({ kind: 'FieldValue' })).toBe(false);
     expect(isArtifact(null)).toBe(false);
   });

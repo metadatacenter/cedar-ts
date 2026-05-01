@@ -12,7 +12,6 @@ import {
   labelOverride,
   property,
   isEmbeddedField,
-  isEmbeddedFieldOfKind,
   embeddedTextField,
   embeddedNumericField,
   embeddedDateField,
@@ -256,12 +255,9 @@ describe('EmbeddedField constructors', () => {
       key: 'title',
       reference: txtRef,
     });
-    expect(ef.kind).toBe('EmbeddedField');
-    expect(ef.fieldKind).toBe('Text');
+    expect(ef.kind).toBe('EmbeddedTextField');
     expect(ef.reference.fieldKind).toBe('Text');
     expect(isEmbeddedField(ef)).toBe(true);
-    expect(isEmbeddedFieldOfKind(ef, 'Text')).toBe(true);
-    expect(isEmbeddedFieldOfKind(ef, 'Numeric')).toBe(false);
   });
 
   it('per-family helpers pin the type', () => {
@@ -269,7 +265,7 @@ describe('EmbeddedField constructors', () => {
       key: 'title',
       reference: txtRef,
     });
-    expect(ef.fieldKind).toBe('Text');
+    expect(ef.kind).toBe('EmbeddedTextField');
 
     // @ts-expect-error EmbeddedTextField is not assignable to EmbeddedDateField
     const d: EmbeddedDateField = ef;
@@ -301,7 +297,7 @@ describe('EmbeddedField constructors', () => {
       key: 'attr',
       reference: attrRef,
     });
-    expect(ef.fieldKind).toBe('AttributeValue');
+    expect(ef.kind).toBe('EmbeddedAttributeValueField');
     expect(ef.defaultValue).toBeUndefined();
 
     // @ts-expect-error DefaultValueFor<'attribute_value'> is never
@@ -352,7 +348,7 @@ describe('EmbeddedField constructors', () => {
     }
   });
 
-  it('coerces a primitive defaultValue input by fieldKind', () => {
+  it('coerces a primitive defaultValue input by family kind', () => {
     const ef = embeddedTextField({
       key: 'title',
       reference: txtRef,
@@ -432,7 +428,7 @@ describe('EmbeddedArtifact union', () => {
       }),
     ];
     for (const a of all) expect(isEmbeddedArtifact(a)).toBe(true);
-    expect(isEmbeddedArtifact({ kind: 'Field' })).toBe(false);
+    expect(isEmbeddedArtifact({ kind: 'TextField' })).toBe(false);
     expect(isEmbeddedArtifact(null)).toBe(false);
     expect(isEmbeddedArtifact('embedded_field')).toBe(false);
   });

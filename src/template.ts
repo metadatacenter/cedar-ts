@@ -2,7 +2,7 @@ import { CedarConstructionError } from './leaves/index.js';
 import { type TemplateId, templateId } from './identity.js';
 import type { SchemaArtifactMetadata } from './metadata/index.js';
 import type { EmbeddedArtifact } from './embedded/index.js';
-import type { Field } from './fields.js';
+import { type Field, isField } from './fields.js';
 import {
   type MultilingualString,
   type MultilingualStringInput,
@@ -155,8 +155,5 @@ export function isTemplate(x: unknown): x is Template {
 
 export type SchemaArtifact = Field | Template;
 
-export const isSchemaArtifact = (x: unknown): x is SchemaArtifact => {
-  if (typeof x !== 'object' || x === null) return false;
-  const k = (x as { kind?: unknown }).kind;
-  return k === 'Field' || k === 'Template';
-};
+export const isSchemaArtifact = (x: unknown): x is SchemaArtifact =>
+  isField(x) || isTemplate(x);

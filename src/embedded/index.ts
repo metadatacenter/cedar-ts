@@ -34,7 +34,6 @@ export {
 export {
   type EmbeddedField,
   isEmbeddedField,
-  isEmbeddedFieldOfKind,
   type EmbeddedTextField,
   type EmbeddedNumericField,
   type EmbeddedDateField,
