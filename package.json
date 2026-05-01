@@ -2,7 +2,7 @@
   "name": "@metadatacenter/cedar-model",
   "version": "0.1.0",
   "description": "TypeScript implementation of the CEDAR Template Model abstract grammar, with schema and instance validation.",
-  "license": "Apache-2.0",
+  "license": "BSD-2-Clause",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",

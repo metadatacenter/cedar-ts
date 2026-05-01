@@ -6,8 +6,6 @@ TypeScript values.
 
 `cedar-ts` is the reference TypeScript binding for the spec defined at
 [`metadatacenter/cedar-structural-spec`](https://github.com/metadatacenter/cedar-structural-spec).
-A parallel Java binding lives at
-[`metadatacenter/cedar-j`](https://github.com/metadatacenter/cedar-j).
 
 ## Status
 
@@ -214,21 +212,6 @@ and constructor. Where the wire grammar specifies a JSON shape, cedar-ts
 preserves it on construction so `JSON.stringify(value)` produces the
 spec-conformant wire form directly.
 
-## Relationship to cedar-j
-
-[cedar-j](https://github.com/metadatacenter/cedar-j) is a parallel Java
-implementation of the same spec. Both bindings:
-
-- preserve the spec's wire form on serialization
-- use single per-variant `kind` discriminators (no double-discriminator
-  patterns)
-- enforce constraints at construction time
-- model human-display strings as multilingual
-
-Different idioms per host language: cedar-ts uses TypeScript interfaces +
-factory functions; cedar-j uses Java records + sealed interfaces with
-Jackson. See `bindings.md` in the spec repo for the meta-pattern.
-
 ## License
 
-Apache-2.0.
+BSD 2-Clause.
