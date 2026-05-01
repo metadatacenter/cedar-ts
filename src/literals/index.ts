@@ -22,7 +22,7 @@ export {
   numericLiteralDatatypeIri,
   numericLiteralToNumber,
   isNumericLiteral,
-} from './numeric.js';
+} from './numeric-literals.js';
 export {
   type FullDateLiteral,
   type TimeLiteral,
@@ -38,4 +38,4 @@ export {
   FULL_DATE_DATATYPE_IRI,
   TIME_DATATYPE_IRI,
   DATE_TIME_DATATYPE_IRI,
-} from './temporal.js';
+} from './temporal-literals.js';
