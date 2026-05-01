@@ -5,7 +5,7 @@ export {
   numericValue,
   isTextValue,
   isNumericValue,
-} from './scalar.js';
+} from './scalar-values.js';
 export {
   type YearValue,
   type YearMonthValue,
@@ -25,13 +25,13 @@ export {
   isDateValue,
   isTimeValue,
   isDateTimeValue,
-} from './temporal.js';
+} from './temporal-values.js';
 export {
   type ControlledTermValue,
   type ControlledTermValueInit,
   controlledTermValue,
   isControlledTermValue,
-} from './controlled-term.js';
+} from './controlled-term-values.js';
 export {
   type LiteralChoiceValue,
   type ControlledTermChoiceValue,
@@ -41,13 +41,13 @@ export {
   isLiteralChoiceValue,
   isControlledTermChoiceValue,
   isChoiceValue,
-} from './choice.js';
+} from './choice-values.js';
 export {
   type LinkValue,
   type LinkValueInit,
   linkValue,
   isLinkValue,
-} from './link.js';
+} from './link-values.js';
 export {
   type EmailValue,
   type PhoneNumberValue,
@@ -55,7 +55,7 @@ export {
   phoneNumberValue,
   isEmailValue,
   isPhoneNumberValue,
-} from './contact.js';
+} from './contact-values.js';
 export {
   type OrcidIri,
   type RorIri,
@@ -89,30 +89,30 @@ export {
   isRridValue,
   isNihGrantIdValue,
   isExternalAuthorityValue,
-} from './external-authority.js';
+} from './external-authority-values.js';
 export {
   type AttributeValue,
   attributeValue,
   isAttributeValue,
-} from './attribute.js';
+} from './attribute-values.js';
 
-import type { TextValue, NumericValue } from './scalar.js';
-import type { DateValue, TimeValue, DateTimeValue } from './temporal.js';
-import type { ControlledTermValue } from './controlled-term.js';
-import type { ChoiceValue } from './choice.js';
-import type { LinkValue } from './link.js';
-import type { EmailValue, PhoneNumberValue } from './contact.js';
-import type { ExternalAuthorityValue } from './external-authority.js';
-import type { AttributeValue } from './attribute.js';
+import type { TextValue, NumericValue } from './scalar-values.js';
+import type { DateValue, TimeValue, DateTimeValue } from './temporal-values.js';
+import type { ControlledTermValue } from './controlled-term-values.js';
+import type { ChoiceValue } from './choice-values.js';
+import type { LinkValue } from './link-values.js';
+import type { EmailValue, PhoneNumberValue } from './contact-values.js';
+import type { ExternalAuthorityValue } from './external-authority-values.js';
+import type { AttributeValue } from './attribute-values.js';
 
-import { isTextValue, isNumericValue } from './scalar.js';
-import { isDateValue, isTimeValue, isDateTimeValue } from './temporal.js';
-import { isControlledTermValue } from './controlled-term.js';
-import { isChoiceValue } from './choice.js';
-import { isLinkValue } from './link.js';
-import { isEmailValue, isPhoneNumberValue } from './contact.js';
-import { isExternalAuthorityValue } from './external-authority.js';
-import { isAttributeValue } from './attribute.js';
+import { isTextValue, isNumericValue } from './scalar-values.js';
+import { isDateValue, isTimeValue, isDateTimeValue } from './temporal-values.js';
+import { isControlledTermValue } from './controlled-term-values.js';
+import { isChoiceValue } from './choice-values.js';
+import { isLinkValue } from './link-values.js';
+import { isEmailValue, isPhoneNumberValue } from './contact-values.js';
+import { isExternalAuthorityValue } from './external-authority-values.js';
+import { isAttributeValue } from './attribute-values.js';
 
 export type Value =
   | TextValue

@@ -2,7 +2,7 @@ import { type Literal, langTaggedLiteral } from '../literals/index.js';
 import {
   type ControlledTermValue,
   isControlledTermValue,
-} from './controlled-term.js';
+} from './controlled-term-values.js';
 
 export interface LiteralChoiceValue {
   readonly kind: 'LiteralChoiceValue';
