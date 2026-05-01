@@ -1,3 +1,24 @@
+// =====================================================================
+// Text field family — plain string content (with optional length /
+// regex / single-vs-multi-line constraints)
+// =====================================================================
+//
+// This file is the complete vertical slice for the text field
+// family. Per the cedar-ts convention each family file holds:
+//
+//   - identifier type            : TextFieldId
+//   - instance value             : TextValue
+//   - schema constraints         : TextFieldSpec
+//   - reusable Field artifact    : TextField
+//   - default value              : TextDefaultValue
+//   - Template-embedding wrapper : EmbeddedTextField
+//
+// Wire `kind` values: "TextField" (artifact), "EmbeddedTextField"
+// (embedding).
+//
+// The instance value carries a `TextLiteral` (`SimpleLiteral |
+// LangTaggedLiteral`) — see `src/literals/literals.ts`.
+
 import { type Iri, iri, assertNonNegativeInteger } from '../leaves/index.js';
 import {
   type TextLiteral,

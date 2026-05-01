@@ -1,3 +1,21 @@
+// =====================================================================
+// Link field family — hyperlink to an external resource (IRI plus
+// optional label)
+// =====================================================================
+//
+// This file is the complete vertical slice for the link field
+// family. Per the cedar-ts convention each family file holds:
+//
+//   - identifier type            : LinkFieldId
+//   - instance value             : LinkValue
+//   - schema constraints         : LinkFieldSpec
+//   - reusable Field artifact    : LinkField
+//   - default value              : LinkDefaultValue
+//   - Template-embedding wrapper : EmbeddedLinkField
+//
+// Wire `kind` values: "LinkField" (artifact), "EmbeddedLinkField"
+// (embedding).
+
 import { type Iri, iri } from '../leaves/index.js';
 import type { SchemaArtifactMetadata } from '../metadata/index.js';
 import type { ValueRequirement } from '../embedded/requirement.js';

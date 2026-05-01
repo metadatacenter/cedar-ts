@@ -1,3 +1,26 @@
+// =====================================================================
+// Choice-shared types — cross-cutting types used by both the
+// single-choice and multiple-choice field families
+// =====================================================================
+//
+// Both `single-choice-field.ts` and `multiple-choice-field.ts` depend
+// on the same option types and the same value types. Co-locating them
+// here avoids either duplicating the definitions or arbitrarily
+// designating one of the two family files as the owner.
+//
+// This file holds:
+//
+//   - LiteralChoiceOption, ControlledTermChoiceOption — option types
+//     used by the four concrete choice-spec variants
+//     (LiteralSingleChoice / ControlledTermSingleChoice /
+//     LiteralMultipleChoice / ControlledTermMultipleChoice).
+//   - LiteralChoiceValue, ControlledTermChoiceValue — instance value
+//     types selected by a choice field.
+//   - ChoiceValue — the union admitted at SingleChoiceField and
+//     MultipleChoiceField instances.
+//   - ChoiceDefaultValue — the default-value variant that wraps a
+//     ChoiceValue.
+
 import { type Literal, langTaggedLiteral } from '../literals/index.js';
 import {
   type ControlledTermValue,

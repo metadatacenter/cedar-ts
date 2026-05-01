@@ -1,3 +1,24 @@
+// =====================================================================
+// Date field family — calendar-date values at year / year-month /
+// full-date precision
+// =====================================================================
+//
+// This file is the complete vertical slice for the date field
+// family. Per the cedar-ts convention each family file holds:
+//
+//   - identifier type            : DateFieldId
+//   - instance value             : DateValue
+//   - schema constraints         : DateFieldSpec
+//   - reusable Field artifact    : DateField
+//   - default value              : DateDefaultValue
+//   - Template-embedding wrapper : EmbeddedDateField
+//
+// Wire `kind` values: "DateField" (artifact), "EmbeddedDateField"
+// (embedding).
+//
+// Owns the `DateValueType` enum. References `FullDateLiteral` from
+// `src/literals/temporal-literals.ts`.
+
 import { type Iri, iri, CedarConstructionError } from '../leaves/index.js';
 import {
   type FullDateLiteral,

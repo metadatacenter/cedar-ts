@@ -1,3 +1,23 @@
+// =====================================================================
+// Embedded-field common helpers — internal-only support for the 18
+// EmbeddedXxxField constructors
+// =====================================================================
+//
+// Holds:
+//
+//   - EmbeddedFieldInitCommon — the shared init-object shape for the 18
+//     EmbeddedXxxFieldInit interfaces.
+//   - assembleCommon() — assembles the per-embedding properties (key,
+//     valueRequirement, cardinality, visibility, labelOverride,
+//     property) shared by every EmbeddedField variant. Called by every
+//     `embeddedXxxField` constructor.
+//   - fieldRef() — extracts the FieldReference from a Field artifact, or
+//     passes through a typed reference. Called by every
+//     `embeddedXxxField` constructor.
+//
+// Not re-exported from `index.ts`; consumed only by the 18 family files
+// in this folder.
+
 import { parseAsciiIdentifier } from '../leaves/index.js';
 import type { ValueRequirement } from '../embedded/requirement.js';
 import type { Cardinality } from '../embedded/cardinality.js';

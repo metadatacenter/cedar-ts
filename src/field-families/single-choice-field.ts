@@ -1,3 +1,27 @@
+// =====================================================================
+// SingleChoice field family — one selection from a curated set of
+// literal or controlled-term options
+// =====================================================================
+//
+// This file is the complete vertical slice for the single-choice field
+// family. Per the cedar-ts convention each family file holds:
+//
+//   - identifier type            : SingleChoiceFieldId
+//   - instance value             : SingleChoiceValue
+//   - schema constraints         : SingleChoiceFieldSpec
+//   - reusable Field artifact    : SingleChoiceField
+//   - default value              : SingleChoiceDefaultValue
+//   - Template-embedding wrapper : EmbeddedSingleChoiceField
+//
+// Wire `kind` values: "SingleChoiceField" (artifact),
+// "EmbeddedSingleChoiceField" (embedding).
+//
+// The `SingleChoiceFieldSpec` is itself a union of
+// `LiteralSingleChoiceFieldSpec` and
+// `ControlledTermSingleChoiceFieldSpec`, both of which live in this
+// file. Choice options and choice values are shared with the
+// multiple-choice family — see `choice-shared.ts`.
+
 import { type Iri, iri } from '../leaves/index.js';
 import type { SchemaArtifactMetadata } from '../metadata/index.js';
 import type { ValueRequirement } from '../embedded/requirement.js';

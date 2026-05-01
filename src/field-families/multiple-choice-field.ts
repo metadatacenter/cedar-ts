@@ -1,3 +1,28 @@
+// =====================================================================
+// MultipleChoice field family — multiple selections from a curated set
+// of literal or controlled-term options
+// =====================================================================
+//
+// This file is the complete vertical slice for the multiple-choice
+// field family. Per the cedar-ts convention each family file holds:
+//
+//   - identifier type            : MultipleChoiceFieldId
+//   - instance value             : MultipleChoiceValue
+//   - schema constraints         : MultipleChoiceFieldSpec
+//   - reusable Field artifact    : MultipleChoiceField
+//   - default value              : MultipleChoiceDefaultValue
+//   - Template-embedding wrapper : EmbeddedMultipleChoiceField
+//
+// Wire `kind` values: "MultipleChoiceField" (artifact),
+// "EmbeddedMultipleChoiceField" (embedding).
+//
+// The `MultipleChoiceFieldSpec` is itself a union of
+// `LiteralMultipleChoiceFieldSpec` and
+// `ControlledTermMultipleChoiceFieldSpec`, both of which live in this
+// file. The cross-cutting `ChoiceFieldSpec` union (single | multiple)
+// lives here too. Choice options and choice values are shared with the
+// single-choice family — see `choice-shared.ts`.
+
 import { type Iri, iri } from '../leaves/index.js';
 import type { SchemaArtifactMetadata } from '../metadata/index.js';
 import type { ValueRequirement } from '../embedded/requirement.js';

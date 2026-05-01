@@ -1,3 +1,24 @@
+// =====================================================================
+// Time field family — time-of-day values at hour-minute / second /
+// fractional-second precision
+// =====================================================================
+//
+// This file is the complete vertical slice for the time field
+// family. Per the cedar-ts convention each family file holds:
+//
+//   - identifier type            : TimeFieldId
+//   - instance value             : TimeValue
+//   - schema constraints         : TimeFieldSpec
+//   - reusable Field artifact    : TimeField
+//   - default value              : TimeDefaultValue
+//   - Template-embedding wrapper : EmbeddedTimeField
+//
+// Wire `kind` values: "TimeField" (artifact), "EmbeddedTimeField"
+// (embedding).
+//
+// Owns the `TimePrecision` and `TimezoneRequirement` enums. References
+// `TimeLiteral` from `src/literals/temporal-literals.ts`.
+
 import { type Iri, iri } from '../leaves/index.js';
 import {
   type TimeLiteral,

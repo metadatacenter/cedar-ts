@@ -1,3 +1,23 @@
+// =====================================================================
+// Numeric field family — numeric content typed by an XSD numeric
+// datatype
+// =====================================================================
+//
+// This file is the complete vertical slice for the numeric field
+// family. Per the cedar-ts convention each family file holds:
+//
+//   - identifier type            : NumericFieldId
+//   - instance value             : NumericValue
+//   - schema constraints         : NumericFieldSpec
+//   - reusable Field artifact    : NumericField
+//   - default value              : NumericDefaultValue
+//   - Template-embedding wrapper : EmbeddedNumericField
+//
+// Wire `kind` values: "NumericField" (artifact), "EmbeddedNumericField"
+// (embedding).
+//
+// This file also owns the `Unit` type, used by `NumericFieldSpec.unit`.
+
 import {
   type Iri,
   type NumericDatatypeKind,

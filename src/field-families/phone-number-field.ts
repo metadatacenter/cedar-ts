@@ -1,3 +1,20 @@
+// =====================================================================
+// PhoneNumber field family — phone number (E.164 international format)
+// =====================================================================
+//
+// This file is the complete vertical slice for the phone-number field
+// family. Per the cedar-ts convention each family file holds:
+//
+//   - identifier type            : PhoneNumberFieldId
+//   - instance value             : PhoneNumberValue
+//   - schema constraints         : PhoneNumberFieldSpec
+//   - reusable Field artifact    : PhoneNumberField
+//   - default value              : PhoneNumberDefaultValue
+//   - Template-embedding wrapper : EmbeddedPhoneNumberField
+//
+// Wire `kind` values: "PhoneNumberField" (artifact),
+// "EmbeddedPhoneNumberField" (embedding).
+
 import { type Iri, iri } from '../leaves/index.js';
 import { type SimpleLiteral, simpleLiteral } from '../literals/index.js';
 import type { SchemaArtifactMetadata } from '../metadata/index.js';

@@ -1,3 +1,23 @@
+// =====================================================================
+// AttributeValue field family — user-defined attribute slot (a generic
+// name + value pair)
+// =====================================================================
+//
+// This file is the complete vertical slice for the attribute-value
+// field family. Per the cedar-ts convention each family file holds:
+//
+//   - identifier type            : AttributeValueFieldId
+//   - instance value             : AttributeValueValue
+//   - schema constraints         : AttributeValueFieldSpec
+//   - reusable Field artifact    : AttributeValueField
+//   - Template-embedding wrapper : EmbeddedAttributeValueField
+//
+// Wire `kind` values: "AttributeValueField" (artifact),
+// "EmbeddedAttributeValueField" (embedding).
+//
+// This family does NOT carry a default value (per grammar §Embedded
+// Artifacts); the `EmbeddedField` interface omits `defaultValue`.
+
 import { type Iri, iri } from '../leaves/index.js';
 import type { SchemaArtifactMetadata } from '../metadata/index.js';
 import type { ValueRequirement } from '../embedded/requirement.js';

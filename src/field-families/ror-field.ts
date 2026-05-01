@@ -1,3 +1,24 @@
+// =====================================================================
+// Ror field family — Research Organization Registry identifier
+// (https://ror.org/... URL form)
+// =====================================================================
+//
+// This file is the complete vertical slice for the ror field
+// family. Per the cedar-ts convention each family file holds:
+//
+//   - identifier type            : RorFieldId
+//   - instance value             : RorValue
+//   - schema constraints         : RorFieldSpec
+//   - reusable Field artifact    : RorField
+//   - default value              : RorDefaultValue
+//   - Template-embedding wrapper : EmbeddedRorField
+//
+// Wire `kind` values: "RorField" (artifact), "EmbeddedRorField"
+// (embedding).
+//
+// One of six external-authority families; shares the value-shape
+// pattern (`iri` + optional `label`) via `external-authority-shared.ts`.
+
 import { type Iri, iri } from '../leaves/index.js';
 import type { SchemaArtifactMetadata } from '../metadata/index.js';
 import type { ValueRequirement } from '../embedded/requirement.js';

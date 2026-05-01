@@ -1,3 +1,24 @@
+// =====================================================================
+// Doi field family — Digital Object Identifier (https://doi.org/...
+// URL form)
+// =====================================================================
+//
+// This file is the complete vertical slice for the doi field
+// family. Per the cedar-ts convention each family file holds:
+//
+//   - identifier type            : DoiFieldId
+//   - instance value             : DoiValue
+//   - schema constraints         : DoiFieldSpec
+//   - reusable Field artifact    : DoiField
+//   - default value              : DoiDefaultValue
+//   - Template-embedding wrapper : EmbeddedDoiField
+//
+// Wire `kind` values: "DoiField" (artifact), "EmbeddedDoiField"
+// (embedding).
+//
+// One of six external-authority families; shares the value-shape
+// pattern (`iri` + optional `label`) via `external-authority-shared.ts`.
+
 import { type Iri, iri } from '../leaves/index.js';
 import type { SchemaArtifactMetadata } from '../metadata/index.js';
 import type { ValueRequirement } from '../embedded/requirement.js';

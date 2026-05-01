@@ -1,3 +1,22 @@
+// =====================================================================
+// External-authority-shared helpers — used by the six external-authority
+// field families (Orcid / Ror / Doi / PubMedId / Rrid / NihGrantId)
+// =====================================================================
+//
+// All six external-authority value types share the same structural
+// shape: an authoritative IRI plus an optional human-readable label.
+// This file holds the common shape-and-construction helpers so the per-
+// family files in this folder remain small and parallel.
+//
+// Holds:
+//
+//   - WithLabel<Kind, IriType> — the value record shape shared by the
+//     six families: `{ kind, iri, label? }`.
+//   - authorityValueFromInput — the widening constructor helper (accepts
+//     a string IRI, an Iri, or a partial init object).
+//   - isTaggedKind — the predicate helper used to build the per-family
+//     `isXxxValue` functions.
+
 import type { Iri } from '../leaves/index.js';
 
 // Internal shared helpers for the six external-authority families

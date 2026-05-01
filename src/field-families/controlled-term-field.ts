@@ -1,3 +1,26 @@
+// =====================================================================
+// ControlledTerm field family — values drawn from an ontology / branch
+// / class set / value set
+// =====================================================================
+//
+// This file is the complete vertical slice for the controlled-term
+// field family. Per the cedar-ts convention each family file holds:
+//
+//   - identifier type            : ControlledTermFieldId
+//   - instance value             : ControlledTermValue
+//   - schema constraints         : ControlledTermFieldSpec
+//   - reusable Field artifact    : ControlledTermField
+//   - default value              : ControlledTermDefaultValue
+//   - Template-embedding wrapper : EmbeddedControlledTermField
+//
+// Wire `kind` values: "ControlledTermField" (artifact),
+// "EmbeddedControlledTermField" (embedding).
+//
+// Additionally this file owns the `ControlledTermFieldSpec` source
+// types, used only here: `OntologyReference`, `OntologyDisplayHint`,
+// `ControlledTermSource` (union), `OntologySource`, `BranchSource`,
+// `ClassSource`, `ValueSetSource`, `ControlledTermClass`.
+
 import {
   type Iri,
   type TermIri,

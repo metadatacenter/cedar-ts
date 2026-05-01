@@ -1,3 +1,24 @@
+// =====================================================================
+// DateTime field family — combined date-time values at minute / second
+// / fractional-second precision
+// =====================================================================
+//
+// This file is the complete vertical slice for the date-time field
+// family. Per the cedar-ts convention each family file holds:
+//
+//   - identifier type            : DateTimeFieldId
+//   - instance value             : DateTimeValue
+//   - schema constraints         : DateTimeFieldSpec
+//   - reusable Field artifact    : DateTimeField
+//   - default value              : DateTimeDefaultValue
+//   - Template-embedding wrapper : EmbeddedDateTimeField
+//
+// Wire `kind` values: "DateTimeField" (artifact), "EmbeddedDateTimeField"
+// (embedding).
+//
+// Owns the `DateTimeValueType` enum. References `DateTimeLiteral` from
+// `src/literals/temporal-literals.ts`.
+
 import { type Iri, iri } from '../leaves/index.js';
 import {
   type DateTimeLiteral,

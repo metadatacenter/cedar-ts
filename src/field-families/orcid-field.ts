@@ -1,3 +1,24 @@
+// =====================================================================
+// Orcid field family — ORCID identifier (https://orcid.org/... URL
+// form)
+// =====================================================================
+//
+// This file is the complete vertical slice for the orcid field
+// family. Per the cedar-ts convention each family file holds:
+//
+//   - identifier type            : OrcidFieldId
+//   - instance value             : OrcidValue
+//   - schema constraints         : OrcidFieldSpec
+//   - reusable Field artifact    : OrcidField
+//   - default value              : OrcidDefaultValue
+//   - Template-embedding wrapper : EmbeddedOrcidField
+//
+// Wire `kind` values: "OrcidField" (artifact), "EmbeddedOrcidField"
+// (embedding).
+//
+// One of six external-authority families; shares the value-shape
+// pattern (`iri` + optional `label`) via `external-authority-shared.ts`.
+
 import { type Iri, iri } from '../leaves/index.js';
 import type { SchemaArtifactMetadata } from '../metadata/index.js';
 import type { ValueRequirement } from '../embedded/requirement.js';

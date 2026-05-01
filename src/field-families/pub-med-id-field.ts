@@ -1,3 +1,24 @@
+// =====================================================================
+// PubMedId field family — PubMed identifier (PMID,
+// https://pubmed.ncbi.nlm.nih.gov/... URL form)
+// =====================================================================
+//
+// This file is the complete vertical slice for the pub-med-id field
+// family. Per the cedar-ts convention each family file holds:
+//
+//   - identifier type            : PubMedIdFieldId
+//   - instance value             : PubMedIdValue
+//   - schema constraints         : PubMedIdFieldSpec
+//   - reusable Field artifact    : PubMedIdField
+//   - default value              : PubMedIdDefaultValue
+//   - Template-embedding wrapper : EmbeddedPubMedIdField
+//
+// Wire `kind` values: "PubMedIdField" (artifact),
+// "EmbeddedPubMedIdField" (embedding).
+//
+// One of six external-authority families; shares the value-shape
+// pattern (`iri` + optional `label`) via `external-authority-shared.ts`.
+
 import { type Iri, iri } from '../leaves/index.js';
 import type { SchemaArtifactMetadata } from '../metadata/index.js';
 import type { ValueRequirement } from '../embedded/requirement.js';

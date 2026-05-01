@@ -1,3 +1,20 @@
+// =====================================================================
+// Email field family — email address (RFC 5321 / 5322 lexical form)
+// =====================================================================
+//
+// This file is the complete vertical slice for the email field
+// family. Per the cedar-ts convention each family file holds:
+//
+//   - identifier type            : EmailFieldId
+//   - instance value             : EmailValue
+//   - schema constraints         : EmailFieldSpec
+//   - reusable Field artifact    : EmailField
+//   - default value              : EmailDefaultValue
+//   - Template-embedding wrapper : EmbeddedEmailField
+//
+// Wire `kind` values: "EmailField" (artifact), "EmbeddedEmailField"
+// (embedding).
+
 import { type Iri, iri } from '../leaves/index.js';
 import { type SimpleLiteral, simpleLiteral } from '../literals/index.js';
 import type { SchemaArtifactMetadata } from '../metadata/index.js';

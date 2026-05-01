@@ -1,3 +1,22 @@
+// =====================================================================
+// Rendering hints — presentational hints carried by FieldSpec families
+// =====================================================================
+//
+// Cross-cutting type module. Each rendering-hint type is a small
+// configuration object carried by a specific FieldSpec family to
+// influence how the field is rendered. They are NOT field-family-
+// specific in the same vertical-slice sense as everything else in this
+// folder — instead, multiple field families reference particular hint
+// types as the type of their `renderingHint?` slot.
+//
+// Holds:
+//
+//   - the union RenderingHint
+//   - per-family hint types: TextRenderingHint, NumericRenderingHint,
+//     SingleChoiceRenderingHint, MultipleChoiceRenderingHint,
+//     DateRenderingHint, TimeRenderingHint, DateTimeRenderingHint
+//   - related enums: DateComponentOrder, TimeFormat
+
 // Rendering hints. Each hint is typed to a specific FieldSpec family so that
 // only compatible combinations are expressible. Where the grammar uses
 // nullary constructors only (e.g. SingleLineTextRenderingHint vs

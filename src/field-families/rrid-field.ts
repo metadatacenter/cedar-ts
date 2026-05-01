@@ -1,3 +1,23 @@
+// =====================================================================
+// Rrid field family — Research Resource Identifier (RRID)
+// =====================================================================
+//
+// This file is the complete vertical slice for the rrid field
+// family. Per the cedar-ts convention each family file holds:
+//
+//   - identifier type            : RridFieldId
+//   - instance value             : RridValue
+//   - schema constraints         : RridFieldSpec
+//   - reusable Field artifact    : RridField
+//   - default value              : RridDefaultValue
+//   - Template-embedding wrapper : EmbeddedRridField
+//
+// Wire `kind` values: "RridField" (artifact), "EmbeddedRridField"
+// (embedding).
+//
+// One of six external-authority families; shares the value-shape
+// pattern (`iri` + optional `label`) via `external-authority-shared.ts`.
+
 import { type Iri, iri } from '../leaves/index.js';
 import type { SchemaArtifactMetadata } from '../metadata/index.js';
 import type { ValueRequirement } from '../embedded/requirement.js';

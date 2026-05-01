@@ -1,3 +1,23 @@
+// =====================================================================
+// NihGrantId field family — NIH grant identifier
+// =====================================================================
+//
+// This file is the complete vertical slice for the nih-grant-id field
+// family. Per the cedar-ts convention each family file holds:
+//
+//   - identifier type            : NihGrantIdFieldId
+//   - instance value             : NihGrantIdValue
+//   - schema constraints         : NihGrantIdFieldSpec
+//   - reusable Field artifact    : NihGrantIdField
+//   - default value              : NihGrantIdDefaultValue
+//   - Template-embedding wrapper : EmbeddedNihGrantIdField
+//
+// Wire `kind` values: "NihGrantIdField" (artifact),
+// "EmbeddedNihGrantIdField" (embedding).
+//
+// One of six external-authority families; shares the value-shape
+// pattern (`iri` + optional `label`) via `external-authority-shared.ts`.
+
 import { type Iri, iri } from '../leaves/index.js';
 import type { SchemaArtifactMetadata } from '../metadata/index.js';
 import type { ValueRequirement } from '../embedded/requirement.js';
