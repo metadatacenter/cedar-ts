@@ -2,13 +2,13 @@ export {
   type DescriptiveMetadata,
   type DescriptiveMetadataInit,
   descriptiveMetadata,
-} from './descriptive.js';
+} from './descriptive-metadata.js';
 
 export {
   type TemporalProvenance,
   type TemporalProvenanceInit,
   temporalProvenance,
-} from './provenance.js';
+} from './temporal-provenance.js';
 
 export {
   type Status,
@@ -17,7 +17,7 @@ export {
   type SchemaVersioning,
   type SchemaVersioningInit,
   schemaVersioning,
-} from './versioning.js';
+} from './schema-versioning.js';
 
 export {
   type AnnotationValue,
@@ -26,50 +26,11 @@ export {
   annotation,
 } from './annotations.js';
 
-import type { DescriptiveMetadata } from './descriptive.js';
-import type { TemporalProvenance } from './provenance.js';
-import type { SchemaVersioning } from './versioning.js';
-import type { Annotation } from './annotations.js';
-
-// ArtifactMetadata bundles the metadata common to all artifacts other than
-// identity (grammar §Aggregate Structure).
-export interface ArtifactMetadata {
-  readonly descriptiveMetadata: DescriptiveMetadata;
-  readonly provenance: TemporalProvenance;
-  readonly annotations: readonly Annotation[];
-}
-
-export interface ArtifactMetadataInit {
-  readonly descriptiveMetadata: DescriptiveMetadata;
-  readonly provenance: TemporalProvenance;
-  readonly annotations?: readonly Annotation[];
-}
-
-export function artifactMetadata(init: ArtifactMetadataInit): ArtifactMetadata {
-  return {
-    descriptiveMetadata: init.descriptiveMetadata,
-    provenance: init.provenance,
-    annotations: init.annotations ?? [],
-  };
-}
-
-// SchemaArtifactMetadata adds versioning information for reusable schema
-// artifacts (Template, Field).
-export interface SchemaArtifactMetadata {
-  readonly artifact: ArtifactMetadata;
-  readonly versioning: SchemaVersioning;
-}
-
-export interface SchemaArtifactMetadataInit {
-  readonly artifact: ArtifactMetadata;
-  readonly versioning: SchemaVersioning;
-}
-
-export function schemaArtifactMetadata(
-  init: SchemaArtifactMetadataInit,
-): SchemaArtifactMetadata {
-  return {
-    artifact: init.artifact,
-    versioning: init.versioning,
-  };
-}
+export {
+  type ArtifactMetadata,
+  type ArtifactMetadataInit,
+  artifactMetadata,
+  type SchemaArtifactMetadata,
+  type SchemaArtifactMetadataInit,
+  schemaArtifactMetadata,
+} from './artifact-metadata.js';
