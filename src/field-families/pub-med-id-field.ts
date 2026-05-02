@@ -10,7 +10,6 @@
 //   - instance value             : PubMedIdValue
 //   - schema constraints         : PubMedIdFieldSpec
 //   - reusable Field artifact    : PubMedIdField
-//   - default value              : PubMedIdDefaultValue
 //   - Template-embedding wrapper : EmbeddedPubMedIdField
 //
 // Wire `kind` values: "PubMedIdField" (artifact),
@@ -28,7 +27,6 @@ import type { LabelOverride } from '../embedded/label-override.js';
 import type { Property } from '../embedded/property.js';
 import {
   type AuthorityValueInput,
-  type AuthorityDefaultValueInput,
   authorityValueFromInput,
   isTaggedKind,
 } from './external-authority-shared.js';
@@ -144,27 +142,7 @@ export const pubMedIdField = (init: PubMedIdFieldInit): PubMedIdField =>
   });
 
 // =====================================================================
-// 5. DefaultValue
-// =====================================================================
-
-export interface PubMedIdDefaultValue {
-  readonly kind: 'PubMedIdDefaultValue';
-  readonly value: PubMedIdValue;
-}
-export function pubMedIdDefaultValue(
-  input: PubMedIdDefaultValue | AuthorityDefaultValueInput<PubMedIri, PubMedIdValue>,
-): PubMedIdDefaultValue {
-  if (typeof input === 'object' && 'kind' in input && input.kind === 'PubMedIdDefaultValue') {
-    return input;
-  }
-  return {
-    kind: 'PubMedIdDefaultValue',
-    value: isPubMedIdValue(input) ? input : pubMedIdValue(input),
-  };
-}
-
-// =====================================================================
-// 6. EmbeddedField
+// 5. EmbeddedField
 // =====================================================================
 
 export interface EmbeddedPubMedIdField {
@@ -176,14 +154,12 @@ export interface EmbeddedPubMedIdField {
   readonly visibility?: Visibility;
   readonly labelOverride?: LabelOverride;
   readonly property?: Property;
-  readonly defaultValue?: PubMedIdDefaultValue;
+  readonly defaultValue?: PubMedIdValue;
 }
 
 export interface EmbeddedPubMedIdFieldInit extends EmbeddedFieldInitCommon {
   readonly reference: PubMedIdFieldReference | PubMedIdField;
-  readonly defaultValue?:
-    | PubMedIdDefaultValue
-    | AuthorityDefaultValueInput<PubMedIri, PubMedIdValue>;
+  readonly defaultValue?: PubMedIdValue | AuthorityValueInput<PubMedIri>;
 }
 
 export function embeddedPubMedIdField(
@@ -194,7 +170,9 @@ export function embeddedPubMedIdField(
     kind: 'EmbeddedPubMedIdField',
     reference: fieldRef(init.reference),
     ...(init.defaultValue !== undefined && {
-      defaultValue: pubMedIdDefaultValue(init.defaultValue),
+      defaultValue: isPubMedIdValue(init.defaultValue)
+        ? init.defaultValue
+        : pubMedIdValue(init.defaultValue),
     }),
   };
   return out;

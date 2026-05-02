@@ -455,7 +455,8 @@ export const principalInvestigatorTemplate: Template = template({
 
     // `defaultValue` is only allowed where the grammar permits (e.g., not
     // on AttributeValueField). Here a bare string is widened to a
-    // TextDefaultValue at construction time.
+    // SimpleLiteral at construction time (the Text family's
+    // family-specific underlying type for the defaultValue slot).
     embeddedTextField({
       key: 'institution_name',
       reference: institutionName,

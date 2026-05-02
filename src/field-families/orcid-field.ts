@@ -10,7 +10,6 @@
 //   - instance value             : OrcidValue
 //   - schema constraints         : OrcidFieldSpec
 //   - reusable Field artifact    : OrcidField
-//   - default value              : OrcidDefaultValue
 //   - Template-embedding wrapper : EmbeddedOrcidField
 //
 // Wire `kind` values: "OrcidField" (artifact), "EmbeddedOrcidField"
@@ -28,7 +27,6 @@ import type { LabelOverride } from '../embedded/label-override.js';
 import type { Property } from '../embedded/property.js';
 import {
   type AuthorityValueInput,
-  type AuthorityDefaultValueInput,
   authorityValueFromInput,
   isTaggedKind,
 } from './external-authority-shared.js';
@@ -139,27 +137,7 @@ export const orcidField = (init: OrcidFieldInit): OrcidField =>
   ({ kind: 'OrcidField', id: orcidFieldId(init.id), metadata: init.metadata, fieldSpec: init.fieldSpec });
 
 // =====================================================================
-// 5. DefaultValue
-// =====================================================================
-
-export interface OrcidDefaultValue {
-  readonly kind: 'OrcidDefaultValue';
-  readonly value: OrcidValue;
-}
-export function orcidDefaultValue(
-  input: OrcidDefaultValue | AuthorityDefaultValueInput<OrcidIri, OrcidValue>,
-): OrcidDefaultValue {
-  if (typeof input === 'object' && 'kind' in input && input.kind === 'OrcidDefaultValue') {
-    return input;
-  }
-  return {
-    kind: 'OrcidDefaultValue',
-    value: isOrcidValue(input) ? input : orcidValue(input),
-  };
-}
-
-// =====================================================================
-// 6. EmbeddedField
+// 5. EmbeddedField
 // =====================================================================
 
 export interface EmbeddedOrcidField {
@@ -171,14 +149,15 @@ export interface EmbeddedOrcidField {
   readonly visibility?: Visibility;
   readonly labelOverride?: LabelOverride;
   readonly property?: Property;
-  readonly defaultValue?: OrcidDefaultValue;
+  readonly defaultValue?: OrcidValue;
 }
 
+// `defaultValue` accepts a fully-built OrcidValue, or any of the
+// widened inputs accepted by orcidValue (a bare string IRI, an Iri,
+// a typed OrcidIri, or an init object with iri+label).
 export interface EmbeddedOrcidFieldInit extends EmbeddedFieldInitCommon {
   readonly reference: OrcidFieldReference | OrcidField;
-  readonly defaultValue?:
-    | OrcidDefaultValue
-    | AuthorityDefaultValueInput<OrcidIri, OrcidValue>;
+  readonly defaultValue?: OrcidValue | AuthorityValueInput<OrcidIri>;
 }
 
 export function embeddedOrcidField(init: EmbeddedOrcidFieldInit): EmbeddedOrcidField {
@@ -187,7 +166,9 @@ export function embeddedOrcidField(init: EmbeddedOrcidFieldInit): EmbeddedOrcidF
     kind: 'EmbeddedOrcidField',
     reference: fieldRef(init.reference),
     ...(init.defaultValue !== undefined && {
-      defaultValue: orcidDefaultValue(init.defaultValue),
+      defaultValue: isOrcidValue(init.defaultValue)
+        ? init.defaultValue
+        : orcidValue(init.defaultValue),
     }),
   };
   return out;

@@ -34,7 +34,6 @@ export * from './metadata.js';
 export * from './embedded-config.js';
 export * from './values.js';
 export * from './field-specs.js';
-export * from './default-values.js';
 export * from './fields.js';
 export * from './embedded-fields.js';
 export * from './presentation.js';

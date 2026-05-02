@@ -10,14 +10,15 @@
 //   - instance value             : TimeValue
 //   - schema constraints         : TimeFieldSpec
 //   - reusable Field artifact    : TimeField
-//   - default value              : TimeDefaultValue
 //   - Template-embedding wrapper : EmbeddedTimeField
 //
 // Wire `kind` values: "TimeField" (artifact), "EmbeddedTimeField"
 // (embedding).
 //
 // Owns the `TimePrecision` and `TimezoneRequirement` enums. References
-// `TimeLiteral` from `src/literals/temporal-literals.ts`.
+// `TimeLiteral` from `src/literals/temporal-literals.ts`. The
+// `defaultValue` slot on `EmbeddedTimeField` is a `TimeLiteral`
+// directly (no wrapper).
 
 import { type Iri, iri } from '../leaves/index.js';
 import {
@@ -173,30 +174,7 @@ export const timeField = (init: TimeFieldInit): TimeField =>
   ({ kind: 'TimeField', id: timeFieldId(init.id), metadata: init.metadata, fieldSpec: init.fieldSpec });
 
 // =====================================================================
-// 5. DefaultValue
-// =====================================================================
-
-export interface TimeDefaultValue {
-  readonly kind: 'TimeDefaultValue';
-  readonly value: TimeValue;
-}
-
-// Idempotent. Accepts a TimeDefaultValue, a TimeValue, a TimeLiteral, or a
-// plain xsd:time lexical form. See textDefaultValue for the rationale.
-export function timeDefaultValue(
-  input: TimeDefaultValue | TimeValue | TimeLiteral | string,
-): TimeDefaultValue {
-  if (typeof input === 'object' && 'kind' in input && input.kind === 'TimeDefaultValue') {
-    return input;
-  }
-  return {
-    kind: 'TimeDefaultValue',
-    value: isTimeValue(input) ? input : timeValue(input),
-  };
-}
-
-// =====================================================================
-// 6. EmbeddedField
+// 5. EmbeddedField
 // =====================================================================
 
 export interface EmbeddedTimeField {
@@ -208,12 +186,14 @@ export interface EmbeddedTimeField {
   readonly visibility?: Visibility;
   readonly labelOverride?: LabelOverride;
   readonly property?: Property;
-  readonly defaultValue?: TimeDefaultValue;
+  readonly defaultValue?: TimeLiteral;
 }
 
+// `defaultValue` accepts a TimeLiteral or a plain xsd:time lexical form
+// (wrapped via timeLiteral).
 export interface EmbeddedTimeFieldInit extends EmbeddedFieldInitCommon {
   readonly reference: TimeFieldReference | TimeField;
-  readonly defaultValue?: TimeDefaultValue | TimeValue | TimeLiteral | string;
+  readonly defaultValue?: TimeLiteral | string;
 }
 
 export function embeddedTimeField(init: EmbeddedTimeFieldInit): EmbeddedTimeField {
@@ -222,7 +202,10 @@ export function embeddedTimeField(init: EmbeddedTimeFieldInit): EmbeddedTimeFiel
     kind: 'EmbeddedTimeField',
     reference: fieldRef(init.reference),
     ...(init.defaultValue !== undefined && {
-      defaultValue: timeDefaultValue(init.defaultValue),
+      defaultValue:
+        typeof init.defaultValue === 'string'
+          ? timeLiteral(init.defaultValue)
+          : init.defaultValue,
     }),
   };
   return out;

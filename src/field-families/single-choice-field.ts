@@ -10,7 +10,6 @@
 //   - instance value             : SingleChoiceValue
 //   - schema constraints         : SingleChoiceFieldSpec
 //   - reusable Field artifact    : SingleChoiceField
-//   - default value              : SingleChoiceDefaultValue
 //   - Template-embedding wrapper : EmbeddedSingleChoiceField
 //
 // Wire `kind` values: "SingleChoiceField" (artifact),
@@ -33,7 +32,7 @@ import type { SingleChoiceRenderingHint } from './rendering-hints.js';
 import type {
   LiteralChoiceOption,
   ControlledTermChoiceOption,
-  ChoiceDefaultValue,
+  ChoiceValue,
 } from './choice-shared.js';
 import {
   type EmbeddedFieldInitCommon,
@@ -187,11 +186,7 @@ export const singleChoiceField = (init: SingleChoiceFieldInit): SingleChoiceFiel
   });
 
 // =====================================================================
-// 5. DefaultValue — see field-families/choice-shared.ts (ChoiceDefaultValue)
-// =====================================================================
-
-// =====================================================================
-// 6. EmbeddedField
+// 5. EmbeddedField
 // =====================================================================
 
 export interface EmbeddedSingleChoiceField {
@@ -203,12 +198,12 @@ export interface EmbeddedSingleChoiceField {
   readonly visibility?: Visibility;
   readonly labelOverride?: LabelOverride;
   readonly property?: Property;
-  readonly defaultValue?: ChoiceDefaultValue;
+  readonly defaultValue?: ChoiceValue;
 }
 
 export interface EmbeddedSingleChoiceFieldInit extends EmbeddedFieldInitCommon {
   readonly reference: SingleChoiceFieldReference | SingleChoiceField;
-  readonly defaultValue?: ChoiceDefaultValue;
+  readonly defaultValue?: ChoiceValue;
 }
 
 export function embeddedSingleChoiceField(

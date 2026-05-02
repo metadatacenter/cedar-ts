@@ -219,6 +219,52 @@ function parseFixedDatatypeTypedLiteral<T extends TypedLiteral>(
   return cons(p.value);
 }
 
+// Parses a NumericLiteral at a position where the datatype is
+// REQUIRED on the wire (e.g. EmbeddedNumericField.defaultValue, where
+// the surrounding NumericFieldSpec is on a separate artifact and not
+// available at parse time).
+export function parseNumericLiteralStandalone(
+  x: unknown,
+  where = 'NumericLiteral',
+): NumericLiteral {
+  const o = expectObject(x, where);
+  expectKnownProperties(o, ['value', 'datatype']);
+  const p = readLiteralProps(o as Record<string, unknown>, where);
+  if (p.hasLang) {
+    throw new CedarConstructionError(
+      `${where}: typed literal MUST NOT carry "lang"`,
+    );
+  }
+  if (!p.hasDatatype) {
+    throw new CedarConstructionError(
+      `${where}: standalone NumericLiteral requires a "datatype"`,
+    );
+  }
+  // Map IRI back to kind.
+  const dt = p.datatype!;
+  let kind: NumericDatatypeKind | undefined;
+  for (const k of NUMERIC_DATATYPE_KINDS) {
+    if ((XsdNumericDatatypeIri as Record<string, string>)[k] === dt) {
+      kind = k;
+      break;
+    }
+  }
+  if (kind === undefined) {
+    throw new CedarConstructionError(
+      `${where}: unknown numeric datatype IRI ${JSON.stringify(dt)}`,
+    );
+  }
+  return numericLiteral(p.value, kind);
+}
+
+// Serializer for NumericLiteral at a standalone position — emits the
+// datatype IRI explicitly (no surrounding context to elide it).
+export function serializeNumericLiteralStandalone(
+  x: NumericLiteral,
+): { value: string; datatype: string } {
+  return { value: x.lexicalForm, datatype: x.datatype.value };
+}
+
 // NumericLiteral parses with the surrounding NumericValue's
 // NumericDatatypeKind providing the datatype when omitted on the wire. The
 // datatype property, if present, MUST resolve to one of the XSD numeric

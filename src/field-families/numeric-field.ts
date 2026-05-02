@@ -10,13 +10,14 @@
 //   - instance value             : NumericValue
 //   - schema constraints         : NumericFieldSpec
 //   - reusable Field artifact    : NumericField
-//   - default value              : NumericDefaultValue
 //   - Template-embedding wrapper : EmbeddedNumericField
 //
 // Wire `kind` values: "NumericField" (artifact), "EmbeddedNumericField"
 // (embedding).
 //
 // This file also owns the `Unit` type, used by `NumericFieldSpec.unit`.
+// The `defaultValue` slot on `EmbeddedNumericField` is a
+// `NumericLiteral` directly (no wrapper).
 
 import {
   type Iri,
@@ -194,18 +195,7 @@ export const numericField = (init: NumericFieldInit): NumericField =>
   ({ kind: 'NumericField', id: numericFieldId(init.id), metadata: init.metadata, fieldSpec: init.fieldSpec });
 
 // =====================================================================
-// 5. DefaultValue
-// =====================================================================
-
-export interface NumericDefaultValue {
-  readonly kind: 'NumericDefaultValue';
-  readonly value: NumericValue;
-}
-export const numericDefaultValue = (value: NumericValue): NumericDefaultValue =>
-  ({ kind: 'NumericDefaultValue', value });
-
-// =====================================================================
-// 6. EmbeddedField
+// 5. EmbeddedField
 // =====================================================================
 
 export interface EmbeddedNumericField {
@@ -217,13 +207,13 @@ export interface EmbeddedNumericField {
   readonly visibility?: Visibility;
   readonly labelOverride?: LabelOverride;
   readonly property?: Property;
-  readonly defaultValue?: NumericDefaultValue;
+  readonly defaultValue?: NumericLiteral;
 }
 
 export interface EmbeddedNumericFieldInit extends EmbeddedFieldInitCommon {
   readonly reference: NumericFieldReference | NumericField;
   // Numeric defaults require explicit construction (datatype ambiguity).
-  readonly defaultValue?: NumericDefaultValue;
+  readonly defaultValue?: NumericLiteral;
 }
 
 export function embeddedNumericField(

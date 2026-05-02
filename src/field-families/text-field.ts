@@ -10,14 +10,15 @@
 //   - instance value             : TextValue
 //   - schema constraints         : TextFieldSpec
 //   - reusable Field artifact    : TextField
-//   - default value              : TextDefaultValue
 //   - Template-embedding wrapper : EmbeddedTextField
 //
 // Wire `kind` values: "TextField" (artifact), "EmbeddedTextField"
 // (embedding).
 //
 // The instance value carries a `TextLiteral` (`SimpleLiteral |
-// LangTaggedLiteral`) — see `src/literals/literals.ts`.
+// LangTaggedLiteral`) — see `src/literals/literals.ts`. The
+// `defaultValue` slot on `EmbeddedTextField` and `TextFieldSpec` is
+// also a `TextLiteral` directly (no wrapper).
 
 import { type Iri, iri, assertNonNegativeInteger } from '../leaves/index.js';
 import {
@@ -111,15 +112,17 @@ export function isTextValue(x: unknown): x is TextValue {
 
 export interface TextFieldSpec {
   readonly kind: 'TextFieldSpec';
-  readonly defaultValue?: TextDefaultValue;
+  readonly defaultValue?: TextLiteral;
   readonly minLength?: number;
   readonly maxLength?: number;
   readonly validationRegex?: string;
   readonly renderingHint?: TextRenderingHint;
 }
 
+// `defaultValue` accepts a TextLiteral or a plain string (wrapped as a
+// SimpleLiteral); see textValue/embeddedTextField for the same widening.
 export interface TextFieldSpecInit {
-  readonly defaultValue?: TextDefaultValue;
+  readonly defaultValue?: TextLiteral | string;
   readonly minLength?: number;
   readonly maxLength?: number;
   readonly validationRegex?: string;
@@ -129,13 +132,18 @@ export interface TextFieldSpecInit {
 export function textFieldSpec(init: TextFieldSpecInit = {}): TextFieldSpec {
   const out: {
     kind: 'TextFieldSpec';
-    defaultValue?: TextDefaultValue;
+    defaultValue?: TextLiteral;
     minLength?: number;
     maxLength?: number;
     validationRegex?: string;
     renderingHint?: TextRenderingHint;
   } = { kind: 'TextFieldSpec' };
-  if (init.defaultValue !== undefined) out.defaultValue = init.defaultValue;
+  if (init.defaultValue !== undefined) {
+    out.defaultValue =
+      typeof init.defaultValue === 'string'
+        ? simpleLiteral(init.defaultValue)
+        : init.defaultValue;
+  }
   if (init.minLength !== undefined) out.minLength = assertNonNegativeInteger(init.minLength);
   if (init.maxLength !== undefined) out.maxLength = assertNonNegativeInteger(init.maxLength);
   if (init.validationRegex !== undefined) out.validationRegex = init.validationRegex;
@@ -168,36 +176,7 @@ export const textField = (init: TextFieldInit): TextField =>
   ({ kind: 'TextField', id: textFieldId(init.id), metadata: init.metadata, fieldSpec: init.fieldSpec });
 
 // =====================================================================
-// 5. DefaultValue
-// =====================================================================
-
-export interface TextDefaultValue {
-  readonly kind: 'TextDefaultValue';
-  readonly value: TextValue;
-}
-
-// Idempotent. Accepts any of:
-//   - a fully-built TextDefaultValue (passes through)
-//   - a TextValue (wrapped)
-//   - a TextLiteral (wrapped via textValue)
-//   - a plain string (wrapped via textValue → simpleLiteral; xsd:string)
-// The widened input avoids three-layer call sites like
-//   textDefaultValue(textValue(simpleLiteral('Hello')))
-// for the common case where xsd:string is what's intended.
-export function textDefaultValue(
-  input: TextDefaultValue | TextValue | TextLiteral | string,
-): TextDefaultValue {
-  if (typeof input === 'object' && 'kind' in input && input.kind === 'TextDefaultValue') {
-    return input;
-  }
-  return {
-    kind: 'TextDefaultValue',
-    value: isTextValue(input) ? input : textValue(input),
-  };
-}
-
-// =====================================================================
-// 6. EmbeddedField
+// 5. EmbeddedField
 // =====================================================================
 
 export interface EmbeddedTextField {
@@ -209,12 +188,18 @@ export interface EmbeddedTextField {
   readonly visibility?: Visibility;
   readonly labelOverride?: LabelOverride;
   readonly property?: Property;
-  readonly defaultValue?: TextDefaultValue;
+  readonly defaultValue?: TextLiteral;
 }
 
+// `defaultValue` accepts a TextLiteral or a plain string (wrapped as a
+// SimpleLiteral with implicit datatype xsd:string). The string shortcut
+// exists so callers don't have to write
+// `embeddedTextField({ ..., defaultValue: simpleLiteral('Hello') })`
+// for the common xsd:string case — pass `langTaggedLiteral(...)`
+// explicitly when a language tag is needed.
 export interface EmbeddedTextFieldInit extends EmbeddedFieldInitCommon {
   readonly reference: TextFieldReference | TextField;
-  readonly defaultValue?: TextDefaultValue | TextValue | TextLiteral | string;
+  readonly defaultValue?: TextLiteral | string;
 }
 
 export function embeddedTextField(init: EmbeddedTextFieldInit): EmbeddedTextField {
@@ -223,7 +208,10 @@ export function embeddedTextField(init: EmbeddedTextFieldInit): EmbeddedTextFiel
     kind: 'EmbeddedTextField',
     reference: fieldRef(init.reference),
     ...(init.defaultValue !== undefined && {
-      defaultValue: textDefaultValue(init.defaultValue),
+      defaultValue:
+        typeof init.defaultValue === 'string'
+          ? simpleLiteral(init.defaultValue)
+          : init.defaultValue,
     }),
   };
   return out;

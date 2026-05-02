@@ -406,12 +406,37 @@ export function serializeLinkValue(x: LinkValue): unknown {
   return out;
 }
 
+// Untagged variant — used at singleton positions where the enclosing
+// production fixes the kind (e.g. EmbeddedLinkField.defaultValue).
+export function serializeLinkValueUntagged(x: LinkValue): unknown {
+  const out: Record<string, unknown> = { iri: x.iri.value };
+  if (x.label !== undefined) out['label'] = x.label;
+  return out;
+}
+
 export function parseLinkValue(x: unknown, where = 'LinkValue'): LinkValue {
   const o = expectObject(x, where);
   expectKnownProperties(o, ['kind', 'iri', 'label']);
   if (o['kind'] !== 'LinkValue') {
     throw new CedarConstructionError(`${where}: expected kind "LinkValue"`);
   }
+  rejectNullProperty(o, 'label');
+  if (!('iri' in o)) {
+    throw new CedarConstructionError(`${where}: missing required "iri"`);
+  }
+  const init: { iri: string; label?: string } = {
+    iri: expectString(o['iri'], `${where}.iri`),
+  };
+  if ('label' in o) init.label = expectString(o['label'], `${where}.label`);
+  return linkValue(init);
+}
+
+export function parseLinkValueUntagged(
+  x: unknown,
+  where = 'LinkValue',
+): LinkValue {
+  const o = expectObject(x, where);
+  expectKnownProperties(o, ['iri', 'label']);
   rejectNullProperty(o, 'label');
   if (!('iri' in o)) {
     throw new CedarConstructionError(`${where}: missing required "iri"`);
@@ -507,11 +532,26 @@ function serializeAuthorityValue(
   return out;
 }
 
+// Untagged authority-value serializer — used at singleton positions
+// (EmbeddedXxxField.defaultValue) where the kind discriminator drops on
+// the wire per the polymorphic-only-kind rule.
+function serializeAuthorityValueUntagged(
+  v: { readonly iri: { readonly value: { value: string } | string }; readonly label?: string },
+): unknown {
+  const inner = (v.iri as unknown as { value: { value: string } }).value;
+  const iriString =
+    typeof inner === 'string' ? inner : inner.value;
+  const out: Record<string, unknown> = { iri: iriString };
+  if (v.label !== undefined) out['label'] = authorityLabelToWire(v.label);
+  return out;
+}
+
 function parseAuthorityFields(
   o: { readonly [k: string]: unknown },
   where: string,
+  expectKind: boolean,
 ): { iri: string; label?: string } {
-  expectKnownProperties(o, ['kind', 'iri', 'label']);
+  expectKnownProperties(o, expectKind ? ['kind', 'iri', 'label'] : ['iri', 'label']);
   rejectNullProperty(o, 'label');
   if (!('iri' in o)) {
     throw new CedarConstructionError(`${where}: missing required "iri"`);
@@ -536,6 +576,21 @@ export const serializeRridValue = (x: RridValue): unknown =>
 export const serializeNihGrantIdValue = (x: NihGrantIdValue): unknown =>
   serializeAuthorityValue('NihGrantIdValue', x);
 
+// Untagged variants — used at singleton positions where the kind drops
+// on the wire (EmbeddedXxxField.defaultValue).
+export const serializeOrcidValueUntagged = (x: OrcidValue): unknown =>
+  serializeAuthorityValueUntagged(x);
+export const serializeRorValueUntagged = (x: RorValue): unknown =>
+  serializeAuthorityValueUntagged(x);
+export const serializeDoiValueUntagged = (x: DoiValue): unknown =>
+  serializeAuthorityValueUntagged(x);
+export const serializePubMedIdValueUntagged = (x: PubMedIdValue): unknown =>
+  serializeAuthorityValueUntagged(x);
+export const serializeRridValueUntagged = (x: RridValue): unknown =>
+  serializeAuthorityValueUntagged(x);
+export const serializeNihGrantIdValueUntagged = (x: NihGrantIdValue): unknown =>
+  serializeAuthorityValueUntagged(x);
+
 function parseAuthority<V>(
   x: unknown,
   expectedKind: string,
@@ -548,7 +603,16 @@ function parseAuthority<V>(
       `${where}: expected kind ${JSON.stringify(expectedKind)}`,
     );
   }
-  return cons(parseAuthorityFields(o, where));
+  return cons(parseAuthorityFields(o, where, true));
+}
+
+function parseAuthorityUntagged<V>(
+  x: unknown,
+  cons: (init: { iri: string; label?: string }) => V,
+  where: string,
+): V {
+  const o = expectObject(x, where);
+  return cons(parseAuthorityFields(o, where, false));
 }
 
 export const parseOrcidValue = (x: unknown, w = 'OrcidValue'): OrcidValue =>
@@ -565,6 +629,23 @@ export const parseNihGrantIdValue = (
   x: unknown,
   w = 'NihGrantIdValue',
 ): NihGrantIdValue => parseAuthority(x, 'NihGrantIdValue', nihGrantIdValue, w);
+
+export const parseOrcidValueUntagged = (x: unknown, w = 'OrcidValue'): OrcidValue =>
+  parseAuthorityUntagged(x, orcidValue, w);
+export const parseRorValueUntagged = (x: unknown, w = 'RorValue'): RorValue =>
+  parseAuthorityUntagged(x, rorValue, w);
+export const parseDoiValueUntagged = (x: unknown, w = 'DoiValue'): DoiValue =>
+  parseAuthorityUntagged(x, doiValue, w);
+export const parsePubMedIdValueUntagged = (
+  x: unknown,
+  w = 'PubMedIdValue',
+): PubMedIdValue => parseAuthorityUntagged(x, pubMedIdValue, w);
+export const parseRridValueUntagged = (x: unknown, w = 'RridValue'): RridValue =>
+  parseAuthorityUntagged(x, rridValue, w);
+export const parseNihGrantIdValueUntagged = (
+  x: unknown,
+  w = 'NihGrantIdValue',
+): NihGrantIdValue => parseAuthorityUntagged(x, nihGrantIdValue, w);
 
 // ---- AttributeValue --------------------------------------------------
 

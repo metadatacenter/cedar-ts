@@ -10,7 +10,6 @@
 //   - instance value             : LinkValue
 //   - schema constraints         : LinkFieldSpec
 //   - reusable Field artifact    : LinkField
-//   - default value              : LinkDefaultValue
 //   - Template-embedding wrapper : EmbeddedLinkField
 //
 // Wire `kind` values: "LinkField" (artifact), "EmbeddedLinkField"
@@ -135,18 +134,7 @@ export const linkField = (init: LinkFieldInit): LinkField =>
   ({ kind: 'LinkField', id: linkFieldId(init.id), metadata: init.metadata, fieldSpec: init.fieldSpec });
 
 // =====================================================================
-// 5. DefaultValue
-// =====================================================================
-
-export interface LinkDefaultValue {
-  readonly kind: 'LinkDefaultValue';
-  readonly value: LinkValue;
-}
-export const linkDefaultValue = (value: LinkValue): LinkDefaultValue =>
-  ({ kind: 'LinkDefaultValue', value });
-
-// =====================================================================
-// 6. EmbeddedField
+// 5. EmbeddedField
 // =====================================================================
 
 export interface EmbeddedLinkField {
@@ -158,12 +146,12 @@ export interface EmbeddedLinkField {
   readonly visibility?: Visibility;
   readonly labelOverride?: LabelOverride;
   readonly property?: Property;
-  readonly defaultValue?: LinkDefaultValue;
+  readonly defaultValue?: LinkValue;
 }
 
 export interface EmbeddedLinkFieldInit extends EmbeddedFieldInitCommon {
   readonly reference: LinkFieldReference | LinkField;
-  readonly defaultValue?: LinkDefaultValue;
+  readonly defaultValue?: LinkValue;
 }
 
 export function embeddedLinkField(init: EmbeddedLinkFieldInit): EmbeddedLinkField {

@@ -10,7 +10,6 @@
 //   - instance value             : ControlledTermValue
 //   - schema constraints         : ControlledTermFieldSpec
 //   - reusable Field artifact    : ControlledTermField
-//   - default value              : ControlledTermDefaultValue
 //   - Template-embedding wrapper : EmbeddedControlledTermField
 //
 // Wire `kind` values: "ControlledTermField" (artifact),
@@ -342,20 +341,7 @@ export const controlledTermField = (
   });
 
 // =====================================================================
-// 5. DefaultValue
-// =====================================================================
-
-export interface ControlledTermDefaultValue {
-  readonly kind: 'ControlledTermDefaultValue';
-  readonly value: ControlledTermValue;
-}
-export const controlledTermDefaultValue = (
-  value: ControlledTermValue,
-): ControlledTermDefaultValue =>
-  ({ kind: 'ControlledTermDefaultValue', value });
-
-// =====================================================================
-// 6. EmbeddedField
+// 5. EmbeddedField
 // =====================================================================
 
 export interface EmbeddedControlledTermField {
@@ -367,12 +353,12 @@ export interface EmbeddedControlledTermField {
   readonly visibility?: Visibility;
   readonly labelOverride?: LabelOverride;
   readonly property?: Property;
-  readonly defaultValue?: ControlledTermDefaultValue;
+  readonly defaultValue?: ControlledTermValue;
 }
 
 export interface EmbeddedControlledTermFieldInit extends EmbeddedFieldInitCommon {
   readonly reference: ControlledTermFieldReference | ControlledTermField;
-  readonly defaultValue?: ControlledTermDefaultValue;
+  readonly defaultValue?: ControlledTermValue;
 }
 
 export function embeddedControlledTermField(

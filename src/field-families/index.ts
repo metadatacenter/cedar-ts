@@ -11,20 +11,19 @@
 //
 //   - all 18 per-family slices (text-field.ts, numeric-field.ts, …,
 //     attribute-value-field.ts) — each contributes a FieldId, Value,
-//     FieldSpec, Field, DefaultValue (where applicable) and
-//     EmbeddedField type
+//     FieldSpec, Field, and EmbeddedField type
 //   - rendering hints                 (rendering-hints.ts)
 //   - choice-shared types             (choice-shared.ts):
 //       LiteralChoiceOption, ControlledTermChoiceOption,
 //       LiteralChoiceValue, ControlledTermChoiceValue,
-//       ChoiceValue (union), ChoiceDefaultValue
+//       ChoiceValue (union)
 //
 // Plus this file defines:
 //
 //   - the cross-family unions: Field, EmbeddedField, Value, FieldSpec,
-//     DefaultValue, FieldId
+//     FieldId
 //   - the union-level predicates: isField, isEmbeddedField, isValue,
-//     isFieldSpec, isDefaultValue, isFieldId
+//     isFieldSpec, isFieldId
 //   - reference-alias types: FieldReference (= FieldId)
 //
 // Internal helpers that are NOT re-exported (private to this folder):
@@ -57,16 +56,15 @@ export * from './rrid-field.js';
 export * from './nih-grant-id-field.js';
 export * from './attribute-value-field.js';
 
-import type { TextField, TextFieldSpec, TextValue, TextDefaultValue, EmbeddedTextField } from './text-field.js';
-import type { NumericField, NumericFieldSpec, NumericValue, NumericDefaultValue, EmbeddedNumericField } from './numeric-field.js';
-import type { DateField, DateFieldSpec, DateValue, DateDefaultValue, EmbeddedDateField } from './date-field.js';
-import type { TimeField, TimeFieldSpec, TimeValue, TimeDefaultValue, EmbeddedTimeField } from './time-field.js';
-import type { DateTimeField, DateTimeFieldSpec, DateTimeValue, DateTimeDefaultValue, EmbeddedDateTimeField } from './date-time-field.js';
+import type { TextField, TextFieldSpec, TextValue, EmbeddedTextField } from './text-field.js';
+import type { NumericField, NumericFieldSpec, NumericValue, EmbeddedNumericField } from './numeric-field.js';
+import type { DateField, DateFieldSpec, DateValue, EmbeddedDateField } from './date-field.js';
+import type { TimeField, TimeFieldSpec, TimeValue, EmbeddedTimeField } from './time-field.js';
+import type { DateTimeField, DateTimeFieldSpec, DateTimeValue, EmbeddedDateTimeField } from './date-time-field.js';
 import type {
   ControlledTermField,
   ControlledTermFieldSpec,
   ControlledTermValue,
-  ControlledTermDefaultValue,
   EmbeddedControlledTermField,
 } from './controlled-term-field.js';
 import type {
@@ -81,22 +79,22 @@ import type {
   ControlledTermMultipleChoiceFieldSpec,
   EmbeddedMultipleChoiceField,
 } from './multiple-choice-field.js';
-import type { LinkField, LinkFieldSpec, LinkValue, LinkDefaultValue, EmbeddedLinkField } from './link-field.js';
-import type { EmailField, EmailFieldSpec, EmailValue, EmailDefaultValue, EmbeddedEmailField } from './email-field.js';
-import type { PhoneNumberField, PhoneNumberFieldSpec, PhoneNumberValue, PhoneNumberDefaultValue, EmbeddedPhoneNumberField } from './phone-number-field.js';
-import type { OrcidField, OrcidFieldSpec, OrcidValue, OrcidDefaultValue, EmbeddedOrcidField } from './orcid-field.js';
-import type { RorField, RorFieldSpec, RorValue, RorDefaultValue, EmbeddedRorField } from './ror-field.js';
-import type { DoiField, DoiFieldSpec, DoiValue, DoiDefaultValue, EmbeddedDoiField } from './doi-field.js';
-import type { PubMedIdField, PubMedIdFieldSpec, PubMedIdValue, PubMedIdDefaultValue, EmbeddedPubMedIdField } from './pub-med-id-field.js';
-import type { RridField, RridFieldSpec, RridValue, RridDefaultValue, EmbeddedRridField } from './rrid-field.js';
-import type { NihGrantIdField, NihGrantIdFieldSpec, NihGrantIdValue, NihGrantIdDefaultValue, EmbeddedNihGrantIdField } from './nih-grant-id-field.js';
+import type { LinkField, LinkFieldSpec, LinkValue, EmbeddedLinkField } from './link-field.js';
+import type { EmailField, EmailFieldSpec, EmailValue, EmbeddedEmailField } from './email-field.js';
+import type { PhoneNumberField, PhoneNumberFieldSpec, PhoneNumberValue, EmbeddedPhoneNumberField } from './phone-number-field.js';
+import type { OrcidField, OrcidFieldSpec, OrcidValue, EmbeddedOrcidField } from './orcid-field.js';
+import type { RorField, RorFieldSpec, RorValue, EmbeddedRorField } from './ror-field.js';
+import type { DoiField, DoiFieldSpec, DoiValue, EmbeddedDoiField } from './doi-field.js';
+import type { PubMedIdField, PubMedIdFieldSpec, PubMedIdValue, EmbeddedPubMedIdField } from './pub-med-id-field.js';
+import type { RridField, RridFieldSpec, RridValue, EmbeddedRridField } from './rrid-field.js';
+import type { NihGrantIdField, NihGrantIdFieldSpec, NihGrantIdValue, EmbeddedNihGrantIdField } from './nih-grant-id-field.js';
 import type {
   AttributeValueField,
   AttributeValueFieldSpec,
   AttributeValue,
   EmbeddedAttributeValueField,
 } from './attribute-value-field.js';
-import type { ChoiceValue, ChoiceDefaultValue } from './choice-shared.js';
+import type { ChoiceValue } from './choice-shared.js';
 
 // =====================================================================
 // Field union
@@ -358,53 +356,6 @@ export function isValue(x: unknown): x is Value {
   if (typeof x !== 'object' || x === null) return false;
   const k = (x as { kind?: unknown }).kind;
   return typeof k === 'string' && VALUE_KINDS.has(k);
-}
-
-// =====================================================================
-// DefaultValue union
-// =====================================================================
-
-export type DefaultValue =
-  | TextDefaultValue
-  | NumericDefaultValue
-  | DateDefaultValue
-  | TimeDefaultValue
-  | DateTimeDefaultValue
-  | ControlledTermDefaultValue
-  | ChoiceDefaultValue
-  | LinkDefaultValue
-  | EmailDefaultValue
-  | PhoneNumberDefaultValue
-  | OrcidDefaultValue
-  | RorDefaultValue
-  | DoiDefaultValue
-  | PubMedIdDefaultValue
-  | RridDefaultValue
-  | NihGrantIdDefaultValue;
-
-const DEFAULT_VALUE_KINDS: ReadonlySet<string> = new Set([
-  'TextDefaultValue',
-  'NumericDefaultValue',
-  'DateDefaultValue',
-  'TimeDefaultValue',
-  'DateTimeDefaultValue',
-  'ControlledTermDefaultValue',
-  'ChoiceDefaultValue',
-  'LinkDefaultValue',
-  'EmailDefaultValue',
-  'PhoneNumberDefaultValue',
-  'OrcidDefaultValue',
-  'RorDefaultValue',
-  'DoiDefaultValue',
-  'PubMedIdDefaultValue',
-  'RridDefaultValue',
-  'NihGrantIdDefaultValue',
-]);
-
-export function isDefaultValue(x: unknown): x is DefaultValue {
-  if (typeof x !== 'object' || x === null) return false;
-  const k = (x as { kind?: unknown }).kind;
-  return typeof k === 'string' && DEFAULT_VALUE_KINDS.has(k);
 }
 
 // =====================================================================

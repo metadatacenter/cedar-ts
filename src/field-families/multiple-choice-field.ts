@@ -10,7 +10,6 @@
 //   - instance value             : MultipleChoiceValue
 //   - schema constraints         : MultipleChoiceFieldSpec
 //   - reusable Field artifact    : MultipleChoiceField
-//   - default value              : MultipleChoiceDefaultValue
 //   - Template-embedding wrapper : EmbeddedMultipleChoiceField
 //
 // Wire `kind` values: "MultipleChoiceField" (artifact),
@@ -34,7 +33,7 @@ import type { MultipleChoiceRenderingHint } from './rendering-hints.js';
 import type {
   LiteralChoiceOption,
   ControlledTermChoiceOption,
-  ChoiceDefaultValue,
+  ChoiceValue,
 } from './choice-shared.js';
 import {
   type EmbeddedFieldInitCommon,
@@ -208,11 +207,7 @@ export const multipleChoiceField = (
   });
 
 // =====================================================================
-// 5. DefaultValue — see field-families/choice-shared.ts (ChoiceDefaultValue)
-// =====================================================================
-
-// =====================================================================
-// 6. EmbeddedField
+// 5. EmbeddedField
 // =====================================================================
 
 export interface EmbeddedMultipleChoiceField {
@@ -224,12 +219,12 @@ export interface EmbeddedMultipleChoiceField {
   readonly visibility?: Visibility;
   readonly labelOverride?: LabelOverride;
   readonly property?: Property;
-  readonly defaultValue?: ChoiceDefaultValue;
+  readonly defaultValue?: ChoiceValue;
 }
 
 export interface EmbeddedMultipleChoiceFieldInit extends EmbeddedFieldInitCommon {
   readonly reference: MultipleChoiceFieldReference | MultipleChoiceField;
-  readonly defaultValue?: ChoiceDefaultValue;
+  readonly defaultValue?: ChoiceValue;
 }
 
 export function embeddedMultipleChoiceField(

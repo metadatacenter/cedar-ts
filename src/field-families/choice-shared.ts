@@ -17,9 +17,10 @@
 //   - LiteralChoiceValue, ControlledTermChoiceValue — instance value
 //     types selected by a choice field.
 //   - ChoiceValue — the union admitted at SingleChoiceField and
-//     MultipleChoiceField instances.
-//   - ChoiceDefaultValue — the default-value variant that wraps a
-//     ChoiceValue.
+//     MultipleChoiceField instances. Also serves directly as the
+//     `defaultValue` slot type on EmbeddedSingleChoiceField and
+//     EmbeddedMultipleChoiceField (kind retained on the wire as the
+//     union is polymorphic).
 
 import { type Literal, langTaggedLiteral } from '../literals/index.js';
 import {
@@ -141,18 +142,3 @@ export function isChoiceValue(x: unknown): x is ChoiceValue {
   return isLiteralChoiceValue(x) || isControlledTermChoiceValue(x);
 }
 
-// =====================================================================
-// ChoiceDefaultValue (shared by single- and multiple-choice embeddings)
-// =====================================================================
-
-// Grammar uses `ChoiceValue+`; we model with a NonEmptyArray invariant
-// enforced at construction.
-export interface ChoiceDefaultValue {
-  readonly kind: 'ChoiceDefaultValue';
-  readonly values: readonly [ChoiceValue, ...ChoiceValue[]];
-}
-export function choiceDefaultValue(
-  ...values: [ChoiceValue, ...ChoiceValue[]]
-): ChoiceDefaultValue {
-  return { kind: 'ChoiceDefaultValue', values };
-}

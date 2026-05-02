@@ -10,7 +10,6 @@
 //   - instance value             : RorValue
 //   - schema constraints         : RorFieldSpec
 //   - reusable Field artifact    : RorField
-//   - default value              : RorDefaultValue
 //   - Template-embedding wrapper : EmbeddedRorField
 //
 // Wire `kind` values: "RorField" (artifact), "EmbeddedRorField"
@@ -28,7 +27,6 @@ import type { LabelOverride } from '../embedded/label-override.js';
 import type { Property } from '../embedded/property.js';
 import {
   type AuthorityValueInput,
-  type AuthorityDefaultValueInput,
   authorityValueFromInput,
   isTaggedKind,
 } from './external-authority-shared.js';
@@ -139,27 +137,7 @@ export const rorField = (init: RorFieldInit): RorField =>
   ({ kind: 'RorField', id: rorFieldId(init.id), metadata: init.metadata, fieldSpec: init.fieldSpec });
 
 // =====================================================================
-// 5. DefaultValue
-// =====================================================================
-
-export interface RorDefaultValue {
-  readonly kind: 'RorDefaultValue';
-  readonly value: RorValue;
-}
-export function rorDefaultValue(
-  input: RorDefaultValue | AuthorityDefaultValueInput<RorIri, RorValue>,
-): RorDefaultValue {
-  if (typeof input === 'object' && 'kind' in input && input.kind === 'RorDefaultValue') {
-    return input;
-  }
-  return {
-    kind: 'RorDefaultValue',
-    value: isRorValue(input) ? input : rorValue(input),
-  };
-}
-
-// =====================================================================
-// 6. EmbeddedField
+// 5. EmbeddedField
 // =====================================================================
 
 export interface EmbeddedRorField {
@@ -171,14 +149,12 @@ export interface EmbeddedRorField {
   readonly visibility?: Visibility;
   readonly labelOverride?: LabelOverride;
   readonly property?: Property;
-  readonly defaultValue?: RorDefaultValue;
+  readonly defaultValue?: RorValue;
 }
 
 export interface EmbeddedRorFieldInit extends EmbeddedFieldInitCommon {
   readonly reference: RorFieldReference | RorField;
-  readonly defaultValue?:
-    | RorDefaultValue
-    | AuthorityDefaultValueInput<RorIri, RorValue>;
+  readonly defaultValue?: RorValue | AuthorityValueInput<RorIri>;
 }
 
 export function embeddedRorField(init: EmbeddedRorFieldInit): EmbeddedRorField {
@@ -187,7 +163,9 @@ export function embeddedRorField(init: EmbeddedRorFieldInit): EmbeddedRorField {
     kind: 'EmbeddedRorField',
     reference: fieldRef(init.reference),
     ...(init.defaultValue !== undefined && {
-      defaultValue: rorDefaultValue(init.defaultValue),
+      defaultValue: isRorValue(init.defaultValue)
+        ? init.defaultValue
+        : rorValue(init.defaultValue),
     }),
   };
   return out;

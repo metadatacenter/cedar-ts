@@ -278,7 +278,8 @@ export const principalInvestigatorTemplate: Template = template({
     }),
 
     // `defaultValue` accepts a bare string here; the constructor widens
-    // it into a TextDefaultValue.
+    // it into a SimpleLiteral (the family-specific underlying type for
+    // Text fields' defaultValue slot).
     embeddedTextField({
       key: 'institution_name',
       reference: textField({

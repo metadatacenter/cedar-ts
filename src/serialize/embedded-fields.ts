@@ -117,39 +117,38 @@ import {
   parseVisibility,
 } from './embedded-config.js';
 import {
-  serializeTextDefaultValue,
-  serializeNumericDefaultValue,
-  serializeDateDefaultValue,
-  serializeTimeDefaultValue,
-  serializeDateTimeDefaultValue,
-  serializeControlledTermDefaultValue,
-  serializeChoiceDefaultValue,
-  serializeLinkDefaultValue,
-  serializeEmailDefaultValue,
-  serializePhoneNumberDefaultValue,
-  serializeOrcidDefaultValue,
-  serializeRorDefaultValue,
-  serializeDoiDefaultValue,
-  serializePubMedIdDefaultValue,
-  serializeRridDefaultValue,
-  serializeNihGrantIdDefaultValue,
-  parseTextDefaultValue,
-  parseNumericDefaultValue,
-  parseDateDefaultValue,
-  parseTimeDefaultValue,
-  parseDateTimeDefaultValue,
-  parseControlledTermDefaultValue,
-  parseChoiceDefaultValue,
-  parseLinkDefaultValue,
-  parseEmailDefaultValue,
-  parsePhoneNumberDefaultValue,
-  parseOrcidDefaultValue,
-  parseRorDefaultValue,
-  parseDoiDefaultValue,
-  parsePubMedIdDefaultValue,
-  parseRridDefaultValue,
-  parseNihGrantIdDefaultValue,
-} from './default-values.js';
+  serializeTextLiteral,
+  parseTextLiteral,
+  serializeTypedLiteralAtPosition,
+  serializeNumericLiteralStandalone,
+  parseNumericLiteralStandalone,
+  parseTimeLiteral,
+  parseDateTimeLiteral,
+  serializeSimpleLiteral,
+} from './literals.js';
+import {
+  serializeDateValue,
+  parseDateValue,
+  serializeChoiceValue,
+  parseChoiceValue,
+  serializeControlledTermValueUntagged,
+  parseControlledTermValueUntagged,
+  serializeLinkValueUntagged,
+  parseLinkValueUntagged,
+  serializeOrcidValueUntagged,
+  serializeRorValueUntagged,
+  serializeDoiValueUntagged,
+  serializePubMedIdValueUntagged,
+  serializeRridValueUntagged,
+  serializeNihGrantIdValueUntagged,
+  parseOrcidValueUntagged,
+  parseRorValueUntagged,
+  parseDoiValueUntagged,
+  parsePubMedIdValueUntagged,
+  parseRridValueUntagged,
+  parseNihGrantIdValueUntagged,
+} from './values.js';
+import type { SimpleLiteral } from '../literals/index.js';
 
 // ---- Common per-embedding properties ---------------------------------
 
@@ -269,6 +268,19 @@ function readShell(
   return out;
 }
 
+// Parses a SimpleLiteral at a defaultValue position — accepts only the
+// `{ value }` shape (no lang, no datatype). Used for email/phone-number
+// default values per the new flat wire form.
+function parseSimpleLiteralAtDefault(x: unknown, where: string): SimpleLiteral {
+  const lit = parseTextLiteral(x, where);
+  if (lit.kind !== 'SimpleLiteral') {
+    throw new CedarConstructionError(
+      `${where}: defaultValue must be a SimpleLiteral (no lang)`,
+    );
+  }
+  return lit;
+}
+
 // ---- Per-family EmbeddedField serializers ---------------------------
 
 export function serializeEmbeddedTextField(x: EmbeddedTextField): unknown {
@@ -279,7 +291,7 @@ export function serializeEmbeddedTextField(x: EmbeddedTextField): unknown {
   };
   serializeCommonProps(x, out);
   if (x.defaultValue !== undefined)
-    out['defaultValue'] = serializeTextDefaultValue(x.defaultValue);
+    out['defaultValue'] = serializeTextLiteral(x.defaultValue);
   return out;
 }
 
@@ -293,7 +305,7 @@ export function parseEmbeddedTextField(
     reference: parseTextFieldId(s.reference, `${where}.reference`),
     ...s.common,
     ...(s.defaultRaw !== undefined && {
-      defaultValue: parseTextDefaultValue(s.defaultRaw, `${where}.defaultValue`),
+      defaultValue: parseTextLiteral(s.defaultRaw, `${where}.defaultValue`),
     }),
   });
 }
@@ -306,7 +318,7 @@ export function serializeEmbeddedNumericField(x: EmbeddedNumericField): unknown 
   };
   serializeCommonProps(x, out);
   if (x.defaultValue !== undefined)
-    out['defaultValue'] = serializeNumericDefaultValue(x.defaultValue);
+    out['defaultValue'] = serializeNumericLiteralStandalone(x.defaultValue);
   return out;
 }
 
@@ -320,7 +332,10 @@ export function parseEmbeddedNumericField(
     reference: parseNumericFieldId(s.reference, `${where}.reference`),
     ...s.common,
     ...(s.defaultRaw !== undefined && {
-      defaultValue: parseNumericDefaultValue(s.defaultRaw, `${where}.defaultValue`),
+      defaultValue: parseNumericLiteralStandalone(
+        s.defaultRaw,
+        `${where}.defaultValue`,
+      ),
     }),
   });
 }
@@ -333,7 +348,7 @@ export function serializeEmbeddedDateField(x: EmbeddedDateField): unknown {
   };
   serializeCommonProps(x, out);
   if (x.defaultValue !== undefined)
-    out['defaultValue'] = serializeDateDefaultValue(x.defaultValue);
+    out['defaultValue'] = serializeDateValue(x.defaultValue);
   return out;
 }
 
@@ -347,7 +362,7 @@ export function parseEmbeddedDateField(
     reference: parseDateFieldId(s.reference, `${where}.reference`),
     ...s.common,
     ...(s.defaultRaw !== undefined && {
-      defaultValue: parseDateDefaultValue(s.defaultRaw, `${where}.defaultValue`),
+      defaultValue: parseDateValue(s.defaultRaw, `${where}.defaultValue`),
     }),
   });
 }
@@ -360,7 +375,7 @@ export function serializeEmbeddedTimeField(x: EmbeddedTimeField): unknown {
   };
   serializeCommonProps(x, out);
   if (x.defaultValue !== undefined)
-    out['defaultValue'] = serializeTimeDefaultValue(x.defaultValue);
+    out['defaultValue'] = serializeTypedLiteralAtPosition(x.defaultValue);
   return out;
 }
 
@@ -374,7 +389,7 @@ export function parseEmbeddedTimeField(
     reference: parseTimeFieldId(s.reference, `${where}.reference`),
     ...s.common,
     ...(s.defaultRaw !== undefined && {
-      defaultValue: parseTimeDefaultValue(s.defaultRaw, `${where}.defaultValue`),
+      defaultValue: parseTimeLiteral(s.defaultRaw, `${where}.defaultValue`),
     }),
   });
 }
@@ -389,7 +404,7 @@ export function serializeEmbeddedDateTimeField(
   };
   serializeCommonProps(x, out);
   if (x.defaultValue !== undefined)
-    out['defaultValue'] = serializeDateTimeDefaultValue(x.defaultValue);
+    out['defaultValue'] = serializeTypedLiteralAtPosition(x.defaultValue);
   return out;
 }
 
@@ -403,7 +418,7 @@ export function parseEmbeddedDateTimeField(
     reference: parseDateTimeFieldId(s.reference, `${where}.reference`),
     ...s.common,
     ...(s.defaultRaw !== undefined && {
-      defaultValue: parseDateTimeDefaultValue(s.defaultRaw, `${where}.defaultValue`),
+      defaultValue: parseDateTimeLiteral(s.defaultRaw, `${where}.defaultValue`),
     }),
   });
 }
@@ -418,7 +433,7 @@ export function serializeEmbeddedControlledTermField(
   };
   serializeCommonProps(x, out);
   if (x.defaultValue !== undefined)
-    out['defaultValue'] = serializeControlledTermDefaultValue(x.defaultValue);
+    out['defaultValue'] = serializeControlledTermValueUntagged(x.defaultValue);
   return out;
 }
 
@@ -432,7 +447,7 @@ export function parseEmbeddedControlledTermField(
     reference: parseControlledTermFieldId(s.reference, `${where}.reference`),
     ...s.common,
     ...(s.defaultRaw !== undefined && {
-      defaultValue: parseControlledTermDefaultValue(
+      defaultValue: parseControlledTermValueUntagged(
         s.defaultRaw,
         `${where}.defaultValue`,
       ),
@@ -450,7 +465,7 @@ export function serializeEmbeddedSingleChoiceField(
   };
   serializeCommonProps(x, out);
   if (x.defaultValue !== undefined)
-    out['defaultValue'] = serializeChoiceDefaultValue(x.defaultValue);
+    out['defaultValue'] = serializeChoiceValue(x.defaultValue);
   return out;
 }
 
@@ -464,7 +479,7 @@ export function parseEmbeddedSingleChoiceField(
     reference: parseSingleChoiceFieldId(s.reference, `${where}.reference`),
     ...s.common,
     ...(s.defaultRaw !== undefined && {
-      defaultValue: parseChoiceDefaultValue(s.defaultRaw, `${where}.defaultValue`),
+      defaultValue: parseChoiceValue(s.defaultRaw, `${where}.defaultValue`),
     }),
   });
 }
@@ -479,7 +494,7 @@ export function serializeEmbeddedMultipleChoiceField(
   };
   serializeCommonProps(x, out);
   if (x.defaultValue !== undefined)
-    out['defaultValue'] = serializeChoiceDefaultValue(x.defaultValue);
+    out['defaultValue'] = serializeChoiceValue(x.defaultValue);
   return out;
 }
 
@@ -493,7 +508,7 @@ export function parseEmbeddedMultipleChoiceField(
     reference: parseMultipleChoiceFieldId(s.reference, `${where}.reference`),
     ...s.common,
     ...(s.defaultRaw !== undefined && {
-      defaultValue: parseChoiceDefaultValue(s.defaultRaw, `${where}.defaultValue`),
+      defaultValue: parseChoiceValue(s.defaultRaw, `${where}.defaultValue`),
     }),
   });
 }
@@ -506,7 +521,7 @@ export function serializeEmbeddedLinkField(x: EmbeddedLinkField): unknown {
   };
   serializeCommonProps(x, out);
   if (x.defaultValue !== undefined)
-    out['defaultValue'] = serializeLinkDefaultValue(x.defaultValue);
+    out['defaultValue'] = serializeLinkValueUntagged(x.defaultValue);
   return out;
 }
 
@@ -520,7 +535,7 @@ export function parseEmbeddedLinkField(
     reference: parseLinkFieldId(s.reference, `${where}.reference`),
     ...s.common,
     ...(s.defaultRaw !== undefined && {
-      defaultValue: parseLinkDefaultValue(s.defaultRaw, `${where}.defaultValue`),
+      defaultValue: parseLinkValueUntagged(s.defaultRaw, `${where}.defaultValue`),
     }),
   });
 }
@@ -533,7 +548,7 @@ export function serializeEmbeddedEmailField(x: EmbeddedEmailField): unknown {
   };
   serializeCommonProps(x, out);
   if (x.defaultValue !== undefined)
-    out['defaultValue'] = serializeEmailDefaultValue(x.defaultValue);
+    out['defaultValue'] = serializeSimpleLiteral(x.defaultValue);
   return out;
 }
 
@@ -547,7 +562,10 @@ export function parseEmbeddedEmailField(
     reference: parseEmailFieldId(s.reference, `${where}.reference`),
     ...s.common,
     ...(s.defaultRaw !== undefined && {
-      defaultValue: parseEmailDefaultValue(s.defaultRaw, `${where}.defaultValue`),
+      defaultValue: parseSimpleLiteralAtDefault(
+        s.defaultRaw,
+        `${where}.defaultValue`,
+      ),
     }),
   });
 }
@@ -562,7 +580,7 @@ export function serializeEmbeddedPhoneNumberField(
   };
   serializeCommonProps(x, out);
   if (x.defaultValue !== undefined)
-    out['defaultValue'] = serializePhoneNumberDefaultValue(x.defaultValue);
+    out['defaultValue'] = serializeSimpleLiteral(x.defaultValue);
   return out;
 }
 
@@ -576,7 +594,7 @@ export function parseEmbeddedPhoneNumberField(
     reference: parsePhoneNumberFieldId(s.reference, `${where}.reference`),
     ...s.common,
     ...(s.defaultRaw !== undefined && {
-      defaultValue: parsePhoneNumberDefaultValue(
+      defaultValue: parseSimpleLiteralAtDefault(
         s.defaultRaw,
         `${where}.defaultValue`,
       ),
@@ -592,7 +610,7 @@ export function serializeEmbeddedOrcidField(x: EmbeddedOrcidField): unknown {
   };
   serializeCommonProps(x, out);
   if (x.defaultValue !== undefined)
-    out['defaultValue'] = serializeOrcidDefaultValue(x.defaultValue);
+    out['defaultValue'] = serializeOrcidValueUntagged(x.defaultValue);
   return out;
 }
 
@@ -606,7 +624,7 @@ export function parseEmbeddedOrcidField(
     reference: parseOrcidFieldId(s.reference, `${where}.reference`),
     ...s.common,
     ...(s.defaultRaw !== undefined && {
-      defaultValue: parseOrcidDefaultValue(s.defaultRaw, `${where}.defaultValue`),
+      defaultValue: parseOrcidValueUntagged(s.defaultRaw, `${where}.defaultValue`),
     }),
   });
 }
@@ -619,7 +637,7 @@ export function serializeEmbeddedRorField(x: EmbeddedRorField): unknown {
   };
   serializeCommonProps(x, out);
   if (x.defaultValue !== undefined)
-    out['defaultValue'] = serializeRorDefaultValue(x.defaultValue);
+    out['defaultValue'] = serializeRorValueUntagged(x.defaultValue);
   return out;
 }
 
@@ -633,7 +651,7 @@ export function parseEmbeddedRorField(
     reference: parseRorFieldId(s.reference, `${where}.reference`),
     ...s.common,
     ...(s.defaultRaw !== undefined && {
-      defaultValue: parseRorDefaultValue(s.defaultRaw, `${where}.defaultValue`),
+      defaultValue: parseRorValueUntagged(s.defaultRaw, `${where}.defaultValue`),
     }),
   });
 }
@@ -646,7 +664,7 @@ export function serializeEmbeddedDoiField(x: EmbeddedDoiField): unknown {
   };
   serializeCommonProps(x, out);
   if (x.defaultValue !== undefined)
-    out['defaultValue'] = serializeDoiDefaultValue(x.defaultValue);
+    out['defaultValue'] = serializeDoiValueUntagged(x.defaultValue);
   return out;
 }
 
@@ -660,7 +678,7 @@ export function parseEmbeddedDoiField(
     reference: parseDoiFieldId(s.reference, `${where}.reference`),
     ...s.common,
     ...(s.defaultRaw !== undefined && {
-      defaultValue: parseDoiDefaultValue(s.defaultRaw, `${where}.defaultValue`),
+      defaultValue: parseDoiValueUntagged(s.defaultRaw, `${where}.defaultValue`),
     }),
   });
 }
@@ -675,7 +693,7 @@ export function serializeEmbeddedPubMedIdField(
   };
   serializeCommonProps(x, out);
   if (x.defaultValue !== undefined)
-    out['defaultValue'] = serializePubMedIdDefaultValue(x.defaultValue);
+    out['defaultValue'] = serializePubMedIdValueUntagged(x.defaultValue);
   return out;
 }
 
@@ -689,7 +707,7 @@ export function parseEmbeddedPubMedIdField(
     reference: parsePubMedIdFieldId(s.reference, `${where}.reference`),
     ...s.common,
     ...(s.defaultRaw !== undefined && {
-      defaultValue: parsePubMedIdDefaultValue(
+      defaultValue: parsePubMedIdValueUntagged(
         s.defaultRaw,
         `${where}.defaultValue`,
       ),
@@ -705,7 +723,7 @@ export function serializeEmbeddedRridField(x: EmbeddedRridField): unknown {
   };
   serializeCommonProps(x, out);
   if (x.defaultValue !== undefined)
-    out['defaultValue'] = serializeRridDefaultValue(x.defaultValue);
+    out['defaultValue'] = serializeRridValueUntagged(x.defaultValue);
   return out;
 }
 
@@ -719,7 +737,7 @@ export function parseEmbeddedRridField(
     reference: parseRridFieldId(s.reference, `${where}.reference`),
     ...s.common,
     ...(s.defaultRaw !== undefined && {
-      defaultValue: parseRridDefaultValue(s.defaultRaw, `${where}.defaultValue`),
+      defaultValue: parseRridValueUntagged(s.defaultRaw, `${where}.defaultValue`),
     }),
   });
 }
@@ -734,7 +752,7 @@ export function serializeEmbeddedNihGrantIdField(
   };
   serializeCommonProps(x, out);
   if (x.defaultValue !== undefined)
-    out['defaultValue'] = serializeNihGrantIdDefaultValue(x.defaultValue);
+    out['defaultValue'] = serializeNihGrantIdValueUntagged(x.defaultValue);
   return out;
 }
 
@@ -748,7 +766,7 @@ export function parseEmbeddedNihGrantIdField(
     reference: parseNihGrantIdFieldId(s.reference, `${where}.reference`),
     ...s.common,
     ...(s.defaultRaw !== undefined && {
-      defaultValue: parseNihGrantIdDefaultValue(
+      defaultValue: parseNihGrantIdValueUntagged(
         s.defaultRaw,
         `${where}.defaultValue`,
       ),

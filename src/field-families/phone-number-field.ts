@@ -9,7 +9,6 @@
 //   - instance value             : PhoneNumberValue
 //   - schema constraints         : PhoneNumberFieldSpec
 //   - reusable Field artifact    : PhoneNumberField
-//   - default value              : PhoneNumberDefaultValue
 //   - Template-embedding wrapper : EmbeddedPhoneNumberField
 //
 // Wire `kind` values: "PhoneNumberField" (artifact),
@@ -128,27 +127,7 @@ export const phoneNumberField = (init: PhoneNumberFieldInit): PhoneNumberField =
   });
 
 // =====================================================================
-// 5. DefaultValue
-// =====================================================================
-
-export interface PhoneNumberDefaultValue {
-  readonly kind: 'PhoneNumberDefaultValue';
-  readonly value: PhoneNumberValue;
-}
-export function phoneNumberDefaultValue(
-  input: PhoneNumberDefaultValue | PhoneNumberValue | SimpleLiteral | string,
-): PhoneNumberDefaultValue {
-  if (typeof input === 'object' && 'kind' in input && input.kind === 'PhoneNumberDefaultValue') {
-    return input;
-  }
-  return {
-    kind: 'PhoneNumberDefaultValue',
-    value: isPhoneNumberValue(input) ? input : phoneNumberValue(input),
-  };
-}
-
-// =====================================================================
-// 6. EmbeddedField
+// 5. EmbeddedField
 // =====================================================================
 
 export interface EmbeddedPhoneNumberField {
@@ -160,16 +139,14 @@ export interface EmbeddedPhoneNumberField {
   readonly visibility?: Visibility;
   readonly labelOverride?: LabelOverride;
   readonly property?: Property;
-  readonly defaultValue?: PhoneNumberDefaultValue;
+  readonly defaultValue?: SimpleLiteral;
 }
 
+// `defaultValue` accepts a SimpleLiteral or a plain string (the phone
+// lexical form, wrapped via simpleLiteral).
 export interface EmbeddedPhoneNumberFieldInit extends EmbeddedFieldInitCommon {
   readonly reference: PhoneNumberFieldReference | PhoneNumberField;
-  readonly defaultValue?:
-    | PhoneNumberDefaultValue
-    | PhoneNumberValue
-    | SimpleLiteral
-    | string;
+  readonly defaultValue?: SimpleLiteral | string;
 }
 
 export function embeddedPhoneNumberField(
@@ -180,7 +157,10 @@ export function embeddedPhoneNumberField(
     kind: 'EmbeddedPhoneNumberField',
     reference: fieldRef(init.reference),
     ...(init.defaultValue !== undefined && {
-      defaultValue: phoneNumberDefaultValue(init.defaultValue),
+      defaultValue:
+        typeof init.defaultValue === 'string'
+          ? simpleLiteral(init.defaultValue)
+          : init.defaultValue,
     }),
   };
   return out;

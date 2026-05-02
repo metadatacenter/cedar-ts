@@ -129,14 +129,13 @@ import {
   parseControlledTermValueUntagged,
 } from './values.js';
 import {
-  serializeTextDefaultValue,
-  parseTextDefaultValue,
-} from './default-values.js';
-import {
   serializeLiteral,
+  serializeTextLiteral,
   parseLiteral,
+  parseTextLiteral,
   parseNumericDatatypeKind,
 } from './literals.js';
+import type { TextLiteral } from '../literals/index.js';
 
 // ---- Rendering hints (flat string enums + temporal objects) ----------
 
@@ -591,7 +590,7 @@ export function parseControlledTermChoiceOption(
 export function serializeTextFieldSpec(x: TextFieldSpec): unknown {
   const out: Record<string, unknown> = { kind: 'TextFieldSpec' };
   if (x.defaultValue !== undefined)
-    out['defaultValue'] = serializeTextDefaultValue(x.defaultValue);
+    out['defaultValue'] = serializeTextLiteral(x.defaultValue);
   if (x.minLength !== undefined) out['minLength'] = x.minLength;
   if (x.maxLength !== undefined) out['maxLength'] = x.maxLength;
   if (x.validationRegex !== undefined)
@@ -621,14 +620,14 @@ export function parseTextFieldSpec(
     throw new CedarConstructionError(`${where}: expected kind "TextFieldSpec"`);
   }
   const init: {
-    defaultValue?: ReturnType<typeof parseTextDefaultValue>;
+    defaultValue?: TextLiteral;
     minLength?: number;
     maxLength?: number;
     validationRegex?: string;
     renderingHint?: TextRenderingHint;
   } = {};
   if ('defaultValue' in o)
-    init.defaultValue = parseTextDefaultValue(
+    init.defaultValue = parseTextLiteral(
       o['defaultValue'],
       `${where}.defaultValue`,
     );

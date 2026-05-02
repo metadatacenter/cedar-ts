@@ -9,7 +9,6 @@
 //   - instance value             : RridValue
 //   - schema constraints         : RridFieldSpec
 //   - reusable Field artifact    : RridField
-//   - default value              : RridDefaultValue
 //   - Template-embedding wrapper : EmbeddedRridField
 //
 // Wire `kind` values: "RridField" (artifact), "EmbeddedRridField"
@@ -27,7 +26,6 @@ import type { LabelOverride } from '../embedded/label-override.js';
 import type { Property } from '../embedded/property.js';
 import {
   type AuthorityValueInput,
-  type AuthorityDefaultValueInput,
   authorityValueFromInput,
   isTaggedKind,
 } from './external-authority-shared.js';
@@ -138,27 +136,7 @@ export const rridField = (init: RridFieldInit): RridField =>
   ({ kind: 'RridField', id: rridFieldId(init.id), metadata: init.metadata, fieldSpec: init.fieldSpec });
 
 // =====================================================================
-// 5. DefaultValue
-// =====================================================================
-
-export interface RridDefaultValue {
-  readonly kind: 'RridDefaultValue';
-  readonly value: RridValue;
-}
-export function rridDefaultValue(
-  input: RridDefaultValue | AuthorityDefaultValueInput<RridIri, RridValue>,
-): RridDefaultValue {
-  if (typeof input === 'object' && 'kind' in input && input.kind === 'RridDefaultValue') {
-    return input;
-  }
-  return {
-    kind: 'RridDefaultValue',
-    value: isRridValue(input) ? input : rridValue(input),
-  };
-}
-
-// =====================================================================
-// 6. EmbeddedField
+// 5. EmbeddedField
 // =====================================================================
 
 export interface EmbeddedRridField {
@@ -170,14 +148,12 @@ export interface EmbeddedRridField {
   readonly visibility?: Visibility;
   readonly labelOverride?: LabelOverride;
   readonly property?: Property;
-  readonly defaultValue?: RridDefaultValue;
+  readonly defaultValue?: RridValue;
 }
 
 export interface EmbeddedRridFieldInit extends EmbeddedFieldInitCommon {
   readonly reference: RridFieldReference | RridField;
-  readonly defaultValue?:
-    | RridDefaultValue
-    | AuthorityDefaultValueInput<RridIri, RridValue>;
+  readonly defaultValue?: RridValue | AuthorityValueInput<RridIri>;
 }
 
 export function embeddedRridField(init: EmbeddedRridFieldInit): EmbeddedRridField {
@@ -186,7 +162,9 @@ export function embeddedRridField(init: EmbeddedRridFieldInit): EmbeddedRridFiel
     kind: 'EmbeddedRridField',
     reference: fieldRef(init.reference),
     ...(init.defaultValue !== undefined && {
-      defaultValue: rridDefaultValue(init.defaultValue),
+      defaultValue: isRridValue(init.defaultValue)
+        ? init.defaultValue
+        : rridValue(init.defaultValue),
     }),
   };
   return out;

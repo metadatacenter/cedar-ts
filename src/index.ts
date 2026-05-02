@@ -22,8 +22,7 @@
 //                      annotations / artifact-metadata
 //   - field-families/: the 18 per-family vertical slices (TextField,
 //                      NumericField, …, AttributeValueField), plus the
-//                      Field, EmbeddedField, Value, FieldSpec,
-//                      DefaultValue unions
+//                      Field, EmbeddedField, Value, FieldSpec unions
 //   - presentation/  : presentation components (RichText / Image /
 //                      YoutubeVideo / SectionBreak / PageBreak)
 //   - embedded/      : per-embedding configuration (Cardinality,

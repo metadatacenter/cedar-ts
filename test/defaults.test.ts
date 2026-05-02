@@ -1,130 +1,278 @@
 import { describe, expect, it } from 'vitest';
 import {
-  textDefaultValue,
-  numericDefaultValue,
-  dateDefaultValue,
-  timeDefaultValue,
-  dateTimeDefaultValue,
-  controlledTermDefaultValue,
-  choiceDefaultValue,
-  linkDefaultValue,
-  emailDefaultValue,
-  phoneNumberDefaultValue,
-  orcidDefaultValue,
-  rorDefaultValue,
-  doiDefaultValue,
-  pubMedIdDefaultValue,
-  rridDefaultValue,
-  nihGrantIdDefaultValue,
-  isDefaultValue,
-  textValue,
-  numericValue,
-  yearValue,
-  fullDateValue,
-  timeValue,
-  dateTimeValue,
+  embeddedTextField,
+  embeddedNumericField,
+  embeddedDateField,
+  embeddedTimeField,
+  embeddedDateTimeField,
+  embeddedControlledTermField,
+  embeddedSingleChoiceField,
+  embeddedMultipleChoiceField,
+  embeddedLinkField,
+  embeddedEmailField,
+  embeddedPhoneNumberField,
+  embeddedOrcidField,
+  embeddedRorField,
+  embeddedDoiField,
+  embeddedPubMedIdField,
+  embeddedRridField,
+  embeddedNihGrantIdField,
+  textFieldId,
+  numericFieldId,
+  dateFieldId,
+  timeFieldId,
+  dateTimeFieldId,
+  controlledTermFieldId,
+  singleChoiceFieldId,
+  multipleChoiceFieldId,
+  linkFieldId,
+  emailFieldId,
+  phoneNumberFieldId,
+  orcidFieldId,
+  rorFieldId,
+  doiFieldId,
+  pubMedIdFieldId,
+  rridFieldId,
+  nihGrantIdFieldId,
+  textFieldSpec,
   controlledTermValue,
   literalChoiceValue,
   linkValue,
-  emailValue,
-  phoneNumberValue,
   orcidValue,
   rorValue,
   doiValue,
   pubMedIdValue,
   rridValue,
   nihGrantIdValue,
-  simpleLiteral,
   numericLiteral,
   fullDateLiteral,
   timeLiteral,
   dateTimeLiteral,
+  yearValue,
+  fullDateValue,
+  simpleLiteral,
   typedLiteral,
   XsdNumericDatatypeIri,
 } from '../src/index.js';
 
-describe('DefaultValue family', () => {
-  it('each default-value constructor produces a tagged object recognised by isDefaultValue', () => {
-    const td = textDefaultValue(textValue(simpleLiteral('x')));
-    const nd = numericDefaultValue(numericValue(numericLiteral('1', 'integer')));
-    const dd = dateDefaultValue(yearValue('2024'));
-    const dd2 = dateDefaultValue(fullDateValue(fullDateLiteral('2024-06-15')));
-    const td2 = timeDefaultValue(timeValue(timeLiteral('10:30:00')));
-    const dt = dateTimeDefaultValue(dateTimeValue(dateTimeLiteral('2024-06-15T10:30:00')));
-    const ct = controlledTermDefaultValue(
-      controlledTermValue({ term: 'http://example.org/t' }),
-    );
-    const cd = choiceDefaultValue(
-      literalChoiceValue(typedLiteral('1', XsdNumericDatatypeIri.integer)),
-    );
-    const lk = linkDefaultValue(linkValue({ iri: 'https://example.org' }));
-    const em = emailDefaultValue(emailValue('me@example.org'));
-    const ph = phoneNumberDefaultValue(phoneNumberValue('+1-415-555-0100'));
-    const oc = orcidDefaultValue(orcidValue({ iri: 'https://orcid.org/0000-0002-1825-0097' }));
-    const rr = rorDefaultValue(rorValue({ iri: 'https://ror.org/05dxps055' }));
-    const di = doiDefaultValue(doiValue({ iri: 'https://doi.org/10.1000/xyz' }));
-    const pm = pubMedIdDefaultValue(
-      pubMedIdValue({ iri: 'https://pubmed.ncbi.nlm.nih.gov/12345' }),
-    );
-    const rrid = rridDefaultValue(rridValue({ iri: 'https://identifiers.org/RRID:AB_12345' }));
-    const ng = nihGrantIdDefaultValue(
-      nihGrantIdValue({ iri: 'https://example.org/nih/grant/1' }),
-    );
+// =====================================================================
+// Defaults — the 17 XxxDefaultValue wrappers were removed (spec 868ef1c).
+// Each EmbeddedXxxField.defaultValue slot now uses the family-specific
+// underlying type directly. These tests pin that behavior at the
+// constructor layer for each family.
+// =====================================================================
 
-    for (const dv of [td, nd, dd, dd2, td2, dt, ct, cd, lk, em, ph, oc, rr, di, pm, rrid, ng]) {
-      expect(isDefaultValue(dv)).toBe(true);
+describe('EmbeddedXxxField.defaultValue (flat, no XxxDefaultValue wrapper)', () => {
+  it('Text — TextLiteral; bare string widens to SimpleLiteral', () => {
+    const ef = embeddedTextField({
+      key: 't',
+      reference: textFieldId('https://example.org/x'),
+      defaultValue: 'Stanford University',
+    });
+    expect(ef.defaultValue?.kind).toBe('SimpleLiteral');
+    if (ef.defaultValue && ef.defaultValue.kind === 'SimpleLiteral') {
+      expect(ef.defaultValue.lexicalForm).toBe('Stanford University');
     }
+    // Pre-built TextLiteral passes through.
+    const ef2 = embeddedTextField({
+      key: 't',
+      reference: textFieldId('https://example.org/x'),
+      defaultValue: simpleLiteral('Hello'),
+    });
+    expect(ef2.defaultValue?.kind).toBe('SimpleLiteral');
   });
 
-  it('choiceDefaultValue requires at least one ChoiceValue', () => {
-    const cv = literalChoiceValue(typedLiteral('1', XsdNumericDatatypeIri.integer));
-    const cd = choiceDefaultValue(cv);
-    expect(cd.values.length).toBe(1);
+  it('Numeric — NumericLiteral (explicit datatype required at construction)', () => {
+    const ef = embeddedNumericField({
+      key: 'n',
+      reference: numericFieldId('https://example.org/x'),
+      defaultValue: numericLiteral('42', 'integer'),
+    });
+    expect(ef.defaultValue?.kind).toBe('TypedLiteral');
+    expect(ef.defaultValue?.lexicalForm).toBe('42');
+  });
 
-    const cd2 = choiceDefaultValue(cv, cv, cv);
-    expect(cd2.values.length).toBe(3);
+  it('Date — DateValue (polymorphic; bare string discriminated by lexical shape)', () => {
+    const efFull = embeddedDateField({
+      key: 'd',
+      reference: dateFieldId('https://example.org/x'),
+      defaultValue: '1990-06-15',
+    });
+    expect(efFull.defaultValue?.kind).toBe('FullDateValue');
 
-    // @ts-expect-error must supply at least one ChoiceValue
-    expect(() => choiceDefaultValue()).toBeDefined();
+    const efYear = embeddedDateField({
+      key: 'd',
+      reference: dateFieldId('https://example.org/x'),
+      defaultValue: '1990',
+    });
+    expect(efYear.defaultValue?.kind).toBe('YearValue');
+
+    // Pre-built DateValue passes through.
+    const efPre = embeddedDateField({
+      key: 'd',
+      reference: dateFieldId('https://example.org/x'),
+      defaultValue: fullDateValue(fullDateLiteral('2024-06-15')),
+    });
+    expect(efPre.defaultValue?.kind).toBe('FullDateValue');
+
+    const efYr = embeddedDateField({
+      key: 'd',
+      reference: dateFieldId('https://example.org/x'),
+      defaultValue: yearValue('2024'),
+    });
+    expect(efYr.defaultValue?.kind).toBe('YearValue');
+  });
+
+  it('Time / DateTime — TimeLiteral / DateTimeLiteral; bare string widens', () => {
+    const efT = embeddedTimeField({
+      key: 't',
+      reference: timeFieldId('https://example.org/x'),
+      defaultValue: '10:30:00',
+    });
+    expect(efT.defaultValue?.kind).toBe('TypedLiteral');
+    expect(efT.defaultValue?.lexicalForm).toBe('10:30:00');
+
+    const efDT = embeddedDateTimeField({
+      key: 'dt',
+      reference: dateTimeFieldId('https://example.org/x'),
+      defaultValue: '2024-06-15T10:30:00',
+    });
+    expect(efDT.defaultValue?.kind).toBe('TypedLiteral');
+
+    const efT2 = embeddedTimeField({
+      key: 't',
+      reference: timeFieldId('https://example.org/x'),
+      defaultValue: timeLiteral('11:00:00'),
+    });
+    expect(efT2.defaultValue?.lexicalForm).toBe('11:00:00');
+
+    const efDT2 = embeddedDateTimeField({
+      key: 'dt',
+      reference: dateTimeFieldId('https://example.org/x'),
+      defaultValue: dateTimeLiteral('2024-12-31T23:59:59'),
+    });
+    expect(efDT2.defaultValue?.lexicalForm).toBe('2024-12-31T23:59:59');
+  });
+
+  it('ControlledTerm — ControlledTermValue (kind retained in memory; dropped on the wire)', () => {
+    const cv = controlledTermValue({ term: 'http://example.org/t' });
+    const ef = embeddedControlledTermField({
+      key: 'ct',
+      reference: controlledTermFieldId('https://example.org/x'),
+      defaultValue: cv,
+    });
+    expect(ef.defaultValue?.kind).toBe('ControlledTermValue');
+    expect(ef.defaultValue).toBe(cv);
+  });
+
+  it('SingleChoice / MultipleChoice — ChoiceValue (polymorphic union; kind retained)', () => {
+    const choice = literalChoiceValue(typedLiteral('1', XsdNumericDatatypeIri.integer));
+    const efS = embeddedSingleChoiceField({
+      key: 'sc',
+      reference: singleChoiceFieldId('https://example.org/x'),
+      defaultValue: choice,
+    });
+    expect(efS.defaultValue?.kind).toBe('LiteralChoiceValue');
+
+    const efM = embeddedMultipleChoiceField({
+      key: 'mc',
+      reference: multipleChoiceFieldId('https://example.org/x'),
+      defaultValue: choice,
+    });
+    expect(efM.defaultValue?.kind).toBe('LiteralChoiceValue');
+  });
+
+  it('Link — LinkValue (kind dropped on the wire)', () => {
+    const lv = linkValue({ iri: 'https://example.org' });
+    const ef = embeddedLinkField({
+      key: 'l',
+      reference: linkFieldId('https://example.org/x'),
+      defaultValue: lv,
+    });
+    expect(ef.defaultValue?.kind).toBe('LinkValue');
+  });
+
+  it('Email / PhoneNumber — SimpleLiteral; bare string widens', () => {
+    const ef = embeddedEmailField({
+      key: 'em',
+      reference: emailFieldId('https://example.org/x'),
+      defaultValue: 'me@example.org',
+    });
+    expect(ef.defaultValue?.kind).toBe('SimpleLiteral');
+    expect(ef.defaultValue?.lexicalForm).toBe('me@example.org');
+
+    const ef2 = embeddedPhoneNumberField({
+      key: 'ph',
+      reference: phoneNumberFieldId('https://example.org/x'),
+      defaultValue: '+1-415-555-0100',
+    });
+    expect(ef2.defaultValue?.kind).toBe('SimpleLiteral');
+  });
+
+  it('External-authority — XxxValue widening (bare string IRI accepted)', () => {
+    const ef = embeddedOrcidField({
+      key: 'or',
+      reference: orcidFieldId('https://example.org/x'),
+      defaultValue: 'https://orcid.org/0000-0002-1825-0097',
+    });
+    expect(ef.defaultValue?.kind).toBe('OrcidValue');
+
+    // Fully-built values pass through.
+    const rv = rorValue({ iri: 'https://ror.org/05dxps055' });
+    const ef2 = embeddedRorField({
+      key: 'ror',
+      reference: rorFieldId('https://example.org/x'),
+      defaultValue: rv,
+    });
+    expect(ef2.defaultValue).toBe(rv);
+
+    const dv = doiValue({ iri: 'https://doi.org/10.1000/xyz' });
+    expect(
+      embeddedDoiField({
+        key: 'doi',
+        reference: doiFieldId('https://example.org/x'),
+        defaultValue: dv,
+      }).defaultValue,
+    ).toBe(dv);
+
+    const pmv = pubMedIdValue({ iri: 'https://pubmed.ncbi.nlm.nih.gov/12345' });
+    expect(
+      embeddedPubMedIdField({
+        key: 'pm',
+        reference: pubMedIdFieldId('https://example.org/x'),
+        defaultValue: pmv,
+      }).defaultValue,
+    ).toBe(pmv);
+
+    const rrv = rridValue({ iri: 'https://identifiers.org/RRID:AB_12345' });
+    expect(
+      embeddedRridField({
+        key: 'rr',
+        reference: rridFieldId('https://example.org/x'),
+        defaultValue: rrv,
+      }).defaultValue,
+    ).toBe(rrv);
+
+    const ngv = nihGrantIdValue({ iri: 'https://example.org/nih/grant/1' });
+    expect(
+      embeddedNihGrantIdField({
+        key: 'ng',
+        reference: nihGrantIdFieldId('https://example.org/x'),
+        defaultValue: ngv,
+      }).defaultValue,
+    ).toBe(ngv);
   });
 });
 
-describe('Default-value-constructor input widening', () => {
-  it('textDefaultValue accepts a plain string', () => {
-    const dv = textDefaultValue('Stanford University');
-    expect(dv.kind).toBe('TextDefaultValue');
-    expect(dv.value.kind).toBe('TextValue');
-    expect(dv.value.literal.kind).toBe('SimpleLiteral');
-    expect(dv.value.literal.lexicalForm).toBe('Stanford University');
+describe('TextFieldSpec.defaultValue is now TextLiteral (no wrapper)', () => {
+  it('accepts a bare string and stores a SimpleLiteral', () => {
+    const spec = textFieldSpec({ defaultValue: 'Hello' });
+    expect(spec.defaultValue?.kind).toBe('SimpleLiteral');
+    expect(spec.defaultValue?.lexicalForm).toBe('Hello');
   });
 
-  it('textDefaultValue still accepts a TextValue and passes it through', () => {
-    const tv = textValue(simpleLiteral('Hello'));
-    const dv = textDefaultValue(tv);
-    expect(dv.value).toBe(tv);
-  });
-
-  it('textDefaultValue accepts a TextLiteral directly', () => {
-    const dv = textDefaultValue(simpleLiteral('Hi'));
-    expect(dv.value.literal.kind).toBe('SimpleLiteral');
-    expect(dv.value.literal.lexicalForm).toBe('Hi');
-  });
-
-  it('timeDefaultValue accepts a lexical string and a TimeValue', () => {
-    const dv1 = timeDefaultValue('10:30:00');
-    expect(dv1.value.literal.lexicalForm).toBe('10:30:00');
-
-    const tv = timeValue(timeLiteral('11:00:00'));
-    const dv2 = timeDefaultValue(tv);
-    expect(dv2.value).toBe(tv);
-  });
-
-  it('dateTimeDefaultValue accepts a lexical string and a DateTimeValue', () => {
-    const dv1 = dateTimeDefaultValue('2024-06-15T10:30:00');
-    expect(dv1.value.literal.lexicalForm).toBe('2024-06-15T10:30:00');
-
-    const dtv = dateTimeValue(dateTimeLiteral('2024-12-31T23:59:59'));
-    const dv2 = dateTimeDefaultValue(dtv);
-    expect(dv2.value).toBe(dtv);
+  it('accepts a pre-built TextLiteral', () => {
+    const spec = textFieldSpec({ defaultValue: simpleLiteral('Hi') });
+    expect(spec.defaultValue?.kind).toBe('SimpleLiteral');
   });
 });

@@ -9,7 +9,6 @@
 //   - instance value             : NihGrantIdValue
 //   - schema constraints         : NihGrantIdFieldSpec
 //   - reusable Field artifact    : NihGrantIdField
-//   - default value              : NihGrantIdDefaultValue
 //   - Template-embedding wrapper : EmbeddedNihGrantIdField
 //
 // Wire `kind` values: "NihGrantIdField" (artifact),
@@ -27,7 +26,6 @@ import type { LabelOverride } from '../embedded/label-override.js';
 import type { Property } from '../embedded/property.js';
 import {
   type AuthorityValueInput,
-  type AuthorityDefaultValueInput,
   authorityValueFromInput,
   isTaggedKind,
 } from './external-authority-shared.js';
@@ -144,27 +142,7 @@ export const nihGrantIdField = (init: NihGrantIdFieldInit): NihGrantIdField =>
   });
 
 // =====================================================================
-// 5. DefaultValue
-// =====================================================================
-
-export interface NihGrantIdDefaultValue {
-  readonly kind: 'NihGrantIdDefaultValue';
-  readonly value: NihGrantIdValue;
-}
-export function nihGrantIdDefaultValue(
-  input: NihGrantIdDefaultValue | AuthorityDefaultValueInput<NihGrantIri, NihGrantIdValue>,
-): NihGrantIdDefaultValue {
-  if (typeof input === 'object' && 'kind' in input && input.kind === 'NihGrantIdDefaultValue') {
-    return input;
-  }
-  return {
-    kind: 'NihGrantIdDefaultValue',
-    value: isNihGrantIdValue(input) ? input : nihGrantIdValue(input),
-  };
-}
-
-// =====================================================================
-// 6. EmbeddedField
+// 5. EmbeddedField
 // =====================================================================
 
 export interface EmbeddedNihGrantIdField {
@@ -176,14 +154,12 @@ export interface EmbeddedNihGrantIdField {
   readonly visibility?: Visibility;
   readonly labelOverride?: LabelOverride;
   readonly property?: Property;
-  readonly defaultValue?: NihGrantIdDefaultValue;
+  readonly defaultValue?: NihGrantIdValue;
 }
 
 export interface EmbeddedNihGrantIdFieldInit extends EmbeddedFieldInitCommon {
   readonly reference: NihGrantIdFieldReference | NihGrantIdField;
-  readonly defaultValue?:
-    | NihGrantIdDefaultValue
-    | AuthorityDefaultValueInput<NihGrantIri, NihGrantIdValue>;
+  readonly defaultValue?: NihGrantIdValue | AuthorityValueInput<NihGrantIri>;
 }
 
 export function embeddedNihGrantIdField(
@@ -194,7 +170,9 @@ export function embeddedNihGrantIdField(
     kind: 'EmbeddedNihGrantIdField',
     reference: fieldRef(init.reference),
     ...(init.defaultValue !== undefined && {
-      defaultValue: nihGrantIdDefaultValue(init.defaultValue),
+      defaultValue: isNihGrantIdValue(init.defaultValue)
+        ? init.defaultValue
+        : nihGrantIdValue(init.defaultValue),
     }),
   };
   return out;

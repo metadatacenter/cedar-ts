@@ -76,13 +76,3 @@ export function isTaggedKind<K extends string>(x: unknown, kind: K): boolean {
   return typeof x === 'object' && x !== null && (x as { kind?: unknown }).kind === kind;
 }
 
-// Permissive input type for each external-authority default-value constructor.
-// Matches the corresponding xxxValue() input plus the value type itself, so
-// callers can pass a bare string IRI, a tagged Iri / typed-iri, an init object,
-// or a fully-built value.
-export type AuthorityDefaultValueInput<I extends object, V> =
-  | V
-  | I
-  | Iri
-  | string
-  | { readonly iri: I | Iri | string; readonly label?: string };

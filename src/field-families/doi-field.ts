@@ -10,7 +10,6 @@
 //   - instance value             : DoiValue
 //   - schema constraints         : DoiFieldSpec
 //   - reusable Field artifact    : DoiField
-//   - default value              : DoiDefaultValue
 //   - Template-embedding wrapper : EmbeddedDoiField
 //
 // Wire `kind` values: "DoiField" (artifact), "EmbeddedDoiField"
@@ -28,7 +27,6 @@ import type { LabelOverride } from '../embedded/label-override.js';
 import type { Property } from '../embedded/property.js';
 import {
   type AuthorityValueInput,
-  type AuthorityDefaultValueInput,
   authorityValueFromInput,
   isTaggedKind,
 } from './external-authority-shared.js';
@@ -139,27 +137,7 @@ export const doiField = (init: DoiFieldInit): DoiField =>
   ({ kind: 'DoiField', id: doiFieldId(init.id), metadata: init.metadata, fieldSpec: init.fieldSpec });
 
 // =====================================================================
-// 5. DefaultValue
-// =====================================================================
-
-export interface DoiDefaultValue {
-  readonly kind: 'DoiDefaultValue';
-  readonly value: DoiValue;
-}
-export function doiDefaultValue(
-  input: DoiDefaultValue | AuthorityDefaultValueInput<DoiIri, DoiValue>,
-): DoiDefaultValue {
-  if (typeof input === 'object' && 'kind' in input && input.kind === 'DoiDefaultValue') {
-    return input;
-  }
-  return {
-    kind: 'DoiDefaultValue',
-    value: isDoiValue(input) ? input : doiValue(input),
-  };
-}
-
-// =====================================================================
-// 6. EmbeddedField
+// 5. EmbeddedField
 // =====================================================================
 
 export interface EmbeddedDoiField {
@@ -171,14 +149,12 @@ export interface EmbeddedDoiField {
   readonly visibility?: Visibility;
   readonly labelOverride?: LabelOverride;
   readonly property?: Property;
-  readonly defaultValue?: DoiDefaultValue;
+  readonly defaultValue?: DoiValue;
 }
 
 export interface EmbeddedDoiFieldInit extends EmbeddedFieldInitCommon {
   readonly reference: DoiFieldReference | DoiField;
-  readonly defaultValue?:
-    | DoiDefaultValue
-    | AuthorityDefaultValueInput<DoiIri, DoiValue>;
+  readonly defaultValue?: DoiValue | AuthorityValueInput<DoiIri>;
 }
 
 export function embeddedDoiField(init: EmbeddedDoiFieldInit): EmbeddedDoiField {
@@ -187,7 +163,9 @@ export function embeddedDoiField(init: EmbeddedDoiFieldInit): EmbeddedDoiField {
     kind: 'EmbeddedDoiField',
     reference: fieldRef(init.reference),
     ...(init.defaultValue !== undefined && {
-      defaultValue: doiDefaultValue(init.defaultValue),
+      defaultValue: isDoiValue(init.defaultValue)
+        ? init.defaultValue
+        : doiValue(init.defaultValue),
     }),
   };
   return out;

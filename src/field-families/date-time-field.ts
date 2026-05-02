@@ -10,14 +10,14 @@
 //   - instance value             : DateTimeValue
 //   - schema constraints         : DateTimeFieldSpec
 //   - reusable Field artifact    : DateTimeField
-//   - default value              : DateTimeDefaultValue
 //   - Template-embedding wrapper : EmbeddedDateTimeField
 //
 // Wire `kind` values: "DateTimeField" (artifact), "EmbeddedDateTimeField"
 // (embedding).
 //
 // Owns the `DateTimeValueType` enum. References `DateTimeLiteral` from
-// `src/literals/temporal-literals.ts`.
+// `src/literals/temporal-literals.ts`. The `defaultValue` slot on
+// `EmbeddedDateTimeField` is a `DateTimeLiteral` directly (no wrapper).
 
 import { type Iri, iri } from '../leaves/index.js';
 import {
@@ -171,30 +171,7 @@ export const dateTimeField = (init: DateTimeFieldInit): DateTimeField =>
   ({ kind: 'DateTimeField', id: dateTimeFieldId(init.id), metadata: init.metadata, fieldSpec: init.fieldSpec });
 
 // =====================================================================
-// 5. DefaultValue
-// =====================================================================
-
-export interface DateTimeDefaultValue {
-  readonly kind: 'DateTimeDefaultValue';
-  readonly value: DateTimeValue;
-}
-
-// Idempotent. Accepts a DateTimeDefaultValue, a DateTimeValue, a
-// DateTimeLiteral, or a plain xsd:dateTime lexical form.
-export function dateTimeDefaultValue(
-  input: DateTimeDefaultValue | DateTimeValue | DateTimeLiteral | string,
-): DateTimeDefaultValue {
-  if (typeof input === 'object' && 'kind' in input && input.kind === 'DateTimeDefaultValue') {
-    return input;
-  }
-  return {
-    kind: 'DateTimeDefaultValue',
-    value: isDateTimeValue(input) ? input : dateTimeValue(input),
-  };
-}
-
-// =====================================================================
-// 6. EmbeddedField
+// 5. EmbeddedField
 // =====================================================================
 
 export interface EmbeddedDateTimeField {
@@ -206,16 +183,14 @@ export interface EmbeddedDateTimeField {
   readonly visibility?: Visibility;
   readonly labelOverride?: LabelOverride;
   readonly property?: Property;
-  readonly defaultValue?: DateTimeDefaultValue;
+  readonly defaultValue?: DateTimeLiteral;
 }
 
+// `defaultValue` accepts a DateTimeLiteral or a plain xsd:dateTime
+// lexical form (wrapped via dateTimeLiteral).
 export interface EmbeddedDateTimeFieldInit extends EmbeddedFieldInitCommon {
   readonly reference: DateTimeFieldReference | DateTimeField;
-  readonly defaultValue?:
-    | DateTimeDefaultValue
-    | DateTimeValue
-    | DateTimeLiteral
-    | string;
+  readonly defaultValue?: DateTimeLiteral | string;
 }
 
 export function embeddedDateTimeField(
@@ -226,7 +201,10 @@ export function embeddedDateTimeField(
     kind: 'EmbeddedDateTimeField',
     reference: fieldRef(init.reference),
     ...(init.defaultValue !== undefined && {
-      defaultValue: dateTimeDefaultValue(init.defaultValue),
+      defaultValue:
+        typeof init.defaultValue === 'string'
+          ? dateTimeLiteral(init.defaultValue)
+          : init.defaultValue,
     }),
   };
   return out;

@@ -10,14 +10,15 @@
 //   - instance value             : DateValue
 //   - schema constraints         : DateFieldSpec
 //   - reusable Field artifact    : DateField
-//   - default value              : DateDefaultValue
 //   - Template-embedding wrapper : EmbeddedDateField
 //
 // Wire `kind` values: "DateField" (artifact), "EmbeddedDateField"
 // (embedding).
 //
 // Owns the `DateValueType` enum. References `FullDateLiteral` from
-// `src/literals/temporal-literals.ts`.
+// `src/literals/temporal-literals.ts`. The `defaultValue` slot on
+// `EmbeddedDateField` is a `DateValue` directly (polymorphic union;
+// kind retained on the wire).
 
 import { type Iri, iri, CedarConstructionError } from '../leaves/index.js';
 import {
@@ -234,31 +235,7 @@ export const dateField = (init: DateFieldInit): DateField =>
   ({ kind: 'DateField', id: dateFieldId(init.id), metadata: init.metadata, fieldSpec: init.fieldSpec });
 
 // =====================================================================
-// 5. DefaultValue
-// =====================================================================
-
-export interface DateDefaultValue {
-  readonly kind: 'DateDefaultValue';
-  readonly value: DateValue;
-}
-
-// Idempotent. Accepts a DateDefaultValue (pass-through), a DateValue, a
-// FullDateLiteral, or a plain string discriminated by lexical shape ('YYYY',
-// 'YYYY-MM', 'YYYY-MM-DD…'). See dateValue for details.
-export function dateDefaultValue(
-  input: DateDefaultValue | DateValue | FullDateLiteral | string,
-): DateDefaultValue {
-  if (typeof input === 'object' && 'kind' in input && input.kind === 'DateDefaultValue') {
-    return input;
-  }
-  return {
-    kind: 'DateDefaultValue',
-    value: isDateValue(input) ? input : dateValue(input),
-  };
-}
-
-// =====================================================================
-// 6. EmbeddedField
+// 5. EmbeddedField
 // =====================================================================
 
 export interface EmbeddedDateField {
@@ -270,12 +247,15 @@ export interface EmbeddedDateField {
   readonly visibility?: Visibility;
   readonly labelOverride?: LabelOverride;
   readonly property?: Property;
-  readonly defaultValue?: DateDefaultValue;
+  readonly defaultValue?: DateValue;
 }
 
+// `defaultValue` accepts a fully-built DateValue, a FullDateLiteral
+// (wrapped as a FullDateValue), or a plain string discriminated by
+// lexical shape ('YYYY', 'YYYY-MM', 'YYYY-MM-DD...'). See dateValue.
 export interface EmbeddedDateFieldInit extends EmbeddedFieldInitCommon {
   readonly reference: DateFieldReference | DateField;
-  readonly defaultValue?: DateDefaultValue | DateValue | FullDateLiteral | string;
+  readonly defaultValue?: DateValue | FullDateLiteral | string;
 }
 
 export function embeddedDateField(init: EmbeddedDateFieldInit): EmbeddedDateField {
@@ -284,7 +264,9 @@ export function embeddedDateField(init: EmbeddedDateFieldInit): EmbeddedDateFiel
     kind: 'EmbeddedDateField',
     reference: fieldRef(init.reference),
     ...(init.defaultValue !== undefined && {
-      defaultValue: dateDefaultValue(init.defaultValue),
+      defaultValue: isDateValue(init.defaultValue)
+        ? init.defaultValue
+        : dateValue(init.defaultValue),
     }),
   };
   return out;

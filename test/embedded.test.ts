@@ -32,10 +32,6 @@ import {
   attributeValueFieldId,
   templateId,
   presentationComponentId,
-  textDefaultValue,
-  numericDefaultValue,
-  textValue,
-  numericValue,
   simpleLiteral,
   numericLiteral,
   textField,
@@ -283,11 +279,11 @@ describe('EmbeddedField constructors', () => {
   });
 
   it('rejects a misaligned default value at the type level', () => {
-    // @ts-expect-error NumericDefaultValue cannot satisfy DefaultValueFor<'text'>
+    // @ts-expect-error NumericLiteral cannot satisfy a TextField defaultValue (TextLiteral)
     embeddedTextField({
       key: 'title',
       reference: txtRef,
-      defaultValue: numericDefaultValue(numericValue(numericLiteral('1', 'integer'))),
+      defaultValue: numericLiteral('1', 'integer'),
     });
   });
 
@@ -299,11 +295,11 @@ describe('EmbeddedField constructors', () => {
     expect(ef.kind).toBe('EmbeddedAttributeValueField');
     expect(ef.defaultValue).toBeUndefined();
 
-    // @ts-expect-error DefaultValueFor<'attribute_value'> is never
+    // @ts-expect-error AttributeValueField has no defaultValue slot
     embeddedAttributeValueField({
       key: 'attr',
       reference: attrRef,
-      defaultValue: textDefaultValue(textValue(simpleLiteral('x'))),
+      defaultValue: simpleLiteral('x'),
     });
   });
 
@@ -314,14 +310,15 @@ describe('EmbeddedField constructors', () => {
       valueRequirement: 'required',
       cardinality: cardinality({ min: 1 }),
       visibility: 'visible',
-      defaultValue: textDefaultValue(textValue(simpleLiteral('Untitled'))),
+      defaultValue: simpleLiteral('Untitled'),
       labelOverride: labelOverride({ label: 'Document Title' }),
       property: property({ iri: 'https://schema.org/name' }),
     });
     expect(ef.valueRequirement).toBe('required');
     expect(ef.cardinality?.min).toBe(1);
     expect(ef.visibility).toBe('visible');
-    expect(ef.defaultValue?.kind).toBe('TextDefaultValue');
+    expect(ef.defaultValue?.kind).toBe('SimpleLiteral');
+    expect(ef.defaultValue?.lexicalForm).toBe('Untitled');
     expect(ef.labelOverride?.label).toEqual([{ value: 'Document Title', lang: 'und' }]);
     expect(ef.property?.iri.value).toBe('https://schema.org/name');
   });
@@ -332,19 +329,14 @@ describe('EmbeddedField constructors', () => {
       reference: dateRef,
       defaultValue: '1990-06-15',
     });
-    expect(ef.defaultValue?.kind).toBe('DateDefaultValue');
-    if (ef.defaultValue?.kind === 'DateDefaultValue') {
-      expect(ef.defaultValue.value.kind).toBe('FullDateValue');
-    }
+    expect(ef.defaultValue?.kind).toBe('FullDateValue');
 
     const efYear = embeddedDateField({
       key: 'year',
       reference: dateRef,
       defaultValue: '1990',
     });
-    if (efYear.defaultValue?.kind === 'DateDefaultValue') {
-      expect(efYear.defaultValue.value.kind).toBe('YearValue');
-    }
+    expect(efYear.defaultValue?.kind).toBe('YearValue');
   });
 
   it('coerces a primitive defaultValue input by family kind', () => {
@@ -353,15 +345,9 @@ describe('EmbeddedField constructors', () => {
       reference: txtRef,
       defaultValue: 'Untitled',
     });
-    expect(ef.defaultValue?.kind).toBe('TextDefaultValue');
-    if (ef.defaultValue?.kind === 'TextDefaultValue') {
-      expect(ef.defaultValue.value.literal.kind).toBe('SimpleLiteral');
-      expect(ef.defaultValue.value.literal.lexicalForm).toBe('Untitled');
-    }
+    expect(ef.defaultValue?.kind).toBe('SimpleLiteral');
+    expect(ef.defaultValue?.lexicalForm).toBe('Untitled');
 
-    // Bare string IRI works for external-authority families.
-    const orcidRef = textFieldId('https://example.org/x'); // dummy not needed
-    void orcidRef;
     const ef2 = embeddedAttributeValueField({
       key: 'attr',
       reference: attrRef,
@@ -373,7 +359,7 @@ describe('EmbeddedField constructors', () => {
     embeddedNumericField({
       key: 'count',
       reference: numRef,
-      // @ts-expect-error EmbeddedNumericFieldInit's defaultValue is NumericDefaultValue only
+      // @ts-expect-error EmbeddedNumericFieldInit's defaultValue is NumericLiteral only
       defaultValue: 'oops',
     });
   });

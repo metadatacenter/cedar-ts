@@ -12,7 +12,6 @@ import {
   cardinality,
   controlledTermChoiceOption,
   controlledTermChoiceValue,
-  controlledTermDefaultValue,
   controlledTermField,
   controlledTermFieldSpec,
   controlledTermSingleChoiceFieldSpec,
@@ -66,7 +65,6 @@ import {
   nihGrantIdField,
   nihGrantIdFieldSpec,
   nihGrantIdValue,
-  numericDefaultValue,
   numericField,
   numericFieldSpec,
   numericLiteral,
@@ -101,7 +99,6 @@ import {
   templateInstance,
   templateInstanceId,
   temporalProvenance,
-  textDefaultValue,
   textField,
   textFieldSpec,
   textValue,
@@ -126,8 +123,6 @@ import {
   parseValue,
   serializeFieldSpec,
   parseFieldSpec,
-  serializeDefaultValue,
-  parseDefaultValue,
   serializeEmbeddedField,
   parseEmbeddedField,
   serializeEmbeddedArtifact,
@@ -524,34 +519,103 @@ describe('FieldSpec round-trip', () => {
   });
 });
 
-// ---- DefaultValue round-trip ----------------------------------------
+// ---- EmbeddedField defaultValue wire-form round-trips ----------------
+// (XxxDefaultValue wrappers are gone; defaultValue is now the
+// family-specific underlying type directly. These tests pin the new
+// flat wire shapes per spec 868ef1c.)
 
-describe('DefaultValue round-trip', () => {
-  it('TextDefaultValue', () => {
-    const dv = textDefaultValue(textValue('hello'));
-    const wire = serializeDefaultValue(dv);
-    const back = parseDefaultValue(wire);
-    expect(serializeDefaultValue(back)).toEqual(wire);
+describe('EmbeddedXxxField.defaultValue wire-form', () => {
+  it('Text — emits a TextLiteral object (no kind, no wrapper)', () => {
+    const e = embeddedTextField({
+      key: 't',
+      reference: textFieldId('https://example.org/x'),
+      defaultValue: 'Stanford University',
+    });
+    const wire = serializeEmbeddedField(e) as { defaultValue: unknown };
+    expect(wire.defaultValue).toEqual({ value: 'Stanford University' });
+    expect(parseEmbeddedField(wire)).toEqual(e);
   });
 
-  it('NumericDefaultValue', () => {
-    const dv = numericDefaultValue(numericValue(numericLiteral('5', 'integer')));
-    const wire = serializeDefaultValue(dv);
-    expect(parseDefaultValue(wire)).toEqual(dv);
+  it('Numeric — emits NumericLiteral { value, datatype }', () => {
+    const e = embeddedNumericField({
+      key: 'n',
+      reference: numericFieldId('https://example.org/x'),
+      defaultValue: numericLiteral('42', 'integer'),
+    });
+    const wire = serializeEmbeddedField(e) as { defaultValue: { value: string; datatype: string } };
+    expect(wire.defaultValue.value).toBe('42');
+    expect(wire.defaultValue.datatype).toContain('integer');
+    expect(parseEmbeddedField(wire)).toEqual(e);
   });
 
-  it('ControlledTermDefaultValue', () => {
-    const dv = controlledTermDefaultValue(
-      controlledTermValue({ term: 'http://example.org/term/1' }),
-    );
-    const wire = serializeDefaultValue(dv);
-    expect(parseDefaultValue(wire)).toEqual(dv);
+  it('Date — emits DateValue with kind retained', () => {
+    const e = embeddedDateField({
+      key: 'd',
+      reference: dateFieldId('https://example.org/x'),
+      defaultValue: '2024-06-15',
+    });
+    const wire = serializeEmbeddedField(e) as { defaultValue: { kind: string } };
+    expect(wire.defaultValue.kind).toBe('FullDateValue');
+    expect(parseEmbeddedField(wire)).toEqual(e);
   });
 
-  it('rejects unknown kind', () => {
-    expect(() =>
-      parseDefaultValue({ kind: 'UnknownDefaultValue', value: {} }),
-    ).toThrow(/Expected kind/);
+  it('ControlledTerm — emits ControlledTermValue with kind dropped', () => {
+    const e = embeddedControlledTermField({
+      key: 'ct',
+      reference: controlledTermFieldId('https://example.org/x'),
+      defaultValue: controlledTermValue({ term: 'http://example.org/term/1' }),
+    });
+    const wire = serializeEmbeddedField(e) as { defaultValue: Record<string, unknown> };
+    expect(wire.defaultValue['kind']).toBeUndefined();
+    expect(wire.defaultValue['term']).toBe('http://example.org/term/1');
+    expect(parseEmbeddedField(wire)).toEqual(e);
+  });
+
+  it('SingleChoice — emits ChoiceValue with kind retained', () => {
+    const e = embeddedSingleChoiceField({
+      key: 'sc',
+      reference: singleChoiceFieldId('https://example.org/x'),
+      defaultValue: literalChoiceValue('Yes', 'en'),
+    });
+    const wire = serializeEmbeddedField(e) as { defaultValue: { kind: string } };
+    expect(wire.defaultValue.kind).toBe('LiteralChoiceValue');
+    expect(parseEmbeddedField(wire)).toEqual(e);
+  });
+
+  it('Link — emits LinkValue with kind dropped', () => {
+    const e = embeddedLinkField({
+      key: 'l',
+      reference: linkFieldId('https://example.org/x'),
+      defaultValue: linkValue({ iri: 'https://example.org', label: 'Example' }),
+    });
+    const wire = serializeEmbeddedField(e) as { defaultValue: Record<string, unknown> };
+    expect(wire.defaultValue['kind']).toBeUndefined();
+    expect(wire.defaultValue['iri']).toBe('https://example.org');
+    expect(wire.defaultValue['label']).toBe('Example');
+    expect(parseEmbeddedField(wire)).toEqual(e);
+  });
+
+  it('Email — emits a SimpleLiteral { value }', () => {
+    const e = embeddedEmailField({
+      key: 'em',
+      reference: emailFieldId('https://example.org/x'),
+      defaultValue: 'jane@example.org',
+    });
+    const wire = serializeEmbeddedField(e) as { defaultValue: unknown };
+    expect(wire.defaultValue).toEqual({ value: 'jane@example.org' });
+    expect(parseEmbeddedField(wire)).toEqual(e);
+  });
+
+  it('Orcid — emits OrcidValue with kind dropped', () => {
+    const e = embeddedOrcidField({
+      key: 'or',
+      reference: orcidFieldId('https://example.org/x'),
+      defaultValue: 'https://orcid.org/0000-0002-1825-0097',
+    });
+    const wire = serializeEmbeddedField(e) as { defaultValue: Record<string, unknown> };
+    expect(wire.defaultValue['kind']).toBeUndefined();
+    expect(wire.defaultValue['iri']).toBe('https://orcid.org/0000-0002-1825-0097');
+    expect(parseEmbeddedField(wire)).toEqual(e);
   });
 });
 

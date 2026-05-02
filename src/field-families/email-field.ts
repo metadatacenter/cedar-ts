@@ -9,7 +9,6 @@
 //   - instance value             : EmailValue
 //   - schema constraints         : EmailFieldSpec
 //   - reusable Field artifact    : EmailField
-//   - default value              : EmailDefaultValue
 //   - Template-embedding wrapper : EmbeddedEmailField
 //
 // Wire `kind` values: "EmailField" (artifact), "EmbeddedEmailField"
@@ -122,29 +121,7 @@ export const emailField = (init: EmailFieldInit): EmailField =>
   ({ kind: 'EmailField', id: emailFieldId(init.id), metadata: init.metadata, fieldSpec: init.fieldSpec });
 
 // =====================================================================
-// 5. DefaultValue
-// =====================================================================
-
-export interface EmailDefaultValue {
-  readonly kind: 'EmailDefaultValue';
-  readonly value: EmailValue;
-}
-// Idempotent. Accepts an EmailDefaultValue, an EmailValue, a SimpleLiteral,
-// or a plain string (the email lexical form).
-export function emailDefaultValue(
-  input: EmailDefaultValue | EmailValue | SimpleLiteral | string,
-): EmailDefaultValue {
-  if (typeof input === 'object' && 'kind' in input && input.kind === 'EmailDefaultValue') {
-    return input;
-  }
-  return {
-    kind: 'EmailDefaultValue',
-    value: isEmailValue(input) ? input : emailValue(input),
-  };
-}
-
-// =====================================================================
-// 6. EmbeddedField
+// 5. EmbeddedField
 // =====================================================================
 
 export interface EmbeddedEmailField {
@@ -156,12 +133,14 @@ export interface EmbeddedEmailField {
   readonly visibility?: Visibility;
   readonly labelOverride?: LabelOverride;
   readonly property?: Property;
-  readonly defaultValue?: EmailDefaultValue;
+  readonly defaultValue?: SimpleLiteral;
 }
 
+// `defaultValue` accepts a SimpleLiteral or a plain string (the email
+// lexical form, wrapped via simpleLiteral).
 export interface EmbeddedEmailFieldInit extends EmbeddedFieldInitCommon {
   readonly reference: EmailFieldReference | EmailField;
-  readonly defaultValue?: EmailDefaultValue | EmailValue | SimpleLiteral | string;
+  readonly defaultValue?: SimpleLiteral | string;
 }
 
 export function embeddedEmailField(init: EmbeddedEmailFieldInit): EmbeddedEmailField {
@@ -170,7 +149,10 @@ export function embeddedEmailField(init: EmbeddedEmailFieldInit): EmbeddedEmailF
     kind: 'EmbeddedEmailField',
     reference: fieldRef(init.reference),
     ...(init.defaultValue !== undefined && {
-      defaultValue: emailDefaultValue(init.defaultValue),
+      defaultValue:
+        typeof init.defaultValue === 'string'
+          ? simpleLiteral(init.defaultValue)
+          : init.defaultValue,
     }),
   };
   return out;
