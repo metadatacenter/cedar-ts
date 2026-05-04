@@ -18,7 +18,7 @@
 //                      FullDateLiteral, …)
 //   - identifiers.ts : top-level artifact identifiers (TemplateId,
 //                      TemplateInstanceId, PresentationComponentId)
-//   - metadata/      : descriptive / temporal-provenance / schema-versioning /
+//   - metadata/      : descriptive / lifecycle-metadata / schema-versioning /
 //                      annotations / artifact-metadata
 //   - field-families/: the 18 per-family vertical slices (TextField,
 //                      NumericField, …, AttributeValueField), plus the

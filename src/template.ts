@@ -22,7 +22,7 @@ import {
 // Identity, metadata, and reuse
 // -----------------------------
 // A Template is a SchemaArtifact: it has a stable IRI identity (TemplateId),
-// carries SchemaArtifactMetadata (descriptive metadata + provenance +
+// carries SchemaArtifactMetadata (descriptive metadata + lifecycle +
 // versioning + status), and is independently versionable. The same
 // reusable Field may be embedded in multiple Templates, and the same
 // reusable Template may be embedded as a sub-Template in another

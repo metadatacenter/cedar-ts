@@ -24,20 +24,20 @@ import {
   templateId,
   templateInstance,
   templateInstanceId,
-  temporalProvenance,
+  lifecycleMetadata,
   textValue,
   type Artifact,
   type InstanceValue,
   type TemplateInstance,
 } from '../src/index.js';
 
-const tp = temporalProvenance({
+const tp = lifecycleMetadata({
   createdOn: '2024-01-01T00:00:00Z',
   createdBy: 'https://example.org/u',
   modifiedOn: '2024-01-01T00:00:00Z',
   modifiedBy: 'https://example.org/u',
 });
-const am = artifactMetadata({ name: 'Demo Instance', provenance: tp });
+const am = artifactMetadata({ name: 'Demo Instance', lifecycle: tp });
 
 const tref = templateId('https://example.org/templates/demo');
 const titleKey = 'title';

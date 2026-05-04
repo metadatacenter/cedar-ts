@@ -13,18 +13,18 @@ import {
   presentationComponentId,
   richTextComponent,
   sectionBreakComponent,
-  temporalProvenance,
+  lifecycleMetadata,
   youtubeVideoComponent,
   type PresentationComponent,
 } from '../src/index.js';
 
-const tp = temporalProvenance({
+const tp = lifecycleMetadata({
   createdOn: '2024-01-01T00:00:00Z',
   createdBy: 'https://example.org/u',
   modifiedOn: '2024-01-01T00:00:00Z',
   modifiedBy: 'https://example.org/u',
 });
-const meta = artifactMetadata({ name: 'X', provenance: tp });
+const meta = artifactMetadata({ name: 'X', lifecycle: tp });
 const id = presentationComponentId('https://example.org/pc/1');
 const MV = '2.0.0';
 

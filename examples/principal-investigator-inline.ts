@@ -57,7 +57,7 @@ import {
   singleChoiceField,
   template,
   type Template,
-  temporalProvenance,
+  lifecycleMetadata,
   textField,
   textFieldSpec,
 } from '../src/index.js';
@@ -81,14 +81,14 @@ const MESH_ONTOLOGY = 'http://id.nlm.nih.gov/mesh/';
 //
 // Two helpers, mirroring the two metadata flavors in the model:
 //
-//   - artifactMeta: ArtifactMetadata (descriptive + provenance + annotations).
+//   - artifactMeta: ArtifactMetadata (descriptive + lifecycle + annotations).
 //                   Used by PresentationComponents and TemplateInstances —
 //                   artifacts that carry no schema versioning.
 //   - meta:         SchemaArtifactMetadata (artifact metadata + versioning).
 //                   Required by Field and Template.
 
 const author = 'https://orcid.org/0000-0002-1825-0097';
-const provenanceTimestamps = {
+const lifecycleTimestamps = {
   createdOn: '2026-04-29T10:00:00Z',
   createdBy: author,
   modifiedOn: '2026-04-29T10:00:00Z',
@@ -99,7 +99,7 @@ function artifactMeta(name: string, description: string): ArtifactMetadata {
   return artifactMetadata({
     name,
     description,
-    provenance: temporalProvenance(provenanceTimestamps),
+    lifecycle: lifecycleMetadata(lifecycleTimestamps),
   });
 }
 

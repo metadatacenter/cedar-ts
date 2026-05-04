@@ -14,7 +14,7 @@ import {
 
 // TemplateInstance — see grammar.md §Instances.
 // An Artifact recording data conforming to a specific Template. Carries
-// ArtifactMetadata (descriptive + provenance + annotations), NOT
+// ArtifactMetadata (descriptive + lifecycle + annotations), NOT
 // SchemaArtifactMetadata: instances are independently identifiable artifacts
 // but do not carry schema versioning.
 

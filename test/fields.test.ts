@@ -58,7 +58,7 @@ import {
   schemaVersioning,
   singleChoiceField,
   singleChoiceFieldId,
-  temporalProvenance,
+  lifecycleMetadata,
   textField,
   textFieldId,
   textFieldSpec,
@@ -73,14 +73,14 @@ import {
   type NumericFieldSpec,
 } from '../src/index.js';
 
-const tp = temporalProvenance({
+const tp = lifecycleMetadata({
   createdOn: '2024-01-01T00:00:00Z',
   createdBy: 'https://example.org/u',
   modifiedOn: '2024-01-01T00:00:00Z',
   modifiedBy: 'https://example.org/u',
 });
 const meta = schemaArtifactMetadata({
-  artifact: artifactMetadata({ name: 'X', provenance: tp }),
+  artifact: artifactMetadata({ name: 'X', lifecycle: tp }),
   versioning: schemaVersioning({
     version: '1.0.0',
     status: 'draft',

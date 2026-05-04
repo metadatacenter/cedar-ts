@@ -5,23 +5,23 @@ import {
   isoDateTimeStamp,
 } from '../leaves/index.js';
 
-// TemporalProvenance identifies when an artifact was created/modified and the
+// LifecycleMetadata identifies when an artifact was created/modified and the
 // agents responsible.
-export interface TemporalProvenance {
+export interface LifecycleMetadata {
   readonly createdOn: IsoDateTimeStamp;
   readonly createdBy: Iri;
   readonly modifiedOn: IsoDateTimeStamp;
   readonly modifiedBy: Iri;
 }
 
-export interface TemporalProvenanceInit {
+export interface LifecycleMetadataInit {
   readonly createdOn: IsoDateTimeStamp | string;
   readonly createdBy: Iri | string;
   readonly modifiedOn: IsoDateTimeStamp | string;
   readonly modifiedBy: Iri | string;
 }
 
-export function temporalProvenance(init: TemporalProvenanceInit): TemporalProvenance {
+export function lifecycleMetadata(init: LifecycleMetadataInit): LifecycleMetadata {
   return {
     createdOn: typeof init.createdOn === 'string' ? isoDateTimeStamp(init.createdOn) : init.createdOn,
     createdBy: typeof init.createdBy === 'string' ? iri(init.createdBy) : init.createdBy,

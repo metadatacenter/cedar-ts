@@ -1,19 +1,19 @@
 // =====================================================================
-// metadata — wire-form serialize/parse for the temporal-provenance,
+// metadata — wire-form serialize/parse for the lifecycle-metadata,
 // schema-versioning, annotations, and artifact-metadata productions.
 // =====================================================================
 
 import { CedarConstructionError, isIri, iri } from '../leaves/index.js';
 import { isLiteral } from '../literals/index.js';
 import {
-  type TemporalProvenance,
+  type LifecycleMetadata,
   type SchemaVersioning,
   type Status,
   type Annotation,
   type AnnotationValue,
   type ArtifactMetadata,
   type SchemaArtifactMetadata,
-  temporalProvenance,
+  lifecycleMetadata,
   schemaVersioning,
   annotation,
   artifactMetadata,
@@ -37,9 +37,9 @@ import {
   parseLiteral,
 } from './literals.js';
 
-// ---- TemporalProvenance ----------------------------------------------
+// ---- LifecycleMetadata -----------------------------------------------
 
-export function serializeTemporalProvenance(x: TemporalProvenance): unknown {
+export function serializeLifecycleMetadata(x: LifecycleMetadata): unknown {
   return {
     createdOn: serializeIsoDateTimeStamp(x.createdOn),
     createdBy: serializeIri(x.createdBy),
@@ -48,10 +48,10 @@ export function serializeTemporalProvenance(x: TemporalProvenance): unknown {
   };
 }
 
-export function parseTemporalProvenance(
+export function parseLifecycleMetadata(
   x: unknown,
-  where = 'TemporalProvenance',
-): TemporalProvenance {
+  where = 'LifecycleMetadata',
+): LifecycleMetadata {
   const o = expectObject(x, where);
   expectKnownProperties(o, ['createdOn', 'createdBy', 'modifiedOn', 'modifiedBy']);
   for (const k of ['createdOn', 'createdBy', 'modifiedOn', 'modifiedBy'] as const) {
@@ -59,7 +59,7 @@ export function parseTemporalProvenance(
       throw new CedarConstructionError(`${where}: missing required ${JSON.stringify(k)}`);
     }
   }
-  return temporalProvenance({
+  return lifecycleMetadata({
     createdOn: expectString(o['createdOn'], `${where}.createdOn`),
     createdBy: expectString(o['createdBy'], `${where}.createdBy`),
     modifiedOn: expectString(o['modifiedOn'], `${where}.modifiedOn`),
@@ -194,7 +194,7 @@ export function parseAnnotation(x: unknown, where = 'Annotation'): Annotation {
 //
 // Wire form is flat: the descriptive properties (name, description,
 // identifier, preferredLabel, altLabels) sit directly alongside
-// `provenance` and `annotations`. Empty `altLabels` and `annotations`
+// `lifecycle` and `annotations`. Empty `altLabels` and `annotations`
 // are elided.
 
 const ARTIFACT_METADATA_KEYS = [
@@ -203,7 +203,7 @@ const ARTIFACT_METADATA_KEYS = [
   'identifier',
   'preferredLabel',
   'altLabels',
-  'provenance',
+  'lifecycle',
   'annotations',
 ] as const;
 
@@ -218,7 +218,7 @@ export function serializeArtifactMetadata(x: ArtifactMetadata): unknown {
     out['preferredLabel'] = serializeMultilingualString(x.preferredLabel);
   if (x.altLabels.length > 0)
     out['altLabels'] = x.altLabels.map(serializeMultilingualString);
-  out['provenance'] = serializeTemporalProvenance(x.provenance);
+  out['lifecycle'] = serializeLifecycleMetadata(x.lifecycle);
   if (x.annotations.length > 0)
     out['annotations'] = x.annotations.map(serializeAnnotation);
   return out;
@@ -236,8 +236,8 @@ export function parseArtifactMetadata(
   if (!('name' in o)) {
     throw new CedarConstructionError(`${where}: missing required "name"`);
   }
-  if (!('provenance' in o)) {
-    throw new CedarConstructionError(`${where}: missing required "provenance"`);
+  if (!('lifecycle' in o)) {
+    throw new CedarConstructionError(`${where}: missing required "lifecycle"`);
   }
   const altRaw =
     'altLabels' in o ? expectArray(o['altLabels'], `${where}.altLabels`) : [];
@@ -251,14 +251,14 @@ export function parseArtifactMetadata(
     identifier?: string;
     preferredLabel?: ReturnType<typeof parseMultilingualString>;
     altLabels: readonly ReturnType<typeof parseMultilingualString>[];
-    provenance: TemporalProvenance;
+    lifecycle: LifecycleMetadata;
     annotations: readonly Annotation[];
   } = {
     name: parseMultilingualString(o['name'], `${where}.name`),
     altLabels: altRaw.map((e, i) =>
       parseMultilingualString(e, `${where}.altLabels[${i}]`),
     ),
-    provenance: parseTemporalProvenance(o['provenance'], `${where}.provenance`),
+    lifecycle: parseLifecycleMetadata(o['lifecycle'], `${where}.lifecycle`),
     annotations: annoArr.map((e, i) =>
       parseAnnotation(e, `${where}.annotations[${i}]`),
     ),

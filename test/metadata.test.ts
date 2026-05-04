@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   CedarConstructionError,
-  temporalProvenance,
+  lifecycleMetadata,
   schemaVersioning,
   STATUSES,
   isStatus,
@@ -13,9 +13,9 @@ import {
   langTaggedLiteral,
 } from '../src/index.js';
 
-describe('TemporalProvenance', () => {
+describe('LifecycleMetadata', () => {
   it('parses string inputs into typed leaves', () => {
-    const tp = temporalProvenance({
+    const tp = lifecycleMetadata({
       createdOn: '2024-01-01T00:00:00Z',
       createdBy: 'https://example.org/users/alice',
       modifiedOn: '2024-06-01T12:00:00Z',
@@ -29,7 +29,7 @@ describe('TemporalProvenance', () => {
 
   it('rejects malformed timestamps and IRIs', () => {
     expect(() =>
-      temporalProvenance({
+      lifecycleMetadata({
         createdOn: 'not-a-timestamp',
         createdBy: 'https://example.org/u',
         modifiedOn: '2024-01-01T00:00:00Z',
@@ -38,7 +38,7 @@ describe('TemporalProvenance', () => {
     ).toThrow(CedarConstructionError);
 
     expect(() =>
-      temporalProvenance({
+      lifecycleMetadata({
         createdOn: '2024-01-01T00:00:00Z',
         createdBy: 'not-an-iri',
         modifiedOn: '2024-01-01T00:00:00Z',
@@ -108,7 +108,7 @@ describe('Annotation', () => {
 });
 
 describe('ArtifactMetadata and SchemaArtifactMetadata', () => {
-  const tp = temporalProvenance({
+  const tp = lifecycleMetadata({
     createdOn: '2024-01-01T00:00:00Z',
     createdBy: 'https://example.org/u',
     modifiedOn: '2024-01-01T00:00:00Z',
@@ -120,7 +120,7 @@ describe('ArtifactMetadata and SchemaArtifactMetadata', () => {
   });
 
   it('requires only a name and defaults altLabels and annotations to empty', () => {
-    const m = artifactMetadata({ name: 'Title', provenance: tp });
+    const m = artifactMetadata({ name: 'Title', lifecycle: tp });
     expect(m.name).toEqual([{ value: 'Title', lang: 'und' }]);
     expect(m.altLabels).toEqual([]);
     expect(m.annotations).toEqual([]);
@@ -136,7 +136,7 @@ describe('ArtifactMetadata and SchemaArtifactMetadata', () => {
       identifier: 'study-001',
       preferredLabel: 'Study title',
       altLabels: ['Title', 'Name of study'],
-      provenance: tp,
+      lifecycle: tp,
     });
     expect(m.description).toEqual([{ value: 'The study title', lang: 'und' }]);
     expect(m.identifier).toBe('study-001');
@@ -150,7 +150,7 @@ describe('ArtifactMetadata and SchemaArtifactMetadata', () => {
   it('carries annotations when provided', () => {
     const m = artifactMetadata({
       name: 'Test',
-      provenance: tp,
+      lifecycle: tp,
       annotations: [
         annotation(
           'http://purl.org/dc/terms/title',
@@ -162,7 +162,7 @@ describe('ArtifactMetadata and SchemaArtifactMetadata', () => {
   });
 
   it('SchemaArtifactMetadata adds schema versioning', () => {
-    const m = artifactMetadata({ name: 'Test', provenance: tp });
+    const m = artifactMetadata({ name: 'Test', lifecycle: tp });
     const sm = schemaArtifactMetadata({ artifact: m, versioning: sv });
     expect(sm.artifact).toBe(m);
     expect(sm.versioning).toBe(sv);

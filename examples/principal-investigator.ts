@@ -71,7 +71,7 @@ import {
   template,
   templateInstance,
   templateInstanceId,
-  temporalProvenance,
+  lifecycleMetadata,
   textField,
   textFieldSpec,
   textValue,
@@ -110,7 +110,7 @@ const MESH_MEDICAL_INFORMATICS_TERM_IRI = `${MESH_ONTOLOGY_IRI}D008490`;
 //
 // Every artifact carries metadata. The model distinguishes two flavors:
 //
-//   - ArtifactMetadata: descriptive metadata + provenance + annotations.
+//   - ArtifactMetadata: descriptive metadata + lifecycle + annotations.
 //     Carried by every Artifact (Field, Template, PresentationComponent,
 //     TemplateInstance).
 //
@@ -125,7 +125,7 @@ const MESH_MEDICAL_INFORMATICS_TERM_IRI = `${MESH_ONTOLOGY_IRI}D008490`;
 // below.
 
 const author = 'https://orcid.org/0000-0002-1825-0097';
-const provenanceTimestamps = {
+const lifecycleTimestamps = {
   createdOn: '2026-04-29T10:00:00Z',
   createdBy: author,
   modifiedOn: '2026-04-29T10:00:00Z',
@@ -137,7 +137,7 @@ function artifactMeta(name: string, description: string): ArtifactMetadata {
   return artifactMetadata({
     name,
     description,
-    provenance: temporalProvenance(provenanceTimestamps),
+    lifecycle: lifecycleMetadata(lifecycleTimestamps),
   });
 }
 

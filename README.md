@@ -34,14 +34,14 @@ import {
   template,
   templateInstance,
   templateInstanceId,
-  temporalProvenance,
+  lifecycleMetadata,
   textField,
   textFieldSpec,
   textValue,
 } from '@metadatacenter/cedar-model';
 
 const author = 'https://orcid.org/0000-0001-2345-6789';
-const provenance = temporalProvenance({
+const lifecycle = lifecycleMetadata({
   createdOn: '2026-04-29T10:00:00Z',
   createdBy: author,
   modifiedOn: '2026-04-29T10:00:00Z',
@@ -57,7 +57,7 @@ const fullName = textField({
     artifact: artifactMetadata({
       name: 'Full Name',
       description: 'Full legal name of the person.',
-      provenance,
+      lifecycle,
     }),
     versioning: schemaVersioning({
       version: '1.0.0',
@@ -71,7 +71,7 @@ const tpl = template({
   id: 'https://example.org/cedar/templates/person',
   modelVersion: MODEL_VERSION,
   metadata: schemaArtifactMetadata({
-    artifact: artifactMetadata({ name: 'Person', provenance }),
+    artifact: artifactMetadata({ name: 'Person', lifecycle }),
     versioning: schemaVersioning({
       version: '1.0.0',
       status: 'draft',
@@ -90,7 +90,7 @@ const tpl = template({
 const inst = templateInstance({
   id: templateInstanceId('https://example.org/instances/person/1'),
   modelVersion: MODEL_VERSION,
-  metadata: artifactMetadata({ name: 'Jane Smith', provenance }),
+  metadata: artifactMetadata({ name: 'Jane Smith', lifecycle }),
   templateRef: tpl.id,
   values: [fieldValue('full_name', textValue('Jane Smith'))],
 });
@@ -115,7 +115,7 @@ src/
                       Typed) plus typed-literal aliases
   identifiers.ts      top-level artifact identifiers (TemplateId,
                       TemplateInstanceId, PresentationComponentId)
-  metadata/           descriptive / temporal-provenance / schema-versioning /
+  metadata/           descriptive / lifecycle-metadata / schema-versioning /
                       annotations / artifact-metadata
   field-families/     18 per-family vertical slices (text-field.ts,
                       numeric-field.ts, …, attribute-value-field.ts),

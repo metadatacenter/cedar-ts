@@ -11,7 +11,7 @@ import {
   schemaVersioning,
   template,
   templateId,
-  temporalProvenance,
+  lifecycleMetadata,
   textField,
   textFieldId,
   textFieldSpec,
@@ -19,14 +19,14 @@ import {
   type Template,
 } from '../src/index.js';
 
-const tp = temporalProvenance({
+const tp = lifecycleMetadata({
   createdOn: '2024-01-01T00:00:00Z',
   createdBy: 'https://example.org/u',
   modifiedOn: '2024-01-01T00:00:00Z',
   modifiedBy: 'https://example.org/u',
 });
 const meta = schemaArtifactMetadata({
-  artifact: artifactMetadata({ name: 'Demo Template', provenance: tp }),
+  artifact: artifactMetadata({ name: 'Demo Template', lifecycle: tp }),
   versioning: schemaVersioning({
     version: '1.0.0',
     status: 'draft',

@@ -3,7 +3,7 @@ import {
   type MultilingualStringInput,
   multilingualString,
 } from '../multilingual.js';
-import type { TemporalProvenance } from './temporal-provenance.js';
+import type { LifecycleMetadata } from './lifecycle-metadata.js';
 import type { SchemaVersioning } from './schema-versioning.js';
 import type { Annotation } from './annotations.js';
 
@@ -27,7 +27,7 @@ export interface ArtifactMetadata {
   readonly identifier?: string;
   readonly preferredLabel?: MultilingualString;
   readonly altLabels: readonly MultilingualString[];
-  readonly provenance: TemporalProvenance;
+  readonly lifecycle: LifecycleMetadata;
   readonly annotations: readonly Annotation[];
 }
 
@@ -37,7 +37,7 @@ export interface ArtifactMetadataInit {
   readonly identifier?: string;
   readonly preferredLabel?: MultilingualStringInput;
   readonly altLabels?: readonly MultilingualStringInput[];
-  readonly provenance: TemporalProvenance;
+  readonly lifecycle: LifecycleMetadata;
   readonly annotations?: readonly Annotation[];
 }
 
@@ -48,12 +48,12 @@ export function artifactMetadata(init: ArtifactMetadataInit): ArtifactMetadata {
     identifier?: string;
     preferredLabel?: MultilingualString;
     altLabels: readonly MultilingualString[];
-    provenance: TemporalProvenance;
+    lifecycle: LifecycleMetadata;
     annotations: readonly Annotation[];
   } = {
     name: multilingualString(init.name),
     altLabels: (init.altLabels ?? []).map(multilingualString),
-    provenance: init.provenance,
+    lifecycle: init.lifecycle,
     annotations: init.annotations ?? [],
   };
   if (init.description !== undefined) out.description = multilingualString(init.description);

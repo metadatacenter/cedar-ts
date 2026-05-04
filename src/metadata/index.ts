@@ -4,24 +4,24 @@
 //
 // Re-exports:
 //
-//   - TemporalProvenance            (temporal-provenance.ts):
+//   - LifecycleMetadata             (lifecycle-metadata.ts):
 //       creation and modification timestamps and agents
 //   - SchemaVersioning + Status     (schema-versioning.ts):
 //       artifact version, lifecycle status, model version
 //   - Annotation + AnnotationValue  (annotations.ts):
 //       arbitrary RDF-flavored annotations on an artifact
 //   - ArtifactMetadata              (artifact-metadata.ts):
-//       the bundle (descriptive properties + provenance + annotations)
+//       the bundle (descriptive properties + lifecycle + annotations)
 //       carried by every Artifact except those that need versioning too
 //   - SchemaArtifactMetadata        (artifact-metadata.ts):
 //       ArtifactMetadata + SchemaVersioning, carried by reusable
 //       schema artifacts (Field and Template)
 
 export {
-  type TemporalProvenance,
-  type TemporalProvenanceInit,
-  temporalProvenance,
-} from './temporal-provenance.js';
+  type LifecycleMetadata,
+  type LifecycleMetadataInit,
+  lifecycleMetadata,
+} from './lifecycle-metadata.js';
 
 export {
   type Status,

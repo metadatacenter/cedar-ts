@@ -39,21 +39,21 @@ import {
   template,
   richTextComponent,
   artifactMetadata,
-  temporalProvenance,
+  lifecycleMetadata,
   schemaArtifactMetadata,
   schemaVersioning,
 } from '../src/index.js';
 
 // Shared fixtures for tests that need to construct full Field / Template /
 // PresentationComponent artifacts.
-const tp = temporalProvenance({
+const tp = lifecycleMetadata({
   createdOn: '2024-01-01T00:00:00Z',
   createdBy: 'https://example.org/u',
   modifiedOn: '2024-01-01T00:00:00Z',
   modifiedBy: 'https://example.org/u',
 });
 const meta = schemaArtifactMetadata({
-  artifact: artifactMetadata({ name: 'X', provenance: tp }),
+  artifact: artifactMetadata({ name: 'X', lifecycle: tp }),
   versioning: schemaVersioning({
     version: '1.0.0',
     status: 'draft',
@@ -108,7 +108,7 @@ describe('Inline Field/Template/PresentationComponent reference inputs', () => {
     const pc = richTextComponent({
       id: presentationComponentId('https://example.org/pc/intro'),
       modelVersion: '2.0.0',
-      metadata: artifactMetadata({ name: 'Intro', provenance: tp }),
+      metadata: artifactMetadata({ name: 'Intro', lifecycle: tp }),
       html: '<p>hi</p>',
     });
     const ep = embeddedPresentationComponent({ key: 'intro', reference: pc });
