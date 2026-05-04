@@ -18,7 +18,7 @@
 // One of six external-authority families; shares the value-shape
 // pattern (`iri` + optional `label`) via `external-authority-shared.ts`.
 
-import { type Iri, iri } from '../leaves/index.js';
+import { type Iri, iri, parseSemanticVersion } from '../leaves/index.js';
 import type { SchemaArtifactMetadata } from '../metadata/index.js';
 import type { ValueRequirement } from '../embedded/requirement.js';
 import type { Cardinality } from '../embedded/cardinality.js';
@@ -123,12 +123,14 @@ export const isPubMedIdFieldSpec = (x: unknown): x is PubMedIdFieldSpec =>
 export interface PubMedIdField {
   readonly kind: 'PubMedIdField';
   readonly id: PubMedIdFieldId;
+  readonly modelVersion: string;
   readonly metadata: SchemaArtifactMetadata;
   readonly fieldSpec: PubMedIdFieldSpec;
 }
 
 export interface PubMedIdFieldInit {
   readonly id: PubMedIdFieldId | Iri | string;
+  readonly modelVersion: string;
   readonly metadata: SchemaArtifactMetadata;
   readonly fieldSpec: PubMedIdFieldSpec;
 }
@@ -137,6 +139,7 @@ export const pubMedIdField = (init: PubMedIdFieldInit): PubMedIdField =>
   ({
     kind: 'PubMedIdField',
     id: pubMedIdFieldId(init.id),
+    modelVersion: parseSemanticVersion(init.modelVersion),
     metadata: init.metadata,
     fieldSpec: init.fieldSpec,
   });

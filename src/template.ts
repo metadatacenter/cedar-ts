@@ -1,4 +1,4 @@
-import { CedarConstructionError } from './leaves/index.js';
+import { CedarConstructionError, parseSemanticVersion } from './leaves/index.js';
 import { type TemplateId, templateId } from './identifiers.js';
 import type { SchemaArtifactMetadata } from './metadata/index.js';
 import type { EmbeddedArtifact } from './embedded/index.js';
@@ -55,6 +55,7 @@ import {
 export interface Template {
   readonly kind: 'Template';
   readonly id: TemplateId;
+  readonly modelVersion: string;
   readonly metadata: SchemaArtifactMetadata;
   readonly header?: MultilingualString;
   readonly footer?: MultilingualString;
@@ -67,6 +68,7 @@ export interface Template {
 // (bare string, lang map, etc. — see src/multilingual.ts).
 export interface TemplateInit {
   readonly id: TemplateId | string;
+  readonly modelVersion: string;
   readonly metadata: SchemaArtifactMetadata;
   readonly header?: MultilingualStringInput;
   readonly footer?: MultilingualStringInput;
@@ -98,6 +100,7 @@ export function template(init: TemplateInit): Template {
   const out: {
     kind: 'Template';
     id: TemplateId;
+    modelVersion: string;
     metadata: SchemaArtifactMetadata;
     header?: MultilingualString;
     footer?: MultilingualString;
@@ -105,6 +108,7 @@ export function template(init: TemplateInit): Template {
   } = {
     kind: 'Template',
     id: typeof init.id === 'string' ? templateId(init.id) : init.id,
+    modelVersion: parseSemanticVersion(init.modelVersion),
     metadata: init.metadata,
     embedded,
   };

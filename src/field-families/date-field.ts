@@ -20,7 +20,7 @@
 // `EmbeddedDateField` is a `DateValue` directly (polymorphic union;
 // kind retained on the wire).
 
-import { type Iri, iri, CedarConstructionError } from '../leaves/index.js';
+import { type Iri, iri, CedarConstructionError, parseSemanticVersion } from '../leaves/index.js';
 import {
   type FullDateLiteral,
   fullDateLiteral,
@@ -221,18 +221,26 @@ export const isDateFieldSpec = (x: unknown): x is DateFieldSpec =>
 export interface DateField {
   readonly kind: 'DateField';
   readonly id: DateFieldId;
+  readonly modelVersion: string;
   readonly metadata: SchemaArtifactMetadata;
   readonly fieldSpec: DateFieldSpec;
 }
 
 export interface DateFieldInit {
   readonly id: DateFieldId | Iri | string;
+  readonly modelVersion: string;
   readonly metadata: SchemaArtifactMetadata;
   readonly fieldSpec: DateFieldSpec;
 }
 
 export const dateField = (init: DateFieldInit): DateField =>
-  ({ kind: 'DateField', id: dateFieldId(init.id), metadata: init.metadata, fieldSpec: init.fieldSpec });
+  ({
+    kind: 'DateField',
+    id: dateFieldId(init.id),
+    modelVersion: parseSemanticVersion(init.modelVersion),
+    metadata: init.metadata,
+    fieldSpec: init.fieldSpec,
+  });
 
 // =====================================================================
 // 5. EmbeddedField

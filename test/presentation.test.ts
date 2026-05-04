@@ -28,11 +28,13 @@ const tp = temporalProvenance({
 });
 const meta = artifactMetadata({ descriptiveMetadata: dm, provenance: tp });
 const id = presentationComponentId('https://example.org/pc/1');
+const MV = '2.0.0';
 
 describe('PresentationComponent variants', () => {
   it('RichTextComponent carries HTML content', () => {
     const c = richTextComponent({
       id,
+      modelVersion: MV,
       metadata: meta,
       html: '<p>Instructions go here.</p>',
     });
@@ -45,6 +47,7 @@ describe('PresentationComponent variants', () => {
   it('ImageComponent wraps an Iri image source from a string', () => {
     const c = imageComponent({
       id,
+      modelVersion: MV,
       metadata: meta,
       image: 'https://example.org/img/1.png',
     });
@@ -55,13 +58,14 @@ describe('PresentationComponent variants', () => {
 
   it('ImageComponent rejects malformed source strings', () => {
     expect(() =>
-      imageComponent({ id, metadata: meta, image: 'not an iri' }),
+      imageComponent({ id, modelVersion: MV, metadata: meta, image: 'not an iri' }),
     ).toThrow(CedarConstructionError);
   });
 
   it('YoutubeVideoComponent wraps an Iri video source', () => {
     const c = youtubeVideoComponent({
       id,
+      modelVersion: MV,
       metadata: meta,
       video: 'https://www.youtube.com/watch?v=abc123',
     });
@@ -71,13 +75,13 @@ describe('PresentationComponent variants', () => {
   });
 
   it('SectionBreakComponent carries only id and metadata', () => {
-    const c = sectionBreakComponent({ id, metadata: meta });
+    const c = sectionBreakComponent({ id, modelVersion: MV, metadata: meta });
     expect(c.kind).toBe('SectionBreakComponent');
     expect(isSectionBreakComponent(c)).toBe(true);
   });
 
   it('PageBreakComponent carries only id and metadata', () => {
-    const c = pageBreakComponent({ id, metadata: meta });
+    const c = pageBreakComponent({ id, modelVersion: MV, metadata: meta });
     expect(c.kind).toBe('PageBreakComponent');
     expect(isPageBreakComponent(c)).toBe(true);
   });
@@ -86,15 +90,16 @@ describe('PresentationComponent variants', () => {
 describe('isPresentationComponent', () => {
   it('accepts every concrete variant', () => {
     const variants: PresentationComponent[] = [
-      richTextComponent({ id, metadata: meta, html: '' }),
-      imageComponent({ id, metadata: meta, image: 'https://example.org/i.png' }),
+      richTextComponent({ id, modelVersion: MV, metadata: meta, html: '' }),
+      imageComponent({ id, modelVersion: MV, metadata: meta, image: 'https://example.org/i.png' }),
       youtubeVideoComponent({
         id,
+        modelVersion: MV,
         metadata: meta,
         video: 'https://www.youtube.com/watch?v=x',
       }),
-      sectionBreakComponent({ id, metadata: meta }),
-      pageBreakComponent({ id, metadata: meta }),
+      sectionBreakComponent({ id, modelVersion: MV, metadata: meta }),
+      pageBreakComponent({ id, modelVersion: MV, metadata: meta }),
     ];
     for (const c of variants) expect(isPresentationComponent(c)).toBe(true);
   });

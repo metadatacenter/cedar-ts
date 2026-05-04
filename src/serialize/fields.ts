@@ -47,6 +47,7 @@ import {
 } from '../field-families/index.js';
 import {
   expectObject,
+  expectString,
   expectKnownProperties,
   expectKindOneOf,
 } from './parse-utils.js';
@@ -140,15 +141,15 @@ function parseFieldShell<T>(
   x: unknown,
   expectedKind: string,
   where: string,
-): { id: unknown; metadata: unknown; fieldSpec: unknown } {
+): { id: unknown; modelVersion: string; metadata: unknown; fieldSpec: unknown } {
   const o = expectObject(x, where);
-  expectKnownProperties(o, ['kind', 'id', 'metadata', 'fieldSpec']);
+  expectKnownProperties(o, ['kind', 'id', 'modelVersion', 'metadata', 'fieldSpec']);
   if (o['kind'] !== expectedKind) {
     throw new CedarConstructionError(
       `${where}: expected kind ${JSON.stringify(expectedKind)}; got ${JSON.stringify(o['kind'])}`,
     );
   }
-  for (const k of ['id', 'metadata', 'fieldSpec']) {
+  for (const k of ['id', 'modelVersion', 'metadata', 'fieldSpec']) {
     if (!(k in o)) {
       throw new CedarConstructionError(
         `${where}: missing required ${JSON.stringify(k)}`,
@@ -156,7 +157,12 @@ function parseFieldShell<T>(
     }
   }
   void (null as unknown as T);
-  return { id: o['id'], metadata: o['metadata'], fieldSpec: o['fieldSpec'] };
+  return {
+    id: o['id'],
+    modelVersion: expectString(o['modelVersion'], `${where}.modelVersion`),
+    metadata: o['metadata'],
+    fieldSpec: o['fieldSpec'],
+  };
 }
 
 // ---- Per-family serializers / parsers --------------------------------
@@ -164,6 +170,7 @@ function parseFieldShell<T>(
 export const serializeTextField = (x: TextField): unknown => ({
   kind: 'TextField',
   id: serializeTextFieldId(x.id),
+  modelVersion: x.modelVersion,
   metadata: serializeSchemaArtifactMetadata(x.metadata),
   fieldSpec: serializeTextFieldSpec(x.fieldSpec),
 });
@@ -172,6 +179,7 @@ export function parseTextField(x: unknown, where = 'TextField'): TextField {
   const s = parseFieldShell<TextField>(x, 'TextField', where);
   return textField({
     id: parseTextFieldId(s.id, `${where}.id`),
+    modelVersion: s.modelVersion,
     metadata: parseSchemaArtifactMetadata(s.metadata, `${where}.metadata`),
     fieldSpec: parseTextFieldSpec(s.fieldSpec, `${where}.fieldSpec`),
   });
@@ -180,6 +188,7 @@ export function parseTextField(x: unknown, where = 'TextField'): TextField {
 export const serializeNumericField = (x: NumericField): unknown => ({
   kind: 'NumericField',
   id: serializeNumericFieldId(x.id),
+  modelVersion: x.modelVersion,
   metadata: serializeSchemaArtifactMetadata(x.metadata),
   fieldSpec: serializeNumericFieldSpec(x.fieldSpec),
 });
@@ -191,6 +200,7 @@ export function parseNumericField(
   const s = parseFieldShell<NumericField>(x, 'NumericField', where);
   return numericField({
     id: parseNumericFieldId(s.id, `${where}.id`),
+    modelVersion: s.modelVersion,
     metadata: parseSchemaArtifactMetadata(s.metadata, `${where}.metadata`),
     fieldSpec: parseNumericFieldSpec(s.fieldSpec, `${where}.fieldSpec`),
   });
@@ -199,6 +209,7 @@ export function parseNumericField(
 export const serializeDateField = (x: DateField): unknown => ({
   kind: 'DateField',
   id: serializeDateFieldId(x.id),
+  modelVersion: x.modelVersion,
   metadata: serializeSchemaArtifactMetadata(x.metadata),
   fieldSpec: serializeDateFieldSpec(x.fieldSpec),
 });
@@ -207,6 +218,7 @@ export function parseDateField(x: unknown, where = 'DateField'): DateField {
   const s = parseFieldShell<DateField>(x, 'DateField', where);
   return dateField({
     id: parseDateFieldId(s.id, `${where}.id`),
+    modelVersion: s.modelVersion,
     metadata: parseSchemaArtifactMetadata(s.metadata, `${where}.metadata`),
     fieldSpec: parseDateFieldSpec(s.fieldSpec, `${where}.fieldSpec`),
   });
@@ -215,6 +227,7 @@ export function parseDateField(x: unknown, where = 'DateField'): DateField {
 export const serializeTimeField = (x: TimeField): unknown => ({
   kind: 'TimeField',
   id: serializeTimeFieldId(x.id),
+  modelVersion: x.modelVersion,
   metadata: serializeSchemaArtifactMetadata(x.metadata),
   fieldSpec: serializeTimeFieldSpec(x.fieldSpec),
 });
@@ -223,6 +236,7 @@ export function parseTimeField(x: unknown, where = 'TimeField'): TimeField {
   const s = parseFieldShell<TimeField>(x, 'TimeField', where);
   return timeField({
     id: parseTimeFieldId(s.id, `${where}.id`),
+    modelVersion: s.modelVersion,
     metadata: parseSchemaArtifactMetadata(s.metadata, `${where}.metadata`),
     fieldSpec: parseTimeFieldSpec(s.fieldSpec, `${where}.fieldSpec`),
   });
@@ -231,6 +245,7 @@ export function parseTimeField(x: unknown, where = 'TimeField'): TimeField {
 export const serializeDateTimeField = (x: DateTimeField): unknown => ({
   kind: 'DateTimeField',
   id: serializeDateTimeFieldId(x.id),
+  modelVersion: x.modelVersion,
   metadata: serializeSchemaArtifactMetadata(x.metadata),
   fieldSpec: serializeDateTimeFieldSpec(x.fieldSpec),
 });
@@ -242,6 +257,7 @@ export function parseDateTimeField(
   const s = parseFieldShell<DateTimeField>(x, 'DateTimeField', where);
   return dateTimeField({
     id: parseDateTimeFieldId(s.id, `${where}.id`),
+    modelVersion: s.modelVersion,
     metadata: parseSchemaArtifactMetadata(s.metadata, `${where}.metadata`),
     fieldSpec: parseDateTimeFieldSpec(s.fieldSpec, `${where}.fieldSpec`),
   });
@@ -250,6 +266,7 @@ export function parseDateTimeField(
 export const serializeControlledTermField = (x: ControlledTermField): unknown => ({
   kind: 'ControlledTermField',
   id: serializeControlledTermFieldId(x.id),
+  modelVersion: x.modelVersion,
   metadata: serializeSchemaArtifactMetadata(x.metadata),
   fieldSpec: serializeControlledTermFieldSpec(x.fieldSpec),
 });
@@ -261,6 +278,7 @@ export function parseControlledTermField(
   const s = parseFieldShell<ControlledTermField>(x, 'ControlledTermField', where);
   return controlledTermField({
     id: parseControlledTermFieldId(s.id, `${where}.id`),
+    modelVersion: s.modelVersion,
     metadata: parseSchemaArtifactMetadata(s.metadata, `${where}.metadata`),
     fieldSpec: parseControlledTermFieldSpec(s.fieldSpec, `${where}.fieldSpec`),
   });
@@ -274,6 +292,7 @@ export function serializeSingleChoiceField(x: SingleChoiceField): unknown {
   return {
     kind: 'SingleChoiceField',
     id: serializeSingleChoiceFieldId(x.id),
+    modelVersion: x.modelVersion,
     metadata: serializeSchemaArtifactMetadata(x.metadata),
     fieldSpec,
   };
@@ -296,6 +315,7 @@ export function parseSingleChoiceField(
       : parseControlledTermSingleChoiceFieldSpec(s.fieldSpec, `${where}.fieldSpec`);
   return singleChoiceField({
     id: parseSingleChoiceFieldId(s.id, `${where}.id`),
+    modelVersion: s.modelVersion,
     metadata: parseSchemaArtifactMetadata(s.metadata, `${where}.metadata`),
     fieldSpec,
   });
@@ -309,6 +329,7 @@ export function serializeMultipleChoiceField(x: MultipleChoiceField): unknown {
   return {
     kind: 'MultipleChoiceField',
     id: serializeMultipleChoiceFieldId(x.id),
+    modelVersion: x.modelVersion,
     metadata: serializeSchemaArtifactMetadata(x.metadata),
     fieldSpec,
   };
@@ -331,6 +352,7 @@ export function parseMultipleChoiceField(
       : parseControlledTermMultipleChoiceFieldSpec(s.fieldSpec, `${where}.fieldSpec`);
   return multipleChoiceField({
     id: parseMultipleChoiceFieldId(s.id, `${where}.id`),
+    modelVersion: s.modelVersion,
     metadata: parseSchemaArtifactMetadata(s.metadata, `${where}.metadata`),
     fieldSpec,
   });
@@ -339,6 +361,7 @@ export function parseMultipleChoiceField(
 export const serializeLinkField = (x: LinkField): unknown => ({
   kind: 'LinkField',
   id: serializeLinkFieldId(x.id),
+  modelVersion: x.modelVersion,
   metadata: serializeSchemaArtifactMetadata(x.metadata),
   fieldSpec: serializeLinkFieldSpec(x.fieldSpec),
 });
@@ -347,6 +370,7 @@ export function parseLinkField(x: unknown, where = 'LinkField'): LinkField {
   const s = parseFieldShell<LinkField>(x, 'LinkField', where);
   return linkField({
     id: parseLinkFieldId(s.id, `${where}.id`),
+    modelVersion: s.modelVersion,
     metadata: parseSchemaArtifactMetadata(s.metadata, `${where}.metadata`),
     fieldSpec: parseLinkFieldSpec(s.fieldSpec, `${where}.fieldSpec`),
   });
@@ -355,6 +379,7 @@ export function parseLinkField(x: unknown, where = 'LinkField'): LinkField {
 export const serializeEmailField = (x: EmailField): unknown => ({
   kind: 'EmailField',
   id: serializeEmailFieldId(x.id),
+  modelVersion: x.modelVersion,
   metadata: serializeSchemaArtifactMetadata(x.metadata),
   fieldSpec: serializeEmailFieldSpec(x.fieldSpec),
 });
@@ -363,6 +388,7 @@ export function parseEmailField(x: unknown, where = 'EmailField'): EmailField {
   const s = parseFieldShell<EmailField>(x, 'EmailField', where);
   return emailField({
     id: parseEmailFieldId(s.id, `${where}.id`),
+    modelVersion: s.modelVersion,
     metadata: parseSchemaArtifactMetadata(s.metadata, `${where}.metadata`),
     fieldSpec: parseEmailFieldSpec(s.fieldSpec, `${where}.fieldSpec`),
   });
@@ -371,6 +397,7 @@ export function parseEmailField(x: unknown, where = 'EmailField'): EmailField {
 export const serializePhoneNumberField = (x: PhoneNumberField): unknown => ({
   kind: 'PhoneNumberField',
   id: serializePhoneNumberFieldId(x.id),
+  modelVersion: x.modelVersion,
   metadata: serializeSchemaArtifactMetadata(x.metadata),
   fieldSpec: serializePhoneNumberFieldSpec(x.fieldSpec),
 });
@@ -382,6 +409,7 @@ export function parsePhoneNumberField(
   const s = parseFieldShell<PhoneNumberField>(x, 'PhoneNumberField', where);
   return phoneNumberField({
     id: parsePhoneNumberFieldId(s.id, `${where}.id`),
+    modelVersion: s.modelVersion,
     metadata: parseSchemaArtifactMetadata(s.metadata, `${where}.metadata`),
     fieldSpec: parsePhoneNumberFieldSpec(s.fieldSpec, `${where}.fieldSpec`),
   });
@@ -390,6 +418,7 @@ export function parsePhoneNumberField(
 export const serializeOrcidField = (x: OrcidField): unknown => ({
   kind: 'OrcidField',
   id: serializeOrcidFieldId(x.id),
+  modelVersion: x.modelVersion,
   metadata: serializeSchemaArtifactMetadata(x.metadata),
   fieldSpec: serializeOrcidFieldSpec(x.fieldSpec),
 });
@@ -398,6 +427,7 @@ export function parseOrcidField(x: unknown, where = 'OrcidField'): OrcidField {
   const s = parseFieldShell<OrcidField>(x, 'OrcidField', where);
   return orcidField({
     id: parseOrcidFieldId(s.id, `${where}.id`),
+    modelVersion: s.modelVersion,
     metadata: parseSchemaArtifactMetadata(s.metadata, `${where}.metadata`),
     fieldSpec: parseOrcidFieldSpec(s.fieldSpec, `${where}.fieldSpec`),
   });
@@ -406,6 +436,7 @@ export function parseOrcidField(x: unknown, where = 'OrcidField'): OrcidField {
 export const serializeRorField = (x: RorField): unknown => ({
   kind: 'RorField',
   id: serializeRorFieldId(x.id),
+  modelVersion: x.modelVersion,
   metadata: serializeSchemaArtifactMetadata(x.metadata),
   fieldSpec: serializeRorFieldSpec(x.fieldSpec),
 });
@@ -414,6 +445,7 @@ export function parseRorField(x: unknown, where = 'RorField'): RorField {
   const s = parseFieldShell<RorField>(x, 'RorField', where);
   return rorField({
     id: parseRorFieldId(s.id, `${where}.id`),
+    modelVersion: s.modelVersion,
     metadata: parseSchemaArtifactMetadata(s.metadata, `${where}.metadata`),
     fieldSpec: parseRorFieldSpec(s.fieldSpec, `${where}.fieldSpec`),
   });
@@ -422,6 +454,7 @@ export function parseRorField(x: unknown, where = 'RorField'): RorField {
 export const serializeDoiField = (x: DoiField): unknown => ({
   kind: 'DoiField',
   id: serializeDoiFieldId(x.id),
+  modelVersion: x.modelVersion,
   metadata: serializeSchemaArtifactMetadata(x.metadata),
   fieldSpec: serializeDoiFieldSpec(x.fieldSpec),
 });
@@ -430,6 +463,7 @@ export function parseDoiField(x: unknown, where = 'DoiField'): DoiField {
   const s = parseFieldShell<DoiField>(x, 'DoiField', where);
   return doiField({
     id: parseDoiFieldId(s.id, `${where}.id`),
+    modelVersion: s.modelVersion,
     metadata: parseSchemaArtifactMetadata(s.metadata, `${where}.metadata`),
     fieldSpec: parseDoiFieldSpec(s.fieldSpec, `${where}.fieldSpec`),
   });
@@ -438,6 +472,7 @@ export function parseDoiField(x: unknown, where = 'DoiField'): DoiField {
 export const serializePubMedIdField = (x: PubMedIdField): unknown => ({
   kind: 'PubMedIdField',
   id: serializePubMedIdFieldId(x.id),
+  modelVersion: x.modelVersion,
   metadata: serializeSchemaArtifactMetadata(x.metadata),
   fieldSpec: serializePubMedIdFieldSpec(x.fieldSpec),
 });
@@ -449,6 +484,7 @@ export function parsePubMedIdField(
   const s = parseFieldShell<PubMedIdField>(x, 'PubMedIdField', where);
   return pubMedIdField({
     id: parsePubMedIdFieldId(s.id, `${where}.id`),
+    modelVersion: s.modelVersion,
     metadata: parseSchemaArtifactMetadata(s.metadata, `${where}.metadata`),
     fieldSpec: parsePubMedIdFieldSpec(s.fieldSpec, `${where}.fieldSpec`),
   });
@@ -457,6 +493,7 @@ export function parsePubMedIdField(
 export const serializeRridField = (x: RridField): unknown => ({
   kind: 'RridField',
   id: serializeRridFieldId(x.id),
+  modelVersion: x.modelVersion,
   metadata: serializeSchemaArtifactMetadata(x.metadata),
   fieldSpec: serializeRridFieldSpec(x.fieldSpec),
 });
@@ -465,6 +502,7 @@ export function parseRridField(x: unknown, where = 'RridField'): RridField {
   const s = parseFieldShell<RridField>(x, 'RridField', where);
   return rridField({
     id: parseRridFieldId(s.id, `${where}.id`),
+    modelVersion: s.modelVersion,
     metadata: parseSchemaArtifactMetadata(s.metadata, `${where}.metadata`),
     fieldSpec: parseRridFieldSpec(s.fieldSpec, `${where}.fieldSpec`),
   });
@@ -473,6 +511,7 @@ export function parseRridField(x: unknown, where = 'RridField'): RridField {
 export const serializeNihGrantIdField = (x: NihGrantIdField): unknown => ({
   kind: 'NihGrantIdField',
   id: serializeNihGrantIdFieldId(x.id),
+  modelVersion: x.modelVersion,
   metadata: serializeSchemaArtifactMetadata(x.metadata),
   fieldSpec: serializeNihGrantIdFieldSpec(x.fieldSpec),
 });
@@ -484,6 +523,7 @@ export function parseNihGrantIdField(
   const s = parseFieldShell<NihGrantIdField>(x, 'NihGrantIdField', where);
   return nihGrantIdField({
     id: parseNihGrantIdFieldId(s.id, `${where}.id`),
+    modelVersion: s.modelVersion,
     metadata: parseSchemaArtifactMetadata(s.metadata, `${where}.metadata`),
     fieldSpec: parseNihGrantIdFieldSpec(s.fieldSpec, `${where}.fieldSpec`),
   });
@@ -492,6 +532,7 @@ export function parseNihGrantIdField(
 export const serializeAttributeValueField = (x: AttributeValueField): unknown => ({
   kind: 'AttributeValueField',
   id: serializeAttributeValueFieldId(x.id),
+  modelVersion: x.modelVersion,
   metadata: serializeSchemaArtifactMetadata(x.metadata),
   fieldSpec: serializeAttributeValueFieldSpec(x.fieldSpec),
 });
@@ -503,6 +544,7 @@ export function parseAttributeValueField(
   const s = parseFieldShell<AttributeValueField>(x, 'AttributeValueField', where);
   return attributeValueField({
     id: parseAttributeValueFieldId(s.id, `${where}.id`),
+    modelVersion: s.modelVersion,
     metadata: parseSchemaArtifactMetadata(s.metadata, `${where}.metadata`),
     fieldSpec: parseAttributeValueFieldSpec(s.fieldSpec, `${where}.fieldSpec`),
   });

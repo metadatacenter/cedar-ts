@@ -61,7 +61,6 @@ const meta = schemaArtifactMetadata({
   versioning: schemaVersioning({
     version: '1.0.0',
     status: 'draft',
-    modelVersion: '2.0.0',
   }),
 });
 
@@ -69,6 +68,7 @@ describe('Inline Field/Template/PresentationComponent reference inputs', () => {
   it('embeddedTextField extracts .id when given a TextField artifact', () => {
     const artifact = textField({
       id: textFieldId('https://example.org/fields/title'),
+      modelVersion: '2.0.0',
       metadata: meta,
       fieldSpec: textFieldSpec(),
     });
@@ -86,6 +86,7 @@ describe('Inline Field/Template/PresentationComponent reference inputs', () => {
   it('embeddedDateField rejects a TextField reference at the type level', () => {
     const wrongFamily = textField({
       id: textFieldId('https://example.org/fields/x'),
+      modelVersion: '2.0.0',
       metadata: meta,
       fieldSpec: textFieldSpec(),
     });
@@ -99,6 +100,7 @@ describe('Inline Field/Template/PresentationComponent reference inputs', () => {
   it('embeddedTemplate extracts .id when given a Template artifact', () => {
     const t = template({
       id: templateId('https://example.org/templates/address'),
+      modelVersion: '2.0.0',
       metadata: meta,
     });
     const et = embeddedTemplate({ key: 'address', reference: t });
@@ -109,6 +111,7 @@ describe('Inline Field/Template/PresentationComponent reference inputs', () => {
   it('embeddedPresentationComponent extracts .id when given a PresentationComponent', () => {
     const pc = richTextComponent({
       id: presentationComponentId('https://example.org/pc/intro'),
+      modelVersion: '2.0.0',
       metadata: artifactMetadata({
         descriptiveMetadata: descriptiveMetadata({ name: 'Intro' }),
         provenance: tp,

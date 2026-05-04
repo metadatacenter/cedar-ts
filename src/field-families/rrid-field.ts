@@ -17,7 +17,7 @@
 // One of six external-authority families; shares the value-shape
 // pattern (`iri` + optional `label`) via `external-authority-shared.ts`.
 
-import { type Iri, iri } from '../leaves/index.js';
+import { type Iri, iri, parseSemanticVersion } from '../leaves/index.js';
 import type { SchemaArtifactMetadata } from '../metadata/index.js';
 import type { ValueRequirement } from '../embedded/requirement.js';
 import type { Cardinality } from '../embedded/cardinality.js';
@@ -122,18 +122,26 @@ export const isRridFieldSpec = (x: unknown): x is RridFieldSpec =>
 export interface RridField {
   readonly kind: 'RridField';
   readonly id: RridFieldId;
+  readonly modelVersion: string;
   readonly metadata: SchemaArtifactMetadata;
   readonly fieldSpec: RridFieldSpec;
 }
 
 export interface RridFieldInit {
   readonly id: RridFieldId | Iri | string;
+  readonly modelVersion: string;
   readonly metadata: SchemaArtifactMetadata;
   readonly fieldSpec: RridFieldSpec;
 }
 
 export const rridField = (init: RridFieldInit): RridField =>
-  ({ kind: 'RridField', id: rridFieldId(init.id), metadata: init.metadata, fieldSpec: init.fieldSpec });
+  ({
+    kind: 'RridField',
+    id: rridFieldId(init.id),
+    modelVersion: parseSemanticVersion(init.modelVersion),
+    metadata: init.metadata,
+    fieldSpec: init.fieldSpec,
+  });
 
 // =====================================================================
 // 5. EmbeddedField

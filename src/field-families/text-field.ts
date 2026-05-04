@@ -20,7 +20,7 @@
 // `defaultValue` slot on `EmbeddedTextField` and `TextFieldSpec` is
 // also a `TextLiteral` directly (no wrapper).
 
-import { type Iri, iri, assertNonNegativeInteger } from '../leaves/index.js';
+import { type Iri, iri, assertNonNegativeInteger, parseSemanticVersion } from '../leaves/index.js';
 import {
   type TextLiteral,
   simpleLiteral,
@@ -162,18 +162,26 @@ export const isTextFieldSpec = (x: unknown): x is TextFieldSpec =>
 export interface TextField {
   readonly kind: 'TextField';
   readonly id: TextFieldId;
+  readonly modelVersion: string;
   readonly metadata: SchemaArtifactMetadata;
   readonly fieldSpec: TextFieldSpec;
 }
 
 export interface TextFieldInit {
   readonly id: TextFieldId | Iri | string;
+  readonly modelVersion: string;
   readonly metadata: SchemaArtifactMetadata;
   readonly fieldSpec: TextFieldSpec;
 }
 
 export const textField = (init: TextFieldInit): TextField =>
-  ({ kind: 'TextField', id: textFieldId(init.id), metadata: init.metadata, fieldSpec: init.fieldSpec });
+  ({
+    kind: 'TextField',
+    id: textFieldId(init.id),
+    modelVersion: parseSemanticVersion(init.modelVersion),
+    metadata: init.metadata,
+    fieldSpec: init.fieldSpec,
+  });
 
 // =====================================================================
 // 5. EmbeddedField

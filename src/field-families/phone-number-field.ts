@@ -14,7 +14,7 @@
 // Wire `kind` values: "PhoneNumberField" (artifact),
 // "EmbeddedPhoneNumberField" (embedding).
 
-import { type Iri, iri } from '../leaves/index.js';
+import { type Iri, iri, parseSemanticVersion } from '../leaves/index.js';
 import { type SimpleLiteral, simpleLiteral } from '../literals/index.js';
 import type { SchemaArtifactMetadata } from '../metadata/index.js';
 import type { ValueRequirement } from '../embedded/requirement.js';
@@ -108,12 +108,14 @@ export const isPhoneNumberFieldSpec = (x: unknown): x is PhoneNumberFieldSpec =>
 export interface PhoneNumberField {
   readonly kind: 'PhoneNumberField';
   readonly id: PhoneNumberFieldId;
+  readonly modelVersion: string;
   readonly metadata: SchemaArtifactMetadata;
   readonly fieldSpec: PhoneNumberFieldSpec;
 }
 
 export interface PhoneNumberFieldInit {
   readonly id: PhoneNumberFieldId | Iri | string;
+  readonly modelVersion: string;
   readonly metadata: SchemaArtifactMetadata;
   readonly fieldSpec: PhoneNumberFieldSpec;
 }
@@ -122,6 +124,7 @@ export const phoneNumberField = (init: PhoneNumberFieldInit): PhoneNumberField =
   ({
     kind: 'PhoneNumberField',
     id: phoneNumberFieldId(init.id),
+    modelVersion: parseSemanticVersion(init.modelVersion),
     metadata: init.metadata,
     fieldSpec: init.fieldSpec,
   });

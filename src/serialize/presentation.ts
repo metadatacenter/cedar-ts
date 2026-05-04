@@ -50,6 +50,7 @@ export function serializeRichTextComponent(x: RichTextComponent): unknown {
   return {
     kind: 'RichTextComponent',
     id: serializePresentationComponentId(x.id),
+    modelVersion: x.modelVersion,
     metadata: serializeArtifactMetadata(x.metadata),
     html: x.html,
   };
@@ -60,13 +61,13 @@ export function parseRichTextComponent(
   where = 'RichTextComponent',
 ): RichTextComponent {
   const o = expectObject(x, where);
-  expectKnownProperties(o, ['kind', 'id', 'metadata', 'html']);
+  expectKnownProperties(o, ['kind', 'id', 'modelVersion', 'metadata', 'html']);
   if (o['kind'] !== 'RichTextComponent') {
     throw new CedarConstructionError(
       `${where}: expected kind "RichTextComponent"`,
     );
   }
-  for (const k of ['id', 'metadata', 'html']) {
+  for (const k of ['id', 'modelVersion', 'metadata', 'html']) {
     if (!(k in o)) {
       throw new CedarConstructionError(
         `${where}: missing required ${JSON.stringify(k)}`,
@@ -75,6 +76,7 @@ export function parseRichTextComponent(
   }
   return richTextComponent({
     id: parsePresentationComponentId(o['id'], `${where}.id`),
+    modelVersion: expectString(o['modelVersion'], `${where}.modelVersion`),
     metadata: parseArtifactMetadata(o['metadata'], `${where}.metadata`),
     html: expectString(o['html'], `${where}.html`),
   });
@@ -86,6 +88,7 @@ export function serializeImageComponent(x: ImageComponent): unknown {
   return {
     kind: 'ImageComponent',
     id: serializePresentationComponentId(x.id),
+    modelVersion: x.modelVersion,
     metadata: serializeArtifactMetadata(x.metadata),
     image: x.image.value,
   };
@@ -96,13 +99,13 @@ export function parseImageComponent(
   where = 'ImageComponent',
 ): ImageComponent {
   const o = expectObject(x, where);
-  expectKnownProperties(o, ['kind', 'id', 'metadata', 'image']);
+  expectKnownProperties(o, ['kind', 'id', 'modelVersion', 'metadata', 'image']);
   if (o['kind'] !== 'ImageComponent') {
     throw new CedarConstructionError(
       `${where}: expected kind "ImageComponent"`,
     );
   }
-  for (const k of ['id', 'metadata', 'image']) {
+  for (const k of ['id', 'modelVersion', 'metadata', 'image']) {
     if (!(k in o)) {
       throw new CedarConstructionError(
         `${where}: missing required ${JSON.stringify(k)}`,
@@ -111,6 +114,7 @@ export function parseImageComponent(
   }
   return imageComponent({
     id: parsePresentationComponentId(o['id'], `${where}.id`),
+    modelVersion: expectString(o['modelVersion'], `${where}.modelVersion`),
     metadata: parseArtifactMetadata(o['metadata'], `${where}.metadata`),
     image: expectString(o['image'], `${where}.image`),
   });
@@ -124,6 +128,7 @@ export function serializeYoutubeVideoComponent(
   return {
     kind: 'YoutubeVideoComponent',
     id: serializePresentationComponentId(x.id),
+    modelVersion: x.modelVersion,
     metadata: serializeArtifactMetadata(x.metadata),
     video: x.video.value,
   };
@@ -134,13 +139,13 @@ export function parseYoutubeVideoComponent(
   where = 'YoutubeVideoComponent',
 ): YoutubeVideoComponent {
   const o = expectObject(x, where);
-  expectKnownProperties(o, ['kind', 'id', 'metadata', 'video']);
+  expectKnownProperties(o, ['kind', 'id', 'modelVersion', 'metadata', 'video']);
   if (o['kind'] !== 'YoutubeVideoComponent') {
     throw new CedarConstructionError(
       `${where}: expected kind "YoutubeVideoComponent"`,
     );
   }
-  for (const k of ['id', 'metadata', 'video']) {
+  for (const k of ['id', 'modelVersion', 'metadata', 'video']) {
     if (!(k in o)) {
       throw new CedarConstructionError(
         `${where}: missing required ${JSON.stringify(k)}`,
@@ -149,6 +154,7 @@ export function parseYoutubeVideoComponent(
   }
   return youtubeVideoComponent({
     id: parsePresentationComponentId(o['id'], `${where}.id`),
+    modelVersion: expectString(o['modelVersion'], `${where}.modelVersion`),
     metadata: parseArtifactMetadata(o['metadata'], `${where}.metadata`),
     video: expectString(o['video'], `${where}.video`),
   });
@@ -162,6 +168,7 @@ export function serializeSectionBreakComponent(
   return {
     kind: 'SectionBreakComponent',
     id: serializePresentationComponentId(x.id),
+    modelVersion: x.modelVersion,
     metadata: serializeArtifactMetadata(x.metadata),
   };
 }
@@ -171,13 +178,13 @@ export function parseSectionBreakComponent(
   where = 'SectionBreakComponent',
 ): SectionBreakComponent {
   const o = expectObject(x, where);
-  expectKnownProperties(o, ['kind', 'id', 'metadata']);
+  expectKnownProperties(o, ['kind', 'id', 'modelVersion', 'metadata']);
   if (o['kind'] !== 'SectionBreakComponent') {
     throw new CedarConstructionError(
       `${where}: expected kind "SectionBreakComponent"`,
     );
   }
-  for (const k of ['id', 'metadata']) {
+  for (const k of ['id', 'modelVersion', 'metadata']) {
     if (!(k in o)) {
       throw new CedarConstructionError(
         `${where}: missing required ${JSON.stringify(k)}`,
@@ -186,6 +193,7 @@ export function parseSectionBreakComponent(
   }
   return sectionBreakComponent({
     id: parsePresentationComponentId(o['id'], `${where}.id`),
+    modelVersion: expectString(o['modelVersion'], `${where}.modelVersion`),
     metadata: parseArtifactMetadata(o['metadata'], `${where}.metadata`),
   });
 }
@@ -194,6 +202,7 @@ export function serializePageBreakComponent(x: PageBreakComponent): unknown {
   return {
     kind: 'PageBreakComponent',
     id: serializePresentationComponentId(x.id),
+    modelVersion: x.modelVersion,
     metadata: serializeArtifactMetadata(x.metadata),
   };
 }
@@ -203,13 +212,13 @@ export function parsePageBreakComponent(
   where = 'PageBreakComponent',
 ): PageBreakComponent {
   const o = expectObject(x, where);
-  expectKnownProperties(o, ['kind', 'id', 'metadata']);
+  expectKnownProperties(o, ['kind', 'id', 'modelVersion', 'metadata']);
   if (o['kind'] !== 'PageBreakComponent') {
     throw new CedarConstructionError(
       `${where}: expected kind "PageBreakComponent"`,
     );
   }
-  for (const k of ['id', 'metadata']) {
+  for (const k of ['id', 'modelVersion', 'metadata']) {
     if (!(k in o)) {
       throw new CedarConstructionError(
         `${where}: missing required ${JSON.stringify(k)}`,
@@ -218,6 +227,7 @@ export function parsePageBreakComponent(
   }
   return pageBreakComponent({
     id: parsePresentationComponentId(o['id'], `${where}.id`),
+    modelVersion: expectString(o['modelVersion'], `${where}.modelVersion`),
     metadata: parseArtifactMetadata(o['metadata'], `${where}.metadata`),
   });
 }

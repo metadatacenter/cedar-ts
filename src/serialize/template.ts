@@ -47,6 +47,7 @@ export function serializeTemplate(x: Template): unknown {
   const out: Record<string, unknown> = {
     kind: 'Template',
     id: serializeTemplateId(x.id),
+    modelVersion: x.modelVersion,
     metadata: serializeSchemaArtifactMetadata(x.metadata),
   };
   if (x.header !== undefined) out['header'] = serializeMultilingualString(x.header);
@@ -60,6 +61,7 @@ export function parseTemplate(x: unknown, where = 'Template'): Template {
   expectKnownProperties(o, [
     'kind',
     'id',
+    'modelVersion',
     'metadata',
     'header',
     'footer',
@@ -75,6 +77,9 @@ export function parseTemplate(x: unknown, where = 'Template'): Template {
   if (!('id' in o)) {
     throw new CedarConstructionError(`${where}: missing required "id"`);
   }
+  if (!('modelVersion' in o)) {
+    throw new CedarConstructionError(`${where}: missing required "modelVersion"`);
+  }
   if (!('metadata' in o)) {
     throw new CedarConstructionError(`${where}: missing required "metadata"`);
   }
@@ -85,6 +90,7 @@ export function parseTemplate(x: unknown, where = 'Template'): Template {
     expectString(o['id'], `${where}.id`),
     `${where}.id`,
   );
+  const modelVersion = expectString(o['modelVersion'], `${where}.modelVersion`);
   const metadata = parseSchemaArtifactMetadata(
     o['metadata'],
     `${where}.metadata`,
@@ -96,11 +102,12 @@ export function parseTemplate(x: unknown, where = 'Template'): Template {
 
   const init: {
     id: typeof id;
+    modelVersion: string;
     metadata: typeof metadata;
     header?: ReturnType<typeof parseMultilingualString>;
     footer?: ReturnType<typeof parseMultilingualString>;
     embedded: typeof embedded;
-  } = { id, metadata, embedded };
+  } = { id, modelVersion, metadata, embedded };
   if ('header' in o)
     init.header = parseMultilingualString(o['header'], `${where}.header`);
   if ('footer' in o)

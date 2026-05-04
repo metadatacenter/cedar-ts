@@ -86,14 +86,16 @@ const meta = schemaArtifactMetadata({
   versioning: schemaVersioning({
     version: '1.0.0',
     status: 'draft',
-    modelVersion: '2.0.0',
   }),
 });
+
+const MV = '2.0.0';
 
 describe('Field constructors', () => {
   it('textField composes id, metadata, and spec into a tagged TextField', () => {
     const f = textField({
       id: textFieldId('https://example.org/fields/title'),
+      modelVersion: MV,
       metadata: meta,
       fieldSpec: textFieldSpec(),
     });
@@ -107,6 +109,7 @@ describe('Field constructors', () => {
     dateField({
       // @ts-expect-error TextFieldId is not a DateFieldId
       id: textFieldId('https://example.org/fields/x'),
+      modelVersion: MV,
       metadata: meta,
       fieldSpec: dateFieldSpec({ dateValueType: 'fullDate' }),
     });
@@ -115,6 +118,7 @@ describe('Field constructors', () => {
   it('rejects a misaligned fieldSpec at the type level', () => {
     numericField({
       id: numericFieldId('https://example.org/fields/x'),
+      modelVersion: MV,
       metadata: meta,
       // @ts-expect-error TextFieldSpec is not a NumericFieldSpec
       fieldSpec: textFieldSpec(),
@@ -126,6 +130,7 @@ describe('Per-family helpers', () => {
   it('textField pins to Field<"text">', () => {
     const f: TextField = textField({
       id: textFieldId('https://example.org/f/1'),
+      modelVersion: MV,
       metadata: meta,
       fieldSpec: textFieldSpec(),
     });
@@ -138,29 +143,34 @@ describe('Per-family helpers', () => {
 
   it('builds one of each concrete family', () => {
     const all: Field[] = [
-      textField({ id: textFieldId('https://example.org/t'), metadata: meta, fieldSpec: textFieldSpec() }),
+      textField({ id: textFieldId('https://example.org/t'), modelVersion: MV, metadata: meta, fieldSpec: textFieldSpec() }),
       numericField({
         id: numericFieldId('https://example.org/n'),
+        modelVersion: MV,
         metadata: meta,
         fieldSpec: numericFieldSpec({ datatype: 'integer' }),
       }),
       dateField({
         id: dateFieldId('https://example.org/d'),
+        modelVersion: MV,
         metadata: meta,
         fieldSpec: dateFieldSpec({ dateValueType: 'fullDate' }),
       }),
       timeField({
         id: timeFieldId('https://example.org/ti'),
+        modelVersion: MV,
         metadata: meta,
         fieldSpec: timeFieldSpec(),
       }),
       dateTimeField({
         id: dateTimeFieldId('https://example.org/dt'),
+        modelVersion: MV,
         metadata: meta,
         fieldSpec: dateTimeFieldSpec({ dateTimeValueType: 'dateHourMinute' }),
       }),
       controlledTermField({
         id: controlledTermFieldId('https://example.org/ct'),
+        modelVersion: MV,
         metadata: meta,
         fieldSpec: controlledTermFieldSpec(
           ontologySource(ontologyReference({ ontologyIri: 'https://example.org/o' })),
@@ -168,6 +178,7 @@ describe('Per-family helpers', () => {
       }),
       singleChoiceField({
         id: singleChoiceFieldId('https://example.org/sc'),
+        modelVersion: MV,
         metadata: meta,
         fieldSpec: literalSingleChoiceFieldSpec({
           options: [
@@ -177,6 +188,7 @@ describe('Per-family helpers', () => {
       }),
       multipleChoiceField({
         id: multipleChoiceFieldId('https://example.org/mc'),
+        modelVersion: MV,
         metadata: meta,
         fieldSpec: literalMultipleChoiceFieldSpec({
           options: [
@@ -184,29 +196,33 @@ describe('Per-family helpers', () => {
           ],
         }),
       }),
-      linkField({ id: linkFieldId('https://example.org/lk'), metadata: meta, fieldSpec: linkFieldSpec() }),
-      emailField({ id: emailFieldId('https://example.org/em'), metadata: meta, fieldSpec: emailFieldSpec() }),
+      linkField({ id: linkFieldId('https://example.org/lk'), modelVersion: MV, metadata: meta, fieldSpec: linkFieldSpec() }),
+      emailField({ id: emailFieldId('https://example.org/em'), modelVersion: MV, metadata: meta, fieldSpec: emailFieldSpec() }),
       phoneNumberField({
         id: phoneNumberFieldId('https://example.org/ph'),
+        modelVersion: MV,
         metadata: meta,
         fieldSpec: phoneNumberFieldSpec(),
       }),
-      orcidField({ id: orcidFieldId('https://example.org/o'), metadata: meta, fieldSpec: orcidFieldSpec() }),
-      rorField({ id: rorFieldId('https://example.org/r'), metadata: meta, fieldSpec: rorFieldSpec() }),
-      doiField({ id: doiFieldId('https://example.org/d'), metadata: meta, fieldSpec: doiFieldSpec() }),
+      orcidField({ id: orcidFieldId('https://example.org/o'), modelVersion: MV, metadata: meta, fieldSpec: orcidFieldSpec() }),
+      rorField({ id: rorFieldId('https://example.org/r'), modelVersion: MV, metadata: meta, fieldSpec: rorFieldSpec() }),
+      doiField({ id: doiFieldId('https://example.org/d'), modelVersion: MV, metadata: meta, fieldSpec: doiFieldSpec() }),
       pubMedIdField({
         id: pubMedIdFieldId('https://example.org/pm'),
+        modelVersion: MV,
         metadata: meta,
         fieldSpec: pubMedIdFieldSpec(),
       }),
-      rridField({ id: rridFieldId('https://example.org/rr'), metadata: meta, fieldSpec: rridFieldSpec() }),
+      rridField({ id: rridFieldId('https://example.org/rr'), modelVersion: MV, metadata: meta, fieldSpec: rridFieldSpec() }),
       nihGrantIdField({
         id: nihGrantIdFieldId('https://example.org/ng'),
+        modelVersion: MV,
         metadata: meta,
         fieldSpec: nihGrantIdFieldSpec(),
       }),
       attributeValueField({
         id: attributeValueFieldId('https://example.org/av'),
+        modelVersion: MV,
         metadata: meta,
         fieldSpec: attributeValueFieldSpec(),
       }),
@@ -219,6 +235,7 @@ describe('Per-family helpers', () => {
     const ctv = controlledTermValue({ termIri: 'https://example.org/term/1' });
     const f = singleChoiceField({
       id: singleChoiceFieldId('https://example.org/sc'),
+      modelVersion: MV,
       metadata: meta,
       fieldSpec: controlledTermSingleChoiceFieldSpec({
         options: [controlledTermChoiceOption(ctv)],
@@ -233,6 +250,7 @@ describe('Field kind narrowing', () => {
   it('narrows the FieldSpec type via the per-variant `kind` discriminant', () => {
     const f: Field = numericField({
       id: numericFieldId('https://example.org/n'),
+      modelVersion: MV,
       metadata: meta,
       fieldSpec: numericFieldSpec({ datatype: 'integer' }),
     });

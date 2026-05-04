@@ -21,7 +21,7 @@
 // file. Choice options and choice values are shared with the
 // multiple-choice family — see `choice-shared.ts`.
 
-import { type Iri, iri } from '../leaves/index.js';
+import { type Iri, iri, parseSemanticVersion } from '../leaves/index.js';
 import type { SchemaArtifactMetadata } from '../metadata/index.js';
 import type { ValueRequirement } from '../embedded/requirement.js';
 import type { Cardinality } from '../embedded/cardinality.js';
@@ -167,12 +167,14 @@ export const isSingleChoiceFieldSpec = (x: unknown): x is SingleChoiceFieldSpec 
 export interface SingleChoiceField {
   readonly kind: 'SingleChoiceField';
   readonly id: SingleChoiceFieldId;
+  readonly modelVersion: string;
   readonly metadata: SchemaArtifactMetadata;
   readonly fieldSpec: SingleChoiceFieldSpec;
 }
 
 export interface SingleChoiceFieldInit {
   readonly id: SingleChoiceFieldId | Iri | string;
+  readonly modelVersion: string;
   readonly metadata: SchemaArtifactMetadata;
   readonly fieldSpec: SingleChoiceFieldSpec;
 }
@@ -181,6 +183,7 @@ export const singleChoiceField = (init: SingleChoiceFieldInit): SingleChoiceFiel
   ({
     kind: 'SingleChoiceField',
     id: singleChoiceFieldId(init.id),
+    modelVersion: parseSemanticVersion(init.modelVersion),
     metadata: init.metadata,
     fieldSpec: init.fieldSpec,
   });

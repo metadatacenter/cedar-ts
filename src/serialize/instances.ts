@@ -148,6 +148,7 @@ export function serializeTemplateInstance(x: TemplateInstance): unknown {
   return {
     kind: 'TemplateInstance',
     id: serializeTemplateInstanceId(x.id),
+    modelVersion: x.modelVersion,
     metadata: serializeArtifactMetadata(x.metadata),
     templateRef: serializeTemplateId(x.templateRef),
     values: x.values.map((v) => serializeInstanceValue(v)),
@@ -159,13 +160,20 @@ export function parseTemplateInstance(
   where = 'TemplateInstance',
 ): TemplateInstance {
   const o = expectObject(x, where);
-  expectKnownProperties(o, ['kind', 'id', 'metadata', 'templateRef', 'values']);
+  expectKnownProperties(o, [
+    'kind',
+    'id',
+    'modelVersion',
+    'metadata',
+    'templateRef',
+    'values',
+  ]);
   if (o['kind'] !== 'TemplateInstance') {
     throw new CedarConstructionError(
       `${where}: expected kind "TemplateInstance"`,
     );
   }
-  for (const k of ['id', 'metadata', 'templateRef', 'values']) {
+  for (const k of ['id', 'modelVersion', 'metadata', 'templateRef', 'values']) {
     if (!(k in o)) {
       throw new CedarConstructionError(
         `${where}: missing required ${JSON.stringify(k)}`,
@@ -178,6 +186,7 @@ export function parseTemplateInstance(
   );
   return templateInstance({
     id: parseTemplateInstanceId(o['id'], `${where}.id`),
+    modelVersion: expectString(o['modelVersion'], `${where}.modelVersion`),
     metadata: parseArtifactMetadata(o['metadata'], `${where}.metadata`),
     templateRef: parseTemplateId(o['templateRef'], `${where}.templateRef`),
     values,

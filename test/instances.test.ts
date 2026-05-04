@@ -104,6 +104,7 @@ describe('NestedTemplateInstance', () => {
 describe('TemplateInstance', () => {
   const baseInit = {
     id: templateInstanceId('https://example.org/instances/i1'),
+    modelVersion: '2.0.0',
     metadata: am,
     templateRef: tref,
   };
@@ -119,6 +120,7 @@ describe('TemplateInstance', () => {
   it('coerces string id and templateRef', () => {
     const ti = templateInstance({
       id: 'https://example.org/instances/i2',
+      modelVersion: '2.0.0',
       metadata: am,
       templateRef: 'https://example.org/templates/demo',
     });
@@ -210,27 +212,30 @@ describe('Artifact union', () => {
     versioning: schemaVersioning({
       version: '1.0.0',
       status: 'draft',
-      modelVersion: '2.0.0',
     }),
   });
 
   it('isArtifact recognises Field, Template, PresentationComponent, and TemplateInstance', () => {
     const f = attributeValueField({
       id: attributeValueFieldId('https://example.org/fields/x'),
+      modelVersion: '2.0.0',
       metadata: meta,
       fieldSpec: attributeValueFieldSpec(),
     });
     const t = template({
       id: templateId('https://example.org/templates/demo'),
+      modelVersion: '2.0.0',
       metadata: meta,
     });
     const pc = richTextComponent({
       id: presentationComponentId('https://example.org/pc/r'),
+      modelVersion: '2.0.0',
       metadata: am,
       html: 'Hi',
     });
     const ti = templateInstance({
       id: templateInstanceId('https://example.org/instances/i1'),
+      modelVersion: '2.0.0',
       metadata: am,
       templateRef: tref,
     });

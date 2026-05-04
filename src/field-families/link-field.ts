@@ -15,7 +15,7 @@
 // Wire `kind` values: "LinkField" (artifact), "EmbeddedLinkField"
 // (embedding).
 
-import { type Iri, iri } from '../leaves/index.js';
+import { type Iri, iri, parseSemanticVersion } from '../leaves/index.js';
 import type { SchemaArtifactMetadata } from '../metadata/index.js';
 import type { ValueRequirement } from '../embedded/requirement.js';
 import type { Cardinality } from '../embedded/cardinality.js';
@@ -120,18 +120,26 @@ export const isLinkFieldSpec = (x: unknown): x is LinkFieldSpec =>
 export interface LinkField {
   readonly kind: 'LinkField';
   readonly id: LinkFieldId;
+  readonly modelVersion: string;
   readonly metadata: SchemaArtifactMetadata;
   readonly fieldSpec: LinkFieldSpec;
 }
 
 export interface LinkFieldInit {
   readonly id: LinkFieldId | Iri | string;
+  readonly modelVersion: string;
   readonly metadata: SchemaArtifactMetadata;
   readonly fieldSpec: LinkFieldSpec;
 }
 
 export const linkField = (init: LinkFieldInit): LinkField =>
-  ({ kind: 'LinkField', id: linkFieldId(init.id), metadata: init.metadata, fieldSpec: init.fieldSpec });
+  ({
+    kind: 'LinkField',
+    id: linkFieldId(init.id),
+    modelVersion: parseSemanticVersion(init.modelVersion),
+    metadata: init.metadata,
+    fieldSpec: init.fieldSpec,
+  });
 
 // =====================================================================
 // 5. EmbeddedField

@@ -89,12 +89,10 @@ describe('Status and SchemaVersioning', () => {
     const sv = schemaVersioning({
       version: '1.2.3',
       status: 'published',
-      modelVersion: '2.0.0',
       previousVersion: 'https://example.org/templates/t/1.2.2',
       derivedFrom: 'https://example.org/templates/source/1.0.0',
     });
     expect(sv.version).toBe('1.2.3');
-    expect(sv.modelVersion).toBe('2.0.0');
     expect(sv.previousVersion?.value).toBe(
       'https://example.org/templates/t/1.2.2',
     );
@@ -103,7 +101,7 @@ describe('Status and SchemaVersioning', () => {
 
   it('rejects malformed semver', () => {
     expect(() =>
-      schemaVersioning({ version: '1.0', status: 'draft', modelVersion: '2.0.0' }),
+      schemaVersioning({ version: '1.0', status: 'draft' }),
     ).toThrow(CedarConstructionError);
   });
 
@@ -111,7 +109,6 @@ describe('Status and SchemaVersioning', () => {
     const sv = schemaVersioning({
       version: '1.0.0',
       status: 'draft',
-      modelVersion: '2.0.0',
     });
     expect('previousVersion' in sv).toBe(false);
     expect('derivedFrom' in sv).toBe(false);
@@ -150,7 +147,6 @@ describe('ArtifactMetadata and SchemaArtifactMetadata', () => {
   const sv = schemaVersioning({
     version: '0.1.0',
     status: 'draft',
-    modelVersion: '2.0.0',
   });
 
   it('ArtifactMetadata bundles descriptive + provenance + annotations', () => {

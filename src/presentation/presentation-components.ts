@@ -1,4 +1,4 @@
-import { type Iri, iri } from '../leaves/index.js';
+import { type Iri, iri, parseSemanticVersion } from '../leaves/index.js';
 import type { ArtifactMetadata } from '../metadata/index.js';
 import { type PresentationComponentId, presentationComponentId } from '../identifiers.js';
 
@@ -19,6 +19,7 @@ const toPresentationComponentId = (
 export interface RichTextComponent {
   readonly kind: 'RichTextComponent';
   readonly id: PresentationComponentId;
+  readonly modelVersion: string;
   readonly metadata: ArtifactMetadata;
   // HtmlContent — the permitted feature set and any sanitization requirements
   // are out of scope for the abstract specification.
@@ -27,6 +28,7 @@ export interface RichTextComponent {
 
 export interface RichTextComponentInit {
   readonly id: PresentationComponentId | Iri | string;
+  readonly modelVersion: string;
   readonly metadata: ArtifactMetadata;
   readonly html: string;
 }
@@ -34,6 +36,7 @@ export interface RichTextComponentInit {
 export const richTextComponent = (init: RichTextComponentInit): RichTextComponent => ({
   kind: 'RichTextComponent',
   id: toPresentationComponentId(init.id),
+  modelVersion: parseSemanticVersion(init.modelVersion),
   metadata: init.metadata,
   html: init.html,
 });
@@ -41,12 +44,14 @@ export const richTextComponent = (init: RichTextComponentInit): RichTextComponen
 export interface ImageComponent {
   readonly kind: 'ImageComponent';
   readonly id: PresentationComponentId;
+  readonly modelVersion: string;
   readonly metadata: ArtifactMetadata;
   readonly image: Iri;
 }
 
 export interface ImageComponentInit {
   readonly id: PresentationComponentId | Iri | string;
+  readonly modelVersion: string;
   readonly metadata: ArtifactMetadata;
   readonly image: Iri | string;
 }
@@ -55,6 +60,7 @@ export function imageComponent(init: ImageComponentInit): ImageComponent {
   return {
     kind: 'ImageComponent',
     id: toPresentationComponentId(init.id),
+    modelVersion: parseSemanticVersion(init.modelVersion),
     metadata: init.metadata,
     image: typeof init.image === 'string' ? iri(init.image) : init.image,
   };
@@ -63,12 +69,14 @@ export function imageComponent(init: ImageComponentInit): ImageComponent {
 export interface YoutubeVideoComponent {
   readonly kind: 'YoutubeVideoComponent';
   readonly id: PresentationComponentId;
+  readonly modelVersion: string;
   readonly metadata: ArtifactMetadata;
   readonly video: Iri;
 }
 
 export interface YoutubeVideoComponentInit {
   readonly id: PresentationComponentId | Iri | string;
+  readonly modelVersion: string;
   readonly metadata: ArtifactMetadata;
   readonly video: Iri | string;
 }
@@ -79,6 +87,7 @@ export function youtubeVideoComponent(
   return {
     kind: 'YoutubeVideoComponent',
     id: toPresentationComponentId(init.id),
+    modelVersion: parseSemanticVersion(init.modelVersion),
     metadata: init.metadata,
     video: typeof init.video === 'string' ? iri(init.video) : init.video,
   };
@@ -87,11 +96,13 @@ export function youtubeVideoComponent(
 export interface SectionBreakComponent {
   readonly kind: 'SectionBreakComponent';
   readonly id: PresentationComponentId;
+  readonly modelVersion: string;
   readonly metadata: ArtifactMetadata;
 }
 
 export interface SectionBreakComponentInit {
   readonly id: PresentationComponentId | Iri | string;
+  readonly modelVersion: string;
   readonly metadata: ArtifactMetadata;
 }
 
@@ -100,17 +111,20 @@ export const sectionBreakComponent = (
 ): SectionBreakComponent => ({
   kind: 'SectionBreakComponent',
   id: toPresentationComponentId(init.id),
+  modelVersion: parseSemanticVersion(init.modelVersion),
   metadata: init.metadata,
 });
 
 export interface PageBreakComponent {
   readonly kind: 'PageBreakComponent';
   readonly id: PresentationComponentId;
+  readonly modelVersion: string;
   readonly metadata: ArtifactMetadata;
 }
 
 export interface PageBreakComponentInit {
   readonly id: PresentationComponentId | Iri | string;
+  readonly modelVersion: string;
   readonly metadata: ArtifactMetadata;
 }
 
@@ -119,6 +133,7 @@ export const pageBreakComponent = (
 ): PageBreakComponent => ({
   kind: 'PageBreakComponent',
   id: toPresentationComponentId(init.id),
+  modelVersion: parseSemanticVersion(init.modelVersion),
   metadata: init.metadata,
 });
 

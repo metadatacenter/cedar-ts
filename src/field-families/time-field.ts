@@ -20,7 +20,7 @@
 // `defaultValue` slot on `EmbeddedTimeField` is a `TimeLiteral`
 // directly (no wrapper).
 
-import { type Iri, iri } from '../leaves/index.js';
+import { type Iri, iri, parseSemanticVersion } from '../leaves/index.js';
 import {
   type TimeLiteral,
   timeLiteral,
@@ -160,18 +160,26 @@ export const isTimeFieldSpec = (x: unknown): x is TimeFieldSpec =>
 export interface TimeField {
   readonly kind: 'TimeField';
   readonly id: TimeFieldId;
+  readonly modelVersion: string;
   readonly metadata: SchemaArtifactMetadata;
   readonly fieldSpec: TimeFieldSpec;
 }
 
 export interface TimeFieldInit {
   readonly id: TimeFieldId | Iri | string;
+  readonly modelVersion: string;
   readonly metadata: SchemaArtifactMetadata;
   readonly fieldSpec: TimeFieldSpec;
 }
 
 export const timeField = (init: TimeFieldInit): TimeField =>
-  ({ kind: 'TimeField', id: timeFieldId(init.id), metadata: init.metadata, fieldSpec: init.fieldSpec });
+  ({
+    kind: 'TimeField',
+    id: timeFieldId(init.id),
+    modelVersion: parseSemanticVersion(init.modelVersion),
+    metadata: init.metadata,
+    fieldSpec: init.fieldSpec,
+  });
 
 // =====================================================================
 // 5. EmbeddedField

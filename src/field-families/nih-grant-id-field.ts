@@ -17,7 +17,7 @@
 // One of six external-authority families; shares the value-shape
 // pattern (`iri` + optional `label`) via `external-authority-shared.ts`.
 
-import { type Iri, iri } from '../leaves/index.js';
+import { type Iri, iri, parseSemanticVersion } from '../leaves/index.js';
 import type { SchemaArtifactMetadata } from '../metadata/index.js';
 import type { ValueRequirement } from '../embedded/requirement.js';
 import type { Cardinality } from '../embedded/cardinality.js';
@@ -123,12 +123,14 @@ export const isNihGrantIdFieldSpec = (x: unknown): x is NihGrantIdFieldSpec =>
 export interface NihGrantIdField {
   readonly kind: 'NihGrantIdField';
   readonly id: NihGrantIdFieldId;
+  readonly modelVersion: string;
   readonly metadata: SchemaArtifactMetadata;
   readonly fieldSpec: NihGrantIdFieldSpec;
 }
 
 export interface NihGrantIdFieldInit {
   readonly id: NihGrantIdFieldId | Iri | string;
+  readonly modelVersion: string;
   readonly metadata: SchemaArtifactMetadata;
   readonly fieldSpec: NihGrantIdFieldSpec;
 }
@@ -137,6 +139,7 @@ export const nihGrantIdField = (init: NihGrantIdFieldInit): NihGrantIdField =>
   ({
     kind: 'NihGrantIdField',
     id: nihGrantIdFieldId(init.id),
+    modelVersion: parseSemanticVersion(init.modelVersion),
     metadata: init.metadata,
     fieldSpec: init.fieldSpec,
   });

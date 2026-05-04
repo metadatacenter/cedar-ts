@@ -14,7 +14,7 @@
 // Wire `kind` values: "EmailField" (artifact), "EmbeddedEmailField"
 // (embedding).
 
-import { type Iri, iri } from '../leaves/index.js';
+import { type Iri, iri, parseSemanticVersion } from '../leaves/index.js';
 import { type SimpleLiteral, simpleLiteral } from '../literals/index.js';
 import type { SchemaArtifactMetadata } from '../metadata/index.js';
 import type { ValueRequirement } from '../embedded/requirement.js';
@@ -107,18 +107,26 @@ export const isEmailFieldSpec = (x: unknown): x is EmailFieldSpec =>
 export interface EmailField {
   readonly kind: 'EmailField';
   readonly id: EmailFieldId;
+  readonly modelVersion: string;
   readonly metadata: SchemaArtifactMetadata;
   readonly fieldSpec: EmailFieldSpec;
 }
 
 export interface EmailFieldInit {
   readonly id: EmailFieldId | Iri | string;
+  readonly modelVersion: string;
   readonly metadata: SchemaArtifactMetadata;
   readonly fieldSpec: EmailFieldSpec;
 }
 
 export const emailField = (init: EmailFieldInit): EmailField =>
-  ({ kind: 'EmailField', id: emailFieldId(init.id), metadata: init.metadata, fieldSpec: init.fieldSpec });
+  ({
+    kind: 'EmailField',
+    id: emailFieldId(init.id),
+    modelVersion: parseSemanticVersion(init.modelVersion),
+    metadata: init.metadata,
+    fieldSpec: init.fieldSpec,
+  });
 
 // =====================================================================
 // 5. EmbeddedField

@@ -26,6 +26,7 @@ import {
   iri,
   assertNonNegativeInteger,
   CedarConstructionError,
+  parseSemanticVersion,
 } from '../leaves/index.js';
 import {
   type MultilingualString,
@@ -320,12 +321,14 @@ export const isControlledTermFieldSpec = (x: unknown): x is ControlledTermFieldS
 export interface ControlledTermField {
   readonly kind: 'ControlledTermField';
   readonly id: ControlledTermFieldId;
+  readonly modelVersion: string;
   readonly metadata: SchemaArtifactMetadata;
   readonly fieldSpec: ControlledTermFieldSpec;
 }
 
 export interface ControlledTermFieldInit {
   readonly id: ControlledTermFieldId | Iri | string;
+  readonly modelVersion: string;
   readonly metadata: SchemaArtifactMetadata;
   readonly fieldSpec: ControlledTermFieldSpec;
 }
@@ -336,6 +339,7 @@ export const controlledTermField = (
   ({
     kind: 'ControlledTermField',
     id: controlledTermFieldId(init.id),
+    modelVersion: parseSemanticVersion(init.modelVersion),
     metadata: init.metadata,
     fieldSpec: init.fieldSpec,
   });

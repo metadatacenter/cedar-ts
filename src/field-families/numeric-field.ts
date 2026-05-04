@@ -24,6 +24,7 @@ import {
   type NumericDatatypeKind,
   iri,
   assertNonNegativeInteger,
+  parseSemanticVersion,
 } from '../leaves/index.js';
 import type { NumericLiteral } from '../literals/index.js';
 import {
@@ -181,18 +182,26 @@ export const isNumericFieldSpec = (x: unknown): x is NumericFieldSpec =>
 export interface NumericField {
   readonly kind: 'NumericField';
   readonly id: NumericFieldId;
+  readonly modelVersion: string;
   readonly metadata: SchemaArtifactMetadata;
   readonly fieldSpec: NumericFieldSpec;
 }
 
 export interface NumericFieldInit {
   readonly id: NumericFieldId | Iri | string;
+  readonly modelVersion: string;
   readonly metadata: SchemaArtifactMetadata;
   readonly fieldSpec: NumericFieldSpec;
 }
 
 export const numericField = (init: NumericFieldInit): NumericField =>
-  ({ kind: 'NumericField', id: numericFieldId(init.id), metadata: init.metadata, fieldSpec: init.fieldSpec });
+  ({
+    kind: 'NumericField',
+    id: numericFieldId(init.id),
+    modelVersion: parseSemanticVersion(init.modelVersion),
+    metadata: init.metadata,
+    fieldSpec: init.fieldSpec,
+  });
 
 // =====================================================================
 // 5. EmbeddedField

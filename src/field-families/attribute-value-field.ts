@@ -18,7 +18,7 @@
 // This family does NOT carry a default value (per grammar §Embedded
 // Artifacts); the `EmbeddedField` interface omits `defaultValue`.
 
-import { type Iri, iri } from '../leaves/index.js';
+import { type Iri, iri, parseSemanticVersion } from '../leaves/index.js';
 import type { SchemaArtifactMetadata } from '../metadata/index.js';
 import type { ValueRequirement } from '../embedded/requirement.js';
 import type { Cardinality } from '../embedded/cardinality.js';
@@ -118,12 +118,14 @@ export const isAttributeValueFieldSpec = (x: unknown): x is AttributeValueFieldS
 export interface AttributeValueField {
   readonly kind: 'AttributeValueField';
   readonly id: AttributeValueFieldId;
+  readonly modelVersion: string;
   readonly metadata: SchemaArtifactMetadata;
   readonly fieldSpec: AttributeValueFieldSpec;
 }
 
 export interface AttributeValueFieldInit {
   readonly id: AttributeValueFieldId | Iri | string;
+  readonly modelVersion: string;
   readonly metadata: SchemaArtifactMetadata;
   readonly fieldSpec: AttributeValueFieldSpec;
 }
@@ -134,6 +136,7 @@ export const attributeValueField = (
   ({
     kind: 'AttributeValueField',
     id: attributeValueFieldId(init.id),
+    modelVersion: parseSemanticVersion(init.modelVersion),
     metadata: init.metadata,
     fieldSpec: init.fieldSpec,
   });

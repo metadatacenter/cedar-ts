@@ -193,9 +193,10 @@ const sam = schemaArtifactMetadata({
   versioning: schemaVersioning({
     version: '1.0.0',
     status: 'draft',
-    modelVersion: '0.1.0',
   }),
 });
+
+const MV = '0.1.0';
 
 // ---- MultilingualString round-trip -----------------------------------
 
@@ -626,6 +627,7 @@ const fieldSamples = [
     'TextField',
     textField({
       id: 'https://example.org/fields/text',
+      modelVersion: MV,
       metadata: sam,
       fieldSpec: textFieldSpec(),
     }),
@@ -634,6 +636,7 @@ const fieldSamples = [
     'NumericField',
     numericField({
       id: 'https://example.org/fields/num',
+      modelVersion: MV,
       metadata: sam,
       fieldSpec: numericFieldSpec({ datatype: 'integer' }),
     }),
@@ -642,6 +645,7 @@ const fieldSamples = [
     'DateField',
     dateField({
       id: 'https://example.org/fields/date',
+      modelVersion: MV,
       metadata: sam,
       fieldSpec: dateFieldSpec({ dateValueType: 'fullDate' }),
     }),
@@ -650,6 +654,7 @@ const fieldSamples = [
     'EmailField',
     emailField({
       id: 'https://example.org/fields/email',
+      modelVersion: MV,
       metadata: sam,
       fieldSpec: emailFieldSpec(),
     }),
@@ -658,6 +663,7 @@ const fieldSamples = [
     'OrcidField',
     orcidField({
       id: 'https://example.org/fields/orcid',
+      modelVersion: MV,
       metadata: sam,
       fieldSpec: orcidFieldSpec(),
     }),
@@ -666,6 +672,7 @@ const fieldSamples = [
     'LinkField',
     linkField({
       id: 'https://example.org/fields/link',
+      modelVersion: MV,
       metadata: sam,
       fieldSpec: linkFieldSpec(),
     }),
@@ -674,6 +681,7 @@ const fieldSamples = [
     'AttributeValueField',
     attributeValueField({
       id: 'https://example.org/fields/attr',
+      modelVersion: MV,
       metadata: sam,
       fieldSpec: attributeValueFieldSpec(),
     }),
@@ -682,6 +690,7 @@ const fieldSamples = [
     'PhoneNumberField',
     phoneNumberField({
       id: 'https://example.org/fields/phone',
+      modelVersion: MV,
       metadata: sam,
       fieldSpec: phoneNumberFieldSpec(),
     }),
@@ -690,6 +699,7 @@ const fieldSamples = [
     'RorField',
     rorField({
       id: 'https://example.org/fields/ror',
+      modelVersion: MV,
       metadata: sam,
       fieldSpec: rorFieldSpec(),
     }),
@@ -698,6 +708,7 @@ const fieldSamples = [
     'DoiField',
     doiField({
       id: 'https://example.org/fields/doi',
+      modelVersion: MV,
       metadata: sam,
       fieldSpec: doiFieldSpec(),
     }),
@@ -706,6 +717,7 @@ const fieldSamples = [
     'PubMedIdField',
     pubMedIdField({
       id: 'https://example.org/fields/pmid',
+      modelVersion: MV,
       metadata: sam,
       fieldSpec: pubMedIdFieldSpec(),
     }),
@@ -714,6 +726,7 @@ const fieldSamples = [
     'RridField',
     rridField({
       id: 'https://example.org/fields/rrid',
+      modelVersion: MV,
       metadata: sam,
       fieldSpec: rridFieldSpec(),
     }),
@@ -722,6 +735,7 @@ const fieldSamples = [
     'NihGrantIdField',
     nihGrantIdField({
       id: 'https://example.org/fields/grant',
+      modelVersion: MV,
       metadata: sam,
       fieldSpec: nihGrantIdFieldSpec(),
     }),
@@ -730,6 +744,7 @@ const fieldSamples = [
     'ControlledTermField',
     controlledTermField({
       id: 'https://example.org/fields/ct',
+      modelVersion: MV,
       metadata: sam,
       fieldSpec: controlledTermFieldSpec(
         ontologySource(
@@ -745,6 +760,7 @@ const fieldSamples = [
     'SingleChoiceField (literal)',
     singleChoiceField({
       id: 'https://example.org/fields/single-lit',
+      modelVersion: MV,
       metadata: sam,
       fieldSpec: literalSingleChoiceFieldSpec({
         options: [literalChoiceOption('A', 'en')],
@@ -755,6 +771,7 @@ const fieldSamples = [
     'MultipleChoiceField (literal)',
     multipleChoiceField({
       id: 'https://example.org/fields/multi-lit',
+      modelVersion: MV,
       metadata: sam,
       fieldSpec: {
         kind: 'LiteralMultipleChoiceFieldSpec',
@@ -779,6 +796,7 @@ describe('Field round-trip', () => {
   it('Field id collapses to a bare string IRI on the wire', () => {
     const f = textField({
       id: 'https://example.org/fields/text',
+      modelVersion: MV,
       metadata: sam,
       fieldSpec: textFieldSpec(),
     });
@@ -790,6 +808,7 @@ describe('Field round-trip', () => {
     const wire = serializeField(
       textField({
         id: 'https://example.org/fields/text',
+        modelVersion: MV,
         metadata: sam,
         fieldSpec: textFieldSpec(),
       }),
@@ -802,6 +821,7 @@ describe('Field round-trip', () => {
     const wire = serializeField(
       textField({
         id: 'https://example.org/fields/text',
+        modelVersion: MV,
         metadata: sam,
         fieldSpec: textFieldSpec(),
       }),
@@ -814,6 +834,7 @@ describe('Field round-trip', () => {
     const wire = serializeField(
       textField({
         id: 'https://example.org/fields/text',
+        modelVersion: MV,
         metadata: sam,
         fieldSpec: textFieldSpec(),
       }),
@@ -995,6 +1016,7 @@ describe('PresentationComponent round-trip', () => {
   it('RichTextComponent', () => {
     const c = richTextComponent({
       id: 'https://example.org/pc/rt',
+      modelVersion: MV,
       metadata: am,
       html: '<p>hi</p>',
     });
@@ -1005,6 +1027,7 @@ describe('PresentationComponent round-trip', () => {
   it('ImageComponent', () => {
     const c = imageComponent({
       id: 'https://example.org/pc/img',
+      modelVersion: MV,
       metadata: am,
       image: 'https://example.org/img.png',
     });
@@ -1015,6 +1038,7 @@ describe('PresentationComponent round-trip', () => {
   it('YoutubeVideoComponent', () => {
     const c = youtubeVideoComponent({
       id: 'https://example.org/pc/vid',
+      modelVersion: MV,
       metadata: am,
       video: 'https://www.youtube.com/watch?v=abc',
     });
@@ -1025,6 +1049,7 @@ describe('PresentationComponent round-trip', () => {
   it('SectionBreakComponent', () => {
     const c = sectionBreakComponent({
       id: 'https://example.org/pc/sec',
+      modelVersion: MV,
       metadata: am,
     });
     const wire = serializePresentationComponent(c);
@@ -1034,6 +1059,7 @@ describe('PresentationComponent round-trip', () => {
   it('PageBreakComponent', () => {
     const c = pageBreakComponent({
       id: 'https://example.org/pc/page',
+      modelVersion: MV,
       metadata: am,
     });
     const wire = serializePresentationComponent(c);
@@ -1043,6 +1069,7 @@ describe('PresentationComponent round-trip', () => {
   it('id collapses to bare string', () => {
     const c = richTextComponent({
       id: 'https://example.org/pc/rt',
+      modelVersion: MV,
       metadata: am,
       html: '<p>hi</p>',
     });
@@ -1055,6 +1082,7 @@ describe('PresentationComponent round-trip', () => {
 
 const sampleTemplate = template({
   id: 'https://example.org/templates/demo',
+  modelVersion: MV,
   metadata: sam,
   header: 'Hello',
   footer: 'Bye',
@@ -1111,6 +1139,7 @@ describe('Template round-trip', () => {
 
 const sampleInstance = templateInstance({
   id: templateInstanceId('https://example.org/instances/i1'),
+  modelVersion: MV,
   metadata: am,
   templateRef: 'https://example.org/templates/demo',
   values: [
@@ -1176,6 +1205,7 @@ describe('Generic serialize() / parse() dispatcher', () => {
   it('serialize() dispatches by kind for Field', () => {
     const f = textField({
       id: 'https://example.org/fields/x',
+      modelVersion: MV,
       metadata: sam,
       fieldSpec: textFieldSpec(),
     });
@@ -1186,6 +1216,7 @@ describe('Generic serialize() / parse() dispatcher', () => {
   it('serialize() dispatches by kind for PresentationComponent', () => {
     const c = sectionBreakComponent({
       id: 'https://example.org/pc/x',
+      modelVersion: MV,
       metadata: am,
     });
     const wire = serialize(c);

@@ -19,7 +19,7 @@
 // `src/literals/temporal-literals.ts`. The `defaultValue` slot on
 // `EmbeddedDateTimeField` is a `DateTimeLiteral` directly (no wrapper).
 
-import { type Iri, iri } from '../leaves/index.js';
+import { type Iri, iri, parseSemanticVersion } from '../leaves/index.js';
 import {
   type DateTimeLiteral,
   dateTimeLiteral,
@@ -157,18 +157,26 @@ export type TemporalFieldSpec = DateFieldSpec | TimeFieldSpec | DateTimeFieldSpe
 export interface DateTimeField {
   readonly kind: 'DateTimeField';
   readonly id: DateTimeFieldId;
+  readonly modelVersion: string;
   readonly metadata: SchemaArtifactMetadata;
   readonly fieldSpec: DateTimeFieldSpec;
 }
 
 export interface DateTimeFieldInit {
   readonly id: DateTimeFieldId | Iri | string;
+  readonly modelVersion: string;
   readonly metadata: SchemaArtifactMetadata;
   readonly fieldSpec: DateTimeFieldSpec;
 }
 
 export const dateTimeField = (init: DateTimeFieldInit): DateTimeField =>
-  ({ kind: 'DateTimeField', id: dateTimeFieldId(init.id), metadata: init.metadata, fieldSpec: init.fieldSpec });
+  ({
+    kind: 'DateTimeField',
+    id: dateTimeFieldId(init.id),
+    modelVersion: parseSemanticVersion(init.modelVersion),
+    metadata: init.metadata,
+    fieldSpec: init.fieldSpec,
+  });
 
 // =====================================================================
 // 5. EmbeddedField

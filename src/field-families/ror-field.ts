@@ -18,7 +18,7 @@
 // One of six external-authority families; shares the value-shape
 // pattern (`iri` + optional `label`) via `external-authority-shared.ts`.
 
-import { type Iri, iri } from '../leaves/index.js';
+import { type Iri, iri, parseSemanticVersion } from '../leaves/index.js';
 import type { SchemaArtifactMetadata } from '../metadata/index.js';
 import type { ValueRequirement } from '../embedded/requirement.js';
 import type { Cardinality } from '../embedded/cardinality.js';
@@ -123,18 +123,26 @@ export const isRorFieldSpec = (x: unknown): x is RorFieldSpec =>
 export interface RorField {
   readonly kind: 'RorField';
   readonly id: RorFieldId;
+  readonly modelVersion: string;
   readonly metadata: SchemaArtifactMetadata;
   readonly fieldSpec: RorFieldSpec;
 }
 
 export interface RorFieldInit {
   readonly id: RorFieldId | Iri | string;
+  readonly modelVersion: string;
   readonly metadata: SchemaArtifactMetadata;
   readonly fieldSpec: RorFieldSpec;
 }
 
 export const rorField = (init: RorFieldInit): RorField =>
-  ({ kind: 'RorField', id: rorFieldId(init.id), metadata: init.metadata, fieldSpec: init.fieldSpec });
+  ({
+    kind: 'RorField',
+    id: rorFieldId(init.id),
+    modelVersion: parseSemanticVersion(init.modelVersion),
+    metadata: init.metadata,
+    fieldSpec: init.fieldSpec,
+  });
 
 // =====================================================================
 // 5. EmbeddedField

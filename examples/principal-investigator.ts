@@ -148,10 +148,14 @@ function meta(name: string, description: string): SchemaArtifactMetadata {
     versioning: schemaVersioning({
       version: '1.0.0',
       status: 'draft',
-      modelVersion: '0.1.0',
     }),
   });
 }
+
+// Every concrete artifact (Field, Template, TemplateInstance,
+// PresentationComponent) carries a top-level `modelVersion` recording the
+// CEDAR structural model version it was authored against.
+const MODEL_VERSION = '0.1.0';
 
 // ---- Reusable Field artifacts -----------------------------------------
 //
@@ -164,6 +168,7 @@ function meta(name: string, description: string): SchemaArtifactMetadata {
 // optional init object (omit it to allow any non-empty string).
 const fullName = textField({
   id: `${FIELDS}full-name`,
+  modelVersion: MODEL_VERSION,
   metadata: meta('Full Name', 'Full legal name of the principal investigator.'),
   fieldSpec: textFieldSpec({
     minLength: 1,
@@ -180,6 +185,7 @@ const fullName = textField({
 // which is backed by an ontology.
 const academicTitle = singleChoiceField({
   id: `${FIELDS}academic-title`,
+  modelVersion: MODEL_VERSION,
   metadata: meta('Academic Title', 'Academic rank or position (literal label).'),
   fieldSpec: literalSingleChoiceFieldSpec({
     options: [
@@ -200,6 +206,7 @@ const academicTitle = singleChoiceField({
 // The IRIs here resolve to terms in the OBO Role Ontology (RoleO).
 const academicRank = singleChoiceField({
   id: `${FIELDS}academic-rank`,
+  modelVersion: MODEL_VERSION,
   metadata: meta(
     'Academic Rank',
     'Academic rank drawn from the OBO Role Ontology (RoleO).',
@@ -236,18 +243,21 @@ const academicRank = singleChoiceField({
 
 const email = emailField({
   id: `${FIELDS}email`,
+  modelVersion: MODEL_VERSION,
   metadata: meta('Email Address', 'Primary work email.'),
   fieldSpec: emailFieldSpec(),
 });
 
 const phone = phoneNumberField({
   id: `${FIELDS}phone`,
+  modelVersion: MODEL_VERSION,
   metadata: meta('Phone Number', 'Primary work phone, in international format.'),
   fieldSpec: phoneNumberFieldSpec(),
 });
 
 const orcid = orcidField({
   id: `${FIELDS}orcid`,
+  modelVersion: MODEL_VERSION,
   metadata: meta('ORCID iD', 'ORCID identifier (https://orcid.org/...).'),
   fieldSpec: orcidFieldSpec(),
 });
@@ -256,12 +266,14 @@ const orcid = orcidField({
 // name field happens to have no validation requirement of its own.
 const institutionName = textField({
   id: `${FIELDS}institution-name`,
+  modelVersion: MODEL_VERSION,
   metadata: meta('Institution Name', 'Name of the home institution.'),
   fieldSpec: textFieldSpec(),
 });
 
 const institutionRor = rorField({
   id: `${FIELDS}institution-ror`,
+  modelVersion: MODEL_VERSION,
   metadata: meta(
     'Institution ROR',
     'Research Organization Registry identifier for the home institution.',
@@ -271,6 +283,7 @@ const institutionRor = rorField({
 
 const department = textField({
   id: `${FIELDS}department`,
+  modelVersion: MODEL_VERSION,
   metadata: meta('Department', 'Department or division within the institution.'),
   fieldSpec: textFieldSpec(),
 });
@@ -279,6 +292,7 @@ const department = textField({
 // values can pin partial dates (year, year+month) — see grammar §Field Specs.
 const appointmentDate = dateField({
   id: `${FIELDS}appointment-date`,
+  modelVersion: MODEL_VERSION,
   metadata: meta('Appointment Date', 'Start date of current appointment.'),
   fieldSpec: dateFieldSpec({ dateValueType: 'fullDate' }),
 });
@@ -287,6 +301,7 @@ const appointmentDate = dateField({
 // produce a multi-valued embedding from a single-valued reusable Field.
 const researchInterest = textField({
   id: `${FIELDS}research-interest`,
+  modelVersion: MODEL_VERSION,
   metadata: meta('Research Interest', 'A single research interest or keyword.'),
   fieldSpec: textFieldSpec(),
 });
@@ -304,6 +319,7 @@ const researchInterest = textField({
 // Here we use a single OntologySource over MeSH.
 const primaryResearchArea = controlledTermField({
   id: `${FIELDS}primary-research-area`,
+  modelVersion: MODEL_VERSION,
   metadata: meta(
     'Primary Research Area',
     "The PI's primary research area, looked up from MeSH.",
@@ -336,6 +352,7 @@ const primaryResearchArea = controlledTermField({
 
 const intro = richTextComponent({
   id: `${COMPONENTS}pi-intro`,
+  modelVersion: MODEL_VERSION,
   metadata: artifactMeta('PI Intro', 'Introductory text shown above the PI form.'),
   html:
     '<p>Please provide details for the <strong>principal investigator</strong> ' +
@@ -375,6 +392,7 @@ const intro = richTextComponent({
 
 export const principalInvestigatorTemplate: Template = template({
   id: `${TEMPLATES}principal-investigator`,
+  modelVersion: MODEL_VERSION,
   metadata: meta(
     'Principal Investigator Details',
     'Identity, contact information, and institutional affiliation of a study PI.',
@@ -556,6 +574,7 @@ export const fieldSummary: readonly EmbeddedFieldSummary[] =
 
 export const exampleInstance: TemplateInstance = templateInstance({
   id: templateInstanceId('https://example.org/cedar/instances/pi/0001'),
+  modelVersion: MODEL_VERSION,
   metadata: artifactMeta(
     'PI: Jane Smith',
     'Example PI details for study EX-2026-001.',

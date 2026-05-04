@@ -32,7 +32,6 @@ const meta = schemaArtifactMetadata({
   versioning: schemaVersioning({
     version: '1.0.0',
     status: 'draft',
-    modelVersion: '2.0.0',
   }),
 });
 
@@ -57,6 +56,7 @@ describe('Template', () => {
   it('builds a template with the minimum required fields', () => {
     const t = template({
       id: templateId('https://example.org/templates/demo'),
+      modelVersion: '2.0.0',
       metadata: meta,
     });
     expect(t.kind).toBe('Template');
@@ -70,6 +70,7 @@ describe('Template', () => {
   it('coerces a string id into a TemplateId', () => {
     const t = template({
       id: 'https://example.org/templates/demo',
+      modelVersion: '2.0.0',
       metadata: meta,
     });
     expect(t.id.kind).toBe('TemplateId');
@@ -79,6 +80,7 @@ describe('Template', () => {
   it('preserves the order of embedded artifacts', () => {
     const t = template({
       id: templateId('https://example.org/templates/demo'),
+      modelVersion: '2.0.0',
       metadata: meta,
       embedded: [introEmbedding, titleEmbedding, addressEmbedding, subtitleEmbedding],
     });
@@ -93,6 +95,7 @@ describe('Template', () => {
   it('carries header and footer when supplied', () => {
     const t = template({
       id: templateId('https://example.org/templates/demo'),
+      modelVersion: '2.0.0',
       metadata: meta,
       header: 'Welcome',
       footer: 'Thanks for participating.',
@@ -109,6 +112,7 @@ describe('Template', () => {
     expect(() =>
       template({
         id: templateId('https://example.org/templates/demo'),
+        modelVersion: '2.0.0',
         metadata: meta,
         embedded: [titleEmbedding, dup],
       }),
@@ -118,11 +122,13 @@ describe('Template', () => {
   it('permits the same key across two distinct templates', () => {
     const t1 = template({
       id: templateId('https://example.org/templates/a'),
+      modelVersion: '2.0.0',
       metadata: meta,
       embedded: [titleEmbedding],
     });
     const t2 = template({
       id: templateId('https://example.org/templates/b'),
+      modelVersion: '2.0.0',
       metadata: meta,
       embedded: [titleEmbedding],
     });
@@ -135,11 +141,13 @@ describe('SchemaArtifact union', () => {
   it('isSchemaArtifact recognises both Field and Template', () => {
     const f = textField({
       id: textFieldId('https://example.org/fields/x'),
+      modelVersion: '2.0.0',
       metadata: meta,
       fieldSpec: textFieldSpec(),
     });
     const t: Template = template({
       id: templateId('https://example.org/templates/demo'),
+      modelVersion: '2.0.0',
       metadata: meta,
     });
     const all: SchemaArtifact[] = [f, t];

@@ -147,7 +147,6 @@ export function serializeSchemaVersioning(x: SchemaVersioning): unknown {
   const out: Record<string, unknown> = {
     version: x.version,
     status: x.status,
-    modelVersion: x.modelVersion,
   };
   if (x.previousVersion !== undefined)
     out['previousVersion'] = serializeIri(x.previousVersion);
@@ -163,7 +162,6 @@ export function parseSchemaVersioning(
   expectKnownProperties(o, [
     'version',
     'status',
-    'modelVersion',
     'previousVersion',
     'derivedFrom',
   ]);
@@ -175,19 +173,14 @@ export function parseSchemaVersioning(
   if (!('status' in o)) {
     throw new CedarConstructionError(`${where}: missing required "status"`);
   }
-  if (!('modelVersion' in o)) {
-    throw new CedarConstructionError(`${where}: missing required "modelVersion"`);
-  }
   const init: {
     version: string;
     status: Status;
-    modelVersion: string;
     previousVersion?: string;
     derivedFrom?: string;
   } = {
     version: expectString(o['version'], `${where}.version`),
     status: parseStatus(o['status'], `${where}.status`),
-    modelVersion: expectString(o['modelVersion'], `${where}.modelVersion`),
   };
   if ('previousVersion' in o)
     init.previousVersion = expectString(o['previousVersion'], `${where}.previousVersion`);
