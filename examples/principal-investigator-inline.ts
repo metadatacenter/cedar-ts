@@ -26,7 +26,6 @@ import {
   controlledTermValue,
   dateField,
   dateFieldSpec,
-  descriptiveMetadata,
   emailField,
   emailFieldSpec,
   embeddedControlledTermField,
@@ -98,7 +97,8 @@ const provenanceTimestamps = {
 
 function artifactMeta(name: string, description: string): ArtifactMetadata {
   return artifactMetadata({
-    descriptiveMetadata: descriptiveMetadata({ name, description }),
+    name,
+    description,
     provenance: temporalProvenance(provenanceTimestamps),
   });
 }

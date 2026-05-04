@@ -1,7 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
   artifactMetadata,
-  descriptiveMetadata,
   embeddedPresentationComponent,
   embeddedTemplate,
   embeddedTextField,
@@ -20,7 +19,6 @@ import {
   type Template,
 } from '../src/index.js';
 
-const dm = descriptiveMetadata({ name: 'Demo Template' });
 const tp = temporalProvenance({
   createdOn: '2024-01-01T00:00:00Z',
   createdBy: 'https://example.org/u',
@@ -28,7 +26,7 @@ const tp = temporalProvenance({
   modifiedBy: 'https://example.org/u',
 });
 const meta = schemaArtifactMetadata({
-  artifact: artifactMetadata({ descriptiveMetadata: dm, provenance: tp }),
+  artifact: artifactMetadata({ name: 'Demo Template', provenance: tp }),
   versioning: schemaVersioning({
     version: '1.0.0',
     status: 'draft',

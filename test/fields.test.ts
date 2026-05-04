@@ -16,7 +16,6 @@ import {
   dateTimeField,
   dateTimeFieldId,
   dateTimeFieldSpec,
-  descriptiveMetadata,
   doiField,
   doiFieldId,
   doiFieldSpec,
@@ -74,7 +73,6 @@ import {
   type NumericFieldSpec,
 } from '../src/index.js';
 
-const dm = descriptiveMetadata({ name: 'X' });
 const tp = temporalProvenance({
   createdOn: '2024-01-01T00:00:00Z',
   createdBy: 'https://example.org/u',
@@ -82,7 +80,7 @@ const tp = temporalProvenance({
   modifiedBy: 'https://example.org/u',
 });
 const meta = schemaArtifactMetadata({
-  artifact: artifactMetadata({ descriptiveMetadata: dm, provenance: tp }),
+  artifact: artifactMetadata({ name: 'X', provenance: tp }),
   versioning: schemaVersioning({
     version: '1.0.0',
     status: 'draft',

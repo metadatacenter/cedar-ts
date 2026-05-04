@@ -39,7 +39,6 @@ import {
   template,
   richTextComponent,
   artifactMetadata,
-  descriptiveMetadata,
   temporalProvenance,
   schemaArtifactMetadata,
   schemaVersioning,
@@ -54,10 +53,7 @@ const tp = temporalProvenance({
   modifiedBy: 'https://example.org/u',
 });
 const meta = schemaArtifactMetadata({
-  artifact: artifactMetadata({
-    descriptiveMetadata: descriptiveMetadata({ name: 'X' }),
-    provenance: tp,
-  }),
+  artifact: artifactMetadata({ name: 'X', provenance: tp }),
   versioning: schemaVersioning({
     version: '1.0.0',
     status: 'draft',
@@ -112,10 +108,7 @@ describe('Inline Field/Template/PresentationComponent reference inputs', () => {
     const pc = richTextComponent({
       id: presentationComponentId('https://example.org/pc/intro'),
       modelVersion: '2.0.0',
-      metadata: artifactMetadata({
-        descriptiveMetadata: descriptiveMetadata({ name: 'Intro' }),
-        provenance: tp,
-      }),
+      metadata: artifactMetadata({ name: 'Intro', provenance: tp }),
       html: '<p>hi</p>',
     });
     const ep = embeddedPresentationComponent({ key: 'intro', reference: pc });

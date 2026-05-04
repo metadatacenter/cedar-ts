@@ -33,7 +33,6 @@ import {
   dateField,
   dateFieldSpec,
   DEFAULT_VALUE_REQUIREMENT,
-  descriptiveMetadata,
   embeddedControlledTermField,
   embeddedDateField,
   embeddedEmailField,
@@ -136,7 +135,8 @@ const provenanceTimestamps = {
 // Returns plain ArtifactMetadata (no version / status / model-version).
 function artifactMeta(name: string, description: string): ArtifactMetadata {
   return artifactMetadata({
-    descriptiveMetadata: descriptiveMetadata({ name, description }),
+    name,
+    description,
     provenance: temporalProvenance(provenanceTimestamps),
   });
 }

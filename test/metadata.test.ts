@@ -1,7 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
   CedarConstructionError,
-  descriptiveMetadata,
   temporalProvenance,
   schemaVersioning,
   STATUSES,
@@ -13,34 +12,6 @@ import {
   iri,
   langTaggedLiteral,
 } from '../src/index.js';
-
-describe('DescriptiveMetadata', () => {
-  it('requires only a name and defaults altLabels to empty', () => {
-    const dm = descriptiveMetadata({ name: 'Title' });
-    expect(dm.name).toEqual([{ value: 'Title', lang: 'und' }]);
-    expect(dm.altLabels).toEqual([]);
-    expect('description' in dm).toBe(false);
-    expect('identifier' in dm).toBe(false);
-    expect('preferredLabel' in dm).toBe(false);
-  });
-
-  it('passes through optional fields when provided', () => {
-    const dm = descriptiveMetadata({
-      name: 'Title',
-      description: 'The study title',
-      identifier: 'study-001',
-      preferredLabel: 'Study title',
-      altLabels: ['Title', 'Name of study'],
-    });
-    expect(dm.description).toEqual([{ value: 'The study title', lang: 'und' }]);
-    expect(dm.identifier).toBe('study-001');
-    expect(dm.preferredLabel).toEqual([{ value: 'Study title', lang: 'und' }]);
-    expect(dm.altLabels).toEqual([
-      [{ value: 'Title', lang: 'und' }],
-      [{ value: 'Name of study', lang: 'und' }],
-    ]);
-  });
-});
 
 describe('TemporalProvenance', () => {
   it('parses string inputs into typed leaves', () => {
@@ -137,7 +108,6 @@ describe('Annotation', () => {
 });
 
 describe('ArtifactMetadata and SchemaArtifactMetadata', () => {
-  const dm = descriptiveMetadata({ name: 'Test' });
   const tp = temporalProvenance({
     createdOn: '2024-01-01T00:00:00Z',
     createdBy: 'https://example.org/u',
@@ -149,11 +119,37 @@ describe('ArtifactMetadata and SchemaArtifactMetadata', () => {
     status: 'draft',
   });
 
-  it('ArtifactMetadata bundles descriptive + provenance + annotations', () => {
-    const m = artifactMetadata({ descriptiveMetadata: dm, provenance: tp });
+  it('requires only a name and defaults altLabels and annotations to empty', () => {
+    const m = artifactMetadata({ name: 'Title', provenance: tp });
+    expect(m.name).toEqual([{ value: 'Title', lang: 'und' }]);
+    expect(m.altLabels).toEqual([]);
     expect(m.annotations).toEqual([]);
-    const m2 = artifactMetadata({
-      descriptiveMetadata: dm,
+    expect('description' in m).toBe(false);
+    expect('identifier' in m).toBe(false);
+    expect('preferredLabel' in m).toBe(false);
+  });
+
+  it('passes through optional descriptive fields when provided', () => {
+    const m = artifactMetadata({
+      name: 'Title',
+      description: 'The study title',
+      identifier: 'study-001',
+      preferredLabel: 'Study title',
+      altLabels: ['Title', 'Name of study'],
+      provenance: tp,
+    });
+    expect(m.description).toEqual([{ value: 'The study title', lang: 'und' }]);
+    expect(m.identifier).toBe('study-001');
+    expect(m.preferredLabel).toEqual([{ value: 'Study title', lang: 'und' }]);
+    expect(m.altLabels).toEqual([
+      [{ value: 'Title', lang: 'und' }],
+      [{ value: 'Name of study', lang: 'und' }],
+    ]);
+  });
+
+  it('carries annotations when provided', () => {
+    const m = artifactMetadata({
+      name: 'Test',
       provenance: tp,
       annotations: [
         annotation(
@@ -162,11 +158,11 @@ describe('ArtifactMetadata and SchemaArtifactMetadata', () => {
         ),
       ],
     });
-    expect(m2.annotations.length).toBe(1);
+    expect(m.annotations.length).toBe(1);
   });
 
   it('SchemaArtifactMetadata adds schema versioning', () => {
-    const m = artifactMetadata({ descriptiveMetadata: dm, provenance: tp });
+    const m = artifactMetadata({ name: 'Test', provenance: tp });
     const sm = schemaArtifactMetadata({ artifact: m, versioning: sv });
     expect(sm.artifact).toBe(m);
     expect(sm.versioning).toBe(sv);

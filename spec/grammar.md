@@ -51,7 +51,7 @@ A conceptual overview of the model — describing the principal categories, thei
 - [Artifact Identity](#artifact-identity)
 - [Artifact Metadata](#artifact-metadata)
   - [Aggregate Structure](#aggregate-structure)
-  - [Descriptive Metadata](#descriptive-metadata)
+  - [Descriptive Properties](#descriptive-properties)
   - [Temporal Provenance](#temporal-provenance)
   - [Schema Versioning](#schema-versioning)
   - [Annotations](#annotations)
@@ -719,15 +719,21 @@ SchemaArtifactMetadata ::= schema_artifact_metadata(
                            )
 
 ArtifactMetadata ::= artifact_metadata(
-                       DescriptiveMetadata
+                       Name
+                       [Description]
+                       [Identifier]
+                       [PreferredLabel]
+                       AlternativeLabel*
                        TemporalProvenance
                        Annotation*
                      )
 ```
 
-### Descriptive Metadata
+The descriptive properties — `Name`, `Description`, `Identifier`, `PreferredLabel`, and `AlternativeLabel` — sit directly on `ArtifactMetadata` rather than under a separate descriptive grouping. They are described in [Descriptive Properties](#descriptive-properties).
 
-`DescriptiveMetadata` identifies the human-oriented descriptive properties of an artifact. These properties support naming, explanatory text, and external or local identifiers used for cataloging. `Name` is the required user-supplied name of the artifact. `Description`, when present, is extended textual description explaining the artifact's purpose and content. `Identifier`, when present, is a user-specified external identifier intended for integration with institutional or external systems. `PreferredLabel`, when present, is the primary display label shown to end users — for fields, this is the question text presented in a rendered form. `AlternativeLabel`, when present, provides additional display labels for the artifact.
+### Descriptive Properties
+
+The descriptive properties identify the human-oriented descriptive aspects of an artifact. They support naming, explanatory text, and external or local identifiers used for cataloging. `Name` is the required user-supplied name of the artifact. `Description`, when present, is extended textual description explaining the artifact's purpose and content. `Identifier`, when present, is a user-specified external identifier intended for integration with institutional or external systems. `PreferredLabel`, when present, is the primary display label shown to end users — for fields, this is the question text presented in a rendered form. `AlternativeLabel`, when present, provides additional display labels for the artifact.
 
 ```ebnf
 Name ::= name(
@@ -741,19 +747,11 @@ Description ::= description(
 Identifier ::= identifier(
                  string
                )
-
-DescriptiveMetadata ::= descriptive_metadata(
-                          Name
-                          [Description]
-                          [Identifier]
-                          [PreferredLabel]
-                          AlternativeLabel*
-                        )
 ```
 
 `Name`, `Description`, and `Identifier` carry arbitrary Unicode string values. `PreferredLabel` is defined in the [Controlled Term Value](#controlled-term-value) section; `AlternativeLabel` is defined in the [Label Override](#label-override) section.
 
-> **Note:** Confirm with the CEDAR team that `PreferredLabel` and `AlternativeLabel` belong on `DescriptiveMetadata` for all artifact kinds rather than on a field-specific metadata structure. The v2.0.0 conceptual document (§4.1) describes these in the context of fields specifically; it is worth verifying whether templates, presentation components, and instances should carry them too.
+> **Note:** Confirm with the CEDAR team that `PreferredLabel` and `AlternativeLabel` belong on `ArtifactMetadata` for all artifact kinds rather than on a field-specific metadata structure. The v2.0.0 conceptual document (§4.1) describes these in the context of fields specifically; it is worth verifying whether templates, presentation components, and instances should carry them too.
 
 ### Temporal Provenance
 

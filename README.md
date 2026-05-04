@@ -27,7 +27,6 @@ instance:
 ```ts
 import {
   artifactMetadata,
-  descriptiveMetadata,
   embeddedTextField,
   fieldValue,
   schemaArtifactMetadata,
@@ -53,10 +52,8 @@ const fullName = textField({
   id: 'https://example.org/cedar/fields/full-name',
   metadata: schemaArtifactMetadata({
     artifact: artifactMetadata({
-      descriptiveMetadata: descriptiveMetadata({
-        name: 'Full Name',
-        description: 'Full legal name of the person.',
-      }),
+      name: 'Full Name',
+      description: 'Full legal name of the person.',
       provenance,
     }),
     versioning: schemaVersioning({
@@ -71,10 +68,7 @@ const fullName = textField({
 const tpl = template({
   id: 'https://example.org/cedar/templates/person',
   metadata: schemaArtifactMetadata({
-    artifact: artifactMetadata({
-      descriptiveMetadata: descriptiveMetadata({ name: 'Person' }),
-      provenance,
-    }),
+    artifact: artifactMetadata({ name: 'Person', provenance }),
     versioning: schemaVersioning({
       version: '1.0.0',
       status: 'draft',
@@ -93,10 +87,7 @@ const tpl = template({
 
 const inst = templateInstance({
   id: templateInstanceId('https://example.org/instances/person/1'),
-  metadata: artifactMetadata({
-    descriptiveMetadata: descriptiveMetadata({ name: 'Jane Smith' }),
-    provenance,
-  }),
+  metadata: artifactMetadata({ name: 'Jane Smith', provenance }),
   templateRef: tpl.id,
   values: [fieldValue('full_name', textValue('Jane Smith'))],
 });

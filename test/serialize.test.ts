@@ -21,7 +21,6 @@ import {
   dateTimeFieldSpec,
   dateTimeLiteral,
   dateTimeValue,
-  descriptiveMetadata,
   doiField,
   doiFieldSpec,
   doiValue,
@@ -180,14 +179,13 @@ import {
 
 // ---- Shared metadata fixtures ----------------------------------------
 
-const dm = descriptiveMetadata({ name: 'Demo' });
 const tp = temporalProvenance({
   createdOn: '2024-01-01T00:00:00Z',
   createdBy: 'https://example.org/u',
   modifiedOn: '2024-01-02T00:00:00Z',
   modifiedBy: 'https://example.org/u',
 });
-const am = artifactMetadata({ descriptiveMetadata: dm, provenance: tp });
+const am = artifactMetadata({ name: 'Demo', provenance: tp });
 const sam = schemaArtifactMetadata({
   artifact: am,
   versioning: schemaVersioning({

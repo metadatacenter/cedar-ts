@@ -4,7 +4,6 @@ import {
   attributeValueField,
   attributeValueFieldId,
   attributeValueFieldSpec,
-  descriptiveMetadata,
   fieldValue,
   fullDateLiteral,
   fullDateValue,
@@ -32,14 +31,13 @@ import {
   type TemplateInstance,
 } from '../src/index.js';
 
-const dm = descriptiveMetadata({ name: 'Demo Instance' });
 const tp = temporalProvenance({
   createdOn: '2024-01-01T00:00:00Z',
   createdBy: 'https://example.org/u',
   modifiedOn: '2024-01-01T00:00:00Z',
   modifiedBy: 'https://example.org/u',
 });
-const am = artifactMetadata({ descriptiveMetadata: dm, provenance: tp });
+const am = artifactMetadata({ name: 'Demo Instance', provenance: tp });
 
 const tref = templateId('https://example.org/templates/demo');
 const titleKey = 'title';

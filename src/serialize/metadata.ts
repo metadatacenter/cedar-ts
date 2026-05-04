@@ -1,13 +1,11 @@
 // =====================================================================
-// metadata — wire-form serialize/parse for the descriptive / temporal-
-// provenance / schema-versioning / annotations / artifact-metadata
-// productions.
+// metadata — wire-form serialize/parse for the temporal-provenance,
+// schema-versioning, annotations, and artifact-metadata productions.
 // =====================================================================
 
 import { CedarConstructionError, isIri, iri } from '../leaves/index.js';
 import { isLiteral } from '../literals/index.js';
 import {
-  type DescriptiveMetadata,
   type TemporalProvenance,
   type SchemaVersioning,
   type Status,
@@ -15,7 +13,6 @@ import {
   type AnnotationValue,
   type ArtifactMetadata,
   type SchemaArtifactMetadata,
-  descriptiveMetadata,
   temporalProvenance,
   schemaVersioning,
   annotation,
@@ -39,67 +36,6 @@ import {
   serializeLiteral,
   parseLiteral,
 } from './literals.js';
-
-// ---- DescriptiveMetadata ---------------------------------------------
-
-export function serializeDescriptiveMetadata(x: DescriptiveMetadata): unknown {
-  const out: Record<string, unknown> = {
-    name: serializeMultilingualString(x.name),
-    altLabels: x.altLabels.map(serializeMultilingualString),
-  };
-  if (x.description !== undefined)
-    out['description'] = serializeMultilingualString(x.description);
-  if (x.identifier !== undefined) out['identifier'] = x.identifier;
-  if (x.preferredLabel !== undefined)
-    out['preferredLabel'] = serializeMultilingualString(x.preferredLabel);
-  return out;
-}
-
-export function parseDescriptiveMetadata(
-  x: unknown,
-  where = 'DescriptiveMetadata',
-): DescriptiveMetadata {
-  const o = expectObject(x, where);
-  expectKnownProperties(o, [
-    'name',
-    'description',
-    'identifier',
-    'preferredLabel',
-    'altLabels',
-  ]);
-  rejectNullProperty(o, 'description');
-  rejectNullProperty(o, 'identifier');
-  rejectNullProperty(o, 'preferredLabel');
-  if (!('name' in o)) {
-    throw new CedarConstructionError(`${where}: missing required "name"`);
-  }
-  if (!('altLabels' in o)) {
-    throw new CedarConstructionError(`${where}: missing required "altLabels"`);
-  }
-  const altRaw = expectArray(o['altLabels'], `${where}.altLabels`);
-  const init: {
-    name: ReturnType<typeof parseMultilingualString>;
-    description?: ReturnType<typeof parseMultilingualString>;
-    identifier?: string;
-    preferredLabel?: ReturnType<typeof parseMultilingualString>;
-    altLabels: readonly ReturnType<typeof parseMultilingualString>[];
-  } = {
-    name: parseMultilingualString(o['name'], `${where}.name`),
-    altLabels: altRaw.map((e, i) =>
-      parseMultilingualString(e, `${where}.altLabels[${i}]`),
-    ),
-  };
-  if ('description' in o)
-    init.description = parseMultilingualString(o['description'], `${where}.description`);
-  if ('identifier' in o)
-    init.identifier = expectString(o['identifier'], `${where}.identifier`);
-  if ('preferredLabel' in o)
-    init.preferredLabel = parseMultilingualString(
-      o['preferredLabel'],
-      `${where}.preferredLabel`,
-    );
-  return descriptiveMetadata(init);
-}
 
 // ---- TemporalProvenance ----------------------------------------------
 
@@ -248,7 +184,6 @@ export function parseAnnotation(x: unknown, where = 'Annotation'): Annotation {
   }
   const propertyIri = expectString(o['property'], `${where}.property`);
   const body = parseAnnotationValue(o['body'], `${where}.body`);
-  // annotation() accepts string IRIs + AnnotationValue.
   if (isLiteral(body)) {
     return annotation(propertyIri, body);
   }
@@ -256,13 +191,37 @@ export function parseAnnotation(x: unknown, where = 'Annotation'): Annotation {
 }
 
 // ---- ArtifactMetadata ------------------------------------------------
+//
+// Wire form is flat: the descriptive properties (name, description,
+// identifier, preferredLabel, altLabels) sit directly alongside
+// `provenance` and `annotations`. Empty `altLabels` and `annotations`
+// are elided.
+
+const ARTIFACT_METADATA_KEYS = [
+  'name',
+  'description',
+  'identifier',
+  'preferredLabel',
+  'altLabels',
+  'provenance',
+  'annotations',
+] as const;
 
 export function serializeArtifactMetadata(x: ArtifactMetadata): unknown {
-  return {
-    descriptiveMetadata: serializeDescriptiveMetadata(x.descriptiveMetadata),
-    provenance: serializeTemporalProvenance(x.provenance),
-    annotations: x.annotations.map(serializeAnnotation),
+  const out: Record<string, unknown> = {
+    name: serializeMultilingualString(x.name),
   };
+  if (x.description !== undefined)
+    out['description'] = serializeMultilingualString(x.description);
+  if (x.identifier !== undefined) out['identifier'] = x.identifier;
+  if (x.preferredLabel !== undefined)
+    out['preferredLabel'] = serializeMultilingualString(x.preferredLabel);
+  if (x.altLabels.length > 0)
+    out['altLabels'] = x.altLabels.map(serializeMultilingualString);
+  out['provenance'] = serializeTemporalProvenance(x.provenance);
+  if (x.annotations.length > 0)
+    out['annotations'] = x.annotations.map(serializeAnnotation);
+  return out;
 }
 
 export function parseArtifactMetadata(
@@ -270,30 +229,58 @@ export function parseArtifactMetadata(
   where = 'ArtifactMetadata',
 ): ArtifactMetadata {
   const o = expectObject(x, where);
-  expectKnownProperties(o, ['descriptiveMetadata', 'provenance', 'annotations']);
-  if (!('descriptiveMetadata' in o)) {
-    throw new CedarConstructionError(`${where}: missing required "descriptiveMetadata"`);
+  expectKnownProperties(o, [...ARTIFACT_METADATA_KEYS]);
+  rejectNullProperty(o, 'description');
+  rejectNullProperty(o, 'identifier');
+  rejectNullProperty(o, 'preferredLabel');
+  if (!('name' in o)) {
+    throw new CedarConstructionError(`${where}: missing required "name"`);
   }
   if (!('provenance' in o)) {
     throw new CedarConstructionError(`${where}: missing required "provenance"`);
   }
-  if (!('annotations' in o)) {
-    throw new CedarConstructionError(`${where}: missing required "annotations"`);
-  }
-  const annoArr = expectArray(o['annotations'], `${where}.annotations`);
-  return artifactMetadata({
-    descriptiveMetadata: parseDescriptiveMetadata(
-      o['descriptiveMetadata'],
-      `${where}.descriptiveMetadata`,
+  const altRaw =
+    'altLabels' in o ? expectArray(o['altLabels'], `${where}.altLabels`) : [];
+  const annoArr =
+    'annotations' in o
+      ? expectArray(o['annotations'], `${where}.annotations`)
+      : [];
+  const init: {
+    name: ReturnType<typeof parseMultilingualString>;
+    description?: ReturnType<typeof parseMultilingualString>;
+    identifier?: string;
+    preferredLabel?: ReturnType<typeof parseMultilingualString>;
+    altLabels: readonly ReturnType<typeof parseMultilingualString>[];
+    provenance: TemporalProvenance;
+    annotations: readonly Annotation[];
+  } = {
+    name: parseMultilingualString(o['name'], `${where}.name`),
+    altLabels: altRaw.map((e, i) =>
+      parseMultilingualString(e, `${where}.altLabels[${i}]`),
     ),
     provenance: parseTemporalProvenance(o['provenance'], `${where}.provenance`),
     annotations: annoArr.map((e, i) =>
       parseAnnotation(e, `${where}.annotations[${i}]`),
     ),
-  });
+  };
+  if ('description' in o)
+    init.description = parseMultilingualString(o['description'], `${where}.description`);
+  if ('identifier' in o)
+    init.identifier = expectString(o['identifier'], `${where}.identifier`);
+  if ('preferredLabel' in o)
+    init.preferredLabel = parseMultilingualString(
+      o['preferredLabel'],
+      `${where}.preferredLabel`,
+    );
+  return artifactMetadata(init);
 }
 
 // ---- SchemaArtifactMetadata ------------------------------------------
+//
+// SchemaArtifactMetadata keeps the `artifact` wrapper on the wire because
+// reusable schema artifacts genuinely carry two coherent groups —
+// the common `ArtifactMetadata` and the schema-specific
+// `SchemaVersioning`.
 
 export function serializeSchemaArtifactMetadata(x: SchemaArtifactMetadata): unknown {
   return {

@@ -2,7 +2,6 @@ import { describe, expect, it } from 'vitest';
 import {
   artifactMetadata,
   CedarConstructionError,
-  descriptiveMetadata,
   imageComponent,
   isImageComponent,
   isPageBreakComponent,
@@ -19,14 +18,13 @@ import {
   type PresentationComponent,
 } from '../src/index.js';
 
-const dm = descriptiveMetadata({ name: 'X' });
 const tp = temporalProvenance({
   createdOn: '2024-01-01T00:00:00Z',
   createdBy: 'https://example.org/u',
   modifiedOn: '2024-01-01T00:00:00Z',
   modifiedBy: 'https://example.org/u',
 });
-const meta = artifactMetadata({ descriptiveMetadata: dm, provenance: tp });
+const meta = artifactMetadata({ name: 'X', provenance: tp });
 const id = presentationComponentId('https://example.org/pc/1');
 const MV = '2.0.0';
 
