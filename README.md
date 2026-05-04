@@ -77,7 +77,7 @@ const tpl = template({
       status: 'draft',
     }),
   }),
-  embedded: [
+  members: [
     embeddedTextField({
       key: 'full_name',
       reference: fullName,

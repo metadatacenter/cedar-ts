@@ -10,11 +10,11 @@
 //     metadata:  SchemaArtifactMetadata
 //     header?:   MultilingualString
 //     footer?:   MultilingualString
-//     embedded:  array<EmbeddedArtifact>
+//     members:   array<EmbeddedArtifact>
 //   }
 //
 // Identifier wrappers collapse to plain strings; `header` / `footer` are
-// MultilingualString arrays; `embedded` is an array of polymorphic
+// MultilingualString arrays; `members` is an array of polymorphic
 // EmbeddedArtifact objects (each tagged with its `kind`).
 
 import { CedarConstructionError } from '../leaves/index.js';
@@ -52,7 +52,7 @@ export function serializeTemplate(x: Template): unknown {
   };
   if (x.header !== undefined) out['header'] = serializeMultilingualString(x.header);
   if (x.footer !== undefined) out['footer'] = serializeMultilingualString(x.footer);
-  out['embedded'] = x.embedded.map((e) => serializeEmbeddedArtifact(e));
+  out['members'] = x.members.map((e) => serializeEmbeddedArtifact(e));
   return out;
 }
 
@@ -65,7 +65,7 @@ export function parseTemplate(x: unknown, where = 'Template'): Template {
     'metadata',
     'header',
     'footer',
-    'embedded',
+    'members',
   ]);
   rejectNullProperty(o, 'header');
   rejectNullProperty(o, 'footer');
@@ -83,8 +83,8 @@ export function parseTemplate(x: unknown, where = 'Template'): Template {
   if (!('metadata' in o)) {
     throw new CedarConstructionError(`${where}: missing required "metadata"`);
   }
-  if (!('embedded' in o)) {
-    throw new CedarConstructionError(`${where}: missing required "embedded"`);
+  if (!('members' in o)) {
+    throw new CedarConstructionError(`${where}: missing required "members"`);
   }
   const id = parseTemplateId(
     expectString(o['id'], `${where}.id`),
@@ -95,9 +95,9 @@ export function parseTemplate(x: unknown, where = 'Template'): Template {
     o['metadata'],
     `${where}.metadata`,
   );
-  const embeddedArr = expectArray(o['embedded'], `${where}.embedded`);
-  const embedded = embeddedArr.map((e, i) =>
-    parseEmbeddedArtifact(e, `${where}.embedded[${i}]`),
+  const membersArr = expectArray(o['members'], `${where}.members`);
+  const members = membersArr.map((e, i) =>
+    parseEmbeddedArtifact(e, `${where}.members[${i}]`),
   );
 
   const init: {
@@ -106,8 +106,8 @@ export function parseTemplate(x: unknown, where = 'Template'): Template {
     metadata: typeof metadata;
     header?: ReturnType<typeof parseMultilingualString>;
     footer?: ReturnType<typeof parseMultilingualString>;
-    embedded: typeof embedded;
-  } = { id, modelVersion, metadata, embedded };
+    members: typeof members;
+  } = { id, modelVersion, metadata, members };
   if ('header' in o)
     init.header = parseMultilingualString(o['header'], `${where}.header`);
   if ('footer' in o)

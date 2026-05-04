@@ -144,7 +144,7 @@ export const principalInvestigatorTemplate: Template = template({
   // two-language localization.
   header: { en: 'Principal Investigator Details', fr: 'Détails du chercheur principal' },
   footer: 'All personal data is handled per the study’s data-management plan.',
-  embedded: [
+  members: [
     // PresentationComponent — contributes structure to the rendered form
     // but produces no instance data.
     embeddedPresentationComponent({

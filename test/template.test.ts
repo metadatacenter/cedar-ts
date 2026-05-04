@@ -59,7 +59,7 @@ describe('Template', () => {
     });
     expect(t.kind).toBe('Template');
     expect(t.id.kind).toBe('TemplateId');
-    expect(t.embedded).toEqual([]);
+    expect(t.members).toEqual([]);
     expect(t.header).toBeUndefined();
     expect(t.footer).toBeUndefined();
     expect(isTemplate(t)).toBe(true);
@@ -80,9 +80,9 @@ describe('Template', () => {
       id: templateId('https://example.org/templates/demo'),
       modelVersion: '2.0.0',
       metadata: meta,
-      embedded: [introEmbedding, titleEmbedding, addressEmbedding, subtitleEmbedding],
+      members: [introEmbedding, titleEmbedding, addressEmbedding, subtitleEmbedding],
     });
-    expect(t.embedded.map((e) => e.key)).toEqual([
+    expect(t.members.map((e) => e.key)).toEqual([
       'intro',
       'title',
       'address',
@@ -112,7 +112,7 @@ describe('Template', () => {
         id: templateId('https://example.org/templates/demo'),
         modelVersion: '2.0.0',
         metadata: meta,
-        embedded: [titleEmbedding, dup],
+        members: [titleEmbedding, dup],
       }),
     ).toThrow(/Duplicate EmbeddedArtifactKey/);
   });
@@ -122,16 +122,16 @@ describe('Template', () => {
       id: templateId('https://example.org/templates/a'),
       modelVersion: '2.0.0',
       metadata: meta,
-      embedded: [titleEmbedding],
+      members: [titleEmbedding],
     });
     const t2 = template({
       id: templateId('https://example.org/templates/b'),
       modelVersion: '2.0.0',
       metadata: meta,
-      embedded: [titleEmbedding],
+      members: [titleEmbedding],
     });
-    expect(t1.embedded[0]?.key).toBe('title');
-    expect(t2.embedded[0]?.key).toBe('title');
+    expect(t1.members[0]?.key).toBe('title');
+    expect(t2.members[0]?.key).toBe('title');
   });
 });
 

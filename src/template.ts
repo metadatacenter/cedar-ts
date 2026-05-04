@@ -59,11 +59,11 @@ export interface Template {
   readonly metadata: SchemaArtifactMetadata;
   readonly header?: MultilingualString;
   readonly footer?: MultilingualString;
-  readonly embedded: readonly EmbeddedArtifact[];
+  readonly members: readonly EmbeddedArtifact[];
 }
 
 // Init type for `template()`. Accepts a bare-string IRI at `id` (widened
-// via `templateId()`); `embedded` is optional and defaults to an empty
+// via `templateId()`); `members` is optional and defaults to an empty
 // sequence. `header` and `footer` accept any MultilingualStringInput
 // (bare string, lang map, etc. — see src/multilingual.ts).
 export interface TemplateInit {
@@ -72,7 +72,7 @@ export interface TemplateInit {
   readonly metadata: SchemaArtifactMetadata;
   readonly header?: MultilingualStringInput;
   readonly footer?: MultilingualStringInput;
-  readonly embedded?: readonly EmbeddedArtifact[];
+  readonly members?: readonly EmbeddedArtifact[];
 }
 
 // Constructor.
@@ -86,7 +86,7 @@ export interface TemplateInit {
 //      values to embeddings by key. Allowing duplicate keys would make
 //      the join ambiguous.
 //
-//   2. The order of `embedded` is preserved as supplied (grammar
+//   2. The order of `members` is preserved as supplied (grammar
 //      §Embedded Artifacts).
 //
 // Cross-template alignment is NOT validated here — e.g., this constructor
@@ -95,8 +95,8 @@ export interface TemplateInit {
 // any default values match the referenced FieldSpec. Such checks belong
 // at the validation layer, not the structural layer.
 export function template(init: TemplateInit): Template {
-  const embedded = init.embedded ?? [];
-  assertUniqueEmbeddedArtifactKeys(embedded);
+  const members = init.members ?? [];
+  assertUniqueEmbeddedArtifactKeys(members);
   const out: {
     kind: 'Template';
     id: TemplateId;
@@ -104,13 +104,13 @@ export function template(init: TemplateInit): Template {
     metadata: SchemaArtifactMetadata;
     header?: MultilingualString;
     footer?: MultilingualString;
-    embedded: readonly EmbeddedArtifact[];
+    members: readonly EmbeddedArtifact[];
   } = {
     kind: 'Template',
     id: typeof init.id === 'string' ? templateId(init.id) : init.id,
     modelVersion: parseSemanticVersion(init.modelVersion),
     metadata: init.metadata,
-    embedded,
+    members,
   };
   if (init.header !== undefined) out.header = multilingualString(init.header);
   if (init.footer !== undefined) out.footer = multilingualString(init.footer);
@@ -121,10 +121,10 @@ export function template(init: TemplateInit): Template {
 // key. Keys are plain strings (validated at the embedded-artifact
 // constructor site against the ASCII-identifier pattern).
 function assertUniqueEmbeddedArtifactKeys(
-  embedded: readonly EmbeddedArtifact[],
+  members: readonly EmbeddedArtifact[],
 ): void {
   const seen = new Set<string>();
-  for (const e of embedded) {
+  for (const e of members) {
     const k = e.key;
     if (seen.has(k)) {
       throw new CedarConstructionError(

@@ -10,7 +10,7 @@
 //      embedding's contextual properties (requirement, cardinality, label
 //      override, semantic property IRI) at the embedding site rather than
 //      on the reusable Field itself.
-//   3. Consume the Template — iterate `template.embedded`, narrow on kind,
+//   3. Consume the Template — iterate `template.members`, narrow on kind,
 //      and project to a small summary record.
 //   4. Build a TemplateInstance whose values conform to the Template.
 //
@@ -404,7 +404,7 @@ export const principalInvestigatorTemplate: Template = template({
   // two-language localization.
   header: { en: 'Principal Investigator Details', fr: 'Détails du chercheur principal' },
   footer: 'All personal data is handled per the study’s data-management plan.',
-  embedded: [
+  members: [
     embeddedPresentationComponent({
       key: 'intro',
       reference: intro,
@@ -529,7 +529,7 @@ export const principalInvestigatorTemplate: Template = template({
 
 // ---- Consuming the Template -------------------------------------------
 //
-// Iterate `template.embedded`, narrow on kind, and project to a small
+// Iterate `template.members`, narrow on kind, and project to a small
 // summary record. `isEmbeddedField` is a type guard, so the array below
 // has element type `EmbeddedField` (with `valueRequirement`, `property`,
 // `cardinality`, etc. accessible without further narrowing).
@@ -541,7 +541,7 @@ export interface EmbeddedFieldSummary {
 }
 
 export const fieldSummary: readonly EmbeddedFieldSummary[] =
-  principalInvestigatorTemplate.embedded
+  principalInvestigatorTemplate.members
     .filter(isEmbeddedField)
     .map((e) => {
       const out: {

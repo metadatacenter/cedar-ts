@@ -1084,7 +1084,7 @@ const sampleTemplate = template({
   metadata: sam,
   header: 'Hello',
   footer: 'Bye',
-  embedded: [
+  members: [
     embeddedTextField({
       key: 'title',
       reference: textFieldId('https://example.org/fields/title'),
@@ -1102,7 +1102,7 @@ const sampleTemplate = template({
 });
 
 describe('Template round-trip', () => {
-  it('round-trips with header/footer/embedded', () => {
+  it('round-trips with header/footer/members', () => {
     const wire = serializeTemplate(sampleTemplate);
     const back = parseTemplate(wire);
     expect(serializeTemplate(back)).toEqual(wire);
@@ -1113,11 +1113,11 @@ describe('Template round-trip', () => {
     expect(wire.id).toBe('https://example.org/templates/demo');
   });
 
-  it('preserves order of embedded artifacts on round-trip', () => {
-    const wire = serializeTemplate(sampleTemplate) as { embedded: { key: string }[] };
-    expect(wire.embedded.map((e) => e.key)).toEqual(['title', 'intro', 'sub']);
+  it('preserves order of members on round-trip', () => {
+    const wire = serializeTemplate(sampleTemplate) as { members: { key: string }[] };
+    expect(wire.members.map((e) => e.key)).toEqual(['title', 'intro', 'sub']);
     const back = parseTemplate(wire);
-    expect(back.embedded.map((e) => e.key)).toEqual(['title', 'intro', 'sub']);
+    expect(back.members.map((e) => e.key)).toEqual(['title', 'intro', 'sub']);
   });
 
   it('rejects wrong kind', () => {
@@ -1128,7 +1128,7 @@ describe('Template round-trip', () => {
 
   it('rejects missing required property', () => {
     const wire = serializeTemplate(sampleTemplate) as Record<string, unknown>;
-    delete wire['embedded'];
+    delete wire['members'];
     expect(() => parseTemplate(wire)).toThrow(/missing required/);
   });
 });
