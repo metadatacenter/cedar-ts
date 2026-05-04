@@ -48,8 +48,11 @@ const provenance = temporalProvenance({
   modifiedBy: author,
 });
 
+const MODEL_VERSION = '0.1.0';
+
 const fullName = textField({
   id: 'https://example.org/cedar/fields/full-name',
+  modelVersion: MODEL_VERSION,
   metadata: schemaArtifactMetadata({
     artifact: artifactMetadata({
       name: 'Full Name',
@@ -59,7 +62,6 @@ const fullName = textField({
     versioning: schemaVersioning({
       version: '1.0.0',
       status: 'draft',
-      modelVersion: '0.1.0',
     }),
   }),
   fieldSpec: textFieldSpec({ minLength: 1 }),
@@ -67,12 +69,12 @@ const fullName = textField({
 
 const tpl = template({
   id: 'https://example.org/cedar/templates/person',
+  modelVersion: MODEL_VERSION,
   metadata: schemaArtifactMetadata({
     artifact: artifactMetadata({ name: 'Person', provenance }),
     versioning: schemaVersioning({
       version: '1.0.0',
       status: 'draft',
-      modelVersion: '0.1.0',
     }),
   }),
   embedded: [
@@ -87,6 +89,7 @@ const tpl = template({
 
 const inst = templateInstance({
   id: templateInstanceId('https://example.org/instances/person/1'),
+  modelVersion: MODEL_VERSION,
   metadata: artifactMetadata({ name: 'Jane Smith', provenance }),
   templateRef: tpl.id,
   values: [fieldValue('full_name', textValue('Jane Smith'))],
