@@ -351,7 +351,7 @@ export const controlledTermField = (
 export interface EmbeddedControlledTermField {
   readonly kind: 'EmbeddedControlledTermField';
   readonly key: string;
-  readonly reference: ControlledTermFieldReference;
+  readonly artifactRef: ControlledTermFieldReference;
   readonly valueRequirement?: ValueRequirement;
   readonly cardinality?: Cardinality;
   readonly visibility?: Visibility;
@@ -361,7 +361,7 @@ export interface EmbeddedControlledTermField {
 }
 
 export interface EmbeddedControlledTermFieldInit extends EmbeddedFieldInitCommon {
-  readonly reference: ControlledTermFieldReference | ControlledTermField;
+  readonly artifactRef: ControlledTermFieldReference | ControlledTermField;
   readonly defaultValue?: ControlledTermValue;
 }
 
@@ -371,7 +371,7 @@ export function embeddedControlledTermField(
   const out: EmbeddedControlledTermField = {
     ...assembleCommon(init),
     kind: 'EmbeddedControlledTermField',
-    reference: fieldRef(init.reference),
+    artifactRef: fieldRef(init.artifactRef),
     ...(init.defaultValue !== undefined && { defaultValue: init.defaultValue }),
   };
   return out;

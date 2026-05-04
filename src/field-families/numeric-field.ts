@@ -210,7 +210,7 @@ export const numericField = (init: NumericFieldInit): NumericField =>
 export interface EmbeddedNumericField {
   readonly kind: 'EmbeddedNumericField';
   readonly key: string;
-  readonly reference: NumericFieldReference;
+  readonly artifactRef: NumericFieldReference;
   readonly valueRequirement?: ValueRequirement;
   readonly cardinality?: Cardinality;
   readonly visibility?: Visibility;
@@ -220,7 +220,7 @@ export interface EmbeddedNumericField {
 }
 
 export interface EmbeddedNumericFieldInit extends EmbeddedFieldInitCommon {
-  readonly reference: NumericFieldReference | NumericField;
+  readonly artifactRef: NumericFieldReference | NumericField;
   // Numeric defaults require explicit construction (datatype ambiguity).
   readonly defaultValue?: NumericLiteral;
 }
@@ -231,7 +231,7 @@ export function embeddedNumericField(
   const out: EmbeddedNumericField = {
     ...assembleCommon(init),
     kind: 'EmbeddedNumericField',
-    reference: fieldRef(init.reference),
+    artifactRef: fieldRef(init.artifactRef),
     ...(init.defaultValue !== undefined && { defaultValue: init.defaultValue }),
   };
   return out;

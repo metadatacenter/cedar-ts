@@ -151,7 +151,7 @@ export const orcidField = (init: OrcidFieldInit): OrcidField =>
 export interface EmbeddedOrcidField {
   readonly kind: 'EmbeddedOrcidField';
   readonly key: string;
-  readonly reference: OrcidFieldReference;
+  readonly artifactRef: OrcidFieldReference;
   readonly valueRequirement?: ValueRequirement;
   readonly cardinality?: Cardinality;
   readonly visibility?: Visibility;
@@ -164,7 +164,7 @@ export interface EmbeddedOrcidField {
 // widened inputs accepted by orcidValue (a bare string IRI, an Iri,
 // a typed OrcidIri, or an init object with iri+label).
 export interface EmbeddedOrcidFieldInit extends EmbeddedFieldInitCommon {
-  readonly reference: OrcidFieldReference | OrcidField;
+  readonly artifactRef: OrcidFieldReference | OrcidField;
   readonly defaultValue?: OrcidValue | AuthorityValueInput<OrcidIri>;
 }
 
@@ -172,7 +172,7 @@ export function embeddedOrcidField(init: EmbeddedOrcidFieldInit): EmbeddedOrcidF
   const out: EmbeddedOrcidField = {
     ...assembleCommon(init),
     kind: 'EmbeddedOrcidField',
-    reference: fieldRef(init.reference),
+    artifactRef: fieldRef(init.artifactRef),
     ...(init.defaultValue !== undefined && {
       defaultValue: isOrcidValue(init.defaultValue)
         ? init.defaultValue

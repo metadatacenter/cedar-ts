@@ -66,7 +66,7 @@ describe('EmbeddedXxxField.defaultValue (flat, no XxxDefaultValue wrapper)', () 
   it('Text — TextLiteral; bare string widens to SimpleLiteral', () => {
     const ef = embeddedTextField({
       key: 't',
-      reference: textFieldId('https://example.org/x'),
+      artifactRef: textFieldId('https://example.org/x'),
       defaultValue: 'Stanford University',
     });
     expect(ef.defaultValue?.kind).toBe('SimpleLiteral');
@@ -76,7 +76,7 @@ describe('EmbeddedXxxField.defaultValue (flat, no XxxDefaultValue wrapper)', () 
     // Pre-built TextLiteral passes through.
     const ef2 = embeddedTextField({
       key: 't',
-      reference: textFieldId('https://example.org/x'),
+      artifactRef: textFieldId('https://example.org/x'),
       defaultValue: simpleLiteral('Hello'),
     });
     expect(ef2.defaultValue?.kind).toBe('SimpleLiteral');
@@ -85,7 +85,7 @@ describe('EmbeddedXxxField.defaultValue (flat, no XxxDefaultValue wrapper)', () 
   it('Numeric — NumericLiteral (explicit datatype required at construction)', () => {
     const ef = embeddedNumericField({
       key: 'n',
-      reference: numericFieldId('https://example.org/x'),
+      artifactRef: numericFieldId('https://example.org/x'),
       defaultValue: numericLiteral('42', 'integer'),
     });
     expect(ef.defaultValue?.kind).toBe('TypedLiteral');
@@ -95,14 +95,14 @@ describe('EmbeddedXxxField.defaultValue (flat, no XxxDefaultValue wrapper)', () 
   it('Date — DateValue (polymorphic; bare string discriminated by lexical shape)', () => {
     const efFull = embeddedDateField({
       key: 'd',
-      reference: dateFieldId('https://example.org/x'),
+      artifactRef: dateFieldId('https://example.org/x'),
       defaultValue: '1990-06-15',
     });
     expect(efFull.defaultValue?.kind).toBe('FullDateValue');
 
     const efYear = embeddedDateField({
       key: 'd',
-      reference: dateFieldId('https://example.org/x'),
+      artifactRef: dateFieldId('https://example.org/x'),
       defaultValue: '1990',
     });
     expect(efYear.defaultValue?.kind).toBe('YearValue');
@@ -110,14 +110,14 @@ describe('EmbeddedXxxField.defaultValue (flat, no XxxDefaultValue wrapper)', () 
     // Pre-built DateValue passes through.
     const efPre = embeddedDateField({
       key: 'd',
-      reference: dateFieldId('https://example.org/x'),
+      artifactRef: dateFieldId('https://example.org/x'),
       defaultValue: fullDateValue(fullDateLiteral('2024-06-15')),
     });
     expect(efPre.defaultValue?.kind).toBe('FullDateValue');
 
     const efYr = embeddedDateField({
       key: 'd',
-      reference: dateFieldId('https://example.org/x'),
+      artifactRef: dateFieldId('https://example.org/x'),
       defaultValue: yearValue('2024'),
     });
     expect(efYr.defaultValue?.kind).toBe('YearValue');
@@ -126,7 +126,7 @@ describe('EmbeddedXxxField.defaultValue (flat, no XxxDefaultValue wrapper)', () 
   it('Time / DateTime — TimeLiteral / DateTimeLiteral; bare string widens', () => {
     const efT = embeddedTimeField({
       key: 't',
-      reference: timeFieldId('https://example.org/x'),
+      artifactRef: timeFieldId('https://example.org/x'),
       defaultValue: '10:30:00',
     });
     expect(efT.defaultValue?.kind).toBe('TypedLiteral');
@@ -134,21 +134,21 @@ describe('EmbeddedXxxField.defaultValue (flat, no XxxDefaultValue wrapper)', () 
 
     const efDT = embeddedDateTimeField({
       key: 'dt',
-      reference: dateTimeFieldId('https://example.org/x'),
+      artifactRef: dateTimeFieldId('https://example.org/x'),
       defaultValue: '2024-06-15T10:30:00',
     });
     expect(efDT.defaultValue?.kind).toBe('TypedLiteral');
 
     const efT2 = embeddedTimeField({
       key: 't',
-      reference: timeFieldId('https://example.org/x'),
+      artifactRef: timeFieldId('https://example.org/x'),
       defaultValue: timeLiteral('11:00:00'),
     });
     expect(efT2.defaultValue?.lexicalForm).toBe('11:00:00');
 
     const efDT2 = embeddedDateTimeField({
       key: 'dt',
-      reference: dateTimeFieldId('https://example.org/x'),
+      artifactRef: dateTimeFieldId('https://example.org/x'),
       defaultValue: dateTimeLiteral('2024-12-31T23:59:59'),
     });
     expect(efDT2.defaultValue?.lexicalForm).toBe('2024-12-31T23:59:59');
@@ -158,7 +158,7 @@ describe('EmbeddedXxxField.defaultValue (flat, no XxxDefaultValue wrapper)', () 
     const cv = controlledTermValue({ term: 'http://example.org/t' });
     const ef = embeddedControlledTermField({
       key: 'ct',
-      reference: controlledTermFieldId('https://example.org/x'),
+      artifactRef: controlledTermFieldId('https://example.org/x'),
       defaultValue: cv,
     });
     expect(ef.defaultValue?.kind).toBe('ControlledTermValue');
@@ -169,14 +169,14 @@ describe('EmbeddedXxxField.defaultValue (flat, no XxxDefaultValue wrapper)', () 
     const choice = literalChoiceValue(typedLiteral('1', XsdNumericDatatypeIri.integer));
     const efS = embeddedSingleChoiceField({
       key: 'sc',
-      reference: singleChoiceFieldId('https://example.org/x'),
+      artifactRef: singleChoiceFieldId('https://example.org/x'),
       defaultValue: choice,
     });
     expect(efS.defaultValue?.kind).toBe('LiteralChoiceValue');
 
     const efM = embeddedMultipleChoiceField({
       key: 'mc',
-      reference: multipleChoiceFieldId('https://example.org/x'),
+      artifactRef: multipleChoiceFieldId('https://example.org/x'),
       defaultValue: choice,
     });
     expect(efM.defaultValue?.kind).toBe('LiteralChoiceValue');
@@ -186,7 +186,7 @@ describe('EmbeddedXxxField.defaultValue (flat, no XxxDefaultValue wrapper)', () 
     const lv = linkValue({ iri: 'https://example.org' });
     const ef = embeddedLinkField({
       key: 'l',
-      reference: linkFieldId('https://example.org/x'),
+      artifactRef: linkFieldId('https://example.org/x'),
       defaultValue: lv,
     });
     expect(ef.defaultValue?.kind).toBe('LinkValue');
@@ -195,7 +195,7 @@ describe('EmbeddedXxxField.defaultValue (flat, no XxxDefaultValue wrapper)', () 
   it('Email / PhoneNumber — SimpleLiteral; bare string widens', () => {
     const ef = embeddedEmailField({
       key: 'em',
-      reference: emailFieldId('https://example.org/x'),
+      artifactRef: emailFieldId('https://example.org/x'),
       defaultValue: 'me@example.org',
     });
     expect(ef.defaultValue?.kind).toBe('SimpleLiteral');
@@ -203,7 +203,7 @@ describe('EmbeddedXxxField.defaultValue (flat, no XxxDefaultValue wrapper)', () 
 
     const ef2 = embeddedPhoneNumberField({
       key: 'ph',
-      reference: phoneNumberFieldId('https://example.org/x'),
+      artifactRef: phoneNumberFieldId('https://example.org/x'),
       defaultValue: '+1-415-555-0100',
     });
     expect(ef2.defaultValue?.kind).toBe('SimpleLiteral');
@@ -212,7 +212,7 @@ describe('EmbeddedXxxField.defaultValue (flat, no XxxDefaultValue wrapper)', () 
   it('External-authority — XxxValue widening (bare string IRI accepted)', () => {
     const ef = embeddedOrcidField({
       key: 'or',
-      reference: orcidFieldId('https://example.org/x'),
+      artifactRef: orcidFieldId('https://example.org/x'),
       defaultValue: 'https://orcid.org/0000-0002-1825-0097',
     });
     expect(ef.defaultValue?.kind).toBe('OrcidValue');
@@ -221,7 +221,7 @@ describe('EmbeddedXxxField.defaultValue (flat, no XxxDefaultValue wrapper)', () 
     const rv = rorValue({ iri: 'https://ror.org/05dxps055' });
     const ef2 = embeddedRorField({
       key: 'ror',
-      reference: rorFieldId('https://example.org/x'),
+      artifactRef: rorFieldId('https://example.org/x'),
       defaultValue: rv,
     });
     expect(ef2.defaultValue).toBe(rv);
@@ -230,7 +230,7 @@ describe('EmbeddedXxxField.defaultValue (flat, no XxxDefaultValue wrapper)', () 
     expect(
       embeddedDoiField({
         key: 'doi',
-        reference: doiFieldId('https://example.org/x'),
+        artifactRef: doiFieldId('https://example.org/x'),
         defaultValue: dv,
       }).defaultValue,
     ).toBe(dv);
@@ -239,7 +239,7 @@ describe('EmbeddedXxxField.defaultValue (flat, no XxxDefaultValue wrapper)', () 
     expect(
       embeddedPubMedIdField({
         key: 'pm',
-        reference: pubMedIdFieldId('https://example.org/x'),
+        artifactRef: pubMedIdFieldId('https://example.org/x'),
         defaultValue: pmv,
       }).defaultValue,
     ).toBe(pmv);
@@ -248,7 +248,7 @@ describe('EmbeddedXxxField.defaultValue (flat, no XxxDefaultValue wrapper)', () 
     expect(
       embeddedRridField({
         key: 'rr',
-        reference: rridFieldId('https://example.org/x'),
+        artifactRef: rridFieldId('https://example.org/x'),
         defaultValue: rrv,
       }).defaultValue,
     ).toBe(rrv);
@@ -257,7 +257,7 @@ describe('EmbeddedXxxField.defaultValue (flat, no XxxDefaultValue wrapper)', () 
     expect(
       embeddedNihGrantIdField({
         key: 'ng',
-        reference: nihGrantIdFieldId('https://example.org/x'),
+        artifactRef: nihGrantIdFieldId('https://example.org/x'),
         defaultValue: ngv,
       }).defaultValue,
     ).toBe(ngv);

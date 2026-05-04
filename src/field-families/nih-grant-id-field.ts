@@ -151,7 +151,7 @@ export const nihGrantIdField = (init: NihGrantIdFieldInit): NihGrantIdField =>
 export interface EmbeddedNihGrantIdField {
   readonly kind: 'EmbeddedNihGrantIdField';
   readonly key: string;
-  readonly reference: NihGrantIdFieldReference;
+  readonly artifactRef: NihGrantIdFieldReference;
   readonly valueRequirement?: ValueRequirement;
   readonly cardinality?: Cardinality;
   readonly visibility?: Visibility;
@@ -161,7 +161,7 @@ export interface EmbeddedNihGrantIdField {
 }
 
 export interface EmbeddedNihGrantIdFieldInit extends EmbeddedFieldInitCommon {
-  readonly reference: NihGrantIdFieldReference | NihGrantIdField;
+  readonly artifactRef: NihGrantIdFieldReference | NihGrantIdField;
   readonly defaultValue?: NihGrantIdValue | AuthorityValueInput<NihGrantIri>;
 }
 
@@ -171,7 +171,7 @@ export function embeddedNihGrantIdField(
   const out: EmbeddedNihGrantIdField = {
     ...assembleCommon(init),
     kind: 'EmbeddedNihGrantIdField',
-    reference: fieldRef(init.reference),
+    artifactRef: fieldRef(init.artifactRef),
     ...(init.defaultValue !== undefined && {
       defaultValue: isNihGrantIdValue(init.defaultValue)
         ? init.defaultValue

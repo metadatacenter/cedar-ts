@@ -12,17 +12,17 @@ import type { LabelOverride } from './label-override.js';
 export interface EmbeddedPresentationComponent {
   readonly kind: 'EmbeddedPresentationComponent';
   readonly key: string;
-  readonly reference: PresentationComponentReference;
+  readonly artifactRef: PresentationComponentReference;
   readonly visibility?: Visibility;
   readonly labelOverride?: LabelOverride;
 }
 
-// `reference` accepts either the typed PresentationComponentReference or the
+// `artifactRef` accepts either the typed PresentationComponentReference or the
 // reusable PresentationComponent artifact itself; the constructor extracts
 // `.id` from the latter.
 export interface EmbeddedPresentationComponentInit {
   readonly key: string;
-  readonly reference: PresentationComponentReference | PresentationComponent;
+  readonly artifactRef: PresentationComponentReference | PresentationComponent;
   readonly visibility?: Visibility;
   readonly labelOverride?: LabelOverride;
 }
@@ -33,16 +33,16 @@ export function embeddedPresentationComponent(
   const out: {
     kind: 'EmbeddedPresentationComponent';
     key: string;
-    reference: PresentationComponentReference;
+    artifactRef: PresentationComponentReference;
     visibility?: Visibility;
     labelOverride?: LabelOverride;
   } = {
     kind: 'EmbeddedPresentationComponent',
     key: parseAsciiIdentifier(init.key),
-    reference:
-      init.reference.kind === 'PresentationComponentId'
-        ? init.reference
-        : init.reference.id,
+    artifactRef:
+      init.artifactRef.kind === 'PresentationComponentId'
+        ? init.artifactRef
+        : init.artifactRef.id,
   };
   if (init.visibility !== undefined) out.visibility = init.visibility;
   if (init.labelOverride !== undefined) out.labelOverride = init.labelOverride;

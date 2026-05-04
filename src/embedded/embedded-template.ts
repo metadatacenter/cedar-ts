@@ -15,7 +15,7 @@ import { type Property, type PropertyInput, property } from './property.js';
 export interface EmbeddedTemplate {
   readonly kind: 'EmbeddedTemplate';
   readonly key: string;
-  readonly reference: TemplateReference;
+  readonly artifactRef: TemplateReference;
   readonly valueRequirement?: ValueRequirement;
   readonly cardinality?: Cardinality;
   readonly visibility?: Visibility;
@@ -23,11 +23,11 @@ export interface EmbeddedTemplate {
   readonly property?: Property;
 }
 
-// `reference` accepts either the typed TemplateReference or the reusable
+// `artifactRef` accepts either the typed TemplateReference or the reusable
 // Template artifact itself; the constructor extracts `.id` from the latter.
 export interface EmbeddedTemplateInit {
   readonly key: string;
-  readonly reference: TemplateReference | Template;
+  readonly artifactRef: TemplateReference | Template;
   readonly valueRequirement?: ValueRequirement;
   readonly cardinality?: Cardinality;
   readonly visibility?: Visibility;
@@ -39,7 +39,7 @@ export function embeddedTemplate(init: EmbeddedTemplateInit): EmbeddedTemplate {
   const out: {
     kind: 'EmbeddedTemplate';
     key: string;
-    reference: TemplateReference;
+    artifactRef: TemplateReference;
     valueRequirement?: ValueRequirement;
     cardinality?: Cardinality;
     visibility?: Visibility;
@@ -48,7 +48,7 @@ export function embeddedTemplate(init: EmbeddedTemplateInit): EmbeddedTemplate {
   } = {
     kind: 'EmbeddedTemplate',
     key: parseAsciiIdentifier(init.key),
-    reference: init.reference.kind === 'Template' ? init.reference.id : init.reference,
+    artifactRef: init.artifactRef.kind === 'Template' ? init.artifactRef.id : init.artifactRef,
   };
   if (init.valueRequirement !== undefined) out.valueRequirement = init.valueRequirement;
   if (init.cardinality !== undefined) out.cardinality = init.cardinality;

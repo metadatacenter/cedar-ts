@@ -151,7 +151,7 @@ export const rorField = (init: RorFieldInit): RorField =>
 export interface EmbeddedRorField {
   readonly kind: 'EmbeddedRorField';
   readonly key: string;
-  readonly reference: RorFieldReference;
+  readonly artifactRef: RorFieldReference;
   readonly valueRequirement?: ValueRequirement;
   readonly cardinality?: Cardinality;
   readonly visibility?: Visibility;
@@ -161,7 +161,7 @@ export interface EmbeddedRorField {
 }
 
 export interface EmbeddedRorFieldInit extends EmbeddedFieldInitCommon {
-  readonly reference: RorFieldReference | RorField;
+  readonly artifactRef: RorFieldReference | RorField;
   readonly defaultValue?: RorValue | AuthorityValueInput<RorIri>;
 }
 
@@ -169,7 +169,7 @@ export function embeddedRorField(init: EmbeddedRorFieldInit): EmbeddedRorField {
   const out: EmbeddedRorField = {
     ...assembleCommon(init),
     kind: 'EmbeddedRorField',
-    reference: fieldRef(init.reference),
+    artifactRef: fieldRef(init.artifactRef),
     ...(init.defaultValue !== undefined && {
       defaultValue: isRorValue(init.defaultValue)
         ? init.defaultValue

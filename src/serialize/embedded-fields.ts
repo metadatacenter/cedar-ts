@@ -214,7 +214,7 @@ function parseCommonProps(
 const COMMON_FIELD_PROPS = [
   'kind',
   'key',
-  'reference',
+  'artifactRef',
   'valueRequirement',
   'cardinality',
   'visibility',
@@ -231,7 +231,7 @@ function readShell(
 ): {
   o: { readonly [k: string]: unknown };
   key: string;
-  reference: unknown;
+  artifactRef: unknown;
   defaultRaw?: unknown;
   common: CommonOut;
 } {
@@ -249,19 +249,19 @@ function readShell(
   if (!('key' in o)) {
     throw new CedarConstructionError(`${where}: missing required "key"`);
   }
-  if (!('reference' in o)) {
-    throw new CedarConstructionError(`${where}: missing required "reference"`);
+  if (!('artifactRef' in o)) {
+    throw new CedarConstructionError(`${where}: missing required "artifactRef"`);
   }
   const out: {
     o: { readonly [k: string]: unknown };
     key: string;
-    reference: unknown;
+    artifactRef: unknown;
     defaultRaw?: unknown;
     common: CommonOut;
   } = {
     o,
     key: expectString(o['key'], `${where}.key`),
-    reference: o['reference'],
+    artifactRef: o['artifactRef'],
     common: parseCommonProps(o, where),
   };
   if (allowDefault && 'defaultValue' in o) out.defaultRaw = o['defaultValue'];
@@ -287,7 +287,7 @@ export function serializeEmbeddedTextField(x: EmbeddedTextField): unknown {
   const out: Record<string, unknown> = {
     kind: 'EmbeddedTextField',
     key: x.key,
-    reference: serializeTextFieldId(x.reference),
+    artifactRef: serializeTextFieldId(x.artifactRef),
   };
   serializeCommonProps(x, out);
   if (x.defaultValue !== undefined)
@@ -302,7 +302,7 @@ export function parseEmbeddedTextField(
   const s = readShell(x, 'EmbeddedTextField', where, true);
   return embeddedTextField({
     key: s.key,
-    reference: parseTextFieldId(s.reference, `${where}.reference`),
+    artifactRef: parseTextFieldId(s.artifactRef, `${where}.artifactRef`),
     ...s.common,
     ...(s.defaultRaw !== undefined && {
       defaultValue: parseTextLiteral(s.defaultRaw, `${where}.defaultValue`),
@@ -314,7 +314,7 @@ export function serializeEmbeddedNumericField(x: EmbeddedNumericField): unknown 
   const out: Record<string, unknown> = {
     kind: 'EmbeddedNumericField',
     key: x.key,
-    reference: serializeNumericFieldId(x.reference),
+    artifactRef: serializeNumericFieldId(x.artifactRef),
   };
   serializeCommonProps(x, out);
   if (x.defaultValue !== undefined)
@@ -329,7 +329,7 @@ export function parseEmbeddedNumericField(
   const s = readShell(x, 'EmbeddedNumericField', where, true);
   return embeddedNumericField({
     key: s.key,
-    reference: parseNumericFieldId(s.reference, `${where}.reference`),
+    artifactRef: parseNumericFieldId(s.artifactRef, `${where}.artifactRef`),
     ...s.common,
     ...(s.defaultRaw !== undefined && {
       defaultValue: parseNumericLiteralStandalone(
@@ -344,7 +344,7 @@ export function serializeEmbeddedDateField(x: EmbeddedDateField): unknown {
   const out: Record<string, unknown> = {
     kind: 'EmbeddedDateField',
     key: x.key,
-    reference: serializeDateFieldId(x.reference),
+    artifactRef: serializeDateFieldId(x.artifactRef),
   };
   serializeCommonProps(x, out);
   if (x.defaultValue !== undefined)
@@ -359,7 +359,7 @@ export function parseEmbeddedDateField(
   const s = readShell(x, 'EmbeddedDateField', where, true);
   return embeddedDateField({
     key: s.key,
-    reference: parseDateFieldId(s.reference, `${where}.reference`),
+    artifactRef: parseDateFieldId(s.artifactRef, `${where}.artifactRef`),
     ...s.common,
     ...(s.defaultRaw !== undefined && {
       defaultValue: parseDateValue(s.defaultRaw, `${where}.defaultValue`),
@@ -371,7 +371,7 @@ export function serializeEmbeddedTimeField(x: EmbeddedTimeField): unknown {
   const out: Record<string, unknown> = {
     kind: 'EmbeddedTimeField',
     key: x.key,
-    reference: serializeTimeFieldId(x.reference),
+    artifactRef: serializeTimeFieldId(x.artifactRef),
   };
   serializeCommonProps(x, out);
   if (x.defaultValue !== undefined)
@@ -386,7 +386,7 @@ export function parseEmbeddedTimeField(
   const s = readShell(x, 'EmbeddedTimeField', where, true);
   return embeddedTimeField({
     key: s.key,
-    reference: parseTimeFieldId(s.reference, `${where}.reference`),
+    artifactRef: parseTimeFieldId(s.artifactRef, `${where}.artifactRef`),
     ...s.common,
     ...(s.defaultRaw !== undefined && {
       defaultValue: parseTimeLiteral(s.defaultRaw, `${where}.defaultValue`),
@@ -400,7 +400,7 @@ export function serializeEmbeddedDateTimeField(
   const out: Record<string, unknown> = {
     kind: 'EmbeddedDateTimeField',
     key: x.key,
-    reference: serializeDateTimeFieldId(x.reference),
+    artifactRef: serializeDateTimeFieldId(x.artifactRef),
   };
   serializeCommonProps(x, out);
   if (x.defaultValue !== undefined)
@@ -415,7 +415,7 @@ export function parseEmbeddedDateTimeField(
   const s = readShell(x, 'EmbeddedDateTimeField', where, true);
   return embeddedDateTimeField({
     key: s.key,
-    reference: parseDateTimeFieldId(s.reference, `${where}.reference`),
+    artifactRef: parseDateTimeFieldId(s.artifactRef, `${where}.artifactRef`),
     ...s.common,
     ...(s.defaultRaw !== undefined && {
       defaultValue: parseDateTimeLiteral(s.defaultRaw, `${where}.defaultValue`),
@@ -429,7 +429,7 @@ export function serializeEmbeddedControlledTermField(
   const out: Record<string, unknown> = {
     kind: 'EmbeddedControlledTermField',
     key: x.key,
-    reference: serializeControlledTermFieldId(x.reference),
+    artifactRef: serializeControlledTermFieldId(x.artifactRef),
   };
   serializeCommonProps(x, out);
   if (x.defaultValue !== undefined)
@@ -444,7 +444,7 @@ export function parseEmbeddedControlledTermField(
   const s = readShell(x, 'EmbeddedControlledTermField', where, true);
   return embeddedControlledTermField({
     key: s.key,
-    reference: parseControlledTermFieldId(s.reference, `${where}.reference`),
+    artifactRef: parseControlledTermFieldId(s.artifactRef, `${where}.artifactRef`),
     ...s.common,
     ...(s.defaultRaw !== undefined && {
       defaultValue: parseControlledTermValueUntagged(
@@ -461,7 +461,7 @@ export function serializeEmbeddedSingleChoiceField(
   const out: Record<string, unknown> = {
     kind: 'EmbeddedSingleChoiceField',
     key: x.key,
-    reference: serializeSingleChoiceFieldId(x.reference),
+    artifactRef: serializeSingleChoiceFieldId(x.artifactRef),
   };
   serializeCommonProps(x, out);
   if (x.defaultValue !== undefined)
@@ -476,7 +476,7 @@ export function parseEmbeddedSingleChoiceField(
   const s = readShell(x, 'EmbeddedSingleChoiceField', where, true);
   return embeddedSingleChoiceField({
     key: s.key,
-    reference: parseSingleChoiceFieldId(s.reference, `${where}.reference`),
+    artifactRef: parseSingleChoiceFieldId(s.artifactRef, `${where}.artifactRef`),
     ...s.common,
     ...(s.defaultRaw !== undefined && {
       defaultValue: parseChoiceValue(s.defaultRaw, `${where}.defaultValue`),
@@ -490,7 +490,7 @@ export function serializeEmbeddedMultipleChoiceField(
   const out: Record<string, unknown> = {
     kind: 'EmbeddedMultipleChoiceField',
     key: x.key,
-    reference: serializeMultipleChoiceFieldId(x.reference),
+    artifactRef: serializeMultipleChoiceFieldId(x.artifactRef),
   };
   serializeCommonProps(x, out);
   if (x.defaultValue !== undefined)
@@ -505,7 +505,7 @@ export function parseEmbeddedMultipleChoiceField(
   const s = readShell(x, 'EmbeddedMultipleChoiceField', where, true);
   return embeddedMultipleChoiceField({
     key: s.key,
-    reference: parseMultipleChoiceFieldId(s.reference, `${where}.reference`),
+    artifactRef: parseMultipleChoiceFieldId(s.artifactRef, `${where}.artifactRef`),
     ...s.common,
     ...(s.defaultRaw !== undefined && {
       defaultValue: parseChoiceValue(s.defaultRaw, `${where}.defaultValue`),
@@ -517,7 +517,7 @@ export function serializeEmbeddedLinkField(x: EmbeddedLinkField): unknown {
   const out: Record<string, unknown> = {
     kind: 'EmbeddedLinkField',
     key: x.key,
-    reference: serializeLinkFieldId(x.reference),
+    artifactRef: serializeLinkFieldId(x.artifactRef),
   };
   serializeCommonProps(x, out);
   if (x.defaultValue !== undefined)
@@ -532,7 +532,7 @@ export function parseEmbeddedLinkField(
   const s = readShell(x, 'EmbeddedLinkField', where, true);
   return embeddedLinkField({
     key: s.key,
-    reference: parseLinkFieldId(s.reference, `${where}.reference`),
+    artifactRef: parseLinkFieldId(s.artifactRef, `${where}.artifactRef`),
     ...s.common,
     ...(s.defaultRaw !== undefined && {
       defaultValue: parseLinkValueUntagged(s.defaultRaw, `${where}.defaultValue`),
@@ -544,7 +544,7 @@ export function serializeEmbeddedEmailField(x: EmbeddedEmailField): unknown {
   const out: Record<string, unknown> = {
     kind: 'EmbeddedEmailField',
     key: x.key,
-    reference: serializeEmailFieldId(x.reference),
+    artifactRef: serializeEmailFieldId(x.artifactRef),
   };
   serializeCommonProps(x, out);
   if (x.defaultValue !== undefined)
@@ -559,7 +559,7 @@ export function parseEmbeddedEmailField(
   const s = readShell(x, 'EmbeddedEmailField', where, true);
   return embeddedEmailField({
     key: s.key,
-    reference: parseEmailFieldId(s.reference, `${where}.reference`),
+    artifactRef: parseEmailFieldId(s.artifactRef, `${where}.artifactRef`),
     ...s.common,
     ...(s.defaultRaw !== undefined && {
       defaultValue: parseSimpleLiteralAtDefault(
@@ -576,7 +576,7 @@ export function serializeEmbeddedPhoneNumberField(
   const out: Record<string, unknown> = {
     kind: 'EmbeddedPhoneNumberField',
     key: x.key,
-    reference: serializePhoneNumberFieldId(x.reference),
+    artifactRef: serializePhoneNumberFieldId(x.artifactRef),
   };
   serializeCommonProps(x, out);
   if (x.defaultValue !== undefined)
@@ -591,7 +591,7 @@ export function parseEmbeddedPhoneNumberField(
   const s = readShell(x, 'EmbeddedPhoneNumberField', where, true);
   return embeddedPhoneNumberField({
     key: s.key,
-    reference: parsePhoneNumberFieldId(s.reference, `${where}.reference`),
+    artifactRef: parsePhoneNumberFieldId(s.artifactRef, `${where}.artifactRef`),
     ...s.common,
     ...(s.defaultRaw !== undefined && {
       defaultValue: parseSimpleLiteralAtDefault(
@@ -606,7 +606,7 @@ export function serializeEmbeddedOrcidField(x: EmbeddedOrcidField): unknown {
   const out: Record<string, unknown> = {
     kind: 'EmbeddedOrcidField',
     key: x.key,
-    reference: serializeOrcidFieldId(x.reference),
+    artifactRef: serializeOrcidFieldId(x.artifactRef),
   };
   serializeCommonProps(x, out);
   if (x.defaultValue !== undefined)
@@ -621,7 +621,7 @@ export function parseEmbeddedOrcidField(
   const s = readShell(x, 'EmbeddedOrcidField', where, true);
   return embeddedOrcidField({
     key: s.key,
-    reference: parseOrcidFieldId(s.reference, `${where}.reference`),
+    artifactRef: parseOrcidFieldId(s.artifactRef, `${where}.artifactRef`),
     ...s.common,
     ...(s.defaultRaw !== undefined && {
       defaultValue: parseOrcidValueUntagged(s.defaultRaw, `${where}.defaultValue`),
@@ -633,7 +633,7 @@ export function serializeEmbeddedRorField(x: EmbeddedRorField): unknown {
   const out: Record<string, unknown> = {
     kind: 'EmbeddedRorField',
     key: x.key,
-    reference: serializeRorFieldId(x.reference),
+    artifactRef: serializeRorFieldId(x.artifactRef),
   };
   serializeCommonProps(x, out);
   if (x.defaultValue !== undefined)
@@ -648,7 +648,7 @@ export function parseEmbeddedRorField(
   const s = readShell(x, 'EmbeddedRorField', where, true);
   return embeddedRorField({
     key: s.key,
-    reference: parseRorFieldId(s.reference, `${where}.reference`),
+    artifactRef: parseRorFieldId(s.artifactRef, `${where}.artifactRef`),
     ...s.common,
     ...(s.defaultRaw !== undefined && {
       defaultValue: parseRorValueUntagged(s.defaultRaw, `${where}.defaultValue`),
@@ -660,7 +660,7 @@ export function serializeEmbeddedDoiField(x: EmbeddedDoiField): unknown {
   const out: Record<string, unknown> = {
     kind: 'EmbeddedDoiField',
     key: x.key,
-    reference: serializeDoiFieldId(x.reference),
+    artifactRef: serializeDoiFieldId(x.artifactRef),
   };
   serializeCommonProps(x, out);
   if (x.defaultValue !== undefined)
@@ -675,7 +675,7 @@ export function parseEmbeddedDoiField(
   const s = readShell(x, 'EmbeddedDoiField', where, true);
   return embeddedDoiField({
     key: s.key,
-    reference: parseDoiFieldId(s.reference, `${where}.reference`),
+    artifactRef: parseDoiFieldId(s.artifactRef, `${where}.artifactRef`),
     ...s.common,
     ...(s.defaultRaw !== undefined && {
       defaultValue: parseDoiValueUntagged(s.defaultRaw, `${where}.defaultValue`),
@@ -689,7 +689,7 @@ export function serializeEmbeddedPubMedIdField(
   const out: Record<string, unknown> = {
     kind: 'EmbeddedPubMedIdField',
     key: x.key,
-    reference: serializePubMedIdFieldId(x.reference),
+    artifactRef: serializePubMedIdFieldId(x.artifactRef),
   };
   serializeCommonProps(x, out);
   if (x.defaultValue !== undefined)
@@ -704,7 +704,7 @@ export function parseEmbeddedPubMedIdField(
   const s = readShell(x, 'EmbeddedPubMedIdField', where, true);
   return embeddedPubMedIdField({
     key: s.key,
-    reference: parsePubMedIdFieldId(s.reference, `${where}.reference`),
+    artifactRef: parsePubMedIdFieldId(s.artifactRef, `${where}.artifactRef`),
     ...s.common,
     ...(s.defaultRaw !== undefined && {
       defaultValue: parsePubMedIdValueUntagged(
@@ -719,7 +719,7 @@ export function serializeEmbeddedRridField(x: EmbeddedRridField): unknown {
   const out: Record<string, unknown> = {
     kind: 'EmbeddedRridField',
     key: x.key,
-    reference: serializeRridFieldId(x.reference),
+    artifactRef: serializeRridFieldId(x.artifactRef),
   };
   serializeCommonProps(x, out);
   if (x.defaultValue !== undefined)
@@ -734,7 +734,7 @@ export function parseEmbeddedRridField(
   const s = readShell(x, 'EmbeddedRridField', where, true);
   return embeddedRridField({
     key: s.key,
-    reference: parseRridFieldId(s.reference, `${where}.reference`),
+    artifactRef: parseRridFieldId(s.artifactRef, `${where}.artifactRef`),
     ...s.common,
     ...(s.defaultRaw !== undefined && {
       defaultValue: parseRridValueUntagged(s.defaultRaw, `${where}.defaultValue`),
@@ -748,7 +748,7 @@ export function serializeEmbeddedNihGrantIdField(
   const out: Record<string, unknown> = {
     kind: 'EmbeddedNihGrantIdField',
     key: x.key,
-    reference: serializeNihGrantIdFieldId(x.reference),
+    artifactRef: serializeNihGrantIdFieldId(x.artifactRef),
   };
   serializeCommonProps(x, out);
   if (x.defaultValue !== undefined)
@@ -763,7 +763,7 @@ export function parseEmbeddedNihGrantIdField(
   const s = readShell(x, 'EmbeddedNihGrantIdField', where, true);
   return embeddedNihGrantIdField({
     key: s.key,
-    reference: parseNihGrantIdFieldId(s.reference, `${where}.reference`),
+    artifactRef: parseNihGrantIdFieldId(s.artifactRef, `${where}.artifactRef`),
     ...s.common,
     ...(s.defaultRaw !== undefined && {
       defaultValue: parseNihGrantIdValueUntagged(
@@ -780,7 +780,7 @@ export function serializeEmbeddedAttributeValueField(
   const out: Record<string, unknown> = {
     kind: 'EmbeddedAttributeValueField',
     key: x.key,
-    reference: serializeAttributeValueFieldId(x.reference),
+    artifactRef: serializeAttributeValueFieldId(x.artifactRef),
   };
   serializeCommonProps(x, out);
   // No defaultValue (grammar prohibits).
@@ -794,7 +794,7 @@ export function parseEmbeddedAttributeValueField(
   const s = readShell(x, 'EmbeddedAttributeValueField', where, false);
   return embeddedAttributeValueField({
     key: s.key,
-    reference: parseAttributeValueFieldId(s.reference, `${where}.reference`),
+    artifactRef: parseAttributeValueFieldId(s.artifactRef, `${where}.artifactRef`),
     ...s.common,
   });
 }
@@ -805,7 +805,7 @@ export function serializeEmbeddedTemplate(x: EmbeddedTemplate): unknown {
   const out: Record<string, unknown> = {
     kind: 'EmbeddedTemplate',
     key: x.key,
-    reference: serializeTemplateId(x.reference),
+    artifactRef: serializeTemplateId(x.artifactRef),
   };
   serializeCommonProps(x, out);
   return out;
@@ -818,7 +818,7 @@ export function parseEmbeddedTemplate(
   const s = readShell(x, 'EmbeddedTemplate', where, false);
   return embeddedTemplate({
     key: s.key,
-    reference: parseTemplateId(s.reference, `${where}.reference`),
+    artifactRef: parseTemplateId(s.artifactRef, `${where}.artifactRef`),
     ...s.common,
   });
 }
@@ -829,7 +829,7 @@ export function serializeEmbeddedPresentationComponent(
   const out: Record<string, unknown> = {
     kind: 'EmbeddedPresentationComponent',
     key: x.key,
-    reference: serializePresentationComponentId(x.reference),
+    artifactRef: serializePresentationComponentId(x.artifactRef),
   };
   if (x.visibility !== undefined)
     out['visibility'] = serializeVisibility(x.visibility);
@@ -846,7 +846,7 @@ export function parseEmbeddedPresentationComponent(
   expectKnownProperties(o, [
     'kind',
     'key',
-    'reference',
+    'artifactRef',
     'visibility',
     'labelOverride',
   ]);
@@ -860,19 +860,19 @@ export function parseEmbeddedPresentationComponent(
   if (!('key' in o)) {
     throw new CedarConstructionError(`${where}: missing required "key"`);
   }
-  if (!('reference' in o)) {
-    throw new CedarConstructionError(`${where}: missing required "reference"`);
+  if (!('artifactRef' in o)) {
+    throw new CedarConstructionError(`${where}: missing required "artifactRef"`);
   }
   const init: {
     key: string;
-    reference: ReturnType<typeof parsePresentationComponentId>;
+    artifactRef: ReturnType<typeof parsePresentationComponentId>;
     visibility?: Visibility;
     labelOverride?: LabelOverride;
   } = {
     key: expectString(o['key'], `${where}.key`),
-    reference: parsePresentationComponentId(
-      o['reference'],
-      `${where}.reference`,
+    artifactRef: parsePresentationComponentId(
+      o['artifactRef'],
+      `${where}.artifactRef`,
     ),
   };
   if ('visibility' in o)

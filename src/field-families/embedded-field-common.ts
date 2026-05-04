@@ -87,7 +87,7 @@ const FIELD_VARIANT_KINDS: ReadonlySet<string> = new Set([
 
 // Extracts the .id from a Field artifact, or passes through if input is
 // already a FieldReference. Used by the per-family constructors so callers
-// can write `reference: fullName` instead of `reference: fullName.id`. The
+// can write `artifactRef: fullName` instead of `artifactRef: fullName.id`. The
 // conditional return type carries the per-family precision through to the
 // caller (e.g. fieldRef(TextField | TextFieldReference) → TextFieldReference).
 //

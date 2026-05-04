@@ -68,15 +68,15 @@ describe('Inline Field/Template/PresentationComponent reference inputs', () => {
       metadata: meta,
       fieldSpec: textFieldSpec(),
     });
-    const ef = embeddedTextField({ key: 'title', reference: artifact });
-    expect(ef.reference).toBe(artifact.id);
-    expect(ef.reference.kind).toBe('TextFieldId');
+    const ef = embeddedTextField({ key: 'title', artifactRef: artifact });
+    expect(ef.artifactRef).toBe(artifact.id);
+    expect(ef.artifactRef.kind).toBe('TextFieldId');
   });
 
   it('embeddedTextField passes the FieldReference through', () => {
     const ref = textFieldId('https://example.org/fields/title');
-    const ef = embeddedTextField({ key: 'title', reference: ref });
-    expect(ef.reference).toBe(ref);
+    const ef = embeddedTextField({ key: 'title', artifactRef: ref });
+    expect(ef.artifactRef).toBe(ref);
   });
 
   it('embeddedDateField rejects a TextField reference at the type level', () => {
@@ -89,7 +89,7 @@ describe('Inline Field/Template/PresentationComponent reference inputs', () => {
     embeddedDateField({
       key: 'born',
       // @ts-expect-error TextField is not a DateField (or DateFieldReference)
-      reference: wrongFamily,
+      artifactRef: wrongFamily,
     });
   });
 
@@ -99,9 +99,9 @@ describe('Inline Field/Template/PresentationComponent reference inputs', () => {
       modelVersion: '2.0.0',
       metadata: meta,
     });
-    const et = embeddedTemplate({ key: 'address', reference: t });
-    expect(et.reference).toBe(t.id);
-    expect(et.reference.kind).toBe('TemplateId');
+    const et = embeddedTemplate({ key: 'address', artifactRef: t });
+    expect(et.artifactRef).toBe(t.id);
+    expect(et.artifactRef.kind).toBe('TemplateId');
   });
 
   it('embeddedPresentationComponent extracts .id when given a PresentationComponent', () => {
@@ -111,32 +111,32 @@ describe('Inline Field/Template/PresentationComponent reference inputs', () => {
       metadata: artifactMetadata({ name: 'Intro', lifecycle: tp }),
       html: '<p>hi</p>',
     });
-    const ep = embeddedPresentationComponent({ key: 'intro', reference: pc });
-    expect(ep.reference).toBe(pc.id);
-    expect(ep.reference.kind).toBe('PresentationComponentId');
+    const ep = embeddedPresentationComponent({ key: 'intro', artifactRef: pc });
+    expect(ep.artifactRef).toBe(pc.id);
+    expect(ep.artifactRef.kind).toBe('PresentationComponentId');
   });
 });
 
 describe('Bare-string key inputs at the embedding init layer', () => {
   it('embeddedField accepts a bare string key and validates it', () => {
-    const ef = embeddedTextField({ key: 'title', reference: txtRef });
+    const ef = embeddedTextField({ key: 'title', artifactRef: txtRef });
     expect(ef.key).toBe('title');
 
     expect(() =>
-      embeddedTextField({ key: '1bad', reference: txtRef }),
+      embeddedTextField({ key: '1bad', artifactRef: txtRef }),
     ).toThrow();
   });
 
   it('embeddedTemplate and embeddedPresentationComponent also accept bare strings', () => {
     const et = embeddedTemplate({
       key: 'address',
-      reference: templateId('https://example.org/templates/address'),
+      artifactRef: templateId('https://example.org/templates/address'),
     });
     expect(et.key).toBe('address');
 
     const ep = embeddedPresentationComponent({
       key: 'intro',
-      reference: presentationComponentId('https://example.org/pc/intro'),
+      artifactRef: presentationComponentId('https://example.org/pc/intro'),
     });
     expect(ep.key).toBe('intro');
   });
@@ -214,7 +214,7 @@ describe('LabelOverride and Property', () => {
   it('embedded-init property accepts a bare string IRI', () => {
     const ef = embeddedTextField({
       key: 'title',
-      reference: txtRef,
+      artifactRef: txtRef,
       property: 'https://schema.org/name',
     });
     expect(ef.property?.iri.value).toBe('https://schema.org/name');
@@ -224,7 +224,7 @@ describe('LabelOverride and Property', () => {
   it('embedded-init property accepts an init object with a label', () => {
     const ef = embeddedTextField({
       key: 'title',
-      reference: txtRef,
+      artifactRef: txtRef,
       property: {
         iri: 'https://schema.org/name',
         label: 'name',
@@ -244,17 +244,17 @@ describe('EmbeddedField constructors', () => {
   it('embeddedTextField composes key, reference, and a tagged shape', () => {
     const ef = embeddedTextField({
       key: 'title',
-      reference: txtRef,
+      artifactRef: txtRef,
     });
     expect(ef.kind).toBe('EmbeddedTextField');
-    expect(ef.reference.kind).toBe('TextFieldId');
+    expect(ef.artifactRef.kind).toBe('TextFieldId');
     expect(isEmbeddedField(ef)).toBe(true);
   });
 
   it('per-family helpers pin the type', () => {
     const ef: EmbeddedTextField = embeddedTextField({
       key: 'title',
-      reference: txtRef,
+      artifactRef: txtRef,
     });
     expect(ef.kind).toBe('EmbeddedTextField');
 
@@ -267,18 +267,18 @@ describe('EmbeddedField constructors', () => {
     embeddedDateField({
       key: 'born',
       // @ts-expect-error TextFieldReference is not a DateFieldReference
-      reference: txtRef,
+      artifactRef: txtRef,
     });
 
     // @ts-expect-error TextFieldReference is not a NumericFieldReference
-    embeddedNumericField({ key: 'age', reference: txtRef });
+    embeddedNumericField({ key: 'age', artifactRef: txtRef });
   });
 
   it('rejects a misaligned default value at the type level', () => {
     // @ts-expect-error NumericLiteral cannot satisfy a TextField defaultValue (TextLiteral)
     embeddedTextField({
       key: 'title',
-      reference: txtRef,
+      artifactRef: txtRef,
       defaultValue: numericLiteral('1', 'integer'),
     });
   });
@@ -286,7 +286,7 @@ describe('EmbeddedField constructors', () => {
   it('attribute-value embeddings cannot carry a default value', () => {
     const ef = embeddedAttributeValueField({
       key: 'attr',
-      reference: attrRef,
+      artifactRef: attrRef,
     });
     expect(ef.kind).toBe('EmbeddedAttributeValueField');
     expect(ef.defaultValue).toBeUndefined();
@@ -294,7 +294,7 @@ describe('EmbeddedField constructors', () => {
     // @ts-expect-error AttributeValueField has no defaultValue slot
     embeddedAttributeValueField({
       key: 'attr',
-      reference: attrRef,
+      artifactRef: attrRef,
       defaultValue: simpleLiteral('x'),
     });
   });
@@ -302,7 +302,7 @@ describe('EmbeddedField constructors', () => {
   it('carries every embedding-level property when supplied', () => {
     const ef = embeddedTextField({
       key: 'title',
-      reference: txtRef,
+      artifactRef: txtRef,
       valueRequirement: 'required',
       cardinality: cardinality({ min: 1 }),
       visibility: 'visible',
@@ -322,14 +322,14 @@ describe('EmbeddedField constructors', () => {
   it('embeddedDateField accepts a date string and discriminates by lexical shape', () => {
     const ef = embeddedDateField({
       key: 'born',
-      reference: dateRef,
+      artifactRef: dateRef,
       defaultValue: '1990-06-15',
     });
     expect(ef.defaultValue?.kind).toBe('FullDateValue');
 
     const efYear = embeddedDateField({
       key: 'year',
-      reference: dateRef,
+      artifactRef: dateRef,
       defaultValue: '1990',
     });
     expect(efYear.defaultValue?.kind).toBe('YearValue');
@@ -338,7 +338,7 @@ describe('EmbeddedField constructors', () => {
   it('coerces a primitive defaultValue input by family kind', () => {
     const ef = embeddedTextField({
       key: 'title',
-      reference: txtRef,
+      artifactRef: txtRef,
       defaultValue: 'Untitled',
     });
     expect(ef.defaultValue?.kind).toBe('SimpleLiteral');
@@ -346,7 +346,7 @@ describe('EmbeddedField constructors', () => {
 
     const ef2 = embeddedAttributeValueField({
       key: 'attr',
-      reference: attrRef,
+      artifactRef: attrRef,
     });
     expect(ef2.defaultValue).toBeUndefined();
   });
@@ -354,16 +354,16 @@ describe('EmbeddedField constructors', () => {
   it('embeddedNumericField rejects a string defaultValue', () => {
     embeddedNumericField({
       key: 'count',
-      reference: numRef,
+      artifactRef: numRef,
       // @ts-expect-error EmbeddedNumericFieldInit's defaultValue is NumericLiteral only
       defaultValue: 'oops',
     });
   });
 
   it('builds a numeric, date, and single-choice embedding without errors', () => {
-    embeddedNumericField({ key: 'age', reference: numRef });
-    embeddedDateField({ key: 'born', reference: dateRef });
-    embeddedSingleChoiceField({ key: 'sex', reference: choiceRef });
+    embeddedNumericField({ key: 'age', artifactRef: numRef });
+    embeddedDateField({ key: 'born', artifactRef: dateRef });
+    embeddedSingleChoiceField({ key: 'sex', artifactRef: choiceRef });
   });
 });
 
@@ -371,7 +371,7 @@ describe('EmbeddedTemplate', () => {
   it('embeds a Template under a key', () => {
     const et = embeddedTemplate({
       key: 'address',
-      reference: templateId('https://example.org/templates/address'),
+      artifactRef: templateId('https://example.org/templates/address'),
       cardinality: cardinality({ min: 0 }),
       property: property({ iri: 'https://schema.org/address' }),
     });
@@ -386,7 +386,7 @@ describe('EmbeddedPresentationComponent', () => {
   it('embeds a PresentationComponent with only visibility/label-override', () => {
     const ep = embeddedPresentationComponent({
       key: 'intro',
-      reference: presentationComponentId('https://example.org/pc/intro'),
+      artifactRef: presentationComponentId('https://example.org/pc/intro'),
       visibility: 'hidden',
     });
     expect(isEmbeddedPresentationComponent(ep)).toBe(true);
@@ -398,14 +398,14 @@ describe('EmbeddedPresentationComponent', () => {
 describe('EmbeddedArtifact union', () => {
   it('isEmbeddedArtifact recognises all three forms and rejects others', () => {
     const all: EmbeddedArtifact[] = [
-      embeddedTextField({ key: 'a', reference: txtRef }),
+      embeddedTextField({ key: 'a', artifactRef: txtRef }),
       embeddedTemplate({
         key: 'b',
-        reference: templateId('https://example.org/t/b'),
+        artifactRef: templateId('https://example.org/t/b'),
       }),
       embeddedPresentationComponent({
         key: 'c',
-        reference: presentationComponentId('https://example.org/pc/c'),
+        artifactRef: presentationComponentId('https://example.org/pc/c'),
       }),
     ];
     for (const a of all) expect(isEmbeddedArtifact(a)).toBe(true);

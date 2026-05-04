@@ -151,7 +151,7 @@ export const doiField = (init: DoiFieldInit): DoiField =>
 export interface EmbeddedDoiField {
   readonly kind: 'EmbeddedDoiField';
   readonly key: string;
-  readonly reference: DoiFieldReference;
+  readonly artifactRef: DoiFieldReference;
   readonly valueRequirement?: ValueRequirement;
   readonly cardinality?: Cardinality;
   readonly visibility?: Visibility;
@@ -161,7 +161,7 @@ export interface EmbeddedDoiField {
 }
 
 export interface EmbeddedDoiFieldInit extends EmbeddedFieldInitCommon {
-  readonly reference: DoiFieldReference | DoiField;
+  readonly artifactRef: DoiFieldReference | DoiField;
   readonly defaultValue?: DoiValue | AuthorityValueInput<DoiIri>;
 }
 
@@ -169,7 +169,7 @@ export function embeddedDoiField(init: EmbeddedDoiFieldInit): EmbeddedDoiField {
   const out: EmbeddedDoiField = {
     ...assembleCommon(init),
     kind: 'EmbeddedDoiField',
-    reference: fieldRef(init.reference),
+    artifactRef: fieldRef(init.artifactRef),
     ...(init.defaultValue !== undefined && {
       defaultValue: isDoiValue(init.defaultValue)
         ? init.defaultValue

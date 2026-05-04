@@ -249,7 +249,7 @@ export const dateField = (init: DateFieldInit): DateField =>
 export interface EmbeddedDateField {
   readonly kind: 'EmbeddedDateField';
   readonly key: string;
-  readonly reference: DateFieldReference;
+  readonly artifactRef: DateFieldReference;
   readonly valueRequirement?: ValueRequirement;
   readonly cardinality?: Cardinality;
   readonly visibility?: Visibility;
@@ -262,7 +262,7 @@ export interface EmbeddedDateField {
 // (wrapped as a FullDateValue), or a plain string discriminated by
 // lexical shape ('YYYY', 'YYYY-MM', 'YYYY-MM-DD...'). See dateValue.
 export interface EmbeddedDateFieldInit extends EmbeddedFieldInitCommon {
-  readonly reference: DateFieldReference | DateField;
+  readonly artifactRef: DateFieldReference | DateField;
   readonly defaultValue?: DateValue | FullDateLiteral | string;
 }
 
@@ -270,7 +270,7 @@ export function embeddedDateField(init: EmbeddedDateFieldInit): EmbeddedDateFiel
   const out: EmbeddedDateField = {
     ...assembleCommon(init),
     kind: 'EmbeddedDateField',
-    reference: fieldRef(init.reference),
+    artifactRef: fieldRef(init.artifactRef),
     ...(init.defaultValue !== undefined && {
       defaultValue: isDateValue(init.defaultValue)
         ? init.defaultValue

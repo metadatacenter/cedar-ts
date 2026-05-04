@@ -195,7 +195,7 @@ export const singleChoiceField = (init: SingleChoiceFieldInit): SingleChoiceFiel
 export interface EmbeddedSingleChoiceField {
   readonly kind: 'EmbeddedSingleChoiceField';
   readonly key: string;
-  readonly reference: SingleChoiceFieldReference;
+  readonly artifactRef: SingleChoiceFieldReference;
   readonly valueRequirement?: ValueRequirement;
   readonly cardinality?: Cardinality;
   readonly visibility?: Visibility;
@@ -205,7 +205,7 @@ export interface EmbeddedSingleChoiceField {
 }
 
 export interface EmbeddedSingleChoiceFieldInit extends EmbeddedFieldInitCommon {
-  readonly reference: SingleChoiceFieldReference | SingleChoiceField;
+  readonly artifactRef: SingleChoiceFieldReference | SingleChoiceField;
   readonly defaultValue?: ChoiceValue;
 }
 
@@ -215,7 +215,7 @@ export function embeddedSingleChoiceField(
   const out: EmbeddedSingleChoiceField = {
     ...assembleCommon(init),
     kind: 'EmbeddedSingleChoiceField',
-    reference: fieldRef(init.reference),
+    artifactRef: fieldRef(init.artifactRef),
     ...(init.defaultValue !== undefined && { defaultValue: init.defaultValue }),
   };
   return out;

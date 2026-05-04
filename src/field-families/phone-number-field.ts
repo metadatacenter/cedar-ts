@@ -136,7 +136,7 @@ export const phoneNumberField = (init: PhoneNumberFieldInit): PhoneNumberField =
 export interface EmbeddedPhoneNumberField {
   readonly kind: 'EmbeddedPhoneNumberField';
   readonly key: string;
-  readonly reference: PhoneNumberFieldReference;
+  readonly artifactRef: PhoneNumberFieldReference;
   readonly valueRequirement?: ValueRequirement;
   readonly cardinality?: Cardinality;
   readonly visibility?: Visibility;
@@ -148,7 +148,7 @@ export interface EmbeddedPhoneNumberField {
 // `defaultValue` accepts a SimpleLiteral or a plain string (the phone
 // lexical form, wrapped via simpleLiteral).
 export interface EmbeddedPhoneNumberFieldInit extends EmbeddedFieldInitCommon {
-  readonly reference: PhoneNumberFieldReference | PhoneNumberField;
+  readonly artifactRef: PhoneNumberFieldReference | PhoneNumberField;
   readonly defaultValue?: SimpleLiteral | string;
 }
 
@@ -158,7 +158,7 @@ export function embeddedPhoneNumberField(
   const out: EmbeddedPhoneNumberField = {
     ...assembleCommon(init),
     kind: 'EmbeddedPhoneNumberField',
-    reference: fieldRef(init.reference),
+    artifactRef: fieldRef(init.artifactRef),
     ...(init.defaultValue !== undefined && {
       defaultValue:
         typeof init.defaultValue === 'string'

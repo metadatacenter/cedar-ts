@@ -150,7 +150,7 @@ export const rridField = (init: RridFieldInit): RridField =>
 export interface EmbeddedRridField {
   readonly kind: 'EmbeddedRridField';
   readonly key: string;
-  readonly reference: RridFieldReference;
+  readonly artifactRef: RridFieldReference;
   readonly valueRequirement?: ValueRequirement;
   readonly cardinality?: Cardinality;
   readonly visibility?: Visibility;
@@ -160,7 +160,7 @@ export interface EmbeddedRridField {
 }
 
 export interface EmbeddedRridFieldInit extends EmbeddedFieldInitCommon {
-  readonly reference: RridFieldReference | RridField;
+  readonly artifactRef: RridFieldReference | RridField;
   readonly defaultValue?: RridValue | AuthorityValueInput<RridIri>;
 }
 
@@ -168,7 +168,7 @@ export function embeddedRridField(init: EmbeddedRridFieldInit): EmbeddedRridFiel
   const out: EmbeddedRridField = {
     ...assembleCommon(init),
     kind: 'EmbeddedRridField',
-    reference: fieldRef(init.reference),
+    artifactRef: fieldRef(init.artifactRef),
     ...(init.defaultValue !== undefined && {
       defaultValue: isRridValue(init.defaultValue)
         ? init.defaultValue

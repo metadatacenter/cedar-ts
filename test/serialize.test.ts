@@ -527,7 +527,7 @@ describe('EmbeddedXxxField.defaultValue wire-form', () => {
   it('Text — emits a TextLiteral object (no kind, no wrapper)', () => {
     const e = embeddedTextField({
       key: 't',
-      reference: textFieldId('https://example.org/x'),
+      artifactRef: textFieldId('https://example.org/x'),
       defaultValue: 'Stanford University',
     });
     const wire = serializeEmbeddedField(e) as { defaultValue: unknown };
@@ -538,7 +538,7 @@ describe('EmbeddedXxxField.defaultValue wire-form', () => {
   it('Numeric — emits NumericLiteral { value, datatype }', () => {
     const e = embeddedNumericField({
       key: 'n',
-      reference: numericFieldId('https://example.org/x'),
+      artifactRef: numericFieldId('https://example.org/x'),
       defaultValue: numericLiteral('42', 'integer'),
     });
     const wire = serializeEmbeddedField(e) as { defaultValue: { value: string; datatype: string } };
@@ -550,7 +550,7 @@ describe('EmbeddedXxxField.defaultValue wire-form', () => {
   it('Date — emits DateValue with kind retained', () => {
     const e = embeddedDateField({
       key: 'd',
-      reference: dateFieldId('https://example.org/x'),
+      artifactRef: dateFieldId('https://example.org/x'),
       defaultValue: '2024-06-15',
     });
     const wire = serializeEmbeddedField(e) as { defaultValue: { kind: string } };
@@ -561,7 +561,7 @@ describe('EmbeddedXxxField.defaultValue wire-form', () => {
   it('ControlledTerm — emits ControlledTermValue with kind dropped', () => {
     const e = embeddedControlledTermField({
       key: 'ct',
-      reference: controlledTermFieldId('https://example.org/x'),
+      artifactRef: controlledTermFieldId('https://example.org/x'),
       defaultValue: controlledTermValue({ term: 'http://example.org/term/1' }),
     });
     const wire = serializeEmbeddedField(e) as { defaultValue: Record<string, unknown> };
@@ -573,7 +573,7 @@ describe('EmbeddedXxxField.defaultValue wire-form', () => {
   it('SingleChoice — emits ChoiceValue with kind retained', () => {
     const e = embeddedSingleChoiceField({
       key: 'sc',
-      reference: singleChoiceFieldId('https://example.org/x'),
+      artifactRef: singleChoiceFieldId('https://example.org/x'),
       defaultValue: literalChoiceValue('Yes', 'en'),
     });
     const wire = serializeEmbeddedField(e) as { defaultValue: { kind: string } };
@@ -584,7 +584,7 @@ describe('EmbeddedXxxField.defaultValue wire-form', () => {
   it('Link — emits LinkValue with kind dropped', () => {
     const e = embeddedLinkField({
       key: 'l',
-      reference: linkFieldId('https://example.org/x'),
+      artifactRef: linkFieldId('https://example.org/x'),
       defaultValue: linkValue({ iri: 'https://example.org', label: 'Example' }),
     });
     const wire = serializeEmbeddedField(e) as { defaultValue: Record<string, unknown> };
@@ -597,7 +597,7 @@ describe('EmbeddedXxxField.defaultValue wire-form', () => {
   it('Email — emits a SimpleLiteral { value }', () => {
     const e = embeddedEmailField({
       key: 'em',
-      reference: emailFieldId('https://example.org/x'),
+      artifactRef: emailFieldId('https://example.org/x'),
       defaultValue: 'jane@example.org',
     });
     const wire = serializeEmbeddedField(e) as { defaultValue: unknown };
@@ -608,7 +608,7 @@ describe('EmbeddedXxxField.defaultValue wire-form', () => {
   it('Orcid — emits OrcidValue with kind dropped', () => {
     const e = embeddedOrcidField({
       key: 'or',
-      reference: orcidFieldId('https://example.org/x'),
+      artifactRef: orcidFieldId('https://example.org/x'),
       defaultValue: 'https://orcid.org/0000-0002-1825-0097',
     });
     const wire = serializeEmbeddedField(e) as { defaultValue: Record<string, unknown> };
@@ -850,7 +850,7 @@ describe('EmbeddedField round-trip', () => {
   it('EmbeddedTextField with all common props', () => {
     const e = embeddedTextField({
       key: 'name',
-      reference: textFieldId('https://example.org/fields/text'),
+      artifactRef: textFieldId('https://example.org/fields/text'),
       valueRequirement: 'required',
       cardinality: cardinality({ min: 0, max: 3 }),
       labelOverride: labelOverride({ label: 'Name' }),
@@ -864,7 +864,7 @@ describe('EmbeddedField round-trip', () => {
   it('EmbeddedAttributeValueField has no defaultValue slot', () => {
     const e = embeddedAttributeValueField({
       key: 'attrs',
-      reference: attributeValueFieldId('https://example.org/fields/attr'),
+      artifactRef: attributeValueFieldId('https://example.org/fields/attr'),
     });
     const wire = serializeEmbeddedField(e);
     expect(parseEmbeddedField(wire)).toEqual(e);
@@ -875,112 +875,112 @@ describe('EmbeddedField round-trip', () => {
       'EmbeddedNumericField',
       embeddedNumericField({
         key: 'n',
-        reference: numericFieldId('https://example.org/fields/num'),
+        artifactRef: numericFieldId('https://example.org/fields/num'),
       }),
     ],
     [
       'EmbeddedDateField',
       embeddedDateField({
         key: 'd',
-        reference: dateFieldId('https://example.org/fields/date'),
+        artifactRef: dateFieldId('https://example.org/fields/date'),
       }),
     ],
     [
       'EmbeddedTimeField',
       embeddedTimeField({
         key: 't',
-        reference: timeFieldId('https://example.org/fields/time'),
+        artifactRef: timeFieldId('https://example.org/fields/time'),
       }),
     ],
     [
       'EmbeddedDateTimeField',
       embeddedDateTimeField({
         key: 'dt',
-        reference: dateTimeFieldId('https://example.org/fields/dt'),
+        artifactRef: dateTimeFieldId('https://example.org/fields/dt'),
       }),
     ],
     [
       'EmbeddedControlledTermField',
       embeddedControlledTermField({
         key: 'ct',
-        reference: controlledTermFieldId('https://example.org/fields/ct'),
+        artifactRef: controlledTermFieldId('https://example.org/fields/ct'),
       }),
     ],
     [
       'EmbeddedSingleChoiceField',
       embeddedSingleChoiceField({
         key: 'sc',
-        reference: singleChoiceFieldId('https://example.org/fields/sc'),
+        artifactRef: singleChoiceFieldId('https://example.org/fields/sc'),
       }),
     ],
     [
       'EmbeddedMultipleChoiceField',
       embeddedMultipleChoiceField({
         key: 'mc',
-        reference: multipleChoiceFieldId('https://example.org/fields/mc'),
+        artifactRef: multipleChoiceFieldId('https://example.org/fields/mc'),
       }),
     ],
     [
       'EmbeddedLinkField',
       embeddedLinkField({
         key: 'lnk',
-        reference: linkFieldId('https://example.org/fields/lnk'),
+        artifactRef: linkFieldId('https://example.org/fields/lnk'),
       }),
     ],
     [
       'EmbeddedEmailField',
       embeddedEmailField({
         key: 'em',
-        reference: emailFieldId('https://example.org/fields/em'),
+        artifactRef: emailFieldId('https://example.org/fields/em'),
       }),
     ],
     [
       'EmbeddedPhoneNumberField',
       embeddedPhoneNumberField({
         key: 'ph',
-        reference: phoneNumberFieldId('https://example.org/fields/ph'),
+        artifactRef: phoneNumberFieldId('https://example.org/fields/ph'),
       }),
     ],
     [
       'EmbeddedOrcidField',
       embeddedOrcidField({
         key: 'or',
-        reference: orcidFieldId('https://example.org/fields/or'),
+        artifactRef: orcidFieldId('https://example.org/fields/or'),
       }),
     ],
     [
       'EmbeddedRorField',
       embeddedRorField({
         key: 'ro',
-        reference: rorFieldId('https://example.org/fields/ro'),
+        artifactRef: rorFieldId('https://example.org/fields/ro'),
       }),
     ],
     [
       'EmbeddedDoiField',
       embeddedDoiField({
         key: 'do',
-        reference: doiFieldId('https://example.org/fields/do'),
+        artifactRef: doiFieldId('https://example.org/fields/do'),
       }),
     ],
     [
       'EmbeddedPubMedIdField',
       embeddedPubMedIdField({
         key: 'pm',
-        reference: pubMedIdFieldId('https://example.org/fields/pm'),
+        artifactRef: pubMedIdFieldId('https://example.org/fields/pm'),
       }),
     ],
     [
       'EmbeddedRridField',
       embeddedRridField({
         key: 'rr',
-        reference: rridFieldId('https://example.org/fields/rr'),
+        artifactRef: rridFieldId('https://example.org/fields/rr'),
       }),
     ],
     [
       'EmbeddedNihGrantIdField',
       embeddedNihGrantIdField({
         key: 'gr',
-        reference: nihGrantIdFieldId('https://example.org/fields/gr'),
+        artifactRef: nihGrantIdFieldId('https://example.org/fields/gr'),
       }),
     ],
   ])('round-trips %s', (_name, e) => {
@@ -991,7 +991,7 @@ describe('EmbeddedField round-trip', () => {
   it('EmbeddedTemplate round-trip', () => {
     const e = embeddedTemplate({
       key: 'sub',
-      reference: templateId('https://example.org/templates/sub'),
+      artifactRef: templateId('https://example.org/templates/sub'),
       cardinality: cardinality({ min: 0 }),
     });
     const wire = serializeEmbeddedArtifact(e);
@@ -1001,7 +1001,7 @@ describe('EmbeddedField round-trip', () => {
   it('EmbeddedPresentationComponent round-trip', () => {
     const e = embeddedPresentationComponent({
       key: 'intro',
-      reference: presentationComponentId('https://example.org/pc/intro'),
+      artifactRef: presentationComponentId('https://example.org/pc/intro'),
     });
     const wire = serializeEmbeddedArtifact(e);
     expect(parseEmbeddedArtifact(wire)).toEqual(e);
@@ -1087,16 +1087,16 @@ const sampleTemplate = template({
   members: [
     embeddedTextField({
       key: 'title',
-      reference: textFieldId('https://example.org/fields/title'),
+      artifactRef: textFieldId('https://example.org/fields/title'),
       valueRequirement: 'required',
     }),
     embeddedPresentationComponent({
       key: 'intro',
-      reference: presentationComponentId('https://example.org/pc/intro'),
+      artifactRef: presentationComponentId('https://example.org/pc/intro'),
     }),
     embeddedTemplate({
       key: 'sub',
-      reference: templateId('https://example.org/templates/sub'),
+      artifactRef: templateId('https://example.org/templates/sub'),
     }),
   ],
 });

@@ -185,7 +185,7 @@ export const dateTimeField = (init: DateTimeFieldInit): DateTimeField =>
 export interface EmbeddedDateTimeField {
   readonly kind: 'EmbeddedDateTimeField';
   readonly key: string;
-  readonly reference: DateTimeFieldReference;
+  readonly artifactRef: DateTimeFieldReference;
   readonly valueRequirement?: ValueRequirement;
   readonly cardinality?: Cardinality;
   readonly visibility?: Visibility;
@@ -197,7 +197,7 @@ export interface EmbeddedDateTimeField {
 // `defaultValue` accepts a DateTimeLiteral or a plain xsd:dateTime
 // lexical form (wrapped via dateTimeLiteral).
 export interface EmbeddedDateTimeFieldInit extends EmbeddedFieldInitCommon {
-  readonly reference: DateTimeFieldReference | DateTimeField;
+  readonly artifactRef: DateTimeFieldReference | DateTimeField;
   readonly defaultValue?: DateTimeLiteral | string;
 }
 
@@ -207,7 +207,7 @@ export function embeddedDateTimeField(
   const out: EmbeddedDateTimeField = {
     ...assembleCommon(init),
     kind: 'EmbeddedDateTimeField',
-    reference: fieldRef(init.reference),
+    artifactRef: fieldRef(init.artifactRef),
     ...(init.defaultValue !== undefined && {
       defaultValue:
         typeof init.defaultValue === 'string'

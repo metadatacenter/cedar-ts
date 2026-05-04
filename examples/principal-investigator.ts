@@ -378,7 +378,7 @@ const intro = richTextComponent({
 // Embedded properties:
 //   - `key`           Local ASCII identifier; unique within this Template.
 //                     Used as the join key in TemplateInstance values.
-//   - `reference`     The reusable artifact (or its typed reference). When
+//   - `artifactRef`   The reusable artifact (or its typed reference). When
 //                     a full artifact is passed, the constructor projects
 //                     out its `.id`.
 //   - `valueRequirement`
@@ -407,12 +407,12 @@ export const principalInvestigatorTemplate: Template = template({
   members: [
     embeddedPresentationComponent({
       key: 'intro',
-      reference: intro,
+      artifactRef: intro,
     }),
 
     embeddedTextField({
       key: 'full_name',
-      reference: fullName,
+      artifactRef: fullName,
       valueRequirement: 'required',
       property: 'https://schema.org/name',
     }),
@@ -421,7 +421,7 @@ export const principalInvestigatorTemplate: Template = template({
     // values as langTaggedLiterals.
     embeddedSingleChoiceField({
       key: 'academic_title',
-      reference: academicTitle,
+      artifactRef: academicTitle,
       valueRequirement: 'required',
       // The `property` slot accepts a bare-string IRI; the (iri, label)
       // object form below adds an optional human-readable label for the
@@ -438,7 +438,7 @@ export const principalInvestigatorTemplate: Template = template({
     // label) rather than a literal string.
     embeddedSingleChoiceField({
       key: 'academic_rank',
-      reference: academicRank,
+      artifactRef: academicRank,
       valueRequirement: 'recommended',
       property: 'https://schema.org/Role',
       labelOverride: labelOverride({ label: 'Academic Rank' }),
@@ -446,19 +446,19 @@ export const principalInvestigatorTemplate: Template = template({
 
     embeddedEmailField({
       key: 'email',
-      reference: email,
+      artifactRef: email,
       valueRequirement: 'required',
       property: 'https://schema.org/email',
     }),
     embeddedPhoneNumberField({
       key: 'phone',
-      reference: phone,
+      artifactRef: phone,
       valueRequirement: 'optional',
       property: 'https://schema.org/telephone',
     }),
     embeddedOrcidField({
       key: 'orcid',
-      reference: orcid,
+      artifactRef: orcid,
       valueRequirement: 'recommended',
       property: 'https://schema.org/identifier',
       // labelOverride supplies template-local labels that override the
@@ -477,14 +477,14 @@ export const principalInvestigatorTemplate: Template = template({
     // family-specific underlying type for the defaultValue slot).
     embeddedTextField({
       key: 'institution_name',
-      reference: institutionName,
+      artifactRef: institutionName,
       valueRequirement: 'required',
       defaultValue: 'Stanford University',
       property: 'https://schema.org/affiliation',
     }),
     embeddedRorField({
       key: 'institution_ror',
-      reference: institutionRor,
+      artifactRef: institutionRor,
       valueRequirement: 'recommended',
       property: {
         iri: 'https://schema.org/affiliation',
@@ -493,14 +493,14 @@ export const principalInvestigatorTemplate: Template = template({
     }),
     embeddedTextField({
       key: 'department',
-      reference: department,
+      artifactRef: department,
       valueRequirement: 'optional',
       property: 'https://schema.org/department',
     }),
 
     embeddedDateField({
       key: 'appointment_date',
-      reference: appointmentDate,
+      artifactRef: appointmentDate,
       valueRequirement: 'optional',
       property: 'https://schema.org/startDate',
     }),
@@ -509,7 +509,7 @@ export const principalInvestigatorTemplate: Template = template({
     // term in the configured ontology, not a curated list.
     embeddedControlledTermField({
       key: 'primary_research_area',
-      reference: primaryResearchArea,
+      artifactRef: primaryResearchArea,
       valueRequirement: 'recommended',
       property: 'http://purl.org/dc/terms/subject',
     }),
@@ -518,7 +518,7 @@ export const principalInvestigatorTemplate: Template = template({
     // Cardinality.max omitted ⇒ unbounded (grammar §Cardinality).
     embeddedTextField({
       key: 'research_interests',
-      reference: researchInterest,
+      artifactRef: researchInterest,
       valueRequirement: 'optional',
       cardinality: cardinality({ min: 0 }),
       labelOverride: labelOverride({ label: 'Research Interests' }),

@@ -153,7 +153,7 @@ export const attributeValueField = (
 export interface EmbeddedAttributeValueField {
   readonly kind: 'EmbeddedAttributeValueField';
   readonly key: string;
-  readonly reference: AttributeValueFieldReference;
+  readonly artifactRef: AttributeValueFieldReference;
   readonly valueRequirement?: ValueRequirement;
   readonly cardinality?: Cardinality;
   readonly visibility?: Visibility;
@@ -163,7 +163,7 @@ export interface EmbeddedAttributeValueField {
 }
 
 export interface EmbeddedAttributeValueFieldInit extends EmbeddedFieldInitCommon {
-  readonly reference: AttributeValueFieldReference | AttributeValueField;
+  readonly artifactRef: AttributeValueFieldReference | AttributeValueField;
   // Grammar prohibits a default value for attribute-value fields.
 }
 
@@ -173,6 +173,6 @@ export function embeddedAttributeValueField(
   return {
     ...assembleCommon(init),
     kind: 'EmbeddedAttributeValueField',
-    reference: fieldRef(init.reference),
+    artifactRef: fieldRef(init.artifactRef),
   };
 }

@@ -151,7 +151,7 @@ export const pubMedIdField = (init: PubMedIdFieldInit): PubMedIdField =>
 export interface EmbeddedPubMedIdField {
   readonly kind: 'EmbeddedPubMedIdField';
   readonly key: string;
-  readonly reference: PubMedIdFieldReference;
+  readonly artifactRef: PubMedIdFieldReference;
   readonly valueRequirement?: ValueRequirement;
   readonly cardinality?: Cardinality;
   readonly visibility?: Visibility;
@@ -161,7 +161,7 @@ export interface EmbeddedPubMedIdField {
 }
 
 export interface EmbeddedPubMedIdFieldInit extends EmbeddedFieldInitCommon {
-  readonly reference: PubMedIdFieldReference | PubMedIdField;
+  readonly artifactRef: PubMedIdFieldReference | PubMedIdField;
   readonly defaultValue?: PubMedIdValue | AuthorityValueInput<PubMedIri>;
 }
 
@@ -171,7 +171,7 @@ export function embeddedPubMedIdField(
   const out: EmbeddedPubMedIdField = {
     ...assembleCommon(init),
     kind: 'EmbeddedPubMedIdField',
-    reference: fieldRef(init.reference),
+    artifactRef: fieldRef(init.artifactRef),
     ...(init.defaultValue !== undefined && {
       defaultValue: isPubMedIdValue(init.defaultValue)
         ? init.defaultValue

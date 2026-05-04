@@ -148,7 +148,7 @@ export const linkField = (init: LinkFieldInit): LinkField =>
 export interface EmbeddedLinkField {
   readonly kind: 'EmbeddedLinkField';
   readonly key: string;
-  readonly reference: LinkFieldReference;
+  readonly artifactRef: LinkFieldReference;
   readonly valueRequirement?: ValueRequirement;
   readonly cardinality?: Cardinality;
   readonly visibility?: Visibility;
@@ -158,7 +158,7 @@ export interface EmbeddedLinkField {
 }
 
 export interface EmbeddedLinkFieldInit extends EmbeddedFieldInitCommon {
-  readonly reference: LinkFieldReference | LinkField;
+  readonly artifactRef: LinkFieldReference | LinkField;
   readonly defaultValue?: LinkValue;
 }
 
@@ -166,7 +166,7 @@ export function embeddedLinkField(init: EmbeddedLinkFieldInit): EmbeddedLinkFiel
   const out: EmbeddedLinkField = {
     ...assembleCommon(init),
     kind: 'EmbeddedLinkField',
-    reference: fieldRef(init.reference),
+    artifactRef: fieldRef(init.artifactRef),
     ...(init.defaultValue !== undefined && { defaultValue: init.defaultValue }),
   };
   return out;

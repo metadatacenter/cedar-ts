@@ -135,7 +135,7 @@ export const emailField = (init: EmailFieldInit): EmailField =>
 export interface EmbeddedEmailField {
   readonly kind: 'EmbeddedEmailField';
   readonly key: string;
-  readonly reference: EmailFieldReference;
+  readonly artifactRef: EmailFieldReference;
   readonly valueRequirement?: ValueRequirement;
   readonly cardinality?: Cardinality;
   readonly visibility?: Visibility;
@@ -147,7 +147,7 @@ export interface EmbeddedEmailField {
 // `defaultValue` accepts a SimpleLiteral or a plain string (the email
 // lexical form, wrapped via simpleLiteral).
 export interface EmbeddedEmailFieldInit extends EmbeddedFieldInitCommon {
-  readonly reference: EmailFieldReference | EmailField;
+  readonly artifactRef: EmailFieldReference | EmailField;
   readonly defaultValue?: SimpleLiteral | string;
 }
 
@@ -155,7 +155,7 @@ export function embeddedEmailField(init: EmbeddedEmailFieldInit): EmbeddedEmailF
   const out: EmbeddedEmailField = {
     ...assembleCommon(init),
     kind: 'EmbeddedEmailField',
-    reference: fieldRef(init.reference),
+    artifactRef: fieldRef(init.artifactRef),
     ...(init.defaultValue !== undefined && {
       defaultValue:
         typeof init.defaultValue === 'string'

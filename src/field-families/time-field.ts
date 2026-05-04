@@ -188,7 +188,7 @@ export const timeField = (init: TimeFieldInit): TimeField =>
 export interface EmbeddedTimeField {
   readonly kind: 'EmbeddedTimeField';
   readonly key: string;
-  readonly reference: TimeFieldReference;
+  readonly artifactRef: TimeFieldReference;
   readonly valueRequirement?: ValueRequirement;
   readonly cardinality?: Cardinality;
   readonly visibility?: Visibility;
@@ -200,7 +200,7 @@ export interface EmbeddedTimeField {
 // `defaultValue` accepts a TimeLiteral or a plain xsd:time lexical form
 // (wrapped via timeLiteral).
 export interface EmbeddedTimeFieldInit extends EmbeddedFieldInitCommon {
-  readonly reference: TimeFieldReference | TimeField;
+  readonly artifactRef: TimeFieldReference | TimeField;
   readonly defaultValue?: TimeLiteral | string;
 }
 
@@ -208,7 +208,7 @@ export function embeddedTimeField(init: EmbeddedTimeFieldInit): EmbeddedTimeFiel
   const out: EmbeddedTimeField = {
     ...assembleCommon(init),
     kind: 'EmbeddedTimeField',
-    reference: fieldRef(init.reference),
+    artifactRef: fieldRef(init.artifactRef),
     ...(init.defaultValue !== undefined && {
       defaultValue:
         typeof init.defaultValue === 'string'

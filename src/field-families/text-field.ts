@@ -190,7 +190,7 @@ export const textField = (init: TextFieldInit): TextField =>
 export interface EmbeddedTextField {
   readonly kind: 'EmbeddedTextField';
   readonly key: string;
-  readonly reference: TextFieldReference;
+  readonly artifactRef: TextFieldReference;
   readonly valueRequirement?: ValueRequirement;
   readonly cardinality?: Cardinality;
   readonly visibility?: Visibility;
@@ -206,7 +206,7 @@ export interface EmbeddedTextField {
 // for the common xsd:string case — pass `langTaggedLiteral(...)`
 // explicitly when a language tag is needed.
 export interface EmbeddedTextFieldInit extends EmbeddedFieldInitCommon {
-  readonly reference: TextFieldReference | TextField;
+  readonly artifactRef: TextFieldReference | TextField;
   readonly defaultValue?: TextLiteral | string;
 }
 
@@ -214,7 +214,7 @@ export function embeddedTextField(init: EmbeddedTextFieldInit): EmbeddedTextFiel
   const out: EmbeddedTextField = {
     ...assembleCommon(init),
     kind: 'EmbeddedTextField',
-    reference: fieldRef(init.reference),
+    artifactRef: fieldRef(init.artifactRef),
     ...(init.defaultValue !== undefined && {
       defaultValue:
         typeof init.defaultValue === 'string'

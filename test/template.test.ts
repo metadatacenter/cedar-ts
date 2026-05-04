@@ -35,19 +35,19 @@ const meta = schemaArtifactMetadata({
 
 const titleEmbedding = embeddedTextField({
   key: 'title',
-  reference: textFieldId('https://example.org/fields/title'),
+  artifactRef: textFieldId('https://example.org/fields/title'),
 });
 const subtitleEmbedding = embeddedTextField({
   key: 'subtitle',
-  reference: textFieldId('https://example.org/fields/subtitle'),
+  artifactRef: textFieldId('https://example.org/fields/subtitle'),
 });
 const introEmbedding = embeddedPresentationComponent({
   key: 'intro',
-  reference: presentationComponentId('https://example.org/pc/intro'),
+  artifactRef: presentationComponentId('https://example.org/pc/intro'),
 });
 const addressEmbedding = embeddedTemplate({
   key: 'address',
-  reference: templateId('https://example.org/templates/address'),
+  artifactRef: templateId('https://example.org/templates/address'),
 });
 
 describe('Template', () => {
@@ -105,7 +105,7 @@ describe('Template', () => {
   it('rejects duplicate EmbeddedArtifactKey values within a single template', () => {
     const dup = embeddedTextField({
       key: 'title',
-      reference: textFieldId('https://example.org/fields/other-title'),
+      artifactRef: textFieldId('https://example.org/fields/other-title'),
     });
     expect(() =>
       template({

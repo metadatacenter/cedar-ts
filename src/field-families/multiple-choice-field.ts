@@ -216,7 +216,7 @@ export const multipleChoiceField = (
 export interface EmbeddedMultipleChoiceField {
   readonly kind: 'EmbeddedMultipleChoiceField';
   readonly key: string;
-  readonly reference: MultipleChoiceFieldReference;
+  readonly artifactRef: MultipleChoiceFieldReference;
   readonly valueRequirement?: ValueRequirement;
   readonly cardinality?: Cardinality;
   readonly visibility?: Visibility;
@@ -226,7 +226,7 @@ export interface EmbeddedMultipleChoiceField {
 }
 
 export interface EmbeddedMultipleChoiceFieldInit extends EmbeddedFieldInitCommon {
-  readonly reference: MultipleChoiceFieldReference | MultipleChoiceField;
+  readonly artifactRef: MultipleChoiceFieldReference | MultipleChoiceField;
   readonly defaultValue?: ChoiceValue;
 }
 
@@ -236,7 +236,7 @@ export function embeddedMultipleChoiceField(
   const out: EmbeddedMultipleChoiceField = {
     ...assembleCommon(init),
     kind: 'EmbeddedMultipleChoiceField',
-    reference: fieldRef(init.reference),
+    artifactRef: fieldRef(init.artifactRef),
     ...(init.defaultValue !== undefined && { defaultValue: init.defaultValue }),
   };
   return out;

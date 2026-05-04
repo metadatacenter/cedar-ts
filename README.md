@@ -80,7 +80,7 @@ const tpl = template({
   members: [
     embeddedTextField({
       key: 'full_name',
-      reference: fullName,
+      artifactRef: fullName,
       valueRequirement: 'required',
       property: 'https://schema.org/name',
     }),

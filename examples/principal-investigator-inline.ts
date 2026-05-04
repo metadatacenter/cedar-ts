@@ -125,7 +125,7 @@ const MODEL_VERSION = '0.1.0';
 //
 // In this style each EmbeddedXxx is built directly around a freshly
 // constructed reusable artifact. The reusable artifact is unnamed at the
-// JavaScript level — it lives only as the value of `reference` — so it
+// JavaScript level — it lives only as the value of `artifactRef` — so it
 // cannot be referenced from elsewhere in the file. Compare with the
 // const-binding variant for cases where the same Field would otherwise be
 // embedded more than once.
@@ -149,7 +149,7 @@ export const principalInvestigatorTemplate: Template = template({
     // but produces no instance data.
     embeddedPresentationComponent({
       key: 'intro',
-      reference: richTextComponent({
+      artifactRef: richTextComponent({
         id: `${COMPONENTS}pi-intro`,
         modelVersion: MODEL_VERSION,
         metadata: artifactMeta('PI Intro', 'Introductory text shown above the PI form.'),
@@ -163,7 +163,7 @@ export const principalInvestigatorTemplate: Template = template({
     // Plain text, with a minimum-length constraint.
     embeddedTextField({
       key: 'full_name',
-      reference: textField({
+      artifactRef: textField({
         id: `${FIELDS}full-name`,
         modelVersion: MODEL_VERSION,
         metadata: meta('Full Name', 'Full legal name of the principal investigator.'),
@@ -179,7 +179,7 @@ export const principalInvestigatorTemplate: Template = template({
     // as langTaggedLiterals.
     embeddedSingleChoiceField({
       key: 'academic_title',
-      reference: singleChoiceField({
+      artifactRef: singleChoiceField({
         id: `${FIELDS}academic-title`,
         modelVersion: MODEL_VERSION,
         metadata: meta('Academic Title', 'Academic rank or position (literal label).'),
@@ -208,7 +208,7 @@ export const principalInvestigatorTemplate: Template = template({
     // the OBO Role Ontology (RoleO).
     embeddedSingleChoiceField({
       key: 'academic_rank',
-      reference: singleChoiceField({
+      artifactRef: singleChoiceField({
         id: `${FIELDS}academic-rank`,
         modelVersion: MODEL_VERSION,
         metadata: meta(
@@ -246,7 +246,7 @@ export const principalInvestigatorTemplate: Template = template({
     // is a syntactically valid email).
     embeddedEmailField({
       key: 'email',
-      reference: emailField({
+      artifactRef: emailField({
         id: `${FIELDS}email`,
         modelVersion: MODEL_VERSION,
         metadata: meta('Email Address', 'Primary work email.'),
@@ -258,7 +258,7 @@ export const principalInvestigatorTemplate: Template = template({
 
     embeddedPhoneNumberField({
       key: 'phone',
-      reference: phoneNumberField({
+      artifactRef: phoneNumberField({
         id: `${FIELDS}phone`,
         modelVersion: MODEL_VERSION,
         metadata: meta('Phone Number', 'Primary work phone, in international format.'),
@@ -270,7 +270,7 @@ export const principalInvestigatorTemplate: Template = template({
 
     embeddedOrcidField({
       key: 'orcid',
-      reference: orcidField({
+      artifactRef: orcidField({
         id: `${FIELDS}orcid`,
         modelVersion: MODEL_VERSION,
         metadata: meta('ORCID iD', 'ORCID identifier (https://orcid.org/...).'),
@@ -292,7 +292,7 @@ export const principalInvestigatorTemplate: Template = template({
     // Text fields' defaultValue slot).
     embeddedTextField({
       key: 'institution_name',
-      reference: textField({
+      artifactRef: textField({
         id: `${FIELDS}institution-name`,
         modelVersion: MODEL_VERSION,
         metadata: meta('Institution Name', 'Name of the home institution.'),
@@ -305,7 +305,7 @@ export const principalInvestigatorTemplate: Template = template({
 
     embeddedRorField({
       key: 'institution_ror',
-      reference: rorField({
+      artifactRef: rorField({
         id: `${FIELDS}institution-ror`,
         modelVersion: MODEL_VERSION,
         metadata: meta(
@@ -323,7 +323,7 @@ export const principalInvestigatorTemplate: Template = template({
 
     embeddedTextField({
       key: 'department',
-      reference: textField({
+      artifactRef: textField({
         id: `${FIELDS}department`,
         modelVersion: MODEL_VERSION,
         metadata: meta('Department', 'Department or division within the institution.'),
@@ -337,7 +337,7 @@ export const principalInvestigatorTemplate: Template = template({
     // partial-date values — see grammar §Field Specs.
     embeddedDateField({
       key: 'appointment_date',
-      reference: dateField({
+      artifactRef: dateField({
         id: `${FIELDS}appointment-date`,
         modelVersion: MODEL_VERSION,
         metadata: meta('Appointment Date', 'Start date of current appointment.'),
@@ -352,7 +352,7 @@ export const principalInvestigatorTemplate: Template = template({
     // Compare with `academic_rank` above, which enumerates its options.
     embeddedControlledTermField({
       key: 'primary_research_area',
-      reference: controlledTermField({
+      artifactRef: controlledTermField({
         id: `${FIELDS}primary-research-area`,
         modelVersion: MODEL_VERSION,
         metadata: meta(
@@ -379,7 +379,7 @@ export const principalInvestigatorTemplate: Template = template({
     // Cardinality.max omitted ⇒ unbounded (grammar §Cardinality).
     embeddedTextField({
       key: 'research_interests',
-      reference: textField({
+      artifactRef: textField({
         id: `${FIELDS}research-interest`,
         modelVersion: MODEL_VERSION,
         metadata: meta('Research Interest', 'A single research interest or keyword.'),
