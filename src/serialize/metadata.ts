@@ -207,10 +207,11 @@ const ARTIFACT_METADATA_KEYS = [
   'annotations',
 ] as const;
 
-export function serializeArtifactMetadata(x: ArtifactMetadata): unknown {
-  const out: Record<string, unknown> = {
-    name: serializeMultilingualString(x.name),
-  };
+function writeArtifactMetadataBody(
+  x: ArtifactMetadata,
+  out: Record<string, unknown>,
+): void {
+  out['name'] = serializeMultilingualString(x.name);
   if (x.description !== undefined)
     out['description'] = serializeMultilingualString(x.description);
   if (x.identifier !== undefined) out['identifier'] = x.identifier;
@@ -221,15 +222,12 @@ export function serializeArtifactMetadata(x: ArtifactMetadata): unknown {
   out['lifecycle'] = serializeLifecycleMetadata(x.lifecycle);
   if (x.annotations.length > 0)
     out['annotations'] = x.annotations.map(serializeAnnotation);
-  return out;
 }
 
-export function parseArtifactMetadata(
-  x: unknown,
-  where = 'ArtifactMetadata',
+function readArtifactMetadataBody(
+  o: Record<string, unknown>,
+  where: string,
 ): ArtifactMetadata {
-  const o = expectObject(x, where);
-  expectKnownProperties(o, [...ARTIFACT_METADATA_KEYS]);
   rejectNullProperty(o, 'description');
   rejectNullProperty(o, 'identifier');
   rejectNullProperty(o, 'preferredLabel');
@@ -275,18 +273,37 @@ export function parseArtifactMetadata(
   return artifactMetadata(init);
 }
 
+export function serializeArtifactMetadata(x: ArtifactMetadata): unknown {
+  const out: Record<string, unknown> = {};
+  writeArtifactMetadataBody(x, out);
+  return out;
+}
+
+export function parseArtifactMetadata(
+  x: unknown,
+  where = 'ArtifactMetadata',
+): ArtifactMetadata {
+  const o = expectObject(x, where);
+  expectKnownProperties(o, [...ARTIFACT_METADATA_KEYS]);
+  return readArtifactMetadataBody(o, where);
+}
+
 // ---- SchemaArtifactMetadata ------------------------------------------
 //
-// SchemaArtifactMetadata keeps the `artifact` wrapper on the wire because
-// reusable schema artifacts genuinely carry two coherent groups —
-// the common `ArtifactMetadata` and the schema-specific
-// `SchemaVersioning`.
+// Wire form is fully flat: the inner `ArtifactMetadata`'s properties
+// are promoted to direct children alongside `versioning`. There is
+// no `artifact` wrapper.
+
+const SCHEMA_ARTIFACT_METADATA_KEYS = [
+  ...ARTIFACT_METADATA_KEYS,
+  'versioning',
+] as const;
 
 export function serializeSchemaArtifactMetadata(x: SchemaArtifactMetadata): unknown {
-  return {
-    artifact: serializeArtifactMetadata(x.artifact),
-    versioning: serializeSchemaVersioning(x.versioning),
-  };
+  const out: Record<string, unknown> = {};
+  writeArtifactMetadataBody(x.artifact, out);
+  out['versioning'] = serializeSchemaVersioning(x.versioning);
+  return out;
 }
 
 export function parseSchemaArtifactMetadata(
@@ -294,15 +311,12 @@ export function parseSchemaArtifactMetadata(
   where = 'SchemaArtifactMetadata',
 ): SchemaArtifactMetadata {
   const o = expectObject(x, where);
-  expectKnownProperties(o, ['artifact', 'versioning']);
-  if (!('artifact' in o)) {
-    throw new CedarConstructionError(`${where}: missing required "artifact"`);
-  }
+  expectKnownProperties(o, [...SCHEMA_ARTIFACT_METADATA_KEYS]);
   if (!('versioning' in o)) {
     throw new CedarConstructionError(`${where}: missing required "versioning"`);
   }
   return schemaArtifactMetadata({
-    artifact: parseArtifactMetadata(o['artifact'], `${where}.artifact`),
+    artifact: readArtifactMetadataBody(o, where),
     versioning: parseSchemaVersioning(o['versioning'], `${where}.versioning`),
   });
 }
