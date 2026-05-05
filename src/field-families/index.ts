@@ -1,5 +1,5 @@
 // =====================================================================
-// Field families — public surface for the 18 per-family vertical
+// Field families — public surface for the 19 per-family vertical
 // slices plus the cross-family unions and predicates
 // =====================================================================
 //
@@ -9,7 +9,7 @@
 //
 // Re-exports:
 //
-//   - all 18 per-family slices (text-field.ts, numeric-field.ts, …,
+//   - all 19 per-family slices (text-field.ts, numeric-field.ts, …,
 //     attribute-value-field.ts) — each contributes a FieldId, Value,
 //     FieldSpec, Field, and EmbeddedField type
 //   - rendering hints                 (rendering-hints.ts)
@@ -39,6 +39,7 @@ export * from './choice-shared.js';
 
 export * from './text-field.js';
 export * from './numeric-field.js';
+export * from './boolean-field.js';
 export * from './date-field.js';
 export * from './time-field.js';
 export * from './date-time-field.js';
@@ -58,6 +59,7 @@ export * from './attribute-value-field.js';
 
 import type { TextField, TextFieldSpec, TextValue, EmbeddedTextField } from './text-field.js';
 import type { NumericField, NumericFieldSpec, NumericValue, EmbeddedNumericField } from './numeric-field.js';
+import type { BooleanField, BooleanFieldSpec, BooleanValue, EmbeddedBooleanField } from './boolean-field.js';
 import type { DateField, DateFieldSpec, DateValue, EmbeddedDateField } from './date-field.js';
 import type { TimeField, TimeFieldSpec, TimeValue, EmbeddedTimeField } from './time-field.js';
 import type { DateTimeField, DateTimeFieldSpec, DateTimeValue, EmbeddedDateTimeField } from './date-time-field.js';
@@ -103,6 +105,7 @@ import type { ChoiceValue } from './choice-shared.js';
 export type Field =
   | TextField
   | NumericField
+  | BooleanField
   | DateField
   | TimeField
   | DateTimeField
@@ -123,6 +126,7 @@ export type Field =
 const FIELD_KINDS: ReadonlySet<string> = new Set([
   'TextField',
   'NumericField',
+  'BooleanField',
   'DateField',
   'TimeField',
   'DateTimeField',
@@ -155,6 +159,7 @@ export function isField(x: unknown): x is Field {
 export type EmbeddedField =
   | EmbeddedTextField
   | EmbeddedNumericField
+  | EmbeddedBooleanField
   | EmbeddedDateField
   | EmbeddedTimeField
   | EmbeddedDateTimeField
@@ -175,6 +180,7 @@ export type EmbeddedField =
 const EMBEDDED_FIELD_KINDS: ReadonlySet<string> = new Set([
   'EmbeddedTextField',
   'EmbeddedNumericField',
+  'EmbeddedBooleanField',
   'EmbeddedDateField',
   'EmbeddedTimeField',
   'EmbeddedDateTimeField',
@@ -210,6 +216,7 @@ export function isEmbeddedField(x: unknown): x is EmbeddedField {
 export type FieldSpec =
   | TextFieldSpec
   | NumericFieldSpec
+  | BooleanFieldSpec
   | DateFieldSpec
   | TimeFieldSpec
   | DateTimeFieldSpec
@@ -232,6 +239,7 @@ export type FieldSpec =
 const FIELD_SPEC_KINDS: ReadonlySet<string> = new Set([
   'TextFieldSpec',
   'NumericFieldSpec',
+  'BooleanFieldSpec',
   'DateFieldSpec',
   'TimeFieldSpec',
   'DateTimeFieldSpec',
@@ -318,6 +326,7 @@ export type ContactFieldSpec = EmailFieldSpec | PhoneNumberFieldSpec;
 export type Value =
   | TextValue
   | NumericValue
+  | BooleanValue
   | DateValue
   | TimeValue
   | DateTimeValue
@@ -332,6 +341,7 @@ export type Value =
 const VALUE_KINDS: ReadonlySet<string> = new Set([
   'TextValue',
   'NumericValue',
+  'BooleanValue',
   'YearValue',
   'YearMonthValue',
   'FullDateValue',
@@ -364,6 +374,7 @@ export function isValue(x: unknown): x is Value {
 
 import type { TextFieldId } from './text-field.js';
 import type { NumericFieldId } from './numeric-field.js';
+import type { BooleanFieldId } from './boolean-field.js';
 import type { DateFieldId } from './date-field.js';
 import type { TimeFieldId } from './time-field.js';
 import type { DateTimeFieldId } from './date-time-field.js';
@@ -384,6 +395,7 @@ import type { AttributeValueFieldId } from './attribute-value-field.js';
 export type FieldId =
   | TextFieldId
   | NumericFieldId
+  | BooleanFieldId
   | DateFieldId
   | TimeFieldId
   | DateTimeFieldId
@@ -409,6 +421,7 @@ export type FieldReference = FieldId;
 const FIELD_ID_KINDS: ReadonlySet<string> = new Set([
   'TextFieldId',
   'NumericFieldId',
+  'BooleanFieldId',
   'DateFieldId',
   'TimeFieldId',
   'DateTimeFieldId',

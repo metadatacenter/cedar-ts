@@ -18,6 +18,7 @@ import {
 import {
   type TextFieldSpec,
   type NumericFieldSpec,
+  type BooleanFieldSpec,
   type DateFieldSpec,
   type TimeFieldSpec,
   type DateTimeFieldSpec,
@@ -58,12 +59,14 @@ import {
   type DateTimeRenderingHint,
   type TextRenderingHint,
   type NumericRenderingHint,
+  type BooleanRenderingHint,
   type SingleChoiceRenderingHint,
   type MultipleChoiceRenderingHint,
   type DateComponentOrder,
   type TimeFormat,
   textFieldSpec,
   numericFieldSpec,
+  booleanFieldSpec,
   dateFieldSpec,
   timeFieldSpec,
   dateTimeFieldSpec,
@@ -100,6 +103,7 @@ import {
   TEXT_RENDERING_HINTS,
   SINGLE_CHOICE_RENDERING_HINTS,
   MULTIPLE_CHOICE_RENDERING_HINTS,
+  BOOLEAN_RENDERING_HINTS,
   DATE_COMPONENT_ORDERS,
   TIME_FORMATS,
   dateRenderingHint,
@@ -150,6 +154,12 @@ export const parseNumericRenderingHint = (
   x: unknown,
   w = 'NumericRenderingHint',
 ): NumericRenderingHint => expectStringEnum(x, ['numericInput'] as const, w);
+
+export const serializeBooleanRenderingHint = (x: BooleanRenderingHint): string => x;
+export const parseBooleanRenderingHint = (
+  x: unknown,
+  w = 'BooleanRenderingHint',
+): BooleanRenderingHint => expectStringEnum(x, BOOLEAN_RENDERING_HINTS, w);
 
 export const serializeSingleChoiceRenderingHint = (
   x: SingleChoiceRenderingHint,
@@ -716,6 +726,36 @@ export function parseNumericFieldSpec(
   return numericFieldSpec(init);
 }
 
+// ---- BooleanFieldSpec ------------------------------------------------
+
+export function serializeBooleanFieldSpec(x: BooleanFieldSpec): unknown {
+  const out: Record<string, unknown> = {
+    kind: 'BooleanFieldSpec',
+  };
+  if (x.renderingHint !== undefined)
+    out['renderingHint'] = serializeBooleanRenderingHint(x.renderingHint);
+  return out;
+}
+
+export function parseBooleanFieldSpec(
+  x: unknown,
+  where = 'BooleanFieldSpec',
+): BooleanFieldSpec {
+  const o = expectObject(x, where);
+  expectKnownProperties(o, ['kind', 'renderingHint']);
+  rejectNullProperty(o, 'renderingHint');
+  if (o['kind'] !== 'BooleanFieldSpec') {
+    throw new CedarConstructionError(`${where}: expected kind "BooleanFieldSpec"`);
+  }
+  const init: { renderingHint?: BooleanRenderingHint } = {};
+  if ('renderingHint' in o)
+    init.renderingHint = parseBooleanRenderingHint(
+      o['renderingHint'],
+      `${where}.renderingHint`,
+    );
+  return booleanFieldSpec(init);
+}
+
 // ---- Date/Time/DateTime FieldSpec ------------------------------------
 
 export function serializeDateFieldSpec(x: DateFieldSpec): unknown {
@@ -1172,6 +1212,7 @@ export const parseAttributeValueFieldSpec = attrValSpecHelpers.parse;
 const FIELD_SPEC_KINDS = [
   'TextFieldSpec',
   'NumericFieldSpec',
+  'BooleanFieldSpec',
   'DateFieldSpec',
   'TimeFieldSpec',
   'DateTimeFieldSpec',
@@ -1198,6 +1239,8 @@ export function serializeFieldSpec(x: FieldSpec): unknown {
       return serializeTextFieldSpec(x);
     case 'NumericFieldSpec':
       return serializeNumericFieldSpec(x);
+    case 'BooleanFieldSpec':
+      return serializeBooleanFieldSpec(x);
     case 'DateFieldSpec':
       return serializeDateFieldSpec(x);
     case 'TimeFieldSpec':
@@ -1245,6 +1288,8 @@ export function parseFieldSpec(x: unknown, where = 'FieldSpec'): FieldSpec {
       return parseTextFieldSpec(x, where);
     case 'NumericFieldSpec':
       return parseNumericFieldSpec(x, where);
+    case 'BooleanFieldSpec':
+      return parseBooleanFieldSpec(x, where);
     case 'DateFieldSpec':
       return parseDateFieldSpec(x, where);
     case 'TimeFieldSpec':

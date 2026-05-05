@@ -1,5 +1,5 @@
 // =====================================================================
-// embedded-fields — wire-form serialize/parse for EmbeddedField (18
+// embedded-fields — wire-form serialize/parse for EmbeddedField (19
 // variants), EmbeddedTemplate, EmbeddedPresentationComponent, plus the
 // EmbeddedArtifact union dispatcher.
 // =====================================================================
@@ -9,6 +9,7 @@ import {
   type EmbeddedField,
   type EmbeddedTextField,
   type EmbeddedNumericField,
+  type EmbeddedBooleanField,
   type EmbeddedDateField,
   type EmbeddedTimeField,
   type EmbeddedDateTimeField,
@@ -27,6 +28,7 @@ import {
   type EmbeddedAttributeValueField,
   embeddedTextField,
   embeddedNumericField,
+  embeddedBooleanField,
   embeddedDateField,
   embeddedTimeField,
   embeddedDateTimeField,
@@ -65,6 +67,7 @@ import {
 import {
   serializeTextFieldId,
   serializeNumericFieldId,
+  serializeBooleanFieldId,
   serializeDateFieldId,
   serializeTimeFieldId,
   serializeDateTimeFieldId,
@@ -85,6 +88,7 @@ import {
   serializePresentationComponentId,
   parseTextFieldId,
   parseNumericFieldId,
+  parseBooleanFieldId,
   parseDateFieldId,
   parseTimeFieldId,
   parseDateTimeFieldId,
@@ -147,8 +151,11 @@ import {
   parsePubMedIdValueUntagged,
   parseRridValueUntagged,
   parseNihGrantIdValueUntagged,
+  serializeBooleanLiteralAtPosition,
+  parseBooleanLiteralAtPosition,
 } from './values.js';
 import type { SimpleLiteral } from '../literals/index.js';
+import type { BooleanLiteral } from '../field-families/boolean-field.js';
 
 // ---- Common per-embedding properties ---------------------------------
 
@@ -338,6 +345,97 @@ export function parseEmbeddedNumericField(
       ),
     }),
   });
+}
+
+// EmbeddedBooleanField is the one EmbeddedField variant that omits the
+// `cardinality` slot. It uses a bespoke shell to enforce the absence of
+// `cardinality` on the wire (rather than reusing `readShell`, which
+// permits it).
+const BOOLEAN_FIELD_PROPS = [
+  'kind',
+  'key',
+  'artifactRef',
+  'valueRequirement',
+  'visibility',
+  'defaultValue',
+  'labelOverride',
+  'property',
+];
+
+export function serializeEmbeddedBooleanField(
+  x: EmbeddedBooleanField,
+): unknown {
+  const out: Record<string, unknown> = {
+    kind: 'EmbeddedBooleanField',
+    key: x.key,
+    artifactRef: serializeBooleanFieldId(x.artifactRef),
+  };
+  if (x.valueRequirement !== undefined)
+    out['valueRequirement'] = serializeValueRequirement(x.valueRequirement);
+  if (x.visibility !== undefined)
+    out['visibility'] = serializeVisibility(x.visibility);
+  if (x.labelOverride !== undefined)
+    out['labelOverride'] = serializeLabelOverride(x.labelOverride);
+  if (x.property !== undefined) out['property'] = serializeProperty(x.property);
+  if (x.defaultValue !== undefined)
+    out['defaultValue'] = serializeBooleanLiteralAtPosition(x.defaultValue);
+  return out;
+}
+
+export function parseEmbeddedBooleanField(
+  x: unknown,
+  where = 'EmbeddedBooleanField',
+): EmbeddedBooleanField {
+  const o = expectObject(x, where);
+  expectKnownProperties(o, BOOLEAN_FIELD_PROPS);
+  rejectNullProperty(o, 'valueRequirement');
+  rejectNullProperty(o, 'visibility');
+  rejectNullProperty(o, 'labelOverride');
+  rejectNullProperty(o, 'property');
+  rejectNullProperty(o, 'defaultValue');
+  if (o['kind'] !== 'EmbeddedBooleanField') {
+    throw new CedarConstructionError(
+      `${where}: expected kind "EmbeddedBooleanField"; got ${JSON.stringify(o['kind'])}`,
+    );
+  }
+  if (!('key' in o)) {
+    throw new CedarConstructionError(`${where}: missing required "key"`);
+  }
+  if (!('artifactRef' in o)) {
+    throw new CedarConstructionError(`${where}: missing required "artifactRef"`);
+  }
+  const init: {
+    key: string;
+    artifactRef: ReturnType<typeof parseBooleanFieldId>;
+    valueRequirement?: ValueRequirement;
+    visibility?: Visibility;
+    labelOverride?: LabelOverride;
+    property?: Property;
+    defaultValue?: BooleanLiteral;
+  } = {
+    key: expectString(o['key'], `${where}.key`),
+    artifactRef: parseBooleanFieldId(o['artifactRef'], `${where}.artifactRef`),
+  };
+  if ('valueRequirement' in o)
+    init.valueRequirement = parseValueRequirement(
+      o['valueRequirement'],
+      `${where}.valueRequirement`,
+    );
+  if ('visibility' in o)
+    init.visibility = parseVisibility(o['visibility'], `${where}.visibility`);
+  if ('labelOverride' in o)
+    init.labelOverride = parseLabelOverride(
+      o['labelOverride'],
+      `${where}.labelOverride`,
+    );
+  if ('property' in o)
+    init.property = parseProperty(o['property'], `${where}.property`);
+  if ('defaultValue' in o)
+    init.defaultValue = parseBooleanLiteralAtPosition(
+      o['defaultValue'],
+      `${where}.defaultValue`,
+    );
+  return embeddedBooleanField(init);
 }
 
 export function serializeEmbeddedDateField(x: EmbeddedDateField): unknown {
@@ -890,6 +988,7 @@ export function parseEmbeddedPresentationComponent(
 const EMBEDDED_FIELD_KINDS = [
   'EmbeddedTextField',
   'EmbeddedNumericField',
+  'EmbeddedBooleanField',
   'EmbeddedDateField',
   'EmbeddedTimeField',
   'EmbeddedDateTimeField',
@@ -914,6 +1013,8 @@ export function serializeEmbeddedField(x: EmbeddedField): unknown {
       return serializeEmbeddedTextField(x);
     case 'EmbeddedNumericField':
       return serializeEmbeddedNumericField(x);
+    case 'EmbeddedBooleanField':
+      return serializeEmbeddedBooleanField(x);
     case 'EmbeddedDateField':
       return serializeEmbeddedDateField(x);
     case 'EmbeddedTimeField':
@@ -960,6 +1061,8 @@ export function parseEmbeddedField(
       return parseEmbeddedTextField(x, where);
     case 'EmbeddedNumericField':
       return parseEmbeddedNumericField(x, where);
+    case 'EmbeddedBooleanField':
+      return parseEmbeddedBooleanField(x, where);
     case 'EmbeddedDateField':
       return parseEmbeddedDateField(x, where);
     case 'EmbeddedTimeField':

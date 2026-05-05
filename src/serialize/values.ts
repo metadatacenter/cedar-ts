@@ -13,6 +13,8 @@ import { CedarConstructionError, iri } from '../leaves/index.js';
 import {
   type TextValue,
   type NumericValue,
+  type BooleanValue,
+  type BooleanLiteral,
   type DateValue,
   type YearValue,
   type YearMonthValue,
@@ -36,6 +38,8 @@ import {
   type Value,
   textValue,
   numericValue,
+  booleanValue,
+  booleanLiteral,
   yearValue,
   yearMonthValue,
   fullDateValue,
@@ -128,6 +132,62 @@ export function parseNumericValue(x: unknown, where = 'NumericValue'): NumericVa
   }
   return numericValue(lit);
 }
+
+// ---- BooleanValue ----------------------------------------------------
+//
+// BooleanValue.literal is a BooleanLiteral whose payload is a JSON
+// boolean (not a string lexical form). The wire shape of BooleanLiteral
+// is `{ value: boolean }` with no datatype; the datatype is implicit
+// xsd:boolean.
+
+function serializeBooleanLiteralAtPosition(x: BooleanLiteral): unknown {
+  return { value: x.value };
+}
+
+function parseBooleanLiteralAtPosition(
+  x: unknown,
+  where: string,
+): BooleanLiteral {
+  const o = expectObject(x, where);
+  expectKnownProperties(o, ['value']);
+  if (!('value' in o)) {
+    throw new CedarConstructionError(`${where}: missing required "value"`);
+  }
+  if (typeof o['value'] !== 'boolean') {
+    throw new CedarConstructionError(
+      `${where}.value must be a JSON boolean`,
+    );
+  }
+  return booleanLiteral(o['value']);
+}
+
+export function serializeBooleanValue(x: BooleanValue): unknown {
+  return {
+    kind: 'BooleanValue',
+    literal: serializeBooleanLiteralAtPosition(x.literal),
+  };
+}
+
+export function parseBooleanValue(x: unknown, where = 'BooleanValue'): BooleanValue {
+  const o = expectObject(x, where);
+  expectKnownProperties(o, ['kind', 'literal']);
+  if (o['kind'] !== 'BooleanValue') {
+    throw new CedarConstructionError(`${where}: expected kind "BooleanValue"`);
+  }
+  if (!('literal' in o)) {
+    throw new CedarConstructionError(`${where}: missing required "literal"`);
+  }
+  return booleanValue(
+    parseBooleanLiteralAtPosition(o['literal'], `${where}.literal`),
+  );
+}
+
+// Exported for the embedded-fields layer (EmbeddedBooleanField default
+// value) to reuse the same shape.
+export {
+  serializeBooleanLiteralAtPosition,
+  parseBooleanLiteralAtPosition,
+};
 
 // ---- DateValue (Year / YearMonth / FullDate) -------------------------
 
@@ -683,6 +743,7 @@ export function parseAttributeValue(
 const VALUE_KINDS = [
   'TextValue',
   'NumericValue',
+  'BooleanValue',
   'YearValue',
   'YearMonthValue',
   'FullDateValue',
@@ -709,6 +770,8 @@ export function serializeValue(x: Value): unknown {
       return serializeTextValue(x);
     case 'NumericValue':
       return serializeNumericValue(x);
+    case 'BooleanValue':
+      return serializeBooleanValue(x);
     case 'YearValue':
       return serializeYearValue(x);
     case 'YearMonthValue':
@@ -756,6 +819,8 @@ export function parseValue(x: unknown, where = 'Value'): Value {
       return parseTextValue(x, where);
     case 'NumericValue':
       return parseNumericValue(x, where);
+    case 'BooleanValue':
+      return parseBooleanValue(x, where);
     case 'YearValue':
       return parseYearValue(x, where);
     case 'YearMonthValue':

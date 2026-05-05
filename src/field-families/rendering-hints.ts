@@ -41,6 +41,14 @@ export const MULTIPLE_CHOICE_RENDERING_HINTS: readonly MultipleChoiceRenderingHi
 // for symmetry and forward-compatibility.
 export type NumericRenderingHint = 'numericInput';
 
+// BooleanRenderingHint distinguishes the two ways a boolean can render:
+// a checkbox (single labelled toggle box) or a toggle (slider/switch).
+export type BooleanRenderingHint = 'checkbox' | 'toggle';
+export const BOOLEAN_RENDERING_HINTS: readonly BooleanRenderingHint[] = Object.freeze([
+  'checkbox',
+  'toggle',
+]);
+
 // DateComponentOrder is the ordering used by DateRenderingHint to display
 // or acquire date components.
 export type DateComponentOrder = 'dayMonthYear' | 'monthDayYear' | 'yearMonthDay';
@@ -99,6 +107,7 @@ export type RenderingHint =
   | SingleChoiceRenderingHint
   | MultipleChoiceRenderingHint
   | NumericRenderingHint
+  | BooleanRenderingHint
   | DateRenderingHint
   | TimeRenderingHint
   | DateTimeRenderingHint;

@@ -88,6 +88,7 @@ export function serialize(x: SerializableArtifact): unknown {
       return serializePresentationComponent(x);
     case 'TextField':
     case 'NumericField':
+    case 'BooleanField':
     case 'DateField':
     case 'TimeField':
     case 'DateTimeField':

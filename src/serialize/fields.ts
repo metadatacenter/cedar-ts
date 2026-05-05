@@ -1,5 +1,5 @@
 // =====================================================================
-// fields — wire-form serialize/parse for the 18 Field artifacts + Field
+// fields — wire-form serialize/parse for the 19 Field artifacts + Field
 // union dispatcher.
 // =====================================================================
 
@@ -8,6 +8,7 @@ import {
   type Field,
   type TextField,
   type NumericField,
+  type BooleanField,
   type DateField,
   type TimeField,
   type DateTimeField,
@@ -28,6 +29,7 @@ import {
   type MultipleChoiceFieldSpec,
   textField,
   numericField,
+  booleanField,
   dateField,
   timeField,
   dateTimeField,
@@ -54,6 +56,7 @@ import {
 import {
   serializeTextFieldId,
   serializeNumericFieldId,
+  serializeBooleanFieldId,
   serializeDateFieldId,
   serializeTimeFieldId,
   serializeDateTimeFieldId,
@@ -72,6 +75,7 @@ import {
   serializeAttributeValueFieldId,
   parseTextFieldId,
   parseNumericFieldId,
+  parseBooleanFieldId,
   parseDateFieldId,
   parseTimeFieldId,
   parseDateTimeFieldId,
@@ -96,6 +100,7 @@ import {
 import {
   serializeTextFieldSpec,
   serializeNumericFieldSpec,
+  serializeBooleanFieldSpec,
   serializeDateFieldSpec,
   serializeTimeFieldSpec,
   serializeDateTimeFieldSpec,
@@ -116,6 +121,7 @@ import {
   serializeAttributeValueFieldSpec,
   parseTextFieldSpec,
   parseNumericFieldSpec,
+  parseBooleanFieldSpec,
   parseDateFieldSpec,
   parseTimeFieldSpec,
   parseDateTimeFieldSpec,
@@ -203,6 +209,27 @@ export function parseNumericField(
     modelVersion: s.modelVersion,
     metadata: parseSchemaArtifactMetadata(s.metadata, `${where}.metadata`),
     fieldSpec: parseNumericFieldSpec(s.fieldSpec, `${where}.fieldSpec`),
+  });
+}
+
+export const serializeBooleanField = (x: BooleanField): unknown => ({
+  kind: 'BooleanField',
+  id: serializeBooleanFieldId(x.id),
+  modelVersion: x.modelVersion,
+  metadata: serializeSchemaArtifactMetadata(x.metadata),
+  fieldSpec: serializeBooleanFieldSpec(x.fieldSpec),
+});
+
+export function parseBooleanField(
+  x: unknown,
+  where = 'BooleanField',
+): BooleanField {
+  const s = parseFieldShell<BooleanField>(x, 'BooleanField', where);
+  return booleanField({
+    id: parseBooleanFieldId(s.id, `${where}.id`),
+    modelVersion: s.modelVersion,
+    metadata: parseSchemaArtifactMetadata(s.metadata, `${where}.metadata`),
+    fieldSpec: parseBooleanFieldSpec(s.fieldSpec, `${where}.fieldSpec`),
   });
 }
 
@@ -555,6 +582,7 @@ export function parseAttributeValueField(
 const FIELD_KINDS = [
   'TextField',
   'NumericField',
+  'BooleanField',
   'DateField',
   'TimeField',
   'DateTimeField',
@@ -579,6 +607,8 @@ export function serializeField(x: Field): unknown {
       return serializeTextField(x);
     case 'NumericField':
       return serializeNumericField(x);
+    case 'BooleanField':
+      return serializeBooleanField(x);
     case 'DateField':
       return serializeDateField(x);
     case 'TimeField':
@@ -622,6 +652,8 @@ export function parseField(x: unknown, where = 'Field'): Field {
       return parseTextField(x, where);
     case 'NumericField':
       return parseNumericField(x, where);
+    case 'BooleanField':
+      return parseBooleanField(x, where);
     case 'DateField':
       return parseDateField(x, where);
     case 'TimeField':
