@@ -2,7 +2,9 @@ import { describe, expect, it } from 'vitest';
 import {
   CedarConstructionError,
   textFieldSpec,
-  numericFieldSpec,
+  integerNumberFieldSpec,
+  realNumberFieldSpec,
+  numericRenderingHint,
   unit,
   dateFieldSpec,
   timeFieldSpec,
@@ -40,12 +42,15 @@ import {
   timeRenderingHint,
   dateTimeRenderingHint,
   controlledTermValue,
-  numericValue,
-  numericLiteral,
+  integerNumberValue,
+  integerNumberLiteral,
+  realNumberValue,
+  realNumberLiteral,
   typedLiteral,
   XsdNumericDatatypeIri,
   isTextFieldSpec,
-  isNumericFieldSpec,
+  isIntegerNumberFieldSpec,
+  isRealNumberFieldSpec,
   isDateFieldSpec,
   isTimeFieldSpec,
   isDateTimeFieldSpec,
@@ -82,11 +87,11 @@ describe('TextFieldSpec', () => {
   });
 });
 
-describe('NumericFieldSpec', () => {
-  it('requires a datatype kind', () => {
-    const fs = numericFieldSpec({ datatype: 'integer' });
-    expect(fs.datatype).toBe('integer');
-    expect(isNumericFieldSpec(fs)).toBe(true);
+describe('IntegerNumberFieldSpec', () => {
+  it('builds an empty spec when no constraints are supplied', () => {
+    const fs = integerNumberFieldSpec();
+    expect(fs.kind).toBe('IntegerNumberFieldSpec');
+    expect(isIntegerNumberFieldSpec(fs)).toBe(true);
   });
 
   it('Unit pairs an Iri with an optional label', () => {
@@ -94,16 +99,32 @@ describe('NumericFieldSpec', () => {
     expect(u.iri.value).toBe('http://qudt.org/vocab/unit/M');
     expect(u.label).toEqual([{ value: 'metre', lang: 'und' }]);
 
-    const fs = numericFieldSpec({
-      datatype: 'decimal',
+    const fs = integerNumberFieldSpec({
       unit: u,
-      numericPrecision: 3,
-      minValue: numericValue(numericLiteral('0', 'decimal')),
-      maxValue: numericValue(numericLiteral('100', 'decimal')),
-      renderingHint: 'numericInput',
+      minValue: integerNumberValue(integerNumberLiteral('0')),
+      maxValue: integerNumberValue(integerNumberLiteral('100')),
+      renderingHint: numericRenderingHint(),
     });
     expect(fs.unit).toBe(u);
-    expect(fs.numericPrecision).toBe(3);
+    expect(fs.minValue?.literal.lexicalForm).toBe('0');
+  });
+});
+
+describe('RealNumberFieldSpec', () => {
+  it('requires a datatype kind', () => {
+    const fs = realNumberFieldSpec({ datatype: 'decimal' });
+    expect(fs.datatype).toBe('decimal');
+    expect(isRealNumberFieldSpec(fs)).toBe(true);
+  });
+
+  it('carries decimalPlaces on the rendering hint', () => {
+    const fs = realNumberFieldSpec({
+      datatype: 'decimal',
+      minValue: realNumberValue(realNumberLiteral('0', 'decimal')),
+      maxValue: realNumberValue(realNumberLiteral('100', 'decimal')),
+      renderingHint: numericRenderingHint(3),
+    });
+    expect(fs.renderingHint?.decimalPlaces).toBe(3);
   });
 });
 
@@ -306,7 +327,8 @@ describe('FieldSpec union', () => {
   it('isFieldSpec recognises every concrete field spec kind', () => {
     const all: FieldSpec[] = [
       textFieldSpec(),
-      numericFieldSpec({ datatype: 'integer' }),
+      integerNumberFieldSpec(),
+      realNumberFieldSpec({ datatype: 'decimal' }),
       dateFieldSpec({ dateValueType: 'fullDate' }),
       timeFieldSpec(),
       dateTimeFieldSpec({ dateTimeValueType: 'dateHourMinute' }),
@@ -339,17 +361,17 @@ describe('FieldSpec union', () => {
 describe('FieldSpecFor<K> mapped type (compile-time)', () => {
   it('resolves to the right spec interface per kind', () => {
     const t: FieldSpecFor<'text'> = textFieldSpec();
-    const n: FieldSpecFor<'numeric'> = numericFieldSpec({ datatype: 'integer' });
+    const n: FieldSpecFor<'integer_number'> = integerNumberFieldSpec();
     const d: FieldSpecFor<'date'> = dateFieldSpec({ dateValueType: 'fullDate' });
     const sc: FieldSpecFor<'single_choice'> = literalSingleChoiceFieldSpec({
       options: [literalChoiceOption(typedLiteral('a', XsdNumericDatatypeIri.integer))],
     });
     expect(t.kind).toBe('TextFieldSpec');
-    expect(n.kind).toBe('NumericFieldSpec');
+    expect(n.kind).toBe('IntegerNumberFieldSpec');
     expect(d.kind).toBe('DateFieldSpec');
     expect(sc.kind).toBe('LiteralSingleChoiceFieldSpec');
-    // @ts-expect-error a NumericFieldSpec is not assignable to FieldSpecFor<'text'>
-    const wrong: FieldSpecFor<'text'> = numericFieldSpec({ datatype: 'integer' });
+    // @ts-expect-error an IntegerNumberFieldSpec is not assignable to FieldSpecFor<'text'>
+    const wrong: FieldSpecFor<'text'> = integerNumberFieldSpec();
     void wrong;
   });
 });

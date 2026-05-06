@@ -14,15 +14,17 @@
 //                      CedarConstructionError
 //   - multilingual.ts: LangString, MultilingualString and selectors
 //   - literals/      : the three RDF literal forms (Simple / LangTagged /
-//                      Typed) plus typed-literal aliases (NumericLiteral,
+//                      Typed) plus typed-literal aliases
+//                      (IntegerNumberLiteral, RealNumberLiteral,
 //                      FullDateLiteral, …)
 //   - identifiers.ts : top-level artifact identifiers (TemplateId,
 //                      TemplateInstanceId, PresentationComponentId)
 //   - metadata/      : descriptive / lifecycle-metadata / schema-versioning /
 //                      annotations / artifact-metadata
-//   - field-families/: the 18 per-family vertical slices (TextField,
-//                      NumericField, …, AttributeValueField), plus the
-//                      Field, EmbeddedField, Value, FieldSpec unions
+//   - field-families/: the 20 per-family vertical slices (TextField,
+//                      IntegerNumberField, RealNumberField, BooleanField,
+//                      …, AttributeValueField), plus the Field,
+//                      EmbeddedField, Value, FieldSpec unions
 //   - presentation/  : presentation components (RichText / Image /
 //                      YoutubeVideo / SectionBreak / PageBreak)
 //   - embedded/      : per-embedding configuration (Cardinality,

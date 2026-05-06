@@ -44,9 +44,9 @@ import {
 
 // Identifier for a `DateField` reusable schema artifact: a typed wrapper
 // around the field's IRI. Distinguished at compile time and runtime from
-// sibling field-id types (e.g. `NumericFieldId`, `EmailFieldId`) so a caller
+// sibling field-id types (e.g. `IntegerNumberFieldId`, `EmailFieldId`) so a caller
 // can't accidentally pass a `DateField`'s IRI where (say) a
-// `NumericField`'s IRI is expected.
+// `IntegerNumberField`'s IRI is expected.
 //
 // On the wire this collapses to a plain JSON string IRI; the typed
 // wrapper exists only in memory.
@@ -61,7 +61,7 @@ export type DateFieldReference = DateFieldId;
 // Idempotent: an existing DateFieldId passes through unchanged. A bare
 // string IRI is validated and wrapped via `iri()`; a typed `Iri` is wrapped
 // without re-validation. The DateFieldId wrapper is distinguished from
-// sibling field-id types (e.g. `NumericFieldId`, `EmailFieldId`) by the
+// sibling field-id types (e.g. `IntegerNumberFieldId`, `EmailFieldId`) by the
 // per-variant `kind` discriminator.
 export const dateFieldId = (
   v: DateFieldId | Iri | string,

@@ -1,46 +1,72 @@
 import {
-  type NumericDatatypeKind,
+  type RealNumberDatatypeKind,
   XsdNumericDatatypeIri,
 } from '../leaves/index.js';
 import { type TypedLiteral, typedLiteral, isTypedLiteral } from './literals.js';
 
-// NumericLiteral is a TypedLiteral whose `datatype` IRI is one of the XSD
-// numeric datatype IRIs (xsd:integer, xsd:decimal, xsd:float, …). It is a
-// type alias rather than a separate runtime type: a NumericLiteral has the
-// same shape and same `kind: 'TypedLiteral'` discriminator as any other
-// TypedLiteral. The numeric-datatype constraint is enforced at construction
-// (via numericLiteral()) and queried at runtime (via isNumericLiteral()).
+// IntegerNumberLiteral and RealNumberLiteral are both `TypedLiteral` type
+// aliases rather than separate runtime types. They share the same shape
+// and the same `kind: 'TypedLiteral'` discriminator as any other
+// `TypedLiteral`; the family-specific datatype constraint is enforced at
+// construction (via the family constructors below) and queried at runtime
+// (via the family predicates below).
 //
-// At polymorphic positions, a NumericLiteral encodes as a TypedLiteral
-// (`{value, datatype}`); at singleton positions like `NumericValue.literal`,
-// the wire form may elide `datatype` per the position-discrimination rule
-// (see wire-grammar.md §4 and serialization.md §4.4).
-export type NumericLiteral = TypedLiteral;
+// At polymorphic positions, each encodes as a `TypedLiteral`
+// (`{value, datatype}`); at singleton positions such as
+// `IntegerNumberValue.literal` and `RealNumberValue.literal`, the wire
+// form may elide `datatype` per the position-discrimination rule (see
+// wire-grammar.md §4 and serialization.md §4.4). On the wire,
+// `IntegerNumberLiteral` carries no `datatype` slot at all (its
+// datatype is fixed by category); `RealNumberLiteral`'s `datatype` slot
+// is optional at singleton positions.
 
-const NUMERIC_DATATYPE_IRIS: ReadonlySet<string> = new Set(
-  Object.values(XsdNumericDatatypeIri),
-);
+export type IntegerNumberLiteral = TypedLiteral;
+export type RealNumberLiteral = TypedLiteral;
 
-export function numericLiteral(
+const REAL_NUMBER_DATATYPE_IRIS: ReadonlySet<string> = new Set([
+  XsdNumericDatatypeIri.decimal,
+  XsdNumericDatatypeIri.float,
+  XsdNumericDatatypeIri.double,
+]);
+
+export function integerNumberLiteral(lexicalForm: string): IntegerNumberLiteral {
+  return typedLiteral(lexicalForm, XsdNumericDatatypeIri.integer);
+}
+
+export function realNumberLiteral(
   lexicalForm: string,
-  datatype: NumericDatatypeKind,
-): NumericLiteral {
+  datatype: RealNumberDatatypeKind,
+): RealNumberLiteral {
   return typedLiteral(lexicalForm, XsdNumericDatatypeIri[datatype]);
 }
 
 // Returns the IRI string for the literal's datatype. Equivalent to
-// `lit.datatype.value`; provided for symmetry with the helper of the same
-// name that existed prior to the type-alias refactor.
-export function numericLiteralDatatypeIri(lit: NumericLiteral): string {
+// `lit.datatype.value`.
+export function integerNumberLiteralDatatypeIri(
+  lit: IntegerNumberLiteral,
+): string {
   return lit.datatype.value;
 }
 
-export function isNumericLiteral(x: unknown): x is NumericLiteral {
-  return isTypedLiteral(x) && NUMERIC_DATATYPE_IRIS.has(x.datatype.value);
+export function realNumberLiteralDatatypeIri(lit: RealNumberLiteral): string {
+  return lit.datatype.value;
 }
 
-// Best-effort numeric value of a NumericLiteral. Returns NaN for ill-typed
-// lexical forms; use validateNumericValue for normative checks.
-export function numericLiteralToNumber(lit: NumericLiteral): number {
+export function isIntegerNumberLiteral(x: unknown): x is IntegerNumberLiteral {
+  return isTypedLiteral(x) && x.datatype.value === XsdNumericDatatypeIri.integer;
+}
+
+export function isRealNumberLiteral(x: unknown): x is RealNumberLiteral {
+  return isTypedLiteral(x) && REAL_NUMBER_DATATYPE_IRIS.has(x.datatype.value);
+}
+
+// Best-effort numeric value of an integer or real-number literal. Returns
+// `NaN` for ill-typed lexical forms; use validation helpers for normative
+// checks.
+export function integerNumberLiteralToNumber(lit: IntegerNumberLiteral): number {
+  return Number(lit.lexicalForm);
+}
+
+export function realNumberLiteralToNumber(lit: RealNumberLiteral): number {
   return Number(lit.lexicalForm);
 }

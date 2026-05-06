@@ -1,7 +1,8 @@
 // =====================================================================
 // literals — wire-form serializers and parsers for the three RDF literal
 // forms (SimpleLiteral / LangTaggedLiteral / TypedLiteral) plus the four
-// typed-literal aliases (NumericLiteral / FullDateLiteral / TimeLiteral /
+// typed-literal aliases (IntegerNumberLiteral / RealNumberLiteral /
+// FullDateLiteral / TimeLiteral /
 // DateTimeLiteral).
 // =====================================================================
 //
@@ -26,7 +27,8 @@ import {
   type TypedLiteral,
   type Literal,
   type TextLiteral,
-  type NumericLiteral,
+  type IntegerNumberLiteral,
+  type RealNumberLiteral,
   type FullDateLiteral,
   type TimeLiteral,
   type DateTimeLiteral,
@@ -36,7 +38,8 @@ import {
   fullDateLiteral,
   timeLiteral,
   dateTimeLiteral,
-  numericLiteral,
+  integerNumberLiteral,
+  realNumberLiteral,
   isLangTaggedLiteral,
   isSimpleLiteral,
   FULL_DATE_DATATYPE_IRI,
@@ -44,9 +47,9 @@ import {
   DATE_TIME_DATATYPE_IRI,
 } from '../literals/index.js';
 import {
-  type NumericDatatypeKind,
+  type RealNumberDatatypeKind,
   XsdNumericDatatypeIri,
-  NUMERIC_DATATYPE_KINDS,
+  REAL_NUMBER_DATATYPE_KINDS,
 } from '../leaves/index.js';
 import {
   expectObject,
@@ -219,14 +222,48 @@ function parseFixedDatatypeTypedLiteral<T extends TypedLiteral>(
   return cons(p.value);
 }
 
-// Parses a NumericLiteral at a position where the datatype is
-// REQUIRED on the wire (e.g. EmbeddedNumericField.defaultValue, where
-// the surrounding NumericFieldSpec is on a separate artifact and not
-// available at parse time).
-export function parseNumericLiteralStandalone(
+// ---- IntegerNumberLiteral --------------------------------------------
+//
+// IntegerNumberLiteral has no `datatype` slot on the wire (datatype is
+// fixed by category at xsd:integer). Wire form: `{ value: string }`.
+
+export function parseIntegerNumberLiteralStandalone(
   x: unknown,
-  where = 'NumericLiteral',
-): NumericLiteral {
+  where = 'IntegerNumberLiteral',
+): IntegerNumberLiteral {
+  const o = expectObject(x, where);
+  expectKnownProperties(o, ['value']);
+  const p = readLiteralProps(o as Record<string, unknown>, where);
+  if (p.hasLang) {
+    throw new CedarConstructionError(
+      `${where}: typed literal MUST NOT carry "lang"`,
+    );
+  }
+  if (p.hasDatatype) {
+    throw new CedarConstructionError(
+      `${where}: IntegerNumberLiteral MUST NOT carry "datatype" on the wire`,
+    );
+  }
+  return integerNumberLiteral(p.value);
+}
+
+export function serializeIntegerNumberLiteralStandalone(
+  x: IntegerNumberLiteral,
+): { value: string } {
+  return { value: x.lexicalForm };
+}
+
+// ---- RealNumberLiteral -----------------------------------------------
+//
+// RealNumberLiteral carries an explicit datatype at standalone positions
+// (e.g. EmbeddedRealNumberField.defaultValue, where the surrounding
+// RealNumberFieldSpec is on a separate artifact and not available at
+// parse time).
+
+export function parseRealNumberLiteralStandalone(
+  x: unknown,
+  where = 'RealNumberLiteral',
+): RealNumberLiteral {
   const o = expectObject(x, where);
   expectKnownProperties(o, ['value', 'datatype']);
   const p = readLiteralProps(o as Record<string, unknown>, where);
@@ -237,43 +274,40 @@ export function parseNumericLiteralStandalone(
   }
   if (!p.hasDatatype) {
     throw new CedarConstructionError(
-      `${where}: standalone NumericLiteral requires a "datatype"`,
+      `${where}: standalone RealNumberLiteral requires a "datatype"`,
     );
   }
-  // Map IRI back to kind.
   const dt = p.datatype!;
-  let kind: NumericDatatypeKind | undefined;
-  for (const k of NUMERIC_DATATYPE_KINDS) {
-    if ((XsdNumericDatatypeIri as Record<string, string>)[k] === dt) {
+  let kind: RealNumberDatatypeKind | undefined;
+  for (const k of REAL_NUMBER_DATATYPE_KINDS) {
+    if (XsdNumericDatatypeIri[k] === dt) {
       kind = k;
       break;
     }
   }
   if (kind === undefined) {
     throw new CedarConstructionError(
-      `${where}: unknown numeric datatype IRI ${JSON.stringify(dt)}`,
+      `${where}: unknown real-number datatype IRI ${JSON.stringify(dt)}`,
     );
   }
-  return numericLiteral(p.value, kind);
+  return realNumberLiteral(p.value, kind);
 }
 
-// Serializer for NumericLiteral at a standalone position — emits the
-// datatype IRI explicitly (no surrounding context to elide it).
-export function serializeNumericLiteralStandalone(
-  x: NumericLiteral,
+export function serializeRealNumberLiteralStandalone(
+  x: RealNumberLiteral,
 ): { value: string; datatype: string } {
   return { value: x.lexicalForm, datatype: x.datatype.value };
 }
 
-// NumericLiteral parses with the surrounding NumericValue's
-// NumericDatatypeKind providing the datatype when omitted on the wire. The
-// datatype property, if present, MUST resolve to one of the XSD numeric
-// IRIs and SHOULD match the surrounding kind.
-export function parseNumericLiteral(
+// Parser for RealNumberLiteral at a singleton position where the
+// surrounding RealNumberValue's RealNumberDatatypeKind provides the
+// datatype when omitted on the wire. The datatype property, if present,
+// MUST match the surrounding kind.
+export function parseRealNumberLiteral(
   x: unknown,
-  surroundingDatatype: NumericDatatypeKind,
-  where = 'NumericLiteral',
-): NumericLiteral {
+  surroundingDatatype: RealNumberDatatypeKind,
+  where = 'RealNumberLiteral',
+): RealNumberLiteral {
   const o = expectObject(x, where);
   expectKnownProperties(o, ['value', 'datatype']);
   const p = readLiteralProps(o as Record<string, unknown>, where);
@@ -290,21 +324,20 @@ export function parseNumericLiteral(
       );
     }
   }
-  return numericLiteral(p.value, surroundingDatatype);
+  return realNumberLiteral(p.value, surroundingDatatype);
 }
 
-// Looks up the NumericDatatypeKind for an XSD numeric IRI; throws if not
-// recognised. Useful for parsing NumericFieldSpec.datatype where the wire
-// form is the bare keyword (e.g. "integer").
-export function parseNumericDatatypeKind(
+// Looks up the RealNumberDatatypeKind for a wire-form datatype string
+// (e.g. "decimal"). Used for parsing RealNumberFieldSpec.datatype.
+export function parseRealNumberDatatypeKind(
   x: unknown,
-  where = 'NumericDatatype',
-): NumericDatatypeKind {
+  where = 'RealNumberDatatype',
+): RealNumberDatatypeKind {
   const s = expectString(x, where);
-  if (!(NUMERIC_DATATYPE_KINDS as readonly string[]).includes(s)) {
+  if (!(REAL_NUMBER_DATATYPE_KINDS as readonly string[]).includes(s)) {
     throw new CedarConstructionError(
-      `${where}: unknown numeric datatype ${JSON.stringify(s)}; expected one of {${NUMERIC_DATATYPE_KINDS.map((k) => JSON.stringify(k)).join(', ')}}`,
+      `${where}: unknown real-number datatype ${JSON.stringify(s)}; expected one of {${REAL_NUMBER_DATATYPE_KINDS.map((k) => JSON.stringify(k)).join(', ')}}`,
     );
   }
-  return s as NumericDatatypeKind;
+  return s as RealNumberDatatypeKind;
 }

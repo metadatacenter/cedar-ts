@@ -12,7 +12,8 @@
 import { CedarConstructionError, iri } from '../leaves/index.js';
 import {
   type TextValue,
-  type NumericValue,
+  type IntegerNumberValue,
+  type RealNumberValue,
   type BooleanValue,
   type BooleanLiteral,
   type DateValue,
@@ -37,7 +38,8 @@ import {
   type ChoiceValue,
   type Value,
   textValue,
-  numericValue,
+  integerNumberValue,
+  realNumberValue,
   booleanValue,
   booleanLiteral,
   yearValue,
@@ -99,38 +101,65 @@ export function parseTextValue(x: unknown, where = 'TextValue'): TextValue {
   return textValue(parseTextLiteral(o['literal'], `${where}.literal`));
 }
 
-// ---- NumericValue ----------------------------------------------------
+// ---- IntegerNumberValue ----------------------------------------------
 //
-// On the wire NumericValue.literal is a TypedLiteral whose datatype is one
-// of the XSD numeric IRIs. We always emit the datatype (the in-memory
-// shape carries it explicitly); on parse we accept either form. We
-// tolerate the elided form by inferring from any present datatype, or
-// otherwise defaulting to xsd:integer if neither is present (per the spec
-// the datatype-less form requires the surrounding context to supply
-// it — for round-trip we always emit the datatype, so this branch is
-// only exercised by hand-authored inputs).
+// On the wire IntegerNumberValue.literal is a TypedLiteral whose datatype
+// is xsd:integer. The datatype is always emitted on serialize; on parse
+// we require it.
 
-export function serializeNumericValue(x: NumericValue): unknown {
-  return { kind: 'NumericValue', literal: serializeLiteral(x.literal) };
+export function serializeIntegerNumberValue(x: IntegerNumberValue): unknown {
+  return { kind: 'IntegerNumberValue', literal: serializeLiteral(x.literal) };
 }
 
-export function parseNumericValue(x: unknown, where = 'NumericValue'): NumericValue {
+export function parseIntegerNumberValue(
+  x: unknown,
+  where = 'IntegerNumberValue',
+): IntegerNumberValue {
   const o = expectObject(x, where);
   expectKnownProperties(o, ['kind', 'literal']);
-  if (o['kind'] !== 'NumericValue') {
-    throw new CedarConstructionError(`${where}: expected kind "NumericValue"`);
+  if (o['kind'] !== 'IntegerNumberValue') {
+    throw new CedarConstructionError(`${where}: expected kind "IntegerNumberValue"`);
   }
   if (!('literal' in o)) {
     throw new CedarConstructionError(`${where}: missing required "literal"`);
   }
-  // The literal must be a TypedLiteral with a numeric datatype IRI.
   const lit = parseLiteral(o['literal'], `${where}.literal`);
   if (lit.kind !== 'TypedLiteral') {
     throw new CedarConstructionError(
-      `${where}.literal must be a typed literal carrying a numeric datatype`,
+      `${where}.literal must be a typed literal carrying xsd:integer`,
     );
   }
-  return numericValue(lit);
+  return integerNumberValue(lit);
+}
+
+// ---- RealNumberValue -------------------------------------------------
+//
+// On the wire RealNumberValue.literal is a TypedLiteral whose datatype is
+// one of xsd:decimal | xsd:float | xsd:double.
+
+export function serializeRealNumberValue(x: RealNumberValue): unknown {
+  return { kind: 'RealNumberValue', literal: serializeLiteral(x.literal) };
+}
+
+export function parseRealNumberValue(
+  x: unknown,
+  where = 'RealNumberValue',
+): RealNumberValue {
+  const o = expectObject(x, where);
+  expectKnownProperties(o, ['kind', 'literal']);
+  if (o['kind'] !== 'RealNumberValue') {
+    throw new CedarConstructionError(`${where}: expected kind "RealNumberValue"`);
+  }
+  if (!('literal' in o)) {
+    throw new CedarConstructionError(`${where}: missing required "literal"`);
+  }
+  const lit = parseLiteral(o['literal'], `${where}.literal`);
+  if (lit.kind !== 'TypedLiteral') {
+    throw new CedarConstructionError(
+      `${where}.literal must be a typed literal carrying a real-number datatype`,
+    );
+  }
+  return realNumberValue(lit);
 }
 
 // ---- BooleanValue ----------------------------------------------------
@@ -742,7 +771,8 @@ export function parseAttributeValue(
 
 const VALUE_KINDS = [
   'TextValue',
-  'NumericValue',
+  'IntegerNumberValue',
+  'RealNumberValue',
   'BooleanValue',
   'YearValue',
   'YearMonthValue',
@@ -768,8 +798,10 @@ export function serializeValue(x: Value): unknown {
   switch (x.kind) {
     case 'TextValue':
       return serializeTextValue(x);
-    case 'NumericValue':
-      return serializeNumericValue(x);
+    case 'IntegerNumberValue':
+      return serializeIntegerNumberValue(x);
+    case 'RealNumberValue':
+      return serializeRealNumberValue(x);
     case 'BooleanValue':
       return serializeBooleanValue(x);
     case 'YearValue':
@@ -817,8 +849,10 @@ export function parseValue(x: unknown, where = 'Value'): Value {
   switch (k) {
     case 'TextValue':
       return parseTextValue(x, where);
-    case 'NumericValue':
-      return parseNumericValue(x, where);
+    case 'IntegerNumberValue':
+      return parseIntegerNumberValue(x, where);
+    case 'RealNumberValue':
+      return parseRealNumberValue(x, where);
     case 'BooleanValue':
       return parseBooleanValue(x, where);
     case 'YearValue':

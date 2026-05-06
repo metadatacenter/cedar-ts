@@ -13,8 +13,8 @@ import {
   isNestedTemplateInstance,
   isTemplateInstance,
   nestedTemplateInstance,
-  numericLiteral,
-  numericValue,
+  integerNumberLiteral,
+  integerNumberValue,
   presentationComponentId,
   richTextComponent,
   schemaArtifactMetadata,
@@ -195,7 +195,7 @@ describe('TemplateInstance', () => {
     const ti: TemplateInstance = templateInstance({
       ...baseInit,
       values: [
-        fieldValue('count', numericValue(numericLiteral('1', 'integer'))),
+        fieldValue('count', integerNumberValue(integerNumberLiteral('1'))),
         fieldValue('born', fullDateValue(fullDateLiteral('1990-01-01'))),
       ],
     });

@@ -34,9 +34,12 @@ import {
   nihGrantIdField,
   nihGrantIdFieldId,
   nihGrantIdFieldSpec,
-  numericField,
-  numericFieldId,
-  numericFieldSpec,
+  integerNumberField,
+  integerNumberFieldId,
+  integerNumberFieldSpec,
+  realNumberField,
+  realNumberFieldId,
+  realNumberFieldSpec,
   ontologyReference,
   ontologySource,
   orcidField,
@@ -70,7 +73,7 @@ import {
   type Field,
   type TextField,
   type DateField,
-  type NumericFieldSpec,
+  type IntegerNumberFieldSpec,
 } from '../src/index.js';
 
 const tp = lifecycleMetadata({
@@ -114,11 +117,11 @@ describe('Field constructors', () => {
   });
 
   it('rejects a misaligned fieldSpec at the type level', () => {
-    numericField({
-      id: numericFieldId('https://example.org/fields/x'),
+    integerNumberField({
+      id: integerNumberFieldId('https://example.org/fields/x'),
       modelVersion: MV,
       metadata: meta,
-      // @ts-expect-error TextFieldSpec is not a NumericFieldSpec
+      // @ts-expect-error TextFieldSpec is not an IntegerNumberFieldSpec
       fieldSpec: textFieldSpec(),
     });
   });
@@ -142,11 +145,17 @@ describe('Per-family helpers', () => {
   it('builds one of each concrete family', () => {
     const all: Field[] = [
       textField({ id: textFieldId('https://example.org/t'), modelVersion: MV, metadata: meta, fieldSpec: textFieldSpec() }),
-      numericField({
-        id: numericFieldId('https://example.org/n'),
+      integerNumberField({
+        id: integerNumberFieldId('https://example.org/n'),
         modelVersion: MV,
         metadata: meta,
-        fieldSpec: numericFieldSpec({ datatype: 'integer' }),
+        fieldSpec: integerNumberFieldSpec(),
+      }),
+      realNumberField({
+        id: realNumberFieldId('https://example.org/r'),
+        modelVersion: MV,
+        metadata: meta,
+        fieldSpec: realNumberFieldSpec({ datatype: 'decimal' }),
       }),
       dateField({
         id: dateFieldId('https://example.org/d'),
@@ -225,7 +234,7 @@ describe('Per-family helpers', () => {
         fieldSpec: attributeValueFieldSpec(),
       }),
     ];
-    expect(all.length).toBe(18);
+    expect(all.length).toBe(19);
     for (const f of all) expect(isField(f)).toBe(true);
   });
 
@@ -246,29 +255,30 @@ describe('Per-family helpers', () => {
 
 describe('Field kind narrowing', () => {
   it('narrows the FieldSpec type via the per-variant `kind` discriminant', () => {
-    const f: Field = numericField({
-      id: numericFieldId('https://example.org/n'),
+    const f: Field = integerNumberField({
+      id: integerNumberFieldId('https://example.org/n'),
       modelVersion: MV,
       metadata: meta,
-      fieldSpec: numericFieldSpec({ datatype: 'integer' }),
+      fieldSpec: integerNumberFieldSpec(),
     });
-    if (f.kind === 'NumericField') {
-      const spec: NumericFieldSpec = f.fieldSpec;
-      expect(spec.datatype).toBe('integer');
+    if (f.kind === 'IntegerNumberField') {
+      const spec: IntegerNumberFieldSpec = f.fieldSpec;
+      expect(spec.kind).toBe('IntegerNumberFieldSpec');
     } else {
-      throw new Error('expected numeric field');
+      throw new Error('expected integer-number field');
     }
   });
 
   it('table check that every family kind discriminant is unique and complete', () => {
     const kinds: Field['kind'][] = [
-      'TextField', 'NumericField', 'DateField', 'TimeField', 'DateTimeField',
+      'TextField', 'IntegerNumberField', 'RealNumberField', 'BooleanField',
+      'DateField', 'TimeField', 'DateTimeField',
       'ControlledTermField', 'SingleChoiceField', 'MultipleChoiceField',
       'LinkField', 'EmailField', 'PhoneNumberField',
       'OrcidField', 'RorField', 'DoiField', 'PubMedIdField', 'RridField', 'NihGrantIdField',
       'AttributeValueField',
     ];
-    expect(kinds.length).toBe(18);
-    expect(new Set(kinds).size).toBe(18);
+    expect(kinds.length).toBe(20);
+    expect(new Set(kinds).size).toBe(20);
   });
 });

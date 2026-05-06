@@ -17,7 +17,10 @@ import {
 } from '../literals/index.js';
 import {
   type TextFieldSpec,
-  type NumericFieldSpec,
+  type IntegerNumberFieldSpec,
+  type RealNumberFieldSpec,
+  type IntegerNumberValue,
+  type RealNumberValue,
   type BooleanFieldSpec,
   type DateFieldSpec,
   type TimeFieldSpec,
@@ -65,7 +68,8 @@ import {
   type DateComponentOrder,
   type TimeFormat,
   textFieldSpec,
-  numericFieldSpec,
+  integerNumberFieldSpec,
+  realNumberFieldSpec,
   booleanFieldSpec,
   dateFieldSpec,
   timeFieldSpec,
@@ -127,8 +131,10 @@ import {
   parseMultilingualString,
 } from './multilingual.js';
 import {
-  serializeNumericValue,
-  parseNumericValue,
+  serializeIntegerNumberValue,
+  parseIntegerNumberValue,
+  serializeRealNumberValue,
+  parseRealNumberValue,
   serializeControlledTermValueUntagged,
   parseControlledTermValueUntagged,
 } from './values.js';
@@ -137,7 +143,7 @@ import {
   serializeTextLiteral,
   parseLiteral,
   parseTextLiteral,
-  parseNumericDatatypeKind,
+  parseRealNumberDatatypeKind,
 } from './literals.js';
 import type { TextLiteral } from '../literals/index.js';
 
@@ -149,11 +155,24 @@ export const parseTextRenderingHint = (
   w = 'TextRenderingHint',
 ): TextRenderingHint => expectStringEnum(x, TEXT_RENDERING_HINTS, w);
 
-export const serializeNumericRenderingHint = (x: NumericRenderingHint): string => x;
-export const parseNumericRenderingHint = (
+export function serializeNumericRenderingHint(x: NumericRenderingHint): unknown {
+  const out: Record<string, unknown> = {};
+  if (x.decimalPlaces !== undefined) out['decimalPlaces'] = x.decimalPlaces;
+  return out;
+}
+
+export function parseNumericRenderingHint(
   x: unknown,
   w = 'NumericRenderingHint',
-): NumericRenderingHint => expectStringEnum(x, ['numericInput'] as const, w);
+): NumericRenderingHint {
+  const o = expectObject(x, w);
+  expectKnownProperties(o, ['decimalPlaces']);
+  rejectNullProperty(o, 'decimalPlaces');
+  const out: { decimalPlaces?: number } = {};
+  if ('decimalPlaces' in o)
+    out.decimalPlaces = expectNumber(o['decimalPlaces'], `${w}.decimalPlaces`);
+  return out;
+}
 
 export const serializeBooleanRenderingHint = (x: BooleanRenderingHint): string => x;
 export const parseBooleanRenderingHint = (
@@ -658,72 +677,126 @@ export function parseTextFieldSpec(
   return textFieldSpec(init);
 }
 
-// ---- NumericFieldSpec ------------------------------------------------
+// ---- IntegerNumberFieldSpec ------------------------------------------
 
-export function serializeNumericFieldSpec(x: NumericFieldSpec): unknown {
+export function serializeIntegerNumberFieldSpec(
+  x: IntegerNumberFieldSpec,
+): unknown {
   const out: Record<string, unknown> = {
-    kind: 'NumericFieldSpec',
-    datatype: x.datatype,
+    kind: 'IntegerNumberFieldSpec',
   };
   if (x.unit !== undefined) out['unit'] = serializeUnit(x.unit);
-  if (x.numericPrecision !== undefined)
-    out['numericPrecision'] = x.numericPrecision;
-  if (x.minValue !== undefined) out['minValue'] = serializeNumericValue(x.minValue);
-  if (x.maxValue !== undefined) out['maxValue'] = serializeNumericValue(x.maxValue);
+  if (x.minValue !== undefined)
+    out['minValue'] = serializeIntegerNumberValue(x.minValue);
+  if (x.maxValue !== undefined)
+    out['maxValue'] = serializeIntegerNumberValue(x.maxValue);
   if (x.renderingHint !== undefined)
     out['renderingHint'] = serializeNumericRenderingHint(x.renderingHint);
   return out;
 }
 
-export function parseNumericFieldSpec(
+export function parseIntegerNumberFieldSpec(
   x: unknown,
-  where = 'NumericFieldSpec',
-): NumericFieldSpec {
+  where = 'IntegerNumberFieldSpec',
+): IntegerNumberFieldSpec {
   const o = expectObject(x, where);
   expectKnownProperties(o, [
     'kind',
-    'datatype',
     'unit',
-    'numericPrecision',
     'minValue',
     'maxValue',
     'renderingHint',
   ]);
-  for (const k of ['unit', 'numericPrecision', 'minValue', 'maxValue', 'renderingHint']) {
+  for (const k of ['unit', 'minValue', 'maxValue', 'renderingHint']) {
     rejectNullProperty(o, k);
   }
-  if (o['kind'] !== 'NumericFieldSpec') {
-    throw new CedarConstructionError(`${where}: expected kind "NumericFieldSpec"`);
-  }
-  if (!('datatype' in o)) {
-    throw new CedarConstructionError(`${where}: missing required "datatype"`);
+  if (o['kind'] !== 'IntegerNumberFieldSpec') {
+    throw new CedarConstructionError(
+      `${where}: expected kind "IntegerNumberFieldSpec"`,
+    );
   }
   const init: {
-    datatype: ReturnType<typeof parseNumericDatatypeKind>;
     unit?: Unit;
-    numericPrecision?: number;
-    minValue?: ReturnType<typeof parseNumericValue>;
-    maxValue?: ReturnType<typeof parseNumericValue>;
+    minValue?: IntegerNumberValue;
+    maxValue?: IntegerNumberValue;
     renderingHint?: NumericRenderingHint;
-  } = {
-    datatype: parseNumericDatatypeKind(o['datatype'], `${where}.datatype`),
-  };
+  } = {};
   if ('unit' in o) init.unit = parseUnit(o['unit'], `${where}.unit`);
-  if ('numericPrecision' in o)
-    init.numericPrecision = expectNumber(
-      o['numericPrecision'],
-      `${where}.numericPrecision`,
-    );
   if ('minValue' in o)
-    init.minValue = parseNumericValue(o['minValue'], `${where}.minValue`);
+    init.minValue = parseIntegerNumberValue(o['minValue'], `${where}.minValue`);
   if ('maxValue' in o)
-    init.maxValue = parseNumericValue(o['maxValue'], `${where}.maxValue`);
+    init.maxValue = parseIntegerNumberValue(o['maxValue'], `${where}.maxValue`);
   if ('renderingHint' in o)
     init.renderingHint = parseNumericRenderingHint(
       o['renderingHint'],
       `${where}.renderingHint`,
     );
-  return numericFieldSpec(init);
+  return integerNumberFieldSpec(init);
+}
+
+// ---- RealNumberFieldSpec ---------------------------------------------
+
+export function serializeRealNumberFieldSpec(
+  x: RealNumberFieldSpec,
+): unknown {
+  const out: Record<string, unknown> = {
+    kind: 'RealNumberFieldSpec',
+    datatype: x.datatype,
+  };
+  if (x.unit !== undefined) out['unit'] = serializeUnit(x.unit);
+  if (x.minValue !== undefined)
+    out['minValue'] = serializeRealNumberValue(x.minValue);
+  if (x.maxValue !== undefined)
+    out['maxValue'] = serializeRealNumberValue(x.maxValue);
+  if (x.renderingHint !== undefined)
+    out['renderingHint'] = serializeNumericRenderingHint(x.renderingHint);
+  return out;
+}
+
+export function parseRealNumberFieldSpec(
+  x: unknown,
+  where = 'RealNumberFieldSpec',
+): RealNumberFieldSpec {
+  const o = expectObject(x, where);
+  expectKnownProperties(o, [
+    'kind',
+    'datatype',
+    'unit',
+    'minValue',
+    'maxValue',
+    'renderingHint',
+  ]);
+  for (const k of ['unit', 'minValue', 'maxValue', 'renderingHint']) {
+    rejectNullProperty(o, k);
+  }
+  if (o['kind'] !== 'RealNumberFieldSpec') {
+    throw new CedarConstructionError(
+      `${where}: expected kind "RealNumberFieldSpec"`,
+    );
+  }
+  if (!('datatype' in o)) {
+    throw new CedarConstructionError(`${where}: missing required "datatype"`);
+  }
+  const init: {
+    datatype: ReturnType<typeof parseRealNumberDatatypeKind>;
+    unit?: Unit;
+    minValue?: RealNumberValue;
+    maxValue?: RealNumberValue;
+    renderingHint?: NumericRenderingHint;
+  } = {
+    datatype: parseRealNumberDatatypeKind(o['datatype'], `${where}.datatype`),
+  };
+  if ('unit' in o) init.unit = parseUnit(o['unit'], `${where}.unit`);
+  if ('minValue' in o)
+    init.minValue = parseRealNumberValue(o['minValue'], `${where}.minValue`);
+  if ('maxValue' in o)
+    init.maxValue = parseRealNumberValue(o['maxValue'], `${where}.maxValue`);
+  if ('renderingHint' in o)
+    init.renderingHint = parseNumericRenderingHint(
+      o['renderingHint'],
+      `${where}.renderingHint`,
+    );
+  return realNumberFieldSpec(init);
 }
 
 // ---- BooleanFieldSpec ------------------------------------------------
@@ -1211,7 +1284,8 @@ export const parseAttributeValueFieldSpec = attrValSpecHelpers.parse;
 
 const FIELD_SPEC_KINDS = [
   'TextFieldSpec',
-  'NumericFieldSpec',
+  'IntegerNumberFieldSpec',
+  'RealNumberFieldSpec',
   'BooleanFieldSpec',
   'DateFieldSpec',
   'TimeFieldSpec',
@@ -1237,8 +1311,10 @@ export function serializeFieldSpec(x: FieldSpec): unknown {
   switch (x.kind) {
     case 'TextFieldSpec':
       return serializeTextFieldSpec(x);
-    case 'NumericFieldSpec':
-      return serializeNumericFieldSpec(x);
+    case 'IntegerNumberFieldSpec':
+      return serializeIntegerNumberFieldSpec(x);
+    case 'RealNumberFieldSpec':
+      return serializeRealNumberFieldSpec(x);
     case 'BooleanFieldSpec':
       return serializeBooleanFieldSpec(x);
     case 'DateFieldSpec':
@@ -1286,8 +1362,10 @@ export function parseFieldSpec(x: unknown, where = 'FieldSpec'): FieldSpec {
   switch (k) {
     case 'TextFieldSpec':
       return parseTextFieldSpec(x, where);
-    case 'NumericFieldSpec':
-      return parseNumericFieldSpec(x, where);
+    case 'IntegerNumberFieldSpec':
+      return parseIntegerNumberFieldSpec(x, where);
+    case 'RealNumberFieldSpec':
+      return parseRealNumberFieldSpec(x, where);
     case 'BooleanFieldSpec':
       return parseBooleanFieldSpec(x, where);
     case 'DateFieldSpec':

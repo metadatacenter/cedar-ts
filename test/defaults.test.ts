@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import {
   embeddedTextField,
-  embeddedNumericField,
+  embeddedIntegerNumberField,
+  embeddedRealNumberField,
   embeddedDateField,
   embeddedTimeField,
   embeddedDateTimeField,
@@ -18,7 +19,8 @@ import {
   embeddedRridField,
   embeddedNihGrantIdField,
   textFieldId,
-  numericFieldId,
+  integerNumberFieldId,
+  realNumberFieldId,
   dateFieldId,
   timeFieldId,
   dateTimeFieldId,
@@ -44,7 +46,8 @@ import {
   pubMedIdValue,
   rridValue,
   nihGrantIdValue,
-  numericLiteral,
+  integerNumberLiteral,
+  realNumberLiteral,
   fullDateLiteral,
   timeLiteral,
   dateTimeLiteral,
@@ -82,14 +85,24 @@ describe('EmbeddedXxxField.defaultValue (flat, no XxxDefaultValue wrapper)', () 
     expect(ef2.defaultValue?.kind).toBe('SimpleLiteral');
   });
 
-  it('Numeric — NumericLiteral (explicit datatype required at construction)', () => {
-    const ef = embeddedNumericField({
+  it('IntegerNumber — IntegerNumberLiteral (datatype fixed at xsd:integer)', () => {
+    const ef = embeddedIntegerNumberField({
       key: 'n',
-      artifactRef: numericFieldId('https://example.org/x'),
-      defaultValue: numericLiteral('42', 'integer'),
+      artifactRef: integerNumberFieldId('https://example.org/x'),
+      defaultValue: integerNumberLiteral('42'),
     });
     expect(ef.defaultValue?.kind).toBe('TypedLiteral');
     expect(ef.defaultValue?.lexicalForm).toBe('42');
+  });
+
+  it('RealNumber — RealNumberLiteral (explicit datatype required at construction)', () => {
+    const ef = embeddedRealNumberField({
+      key: 'r',
+      artifactRef: realNumberFieldId('https://example.org/x'),
+      defaultValue: realNumberLiteral('3.14', 'decimal'),
+    });
+    expect(ef.defaultValue?.kind).toBe('TypedLiteral');
+    expect(ef.defaultValue?.lexicalForm).toBe('3.14');
   });
 
   it('Date — DateValue (polymorphic; bare string discriminated by lexical shape)', () => {

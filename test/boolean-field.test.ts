@@ -47,7 +47,7 @@ describe('BooleanLiteral', () => {
 
   it('isBooleanLiteral discriminates', () => {
     expect(isBooleanLiteral(booleanLiteral(true))).toBe(true);
-    expect(isBooleanLiteral({ kind: 'NumericLiteral' })).toBe(false);
+    expect(isBooleanLiteral({ kind: 'TypedLiteral' })).toBe(false);
     expect(isBooleanLiteral(null)).toBe(false);
     expect(isBooleanLiteral(true)).toBe(false);
   });
@@ -68,7 +68,7 @@ describe('BooleanValue', () => {
 
   it('isBooleanValue discriminates', () => {
     expect(isBooleanValue(booleanValue(true))).toBe(true);
-    expect(isBooleanValue({ kind: 'NumericValue' })).toBe(false);
+    expect(isBooleanValue({ kind: 'IntegerNumberValue' })).toBe(false);
     expect(isBooleanValue(null)).toBe(false);
   });
 });

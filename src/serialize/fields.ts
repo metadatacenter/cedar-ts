@@ -7,7 +7,8 @@ import { CedarConstructionError } from '../leaves/index.js';
 import {
   type Field,
   type TextField,
-  type NumericField,
+  type IntegerNumberField,
+  type RealNumberField,
   type BooleanField,
   type DateField,
   type TimeField,
@@ -28,7 +29,8 @@ import {
   type SingleChoiceFieldSpec,
   type MultipleChoiceFieldSpec,
   textField,
-  numericField,
+  integerNumberField,
+  realNumberField,
   booleanField,
   dateField,
   timeField,
@@ -55,7 +57,8 @@ import {
 } from './parse-utils.js';
 import {
   serializeTextFieldId,
-  serializeNumericFieldId,
+  serializeIntegerNumberFieldId,
+  serializeRealNumberFieldId,
   serializeBooleanFieldId,
   serializeDateFieldId,
   serializeTimeFieldId,
@@ -74,7 +77,8 @@ import {
   serializeNihGrantIdFieldId,
   serializeAttributeValueFieldId,
   parseTextFieldId,
-  parseNumericFieldId,
+  parseIntegerNumberFieldId,
+  parseRealNumberFieldId,
   parseBooleanFieldId,
   parseDateFieldId,
   parseTimeFieldId,
@@ -99,7 +103,8 @@ import {
 } from './metadata.js';
 import {
   serializeTextFieldSpec,
-  serializeNumericFieldSpec,
+  serializeIntegerNumberFieldSpec,
+  serializeRealNumberFieldSpec,
   serializeBooleanFieldSpec,
   serializeDateFieldSpec,
   serializeTimeFieldSpec,
@@ -120,7 +125,8 @@ import {
   serializeNihGrantIdFieldSpec,
   serializeAttributeValueFieldSpec,
   parseTextFieldSpec,
-  parseNumericFieldSpec,
+  parseIntegerNumberFieldSpec,
+  parseRealNumberFieldSpec,
   parseBooleanFieldSpec,
   parseDateFieldSpec,
   parseTimeFieldSpec,
@@ -191,24 +197,51 @@ export function parseTextField(x: unknown, where = 'TextField'): TextField {
   });
 }
 
-export const serializeNumericField = (x: NumericField): unknown => ({
-  kind: 'NumericField',
-  id: serializeNumericFieldId(x.id),
+export const serializeIntegerNumberField = (
+  x: IntegerNumberField,
+): unknown => ({
+  kind: 'IntegerNumberField',
+  id: serializeIntegerNumberFieldId(x.id),
   modelVersion: x.modelVersion,
   metadata: serializeSchemaArtifactMetadata(x.metadata),
-  fieldSpec: serializeNumericFieldSpec(x.fieldSpec),
+  fieldSpec: serializeIntegerNumberFieldSpec(x.fieldSpec),
 });
 
-export function parseNumericField(
+export function parseIntegerNumberField(
   x: unknown,
-  where = 'NumericField',
-): NumericField {
-  const s = parseFieldShell<NumericField>(x, 'NumericField', where);
-  return numericField({
-    id: parseNumericFieldId(s.id, `${where}.id`),
+  where = 'IntegerNumberField',
+): IntegerNumberField {
+  const s = parseFieldShell<IntegerNumberField>(
+    x,
+    'IntegerNumberField',
+    where,
+  );
+  return integerNumberField({
+    id: parseIntegerNumberFieldId(s.id, `${where}.id`),
     modelVersion: s.modelVersion,
     metadata: parseSchemaArtifactMetadata(s.metadata, `${where}.metadata`),
-    fieldSpec: parseNumericFieldSpec(s.fieldSpec, `${where}.fieldSpec`),
+    fieldSpec: parseIntegerNumberFieldSpec(s.fieldSpec, `${where}.fieldSpec`),
+  });
+}
+
+export const serializeRealNumberField = (x: RealNumberField): unknown => ({
+  kind: 'RealNumberField',
+  id: serializeRealNumberFieldId(x.id),
+  modelVersion: x.modelVersion,
+  metadata: serializeSchemaArtifactMetadata(x.metadata),
+  fieldSpec: serializeRealNumberFieldSpec(x.fieldSpec),
+});
+
+export function parseRealNumberField(
+  x: unknown,
+  where = 'RealNumberField',
+): RealNumberField {
+  const s = parseFieldShell<RealNumberField>(x, 'RealNumberField', where);
+  return realNumberField({
+    id: parseRealNumberFieldId(s.id, `${where}.id`),
+    modelVersion: s.modelVersion,
+    metadata: parseSchemaArtifactMetadata(s.metadata, `${where}.metadata`),
+    fieldSpec: parseRealNumberFieldSpec(s.fieldSpec, `${where}.fieldSpec`),
   });
 }
 
@@ -581,7 +614,8 @@ export function parseAttributeValueField(
 
 const FIELD_KINDS = [
   'TextField',
-  'NumericField',
+  'IntegerNumberField',
+  'RealNumberField',
   'BooleanField',
   'DateField',
   'TimeField',
@@ -605,8 +639,10 @@ export function serializeField(x: Field): unknown {
   switch (x.kind) {
     case 'TextField':
       return serializeTextField(x);
-    case 'NumericField':
-      return serializeNumericField(x);
+    case 'IntegerNumberField':
+      return serializeIntegerNumberField(x);
+    case 'RealNumberField':
+      return serializeRealNumberField(x);
     case 'BooleanField':
       return serializeBooleanField(x);
     case 'DateField':
@@ -650,8 +686,10 @@ export function parseField(x: unknown, where = 'Field'): Field {
   switch (k) {
     case 'TextField':
       return parseTextField(x, where);
-    case 'NumericField':
-      return parseNumericField(x, where);
+    case 'IntegerNumberField':
+      return parseIntegerNumberField(x, where);
+    case 'RealNumberField':
+      return parseRealNumberField(x, where);
     case 'BooleanField':
       return parseBooleanField(x, where);
     case 'DateField':

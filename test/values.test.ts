@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import {
   textValue,
-  numericValue,
+  integerNumberValue,
+  realNumberValue,
   yearValue,
   yearMonthValue,
   fullDateValue,
@@ -39,7 +40,8 @@ import {
   isValue,
   simpleLiteral,
   langTaggedLiteral,
-  numericLiteral,
+  integerNumberLiteral,
+  realNumberLiteral,
   fullDateLiteral,
   timeLiteral,
   dateTimeLiteral,
@@ -57,10 +59,16 @@ describe('Scalar values', () => {
     expect(lv.literal.kind).toBe('LangTaggedLiteral');
   });
 
-  it('NumericValue wraps a NumericLiteral', () => {
-    const nv = numericValue(numericLiteral('42', 'integer'));
-    expect(nv.kind).toBe('NumericValue');
+  it('IntegerNumberValue wraps an IntegerNumberLiteral', () => {
+    const nv = integerNumberValue(integerNumberLiteral('42'));
+    expect(nv.kind).toBe('IntegerNumberValue');
     expect(nv.literal.lexicalForm).toBe('42');
+  });
+
+  it('RealNumberValue wraps a RealNumberLiteral', () => {
+    const nv = realNumberValue(realNumberLiteral('3.14', 'decimal'));
+    expect(nv.kind).toBe('RealNumberValue');
+    expect(nv.literal.lexicalForm).toBe('3.14');
   });
 });
 
@@ -218,7 +226,7 @@ describe('AttributeValue (recursive)', () => {
   });
 
   it('can nest another AttributeValue without bound', () => {
-    const inner = attributeValue('depth', numericValue(numericLiteral('3', 'integer')));
+    const inner = attributeValue('depth', integerNumberValue(integerNumberLiteral('3')));
     const middle = attributeValue('layer', inner);
     const outer = attributeValue('outer', middle);
     expect(outer.value.kind).toBe('AttributeValue');
@@ -229,7 +237,8 @@ describe('AttributeValue (recursive)', () => {
 describe('Value union recognition', () => {
   it('isValue accepts every concrete Value variant', () => {
     expect(isValue(textValue(simpleLiteral('x')))).toBe(true);
-    expect(isValue(numericValue(numericLiteral('1', 'integer')))).toBe(true);
+    expect(isValue(integerNumberValue(integerNumberLiteral('1')))).toBe(true);
+    expect(isValue(realNumberValue(realNumberLiteral('1.0', 'decimal')))).toBe(true);
     expect(isValue(yearValue('2024'))).toBe(true);
     expect(isValue(yearMonthValue('2024-06'))).toBe(true);
     expect(isValue(fullDateValue(fullDateLiteral('2024-06-15')))).toBe(true);

@@ -13,7 +13,7 @@ import {
   property,
   isEmbeddedField,
   embeddedTextField,
-  embeddedNumericField,
+  embeddedIntegerNumberField,
   embeddedDateField,
   embeddedSingleChoiceField,
   embeddedAttributeValueField,
@@ -26,14 +26,14 @@ import {
   type EmbeddedTextField,
   type EmbeddedDateField,
   textFieldId,
-  numericFieldId,
+  integerNumberFieldId,
   dateFieldId,
   singleChoiceFieldId,
   attributeValueFieldId,
   templateId,
   presentationComponentId,
   simpleLiteral,
-  numericLiteral,
+  integerNumberLiteral,
   textField,
   textFieldSpec,
   template,
@@ -235,7 +235,7 @@ describe('LabelOverride and Property', () => {
 });
 
 const txtRef = textFieldId('https://example.org/fields/title');
-const numRef = numericFieldId('https://example.org/fields/age');
+const numRef = integerNumberFieldId('https://example.org/fields/age');
 const dateRef = dateFieldId('https://example.org/fields/born');
 const choiceRef = singleChoiceFieldId('https://example.org/fields/sex');
 const attrRef = attributeValueFieldId('https://example.org/fields/attr');
@@ -270,16 +270,16 @@ describe('EmbeddedField constructors', () => {
       artifactRef: txtRef,
     });
 
-    // @ts-expect-error TextFieldReference is not a NumericFieldReference
-    embeddedNumericField({ key: 'age', artifactRef: txtRef });
+    // @ts-expect-error TextFieldReference is not an IntegerNumberFieldReference
+    embeddedIntegerNumberField({ key: 'age', artifactRef: txtRef });
   });
 
   it('rejects a misaligned default value at the type level', () => {
-    // @ts-expect-error NumericLiteral cannot satisfy a TextField defaultValue (TextLiteral)
+    // @ts-expect-error IntegerNumberLiteral cannot satisfy a TextField defaultValue (TextLiteral)
     embeddedTextField({
       key: 'title',
       artifactRef: txtRef,
-      defaultValue: numericLiteral('1', 'integer'),
+      defaultValue: integerNumberLiteral('1'),
     });
   });
 
@@ -351,17 +351,17 @@ describe('EmbeddedField constructors', () => {
     expect(ef2.defaultValue).toBeUndefined();
   });
 
-  it('embeddedNumericField rejects a string defaultValue', () => {
-    embeddedNumericField({
+  it('embeddedIntegerNumberField rejects a string defaultValue', () => {
+    embeddedIntegerNumberField({
       key: 'count',
       artifactRef: numRef,
-      // @ts-expect-error EmbeddedNumericFieldInit's defaultValue is NumericLiteral only
+      // @ts-expect-error EmbeddedIntegerNumberFieldInit's defaultValue is IntegerNumberLiteral only
       defaultValue: 'oops',
     });
   });
 
   it('builds a numeric, date, and single-choice embedding without errors', () => {
-    embeddedNumericField({ key: 'age', artifactRef: numRef });
+    embeddedIntegerNumberField({ key: 'age', artifactRef: numRef });
     embeddedDateField({ key: 'born', artifactRef: dateRef });
     embeddedSingleChoiceField({ key: 'sex', artifactRef: choiceRef });
   });

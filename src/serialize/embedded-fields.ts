@@ -8,7 +8,8 @@ import { CedarConstructionError } from '../leaves/index.js';
 import {
   type EmbeddedField,
   type EmbeddedTextField,
-  type EmbeddedNumericField,
+  type EmbeddedIntegerNumberField,
+  type EmbeddedRealNumberField,
   type EmbeddedBooleanField,
   type EmbeddedDateField,
   type EmbeddedTimeField,
@@ -27,7 +28,8 @@ import {
   type EmbeddedNihGrantIdField,
   type EmbeddedAttributeValueField,
   embeddedTextField,
-  embeddedNumericField,
+  embeddedIntegerNumberField,
+  embeddedRealNumberField,
   embeddedBooleanField,
   embeddedDateField,
   embeddedTimeField,
@@ -66,7 +68,8 @@ import {
 } from './parse-utils.js';
 import {
   serializeTextFieldId,
-  serializeNumericFieldId,
+  serializeIntegerNumberFieldId,
+  serializeRealNumberFieldId,
   serializeBooleanFieldId,
   serializeDateFieldId,
   serializeTimeFieldId,
@@ -87,7 +90,8 @@ import {
   serializeTemplateId,
   serializePresentationComponentId,
   parseTextFieldId,
-  parseNumericFieldId,
+  parseIntegerNumberFieldId,
+  parseRealNumberFieldId,
   parseBooleanFieldId,
   parseDateFieldId,
   parseTimeFieldId,
@@ -124,8 +128,10 @@ import {
   serializeTextLiteral,
   parseTextLiteral,
   serializeTypedLiteralAtPosition,
-  serializeNumericLiteralStandalone,
-  parseNumericLiteralStandalone,
+  serializeIntegerNumberLiteralStandalone,
+  parseIntegerNumberLiteralStandalone,
+  serializeRealNumberLiteralStandalone,
+  parseRealNumberLiteralStandalone,
   parseTimeLiteral,
   parseDateTimeLiteral,
   serializeSimpleLiteral,
@@ -317,29 +323,59 @@ export function parseEmbeddedTextField(
   });
 }
 
-export function serializeEmbeddedNumericField(x: EmbeddedNumericField): unknown {
+export function serializeEmbeddedIntegerNumberField(x: EmbeddedIntegerNumberField): unknown {
   const out: Record<string, unknown> = {
-    kind: 'EmbeddedNumericField',
+    kind: 'EmbeddedIntegerNumberField',
     key: x.key,
-    artifactRef: serializeNumericFieldId(x.artifactRef),
+    artifactRef: serializeIntegerNumberFieldId(x.artifactRef),
   };
   serializeCommonProps(x, out);
   if (x.defaultValue !== undefined)
-    out['defaultValue'] = serializeNumericLiteralStandalone(x.defaultValue);
+    out['defaultValue'] = serializeIntegerNumberLiteralStandalone(x.defaultValue);
   return out;
 }
 
-export function parseEmbeddedNumericField(
+export function parseEmbeddedIntegerNumberField(
   x: unknown,
-  where = 'EmbeddedNumericField',
-): EmbeddedNumericField {
-  const s = readShell(x, 'EmbeddedNumericField', where, true);
-  return embeddedNumericField({
+  where = 'EmbeddedIntegerNumberField',
+): EmbeddedIntegerNumberField {
+  const s = readShell(x, 'EmbeddedIntegerNumberField', where, true);
+  return embeddedIntegerNumberField({
     key: s.key,
-    artifactRef: parseNumericFieldId(s.artifactRef, `${where}.artifactRef`),
+    artifactRef: parseIntegerNumberFieldId(s.artifactRef, `${where}.artifactRef`),
     ...s.common,
     ...(s.defaultRaw !== undefined && {
-      defaultValue: parseNumericLiteralStandalone(
+      defaultValue: parseIntegerNumberLiteralStandalone(
+        s.defaultRaw,
+        `${where}.defaultValue`,
+      ),
+    }),
+  });
+}
+
+export function serializeEmbeddedRealNumberField(x: EmbeddedRealNumberField): unknown {
+  const out: Record<string, unknown> = {
+    kind: 'EmbeddedRealNumberField',
+    key: x.key,
+    artifactRef: serializeRealNumberFieldId(x.artifactRef),
+  };
+  serializeCommonProps(x, out);
+  if (x.defaultValue !== undefined)
+    out['defaultValue'] = serializeRealNumberLiteralStandalone(x.defaultValue);
+  return out;
+}
+
+export function parseEmbeddedRealNumberField(
+  x: unknown,
+  where = 'EmbeddedRealNumberField',
+): EmbeddedRealNumberField {
+  const s = readShell(x, 'EmbeddedRealNumberField', where, true);
+  return embeddedRealNumberField({
+    key: s.key,
+    artifactRef: parseRealNumberFieldId(s.artifactRef, `${where}.artifactRef`),
+    ...s.common,
+    ...(s.defaultRaw !== undefined && {
+      defaultValue: parseRealNumberLiteralStandalone(
         s.defaultRaw,
         `${where}.defaultValue`,
       ),
@@ -987,7 +1023,8 @@ export function parseEmbeddedPresentationComponent(
 
 const EMBEDDED_FIELD_KINDS = [
   'EmbeddedTextField',
-  'EmbeddedNumericField',
+  'EmbeddedIntegerNumberField',
+  'EmbeddedRealNumberField',
   'EmbeddedBooleanField',
   'EmbeddedDateField',
   'EmbeddedTimeField',
@@ -1011,8 +1048,10 @@ export function serializeEmbeddedField(x: EmbeddedField): unknown {
   switch (x.kind) {
     case 'EmbeddedTextField':
       return serializeEmbeddedTextField(x);
-    case 'EmbeddedNumericField':
-      return serializeEmbeddedNumericField(x);
+    case 'EmbeddedIntegerNumberField':
+      return serializeEmbeddedIntegerNumberField(x);
+    case 'EmbeddedRealNumberField':
+      return serializeEmbeddedRealNumberField(x);
     case 'EmbeddedBooleanField':
       return serializeEmbeddedBooleanField(x);
     case 'EmbeddedDateField':
@@ -1059,8 +1098,10 @@ export function parseEmbeddedField(
   switch (k) {
     case 'EmbeddedTextField':
       return parseEmbeddedTextField(x, where);
-    case 'EmbeddedNumericField':
-      return parseEmbeddedNumericField(x, where);
+    case 'EmbeddedIntegerNumberField':
+      return parseEmbeddedIntegerNumberField(x, where);
+    case 'EmbeddedRealNumberField':
+      return parseEmbeddedRealNumberField(x, where);
     case 'EmbeddedBooleanField':
       return parseEmbeddedBooleanField(x, where);
     case 'EmbeddedDateField':

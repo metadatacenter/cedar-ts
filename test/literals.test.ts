@@ -10,9 +10,12 @@ import {
   isTypedLiteral,
   isTextLiteral,
   isLiteral,
-  numericLiteral,
-  numericLiteralDatatypeIri,
-  numericLiteralToNumber,
+  integerNumberLiteral,
+  integerNumberLiteralDatatypeIri,
+  integerNumberLiteralToNumber,
+  realNumberLiteral,
+  realNumberLiteralDatatypeIri,
+  realNumberLiteralToNumber,
   fullDateLiteral,
   timeLiteral,
   dateTimeLiteral,
@@ -96,20 +99,37 @@ describe('literalsTermEqual', () => {
   });
 });
 
-describe('NumericLiteral', () => {
-  it('is a TypedLiteral with a numeric XSD datatype IRI', () => {
-    const lit = numericLiteral('42', 'integer');
+describe('IntegerNumberLiteral', () => {
+  it('is a TypedLiteral with xsd:integer', () => {
+    const lit = integerNumberLiteral('42');
     expect(lit.kind).toBe('TypedLiteral');
     expect(lit.lexicalForm).toBe('42');
     expect(lit.datatype.value).toBe('http://www.w3.org/2001/XMLSchema#integer');
-    expect(numericLiteralDatatypeIri(lit)).toBe(
+    expect(integerNumberLiteralDatatypeIri(lit)).toBe(
       'http://www.w3.org/2001/XMLSchema#integer',
     );
   });
 
   it('exposes numeric value via best-effort coercion', () => {
-    expect(numericLiteralToNumber(numericLiteral('3.14', 'decimal'))).toBeCloseTo(3.14);
-    expect(numericLiteralToNumber(numericLiteral('not-a-number', 'integer'))).toBeNaN();
+    expect(integerNumberLiteralToNumber(integerNumberLiteral('42'))).toBe(42);
+    expect(integerNumberLiteralToNumber(integerNumberLiteral('not-a-number'))).toBeNaN();
+  });
+});
+
+describe('RealNumberLiteral', () => {
+  it('is a TypedLiteral with a real-number XSD datatype IRI', () => {
+    const lit = realNumberLiteral('3.14', 'decimal');
+    expect(lit.kind).toBe('TypedLiteral');
+    expect(lit.lexicalForm).toBe('3.14');
+    expect(lit.datatype.value).toBe('http://www.w3.org/2001/XMLSchema#decimal');
+    expect(realNumberLiteralDatatypeIri(lit)).toBe(
+      'http://www.w3.org/2001/XMLSchema#decimal',
+    );
+  });
+
+  it('exposes numeric value via best-effort coercion', () => {
+    expect(realNumberLiteralToNumber(realNumberLiteral('3.14', 'decimal'))).toBeCloseTo(3.14);
+    expect(realNumberLiteralToNumber(realNumberLiteral('not-a-number', 'float'))).toBeNaN();
   });
 });
 

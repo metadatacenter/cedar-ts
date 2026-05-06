@@ -36,7 +36,7 @@ import { fieldRef } from './embedded-field-common.js';
 // Identifier for a `BooleanField` reusable schema artifact: a typed
 // wrapper around the field's IRI. Distinguished at compile time and
 // runtime from sibling field-id types so a caller can't accidentally
-// pass a `BooleanField`'s IRI where (say) a `NumericField`'s IRI is
+// pass a `BooleanField`'s IRI where (say) a `IntegerNumberField`'s IRI is
 // expected. On the wire this collapses to a plain JSON string IRI.
 export interface BooleanFieldId {
   readonly kind: 'BooleanFieldId';

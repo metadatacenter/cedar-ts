@@ -25,7 +25,8 @@ import {
 } from '../identifiers.js';
 import {
   type TextFieldId,
-  type NumericFieldId,
+  type IntegerNumberFieldId,
+  type RealNumberFieldId,
   type BooleanFieldId,
   type DateFieldId,
   type TimeFieldId,
@@ -44,7 +45,8 @@ import {
   type NihGrantIdFieldId,
   type AttributeValueFieldId,
   textFieldId,
-  numericFieldId,
+  integerNumberFieldId,
+  realNumberFieldId,
   booleanFieldId,
   dateFieldId,
   timeFieldId,
@@ -93,13 +95,14 @@ export function parseIsoDateTimeStamp(
 
 // ---- Per-family field identifiers ------------------------------------
 //
-// Nineteen FieldId types + TemplateId / TemplateInstanceId /
+// Twenty FieldId types + TemplateId / TemplateInstanceId /
 // PresentationComponentId. All collapse to a plain string IRI on the wire.
 // Round-trip uses the type-specific constructor at the appropriate
 // position so the in-memory tag is correct.
 
 export const serializeTextFieldId = (x: TextFieldId): string => x.iri.value;
-export const serializeNumericFieldId = (x: NumericFieldId): string => x.iri.value;
+export const serializeIntegerNumberFieldId = (x: IntegerNumberFieldId): string => x.iri.value;
+export const serializeRealNumberFieldId = (x: RealNumberFieldId): string => x.iri.value;
 export const serializeBooleanFieldId = (x: BooleanFieldId): string => x.iri.value;
 export const serializeDateFieldId = (x: DateFieldId): string => x.iri.value;
 export const serializeTimeFieldId = (x: TimeFieldId): string => x.iri.value;
@@ -120,8 +123,10 @@ export const serializeAttributeValueFieldId = (x: AttributeValueFieldId): string
 
 export const parseTextFieldId = (x: unknown, w = 'TextFieldId'): TextFieldId =>
   textFieldId(expectString(x, w));
-export const parseNumericFieldId = (x: unknown, w = 'NumericFieldId'): NumericFieldId =>
-  numericFieldId(expectString(x, w));
+export const parseIntegerNumberFieldId = (x: unknown, w = 'IntegerNumberFieldId'): IntegerNumberFieldId =>
+  integerNumberFieldId(expectString(x, w));
+export const parseRealNumberFieldId = (x: unknown, w = 'RealNumberFieldId'): RealNumberFieldId =>
+  realNumberFieldId(expectString(x, w));
 export const parseBooleanFieldId = (x: unknown, w = 'BooleanFieldId'): BooleanFieldId =>
   booleanFieldId(expectString(x, w));
 export const parseDateFieldId = (x: unknown, w = 'DateFieldId'): DateFieldId =>

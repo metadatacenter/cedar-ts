@@ -1,21 +1,21 @@
 // =====================================================================
-// Embedded-field common helpers — internal-only support for the 19
+// Embedded-field common helpers — internal-only support for the 20
 // EmbeddedXxxField constructors
 // =====================================================================
 //
 // Holds:
 //
-//   - EmbeddedFieldInitCommon — the shared init-object shape for the 18
+//   - EmbeddedFieldInitCommon — the shared init-object shape for the 19
 //     EmbeddedXxxFieldInit interfaces that carry a [Cardinality] slot.
 //     EmbeddedBooleanField is the one exception: it omits cardinality
 //     and uses a slimmer init-common defined locally in boolean-field.ts.
 //   - assembleCommon() — assembles the per-embedding properties (key,
 //     valueRequirement, cardinality, visibility, labelOverride,
-//     property) shared by the 18 cardinality-carrying EmbeddedField
+//     property) shared by the 19 cardinality-carrying EmbeddedField
 //     variants. Called by their `embeddedXxxField` constructors.
 //   - fieldRef() — extracts the FieldReference from a Field artifact, or
 //     passes through a typed reference. Called by every
-//     `embeddedXxxField` constructor (all 19 variants).
+//     `embeddedXxxField` constructor (all 20 variants).
 //
 // Not re-exported from `index.ts`; consumed only by the family files
 // in this folder.
@@ -68,7 +68,8 @@ export function assembleCommon(init: EmbeddedFieldInitCommon): AssembledCommon {
 // returned as-is).
 const FIELD_VARIANT_KINDS: ReadonlySet<string> = new Set([
   'TextField',
-  'NumericField',
+  'IntegerNumberField',
+  'RealNumberField',
   'BooleanField',
   'DateField',
   'TimeField',

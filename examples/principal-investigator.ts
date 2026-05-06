@@ -24,6 +24,9 @@
 
 import {
   artifactMetadata,
+  booleanField,
+  booleanFieldSpec,
+  booleanValue,
   cardinality,
   controlledTermChoiceOption,
   controlledTermField,
@@ -33,6 +36,7 @@ import {
   dateField,
   dateFieldSpec,
   DEFAULT_VALUE_REQUIREMENT,
+  embeddedBooleanField,
   embeddedControlledTermField,
   embeddedDateField,
   embeddedEmailField,
@@ -297,6 +301,21 @@ const appointmentDate = dateField({
   fieldSpec: dateFieldSpec({ dateValueType: 'fullDate' }),
 });
 
+// Boolean field — true / false. The fieldSpec carries an optional
+// rendering hint (`'checkbox'` or `'toggle'`) but no value-shaping slots:
+// a boolean's domain is fixed at two values. Embeddings of a BooleanField
+// also omit `cardinality` (booleans are inherently single-valued) — see
+// the embedding below.
+const acceptingNewStudents = booleanField({
+  id: `${FIELDS}accepting-new-students`,
+  modelVersion: MODEL_VERSION,
+  metadata: meta(
+    'Accepting New Students',
+    'Whether the PI is accepting new graduate students this cycle.',
+  ),
+  fieldSpec: booleanFieldSpec({ renderingHint: 'toggle' }),
+});
+
 // This single Field is embedded with min=0 / max=∞ cardinality below to
 // produce a multi-valued embedding from a single-valued reusable Field.
 const researchInterest = textField({
@@ -505,6 +524,17 @@ export const principalInvestigatorTemplate: Template = template({
       property: 'https://schema.org/startDate',
     }),
 
+    // Boolean embedding. Note: no `cardinality` slot is permitted on
+    // EmbeddedBooleanField — booleans are inherently single-valued. The
+    // `defaultValue` accepts a BooleanLiteral or a bare boolean shortcut
+    // (here the bare `false`, which the constructor wraps).
+    embeddedBooleanField({
+      key: 'accepting_new_students',
+      artifactRef: acceptingNewStudents,
+      valueRequirement: 'optional',
+      defaultValue: false,
+    }),
+
     // Open-lookup controlled-term field — instance values reference any
     // term in the configured ontology, not a curated list.
     embeddedControlledTermField({
@@ -619,6 +649,13 @@ export const exampleInstance: TemplateInstance = templateInstance({
     fieldValue(
       'appointment_date',
       fullDateValue('2018-09-01'),
+    ),
+    // Boolean value — the PI is accepting new students. The
+    // `booleanValue()` constructor accepts a bare JavaScript boolean and
+    // wraps it as a BooleanLiteral.
+    fieldValue(
+      'accepting_new_students',
+      booleanValue(true),
     ),
     // Open-lookup controlled-term value: a MeSH descriptor IRI plus its
     // English label. The `term` IRI here is the MeSH descriptor for

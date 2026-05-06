@@ -37,9 +37,26 @@ export type MultipleChoiceRenderingHint = 'checkbox' | 'multiSelectDropdown';
 export const MULTIPLE_CHOICE_RENDERING_HINTS: readonly MultipleChoiceRenderingHint[] =
   Object.freeze(['checkbox', 'multiSelectDropdown']);
 
-// NumericRenderingHint has only one widget. Modeled as a singleton union
-// for symmetry and forward-compatibility.
-export type NumericRenderingHint = 'numericInput';
+// NumericRenderingHint is shared by IntegerNumberFieldSpec and
+// RealNumberFieldSpec. It carries an optional `decimalPlaces` value that
+// tells a rendering implementation how many digits to display after the
+// decimal point. `decimalPlaces` is a presentation concern only — it does
+// NOT constrain the lexical form of submitted values; encoders and
+// decoders MUST NOT enforce a precision cap based on this slot.
+//
+// On RealNumberFieldSpec, `decimalPlaces` controls display rounding for
+// decimal/float/double values. On IntegerNumberFieldSpec, the slot is
+// meaningless (integers have no fractional part); a value of `0` is
+// harmless and conventionally omitted.
+export interface NumericRenderingHint {
+  readonly decimalPlaces?: number;
+}
+
+export function numericRenderingHint(decimalPlaces?: number): NumericRenderingHint {
+  const out: { decimalPlaces?: number } = {};
+  if (decimalPlaces !== undefined) out.decimalPlaces = decimalPlaces;
+  return out;
+}
 
 // BooleanRenderingHint distinguishes the two ways a boolean can render:
 // a checkbox (single labelled toggle box) or a toggle (slider/switch).

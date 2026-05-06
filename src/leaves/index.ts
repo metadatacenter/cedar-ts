@@ -11,7 +11,7 @@
 //       integer lexical form, plus the assertNonNegativeInteger helper
 //   - the Unicode NFC helper toNfc              (unicode-nfc.ts)
 //   - the XSD / RDF datatype IRI constants and
-//     the NumericDatatypeKind enum              (datatype-iris.ts)
+//     the RealNumberDatatypeKind enum           (datatype-iris.ts)
 //   - the leaf types Iri, LanguageTag,
 //     IsoDateTimeStamp and their constructors   (leaf-types.ts)
 //
@@ -50,9 +50,10 @@ export {
   XsdNumericDatatypeIri,
   XsdTemporalDatatypeIri,
   XsdStringDatatypeIri,
+  XsdBooleanDatatypeIri,
   RdfLangStringDatatypeIri,
-  type NumericDatatypeKind,
-  NUMERIC_DATATYPE_KINDS,
+  type RealNumberDatatypeKind,
+  REAL_NUMBER_DATATYPE_KINDS,
 } from './datatype-iris.js';
 export {
   type Iri,

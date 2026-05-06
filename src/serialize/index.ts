@@ -87,7 +87,8 @@ export function serialize(x: SerializableArtifact): unknown {
     case 'PageBreakComponent':
       return serializePresentationComponent(x);
     case 'TextField':
-    case 'NumericField':
+    case 'IntegerNumberField':
+    case 'RealNumberField':
     case 'BooleanField':
     case 'DateField':
     case 'TimeField':
@@ -185,7 +186,9 @@ export function parseArtifact(
     case 'PageBreakComponent':
       return parsePresentationComponent(x, where);
     case 'TextField':
-    case 'NumericField':
+    case 'IntegerNumberField':
+    case 'RealNumberField':
+    case 'BooleanField':
     case 'DateField':
     case 'TimeField':
     case 'DateTimeField':
