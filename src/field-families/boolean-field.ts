@@ -2,23 +2,11 @@
 // Boolean field family — true/false values
 // =====================================================================
 //
-// This file is the complete vertical slice for the boolean field
-// family. Per the cedar-ts convention each family file holds:
+// BooleanValue carries `value: boolean` directly. The datatype is
+// implicitly xsd:boolean and is not carried.
 //
-//   - identifier type            : BooleanFieldId
-//   - instance literal           : BooleanLiteral
-//   - instance value             : BooleanValue
-//   - schema constraints         : BooleanFieldSpec
-//   - reusable Field artifact    : BooleanField
-//   - Template-embedding wrapper : EmbeddedBooleanField
-//
-// Wire `kind` values: "BooleanField" (artifact), "EmbeddedBooleanField"
-// (embedding), "BooleanValue" (value).
-//
-// The boolean family deviates from the otherwise-uniform EmbeddedField
-// pattern: EmbeddedBooleanField omits the `cardinality` slot. A boolean
-// is inherently single-valued; ValueRequirement remains as the way to
-// express required vs optional.
+// EmbeddedBooleanField omits the `cardinality` slot — booleans are
+// inherently single-valued.
 
 import { type Iri, iri, parseSemanticVersion, parseAsciiIdentifier } from '../leaves/index.js';
 import type { SchemaArtifactMetadata } from '../metadata/index.js';
@@ -33,11 +21,6 @@ import { fieldRef } from './embedded-field-common.js';
 // 1. Identifier
 // =====================================================================
 
-// Identifier for a `BooleanField` reusable schema artifact: a typed
-// wrapper around the field's IRI. Distinguished at compile time and
-// runtime from sibling field-id types so a caller can't accidentally
-// pass a `BooleanField`'s IRI where (say) a `IntegerNumberField`'s IRI is
-// expected. On the wire this collapses to a plain JSON string IRI.
 export interface BooleanFieldId {
   readonly kind: 'BooleanFieldId';
   readonly iri: Iri;
@@ -58,41 +41,21 @@ export const booleanFieldId = (
 };
 
 // =====================================================================
-// 2. Literal
-// =====================================================================
-//
-// BooleanLiteral is unique among the cedar-ts literal types: its payload
-// is a JSON boolean rather than a lexical-form string. The datatype is
-// implicitly xsd:boolean and is not carried.
-
-export interface BooleanLiteral {
-  readonly kind: 'BooleanLiteral';
-  readonly value: boolean;
-}
-
-export const booleanLiteral = (value: boolean): BooleanLiteral => ({
-  kind: 'BooleanLiteral',
-  value,
-});
-
-export const isBooleanLiteral = (x: unknown): x is BooleanLiteral =>
-  typeof x === 'object' && x !== null &&
-  (x as { kind?: unknown }).kind === 'BooleanLiteral';
-
-// =====================================================================
-// 3. Value
+// 2. Value
 // =====================================================================
 
 export interface BooleanValue {
   readonly kind: 'BooleanValue';
-  readonly literal: BooleanLiteral;
+  readonly value: boolean;
 }
 
-export function booleanValue(literal: BooleanLiteral | boolean): BooleanValue {
-  return {
-    kind: 'BooleanValue',
-    literal: typeof literal === 'boolean' ? booleanLiteral(literal) : literal,
-  };
+export type BooleanValueInput = BooleanValue | boolean;
+
+export function booleanValue(value: boolean): BooleanValue;
+export function booleanValue(value: BooleanValue): BooleanValue;
+export function booleanValue(value: BooleanValue | boolean): BooleanValue {
+  if (typeof value === 'boolean') return { kind: 'BooleanValue', value };
+  return value;
 }
 
 export function isBooleanValue(x: unknown): x is BooleanValue {
@@ -103,7 +66,7 @@ export function isBooleanValue(x: unknown): x is BooleanValue {
 }
 
 // =====================================================================
-// 4. FieldSpec
+// 3. FieldSpec
 // =====================================================================
 
 export interface BooleanFieldSpec {
@@ -128,7 +91,7 @@ export const isBooleanFieldSpec = (x: unknown): x is BooleanFieldSpec =>
   (x as { kind?: unknown }).kind === 'BooleanFieldSpec';
 
 // =====================================================================
-// 5. Field artifact
+// 4. Field artifact
 // =====================================================================
 
 export interface BooleanField {
@@ -156,13 +119,8 @@ export const booleanField = (init: BooleanFieldInit): BooleanField =>
   });
 
 // =====================================================================
-// 6. EmbeddedField
+// 5. EmbeddedField
 // =====================================================================
-//
-// EmbeddedBooleanField omits the `cardinality` slot — booleans are
-// inherently single-valued. ValueRequirement remains as the way to
-// express required vs optional. This is the one deviation from the
-// otherwise-uniform EmbeddedField pattern.
 
 export interface EmbeddedBooleanField {
   readonly kind: 'EmbeddedBooleanField';
@@ -172,12 +130,9 @@ export interface EmbeddedBooleanField {
   readonly visibility?: Visibility;
   readonly labelOverride?: LabelOverride;
   readonly property?: Property;
-  readonly defaultValue?: BooleanLiteral;
+  readonly defaultValue?: BooleanValue;
 }
 
-// EmbeddedBooleanField does not include cardinality, so its init type
-// cannot reuse EmbeddedFieldInitCommon. The slimmer init is declared
-// inline here.
 export interface EmbeddedBooleanFieldInit {
   readonly key: string;
   readonly artifactRef: BooleanFieldReference | BooleanField;
@@ -185,7 +140,7 @@ export interface EmbeddedBooleanFieldInit {
   readonly visibility?: Visibility;
   readonly labelOverride?: LabelOverride;
   readonly property?: PropertyInput;
-  readonly defaultValue?: BooleanLiteral | boolean;
+  readonly defaultValue?: BooleanValueInput;
 }
 
 export function embeddedBooleanField(
@@ -199,7 +154,7 @@ export function embeddedBooleanField(
     visibility?: Visibility;
     labelOverride?: LabelOverride;
     property?: Property;
-    defaultValue?: BooleanLiteral;
+    defaultValue?: BooleanValue;
   } = {
     kind: 'EmbeddedBooleanField',
     key: parseAsciiIdentifier(init.key),
@@ -212,7 +167,7 @@ export function embeddedBooleanField(
   if (init.defaultValue !== undefined) {
     out.defaultValue =
       typeof init.defaultValue === 'boolean'
-        ? booleanLiteral(init.defaultValue)
+        ? booleanValue(init.defaultValue)
         : init.defaultValue;
   }
   return out;

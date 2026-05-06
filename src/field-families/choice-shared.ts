@@ -3,70 +3,103 @@
 // single-choice and multiple-choice field families
 // =====================================================================
 //
-// Both `single-choice-field.ts` and `multiple-choice-field.ts` depend
-// on the same option types and the same value types. Co-locating them
-// here avoids either duplicating the definitions or arbitrarily
-// designating one of the two family files as the owner.
-//
 // This file holds:
 //
 //   - LiteralChoiceOption, ControlledTermChoiceOption — option types
-//     used by the four concrete choice-spec variants
-//     (LiteralSingleChoice / ControlledTermSingleChoice /
-//     LiteralMultipleChoice / ControlledTermMultipleChoice).
+//     used by the four concrete choice-spec variants.
 //   - LiteralChoiceValue, ControlledTermChoiceValue — instance value
 //     types selected by a choice field.
 //   - ChoiceValue — the union admitted at SingleChoiceField and
-//     MultipleChoiceField instances. Also serves directly as the
-//     `defaultValue` slot type on EmbeddedSingleChoiceField and
-//     EmbeddedMultipleChoiceField (kind retained on the wire as the
-//     union is polymorphic).
+//     MultipleChoiceField instances.
+//
+// `LiteralChoiceValue` carries a flat shape: `{ kind, value, lang?,
+// datatype? }`. The `lang` and `datatype` slots are mutually exclusive.
+// `LiteralChoiceOption` mirrors that shape (without the `kind`
+// discriminator, since it is at a singleton position) plus an optional
+// `default: true`.
 
-import { type Literal, langTaggedLiteral } from '../literals/index.js';
+import {
+  type Iri,
+  type LanguageTag,
+  CedarConstructionError,
+  iri,
+  languageTag,
+} from '../leaves/index.js';
 import {
   type ControlledTermValue,
   isControlledTermValue,
 } from './controlled-term-field.js';
 
 // =====================================================================
-// Choice options (used by SingleChoiceFieldSpec / MultipleChoiceFieldSpec)
+// LiteralChoiceOption / ControlledTermChoiceOption
 // =====================================================================
 
-// LiteralChoiceOption pairs a literal value with an optional default-marker.
-// `default` is modeled as a plain boolean property; the grammar's
-// `default_option()` nullary constructor collapses to `default: true` here.
 export interface LiteralChoiceOption {
-  readonly literal: Literal;
+  readonly value: string;
+  readonly lang?: LanguageTag;
+  readonly datatype?: Iri;
   readonly default?: true;
 }
 
-// Accepts either a fully-built Literal, or a (text, lang) pair that's wrapped
-// as a langTaggedLiteral. The (text, lang) shortcut covers the very common
-// case of human-readable choice labels in a specific language.
+export interface LiteralChoiceOptionInit {
+  readonly value: string;
+  readonly lang?: string | LanguageTag;
+  readonly datatype?: string | Iri;
+  readonly default?: boolean;
+}
+
+function assertLangDatatypeExclusive(
+  hasLang: boolean,
+  hasDatatype: boolean,
+  where: string,
+): void {
+  if (hasLang && hasDatatype) {
+    throw new CedarConstructionError(
+      `${where}: lang and datatype are mutually exclusive; at most one may be present`,
+    );
+  }
+}
+
 export function literalChoiceOption(
-  literal: Literal,
-  options?: { default?: boolean },
+  init: LiteralChoiceOptionInit,
 ): LiteralChoiceOption;
+// (text, lang) shortcut: language-tagged plain text option.
 export function literalChoiceOption(
   text: string,
   lang: string,
   options?: { default?: boolean },
 ): LiteralChoiceOption;
 export function literalChoiceOption(
-  arg1: Literal | string,
-  arg2?: string | { default?: boolean },
+  arg1: LiteralChoiceOptionInit | string,
+  arg2?: string,
   arg3?: { default?: boolean },
 ): LiteralChoiceOption {
-  const literal: Literal =
-    typeof arg1 === 'string' ? langTaggedLiteral(arg1, arg2 as string) : arg1;
-  const options =
-    typeof arg1 === 'string'
-      ? arg3
-      : (arg2 as { default?: boolean } | undefined);
-  const out: { literal: Literal; default?: true } = {
-    literal,
-  };
-  if (options?.default === true) out.default = true;
+  if (typeof arg1 === 'string') {
+    const init: LiteralChoiceOptionInit = {
+      value: arg1,
+      lang: arg2 as string,
+    };
+    if (arg3?.default === true) (init as { default?: boolean }).default = true;
+    return literalChoiceOption(init);
+  }
+  const hasLang = arg1.lang !== undefined;
+  const hasDatatype = arg1.datatype !== undefined;
+  assertLangDatatypeExclusive(hasLang, hasDatatype, 'LiteralChoiceOption');
+  const out: {
+    value: string;
+    lang?: LanguageTag;
+    datatype?: Iri;
+    default?: true;
+  } = { value: arg1.value };
+  if (hasLang) {
+    out.lang =
+      typeof arg1.lang === 'string' ? languageTag(arg1.lang) : (arg1.lang as LanguageTag);
+  }
+  if (hasDatatype) {
+    out.datatype =
+      typeof arg1.datatype === 'string' ? iri(arg1.datatype) : (arg1.datatype as Iri);
+  }
+  if (arg1.default === true) out.default = true;
   return out;
 }
 
@@ -88,26 +121,59 @@ export function controlledTermChoiceOption(
 }
 
 // =====================================================================
-// Choice values (the runtime value carried by single-/multiple-choice fields)
+// LiteralChoiceValue / ControlledTermChoiceValue / ChoiceValue
 // =====================================================================
 
 export interface LiteralChoiceValue {
   readonly kind: 'LiteralChoiceValue';
-  readonly literal: Literal;
+  readonly value: string;
+  readonly lang?: LanguageTag;
+  readonly datatype?: Iri;
 }
 
-// Accepts either a fully-built Literal, or a (text, lang) pair that's wrapped
-// as a langTaggedLiteral. The (text, lang) shortcut covers the very common
-// case of human-readable choice labels in a specific language.
-export function literalChoiceValue(literal: Literal): LiteralChoiceValue;
-export function literalChoiceValue(text: string, lang: string): LiteralChoiceValue;
+export interface LiteralChoiceValueInit {
+  readonly value: string;
+  readonly lang?: string | LanguageTag;
+  readonly datatype?: string | Iri;
+}
+
 export function literalChoiceValue(
-  arg1: Literal | string,
+  init: LiteralChoiceValueInit,
+): LiteralChoiceValue;
+// (text, lang) shortcut: language-tagged plain text choice.
+export function literalChoiceValue(
+  text: string,
+  lang: string,
+): LiteralChoiceValue;
+// Plain text (no lang, no datatype).
+export function literalChoiceValue(text: string): LiteralChoiceValue;
+export function literalChoiceValue(
+  arg1: LiteralChoiceValueInit | string,
   arg2?: string,
 ): LiteralChoiceValue {
-  const literal: Literal =
-    typeof arg1 === 'string' ? langTaggedLiteral(arg1, arg2 as string) : arg1;
-  return { kind: 'LiteralChoiceValue', literal };
+  if (typeof arg1 === 'string') {
+    return arg2 === undefined
+      ? { kind: 'LiteralChoiceValue', value: arg1 }
+      : literalChoiceValue({ value: arg1, lang: arg2 });
+  }
+  const hasLang = arg1.lang !== undefined;
+  const hasDatatype = arg1.datatype !== undefined;
+  assertLangDatatypeExclusive(hasLang, hasDatatype, 'LiteralChoiceValue');
+  const out: {
+    kind: 'LiteralChoiceValue';
+    value: string;
+    lang?: LanguageTag;
+    datatype?: Iri;
+  } = { kind: 'LiteralChoiceValue', value: arg1.value };
+  if (hasLang) {
+    out.lang =
+      typeof arg1.lang === 'string' ? languageTag(arg1.lang) : (arg1.lang as LanguageTag);
+  }
+  if (hasDatatype) {
+    out.datatype =
+      typeof arg1.datatype === 'string' ? iri(arg1.datatype) : (arg1.datatype as Iri);
+  }
+  return out;
 }
 
 export interface ControlledTermChoiceValue {
@@ -141,4 +207,3 @@ export function isControlledTermChoiceValue(
 export function isChoiceValue(x: unknown): x is ChoiceValue {
   return isLiteralChoiceValue(x) || isControlledTermChoiceValue(x);
 }
-

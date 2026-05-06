@@ -33,6 +33,9 @@ export {
 } from './schema-versioning.js';
 
 export {
+  type AnnotationStringValue,
+  annotationStringValue,
+  isAnnotationStringValue,
   type AnnotationValue,
   isAnnotationValue,
   type Annotation,

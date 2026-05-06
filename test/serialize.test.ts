@@ -19,7 +19,6 @@ import {
   dateField,
   dateFieldSpec,
   dateTimeFieldSpec,
-  dateTimeLiteral,
   dateTimeValue,
   doiField,
   doiFieldSpec,
@@ -49,10 +48,8 @@ import {
   emailFieldSpec,
   emailValue,
   fieldValue,
-  fullDateLiteral,
   fullDateValue,
   imageComponent,
-  langTaggedLiteral,
   labelOverride,
   linkField,
   linkFieldSpec,
@@ -67,12 +64,10 @@ import {
   nihGrantIdValue,
   integerNumberField,
   integerNumberFieldSpec,
-  integerNumberLiteral,
   integerNumberValue,
   numericRenderingHint,
   realNumberField,
   realNumberFieldSpec,
-  realNumberLiteral,
   realNumberValue,
   ontologyDisplayHint,
   ontologyReference,
@@ -97,7 +92,6 @@ import {
   schemaArtifactMetadata,
   schemaVersioning,
   sectionBreakComponent,
-  simpleLiteral,
   singleChoiceField,
   template,
   templateId,
@@ -108,7 +102,6 @@ import {
   textFieldSpec,
   textValue,
   timeFieldSpec,
-  timeLiteral,
   timeValue,
   yearMonthValue,
   yearValue,
@@ -132,9 +125,6 @@ import {
   parseEmbeddedField,
   serializeEmbeddedArtifact,
   parseEmbeddedArtifact,
-  serializeLiteral,
-  parseLiteral,
-  parseTextLiteral,
   serializeMultilingualString,
   parseMultilingualString,
   serializeFieldValue,
@@ -161,6 +151,7 @@ import {
   CedarConstructionError,
   iri,
   annotation,
+  annotationStringValue,
   property,
   attributeValueFieldId,
   controlledTermFieldId,
@@ -221,78 +212,32 @@ describe('MultilingualString round-trip', () => {
   });
 });
 
-// ---- Literal round-trip ----------------------------------------------
-
-describe('Literal round-trip', () => {
-  it('SimpleLiteral: { value }', () => {
-    const lit = simpleLiteral('hello');
-    expect(serializeLiteral(lit)).toEqual({ value: 'hello' });
-    expect(parseLiteral({ value: 'hello' })).toEqual(lit);
-  });
-
-  it('LangTaggedLiteral: { value, lang }', () => {
-    const lit = langTaggedLiteral('hello', 'en');
-    expect(serializeLiteral(lit)).toEqual({ value: 'hello', lang: 'en' });
-    expect(parseLiteral({ value: 'hello', lang: 'en' })).toEqual(lit);
-  });
-
-  it('TypedLiteral: { value, datatype }', () => {
-    const lit = integerNumberLiteral('42');
-    expect(serializeLiteral(lit)).toMatchObject({
-      value: '42',
-      datatype: expect.any(String),
-    });
-    const round = parseLiteral(serializeLiteral(lit));
-    expect(round).toEqual(lit);
-  });
-
-  it('rejects multi-match { value, lang, datatype }', () => {
-    expect(() =>
-      parseLiteral({
-        value: 'x',
-        lang: 'en',
-        datatype: 'http://www.w3.org/2001/XMLSchema#string',
-      }),
-    ).toThrow(/MUST NOT carry both/);
-  });
-
-  it('rejects no-match (no value)', () => {
-    expect(() => parseLiteral({ lang: 'en' })).toThrow(/missing required/);
-  });
-
-  it('TextLiteral position rejects datatype', () => {
-    expect(() =>
-      parseTextLiteral({
-        value: 'x',
-        datatype: 'http://www.w3.org/2001/XMLSchema#string',
-      }),
-    ).toThrow(/datatype/);
-  });
-
-  it('rejects null property where omission is required', () => {
-    expect(() => parseLiteral({ value: 'x', lang: null })).toThrow(
-      /MUST be omitted/,
-    );
-  });
-});
-
 // ---- Value round-trips -----------------------------------------------
 
 const valueSamples = [
-  ['TextValue (simple)', textValue('hello')],
-  ['TextValue (lang)', textValue(langTaggedLiteral('hello', 'en'))],
-  ['IntegerNumberValue', integerNumberValue(integerNumberLiteral('42'))],
-  ['RealNumberValue', realNumberValue(realNumberLiteral('3.14', 'decimal'))],
+  ['TextValue (no lang)', textValue('hello')],
+  ['TextValue (lang)', textValue('hello', 'en')],
+  ['IntegerNumberValue', integerNumberValue('42')],
+  ['RealNumberValue', realNumberValue('3.14', 'decimal')],
+  ['BooleanValue', { kind: 'BooleanValue' as const, value: true }],
   ['YearValue', yearValue('2024')],
   ['YearMonthValue', yearMonthValue('2024-06')],
-  ['FullDateValue', fullDateValue(fullDateLiteral('2024-01-01'))],
-  ['TimeValue', timeValue(timeLiteral('14:00:00'))],
-  ['DateTimeValue', dateTimeValue(dateTimeLiteral('2024-01-01T12:00:00Z'))],
+  ['FullDateValue', fullDateValue('2024-01-01')],
+  ['TimeValue', timeValue('14:00:00')],
+  ['DateTimeValue', dateTimeValue('2024-01-01T12:00:00Z')],
   [
     'ControlledTermValue',
     controlledTermValue({ term: 'http://example.org/term/1', label: 'Term One' }),
   ],
-  ['LiteralChoiceValue', literalChoiceValue('Yes', 'en')],
+  ['LiteralChoiceValue (lang)', literalChoiceValue('Yes', 'en')],
+  [
+    'LiteralChoiceValue (typed)',
+    literalChoiceValue({
+      value: '42',
+      datatype: 'http://www.w3.org/2001/XMLSchema#integer',
+    }),
+  ],
+  ['LiteralChoiceValue (plain)', literalChoiceValue('plain')],
   [
     'ControlledTermChoiceValue',
     controlledTermChoiceValue(
@@ -328,6 +273,29 @@ describe('Value round-trip', () => {
     const wire = serializeValue(av);
     const back = parseValue(wire);
     expect(serializeValue(back)).toEqual(wire);
+  });
+
+  it('TextValue wire shape carries value (and lang when present)', () => {
+    expect(serializeValue(textValue('Hi'))).toEqual({
+      kind: 'TextValue',
+      value: 'Hi',
+    });
+    expect(serializeValue(textValue('Hi', 'en'))).toEqual({
+      kind: 'TextValue',
+      value: 'Hi',
+      lang: 'en',
+    });
+  });
+
+  it('LiteralChoiceValue rejects multi-match (lang AND datatype) on parse', () => {
+    expect(() =>
+      parseValue({
+        kind: 'LiteralChoiceValue',
+        value: 'x',
+        lang: 'en',
+        datatype: 'http://www.w3.org/2001/XMLSchema#string',
+      }),
+    ).toThrow(/mutually exclusive/);
   });
 });
 
@@ -387,11 +355,18 @@ describe('AnnotationValue round-trip', () => {
     expect((back as { value: string }).value).toBe('https://example.org/x');
   });
 
-  it('SimpleLiteral arm wraps as { value }', () => {
-    const lit = simpleLiteral('foo');
-    expect(serializeAnnotationValue(lit)).toEqual({ value: 'foo' });
+  it('AnnotationStringValue arm wraps as { value }', () => {
+    const sv = annotationStringValue('foo');
+    expect(serializeAnnotationValue(sv)).toEqual({ value: 'foo' });
     const back = parseAnnotationValue({ value: 'foo' });
-    expect((back as { kind: string }).kind).toBe('SimpleLiteral');
+    expect((back as { kind: string }).kind).toBe('AnnotationStringValue');
+  });
+
+  it('AnnotationStringValue with lang', () => {
+    const sv = annotationStringValue('foo', 'en');
+    expect(serializeAnnotationValue(sv)).toEqual({ value: 'foo', lang: 'en' });
+    const back = parseAnnotationValue({ value: 'foo', lang: 'en' });
+    expect((back as { kind: string }).kind).toBe('AnnotationStringValue');
   });
 
   it('rejects multi-match { iri, value }', () => {
@@ -408,8 +383,8 @@ describe('AnnotationValue round-trip', () => {
 // ---- Annotation round-trip ------------------------------------------
 
 describe('Annotation round-trip', () => {
-  it('with literal body', () => {
-    const a = annotation('https://example.org/p', simpleLiteral('foo'));
+  it('with string body', () => {
+    const a = annotation('https://example.org/p', annotationStringValue('foo'));
     const wire = serializeAnnotation(a);
     expect(wire).toEqual({
       property: 'https://example.org/p',
@@ -528,12 +503,9 @@ describe('FieldSpec round-trip', () => {
 });
 
 // ---- EmbeddedField defaultValue wire-form round-trips ----------------
-// (XxxDefaultValue wrappers are gone; defaultValue is now the
-// family-specific underlying type directly. These tests pin the new
-// flat wire shapes per spec 868ef1c.)
 
 describe('EmbeddedXxxField.defaultValue wire-form', () => {
-  it('Text — emits a TextLiteral object (no kind, no wrapper)', () => {
+  it('Text — emits { value [, lang] } (no kind, no wrapper)', () => {
     const e = embeddedTextField({
       key: 't',
       artifactRef: textFieldId('https://example.org/x'),
@@ -544,11 +516,11 @@ describe('EmbeddedXxxField.defaultValue wire-form', () => {
     expect(parseEmbeddedField(wire)).toEqual(e);
   });
 
-  it('IntegerNumber — emits IntegerNumberLiteral { value } (datatype elided; fixed)', () => {
+  it('IntegerNumber — emits { value } (datatype elided)', () => {
     const e = embeddedIntegerNumberField({
       key: 'n',
       artifactRef: integerNumberFieldId('https://example.org/x'),
-      defaultValue: integerNumberLiteral('42'),
+      defaultValue: '42',
     });
     const wire = serializeEmbeddedField(e) as { defaultValue: { value: string } };
     expect(wire.defaultValue.value).toBe('42');
@@ -556,15 +528,15 @@ describe('EmbeddedXxxField.defaultValue wire-form', () => {
     expect(parseEmbeddedField(wire)).toEqual(e);
   });
 
-  it('RealNumber — emits RealNumberLiteral { value, datatype }', () => {
+  it('RealNumber — emits { value, datatype }', () => {
     const e = embeddedRealNumberField({
       key: 'r',
       artifactRef: realNumberFieldId('https://example.org/x'),
-      defaultValue: realNumberLiteral('3.14', 'decimal'),
+      defaultValue: realNumberValue('3.14', 'decimal'),
     });
     const wire = serializeEmbeddedField(e) as { defaultValue: { value: string; datatype: string } };
     expect(wire.defaultValue.value).toBe('3.14');
-    expect(wire.defaultValue.datatype).toContain('decimal');
+    expect(wire.defaultValue.datatype).toBe('decimal');
     expect(parseEmbeddedField(wire)).toEqual(e);
   });
 
@@ -615,7 +587,7 @@ describe('EmbeddedXxxField.defaultValue wire-form', () => {
     expect(parseEmbeddedField(wire)).toEqual(e);
   });
 
-  it('Email — emits a SimpleLiteral { value }', () => {
+  it('Email — emits { value } untagged', () => {
     const e = embeddedEmailField({
       key: 'em',
       artifactRef: emailFieldId('https://example.org/x'),
@@ -868,7 +840,6 @@ describe('Field round-trip', () => {
       }),
     ) as Record<string, unknown>;
     wire['_extra'] = 'ok';
-    // Should not throw.
     const back = parseField(wire);
     expect(back.kind).toBe('TextField');
   });

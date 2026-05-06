@@ -4,11 +4,9 @@ import {
   booleanField,
   booleanFieldId,
   booleanFieldSpec,
-  booleanLiteral,
   booleanValue,
   embeddedBooleanField,
   isBooleanFieldSpec,
-  isBooleanLiteral,
   isBooleanValue,
   isField,
   isEmbeddedField,
@@ -35,41 +33,25 @@ const meta = schemaArtifactMetadata({
 
 const MV = '0.1.0';
 
-describe('BooleanLiteral', () => {
-  it('carries a JSON boolean payload', () => {
-    const t = booleanLiteral(true);
-    expect(t.kind).toBe('BooleanLiteral');
-    expect(t.value).toBe(true);
-
-    const f = booleanLiteral(false);
-    expect(f.value).toBe(false);
-  });
-
-  it('isBooleanLiteral discriminates', () => {
-    expect(isBooleanLiteral(booleanLiteral(true))).toBe(true);
-    expect(isBooleanLiteral({ kind: 'TypedLiteral' })).toBe(false);
-    expect(isBooleanLiteral(null)).toBe(false);
-    expect(isBooleanLiteral(true)).toBe(false);
-  });
-});
-
 describe('BooleanValue', () => {
-  it('wraps a BooleanLiteral', () => {
+  it('carries a JSON boolean payload directly', () => {
     const v = booleanValue(true);
     expect(v.kind).toBe('BooleanValue');
-    expect(v.literal.kind).toBe('BooleanLiteral');
-    expect(v.literal.value).toBe(true);
-  });
+    expect(v.value).toBe(true);
 
-  it('accepts a bare boolean shortcut', () => {
-    const v = booleanValue(false);
-    expect(v.literal.value).toBe(false);
+    const f = booleanValue(false);
+    expect(f.value).toBe(false);
   });
 
   it('isBooleanValue discriminates', () => {
     expect(isBooleanValue(booleanValue(true))).toBe(true);
     expect(isBooleanValue({ kind: 'IntegerNumberValue' })).toBe(false);
     expect(isBooleanValue(null)).toBe(false);
+  });
+
+  it('passes a pre-built BooleanValue through unchanged', () => {
+    const a = booleanValue(true);
+    expect(booleanValue(a)).toBe(a);
   });
 });
 
@@ -134,11 +116,11 @@ describe('EmbeddedBooleanField', () => {
     });
     expect(ef.valueRequirement).toBe('required');
     expect(ef.visibility).toBe('visible');
-    expect(ef.defaultValue?.kind).toBe('BooleanLiteral');
+    expect(ef.defaultValue?.kind).toBe('BooleanValue');
     expect(ef.defaultValue?.value).toBe(true);
   });
 
-  it('accepts a BooleanLiteral or a bare boolean as defaultValue', () => {
+  it('accepts a BooleanValue or a bare boolean as defaultValue', () => {
     const a = embeddedBooleanField({
       key: 'a',
       artifactRef: ref,
@@ -147,7 +129,7 @@ describe('EmbeddedBooleanField', () => {
     const b = embeddedBooleanField({
       key: 'b',
       artifactRef: ref,
-      defaultValue: booleanLiteral(false),
+      defaultValue: booleanValue(false),
     });
     expect(a.defaultValue?.value).toBe(false);
     expect(b.defaultValue?.value).toBe(false);

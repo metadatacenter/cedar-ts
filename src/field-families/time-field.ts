@@ -3,28 +3,10 @@
 // fractional-second precision
 // =====================================================================
 //
-// This file is the complete vertical slice for the time field
-// family. Per the cedar-ts convention each family file holds:
-//
-//   - identifier type            : TimeFieldId
-//   - instance value             : TimeValue
-//   - schema constraints         : TimeFieldSpec
-//   - reusable Field artifact    : TimeField
-//   - Template-embedding wrapper : EmbeddedTimeField
-//
-// Wire `kind` values: "TimeField" (artifact), "EmbeddedTimeField"
-// (embedding).
-//
-// Owns the `TimePrecision` and `TimezoneRequirement` enums. References
-// `TimeLiteral` from `src/literals/temporal-literals.ts`. The
-// `defaultValue` slot on `EmbeddedTimeField` is a `TimeLiteral`
-// directly (no wrapper).
+// TimeValue carries `value: string` (an xsd:time lexical form). The
+// datatype is fixed at xsd:time and is not carried.
 
 import { type Iri, iri, parseSemanticVersion } from '../leaves/index.js';
-import {
-  type TimeLiteral,
-  timeLiteral,
-} from '../literals/index.js';
 import type { SchemaArtifactMetadata } from '../metadata/index.js';
 import type { ValueRequirement } from '../embedded/requirement.js';
 import type { Cardinality } from '../embedded/cardinality.js';
@@ -42,14 +24,6 @@ import {
 // 1. Identifier
 // =====================================================================
 
-// Identifier for a `TimeField` reusable schema artifact: a typed wrapper
-// around the field's IRI. Distinguished at compile time and runtime from
-// sibling field-id types (e.g. `IntegerNumberFieldId`, `EmailFieldId`) so a caller
-// can't accidentally pass a `TimeField`'s IRI where (say) a
-// `IntegerNumberField`'s IRI is expected.
-//
-// On the wire this collapses to a plain JSON string IRI; the typed
-// wrapper exists only in memory.
 export interface TimeFieldId {
   readonly kind: 'TimeFieldId';
   readonly iri: Iri;
@@ -57,12 +31,6 @@ export interface TimeFieldId {
 
 export type TimeFieldReference = TimeFieldId;
 
-// Identifier-wrapper constructor for the Time field family.
-// Idempotent: an existing TimeFieldId passes through unchanged. A bare
-// string IRI is validated and wrapped via `iri()`; a typed `Iri` is wrapped
-// without re-validation. The TimeFieldId wrapper is distinguished from
-// sibling field-id types (e.g. `IntegerNumberFieldId`, `EmailFieldId`) by the
-// per-variant `kind` discriminator.
 export const timeFieldId = (
   v: TimeFieldId | Iri | string,
 ): TimeFieldId => {
@@ -81,15 +49,16 @@ export const timeFieldId = (
 
 export interface TimeValue {
   readonly kind: 'TimeValue';
-  readonly literal: TimeLiteral;
+  readonly value: string;
 }
 
-// Accepts a TimeLiteral or its lexical form directly. See fullDateValue.
-export function timeValue(input: TimeLiteral | string): TimeValue {
-  return {
-    kind: 'TimeValue',
-    literal: typeof input === 'string' ? timeLiteral(input) : input,
-  };
+export type TimeValueInput = TimeValue | string;
+
+export function timeValue(value: string): TimeValue;
+export function timeValue(value: TimeValue): TimeValue;
+export function timeValue(value: TimeValue | string): TimeValue {
+  if (typeof value !== 'string') return value;
+  return { kind: 'TimeValue', value };
 }
 
 export function isTimeValue(x: unknown): x is TimeValue {
@@ -103,8 +72,6 @@ export function isTimeValue(x: unknown): x is TimeValue {
 // 3. FieldSpec
 // =====================================================================
 
-// TimePrecision identifies the finest time precision permitted by a TimeFieldSpec.
-// Strict-truncation rules apply at validation: finer components MUST be omitted.
 export type TimePrecision =
   | 'hourMinute'
   | 'hourMinuteSecond'
@@ -115,7 +82,6 @@ export const TIME_PRECISIONS: readonly TimePrecision[] = Object.freeze([
   'hourMinuteSecondFraction',
 ]);
 
-// TimezoneRequirement: whether timezone information is required.
 export type TimezoneRequirement = 'required' | 'notRequired';
 export const TIMEZONE_REQUIREMENTS: readonly TimezoneRequirement[] = Object.freeze([
   'required',
@@ -194,14 +160,12 @@ export interface EmbeddedTimeField {
   readonly visibility?: Visibility;
   readonly labelOverride?: LabelOverride;
   readonly property?: Property;
-  readonly defaultValue?: TimeLiteral;
+  readonly defaultValue?: TimeValue;
 }
 
-// `defaultValue` accepts a TimeLiteral or a plain xsd:time lexical form
-// (wrapped via timeLiteral).
 export interface EmbeddedTimeFieldInit extends EmbeddedFieldInitCommon {
   readonly artifactRef: TimeFieldReference | TimeField;
-  readonly defaultValue?: TimeLiteral | string;
+  readonly defaultValue?: TimeValueInput;
 }
 
 export function embeddedTimeField(init: EmbeddedTimeFieldInit): EmbeddedTimeField {
@@ -212,7 +176,7 @@ export function embeddedTimeField(init: EmbeddedTimeFieldInit): EmbeddedTimeFiel
     ...(init.defaultValue !== undefined && {
       defaultValue:
         typeof init.defaultValue === 'string'
-          ? timeLiteral(init.defaultValue)
+          ? timeValue(init.defaultValue)
           : init.defaultValue,
     }),
   };

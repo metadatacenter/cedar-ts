@@ -3,6 +3,7 @@ import {
   textValue,
   integerNumberValue,
   realNumberValue,
+  booleanValue,
   yearValue,
   yearMonthValue,
   fullDateValue,
@@ -38,37 +39,37 @@ import {
   attributeValue,
   isAttributeValue,
   isValue,
-  simpleLiteral,
-  langTaggedLiteral,
-  integerNumberLiteral,
-  realNumberLiteral,
-  fullDateLiteral,
-  timeLiteral,
-  dateTimeLiteral,
-  XsdNumericDatatypeIri,
-  typedLiteral,
 } from '../src/index.js';
 
 describe('Scalar values', () => {
-  it('TextValue wraps a TextLiteral', () => {
-    const tv = textValue(simpleLiteral('hello'));
+  it('TextValue carries value (and optional lang) directly', () => {
+    const tv = textValue('hello');
     expect(tv.kind).toBe('TextValue');
-    expect(tv.literal.kind).toBe('SimpleLiteral');
+    expect(tv.value).toBe('hello');
+    expect(tv.lang).toBeUndefined();
 
-    const lv = textValue(langTaggedLiteral('hello', 'en'));
-    expect(lv.literal.kind).toBe('LangTaggedLiteral');
+    const lv = textValue('hello', 'en');
+    expect(lv.kind).toBe('TextValue');
+    expect(lv.lang?.value).toBe('en');
   });
 
-  it('IntegerNumberValue wraps an IntegerNumberLiteral', () => {
-    const nv = integerNumberValue(integerNumberLiteral('42'));
+  it('IntegerNumberValue carries a base-10 lexical form', () => {
+    const nv = integerNumberValue('42');
     expect(nv.kind).toBe('IntegerNumberValue');
-    expect(nv.literal.lexicalForm).toBe('42');
+    expect(nv.value).toBe('42');
   });
 
-  it('RealNumberValue wraps a RealNumberLiteral', () => {
-    const nv = realNumberValue(realNumberLiteral('3.14', 'decimal'));
+  it('RealNumberValue carries a lexical form plus a datatype enum', () => {
+    const nv = realNumberValue('3.14', 'decimal');
     expect(nv.kind).toBe('RealNumberValue');
-    expect(nv.literal.lexicalForm).toBe('3.14');
+    expect(nv.value).toBe('3.14');
+    expect(nv.datatype).toBe('decimal');
+  });
+
+  it('BooleanValue carries a JSON boolean directly', () => {
+    const v = booleanValue(true);
+    expect(v.kind).toBe('BooleanValue');
+    expect(v.value).toBe(true);
   });
 });
 
@@ -88,9 +89,10 @@ describe('DateValue refinements', () => {
     expect(isDateValue(ym)).toBe(true);
   });
 
-  it('FullDateValue wraps a FullDateLiteral', () => {
-    const fd = fullDateValue(fullDateLiteral('2024-06-15'));
+  it('FullDateValue carries a plain string', () => {
+    const fd = fullDateValue('2024-06-15');
     expect(fd.kind).toBe('FullDateValue');
+    expect(fd.value).toBe('2024-06-15');
     expect(isFullDateValue(fd)).toBe(true);
     expect(isDateValue(fd)).toBe(true);
   });
@@ -102,14 +104,16 @@ describe('DateValue refinements', () => {
 });
 
 describe('TimeValue / DateTimeValue', () => {
-  it('TimeValue wraps a TimeLiteral', () => {
-    const tv = timeValue(timeLiteral('10:30:00'));
+  it('TimeValue carries a plain string', () => {
+    const tv = timeValue('10:30:00');
     expect(tv.kind).toBe('TimeValue');
+    expect(tv.value).toBe('10:30:00');
   });
 
-  it('DateTimeValue wraps a DateTimeLiteral', () => {
-    const dtv = dateTimeValue(dateTimeLiteral('2024-06-15T10:30:00Z'));
+  it('DateTimeValue carries a plain string', () => {
+    const dtv = dateTimeValue('2024-06-15T10:30:00Z');
     expect(dtv.kind).toBe('DateTimeValue');
+    expect(dtv.value).toBe('2024-06-15T10:30:00Z');
   });
 });
 
@@ -137,12 +141,33 @@ describe('ControlledTermValue', () => {
 });
 
 describe('ChoiceValue', () => {
-  it('LiteralChoiceValue wraps a Literal', () => {
-    const cv = literalChoiceValue(
-      typedLiteral('1', XsdNumericDatatypeIri.integer),
-    );
+  it('LiteralChoiceValue (typed) carries a datatype IRI', () => {
+    const cv = literalChoiceValue({
+      value: '1',
+      datatype: 'http://www.w3.org/2001/XMLSchema#integer',
+    });
     expect(isLiteralChoiceValue(cv)).toBe(true);
     expect(isChoiceValue(cv)).toBe(true);
+    expect(cv.datatype?.value).toBe(
+      'http://www.w3.org/2001/XMLSchema#integer',
+    );
+  });
+
+  it('LiteralChoiceValue (lang-tagged) carries a lang', () => {
+    const cv = literalChoiceValue('Professor', 'en');
+    expect(cv.lang?.value).toBe('en');
+  });
+
+  it('LiteralChoiceValue (plain) carries neither lang nor datatype', () => {
+    const cv = literalChoiceValue('Plain');
+    expect(cv.lang).toBeUndefined();
+    expect(cv.datatype).toBeUndefined();
+  });
+
+  it('LiteralChoiceValue rejects both lang and datatype together', () => {
+    expect(() =>
+      literalChoiceValue({ value: 'x', lang: 'en', datatype: 'http://example.org/d' }),
+    ).toThrow();
   });
 
   it('ControlledTermChoiceValue wraps a ControlledTermValue', () => {
@@ -167,15 +192,15 @@ describe('LinkValue', () => {
 });
 
 describe('Contact values', () => {
-  it('EmailValue wraps a SimpleLiteral', () => {
+  it('EmailValue carries value: string directly', () => {
     const ev = emailValue('me@example.org');
-    expect(ev.literal.kind).toBe('SimpleLiteral');
-    expect(ev.literal.lexicalForm).toBe('me@example.org');
+    expect(ev.kind).toBe('EmailValue');
+    expect(ev.value).toBe('me@example.org');
   });
 
-  it('PhoneNumberValue wraps a SimpleLiteral', () => {
+  it('PhoneNumberValue carries value: string directly', () => {
     const pv = phoneNumberValue('+1-415-555-0100');
-    expect(pv.literal.lexicalForm).toBe('+1-415-555-0100');
+    expect(pv.value).toBe('+1-415-555-0100');
   });
 });
 
@@ -219,14 +244,14 @@ describe('External authority values', () => {
 
 describe('AttributeValue (recursive)', () => {
   it('can carry a scalar value', () => {
-    const av = attributeValue('color', textValue(simpleLiteral('blue')));
+    const av = attributeValue('color', textValue('blue'));
     expect(av.kind).toBe('AttributeValue');
     expect(av.name).toBe('color');
     expect(isAttributeValue(av)).toBe(true);
   });
 
   it('can nest another AttributeValue without bound', () => {
-    const inner = attributeValue('depth', integerNumberValue(integerNumberLiteral('3')));
+    const inner = attributeValue('depth', integerNumberValue('3'));
     const middle = attributeValue('layer', inner);
     const outer = attributeValue('outer', middle);
     expect(outer.value.kind).toBe('AttributeValue');
@@ -236,19 +261,20 @@ describe('AttributeValue (recursive)', () => {
 
 describe('Value union recognition', () => {
   it('isValue accepts every concrete Value variant', () => {
-    expect(isValue(textValue(simpleLiteral('x')))).toBe(true);
-    expect(isValue(integerNumberValue(integerNumberLiteral('1')))).toBe(true);
-    expect(isValue(realNumberValue(realNumberLiteral('1.0', 'decimal')))).toBe(true);
+    expect(isValue(textValue('x'))).toBe(true);
+    expect(isValue(integerNumberValue('1'))).toBe(true);
+    expect(isValue(realNumberValue('1.0', 'decimal'))).toBe(true);
+    expect(isValue(booleanValue(true))).toBe(true);
     expect(isValue(yearValue('2024'))).toBe(true);
     expect(isValue(yearMonthValue('2024-06'))).toBe(true);
-    expect(isValue(fullDateValue(fullDateLiteral('2024-06-15')))).toBe(true);
-    expect(isValue(timeValue(timeLiteral('10:30:00')))).toBe(true);
-    expect(isValue(dateTimeValue(dateTimeLiteral('2024-06-15T10:30:00')))).toBe(true);
+    expect(isValue(fullDateValue('2024-06-15'))).toBe(true);
+    expect(isValue(timeValue('10:30:00'))).toBe(true);
+    expect(isValue(dateTimeValue('2024-06-15T10:30:00'))).toBe(true);
     expect(
       isValue(controlledTermValue({ term: 'http://example.org/t' })),
     ).toBe(true);
     expect(
-      isValue(literalChoiceValue(typedLiteral('1', XsdNumericDatatypeIri.integer))),
+      isValue(literalChoiceValue({ value: '1', datatype: 'http://www.w3.org/2001/XMLSchema#integer' })),
     ).toBe(true);
     expect(isValue(linkValue({ iri: 'https://example.org' }))).toBe(true);
     expect(isValue(emailValue('me@example.org'))).toBe(true);
@@ -256,7 +282,7 @@ describe('Value union recognition', () => {
       isValue(orcidValue({ iri: 'https://orcid.org/0000-0002-1825-0097' })),
     ).toBe(true);
     expect(
-      isValue(attributeValue('k', textValue(simpleLiteral('v')))),
+      isValue(attributeValue('k', textValue('v'))),
     ).toBe(true);
   });
 
@@ -269,40 +295,37 @@ describe('Value union recognition', () => {
 });
 
 describe('Value-constructor input widening', () => {
-  it('textValue accepts a plain string and wraps it as a SimpleLiteral', () => {
+  it('textValue accepts a plain string with no lang', () => {
     const v = textValue('Hello');
     expect(v.kind).toBe('TextValue');
-    expect(v.literal.kind).toBe('SimpleLiteral');
-    expect(v.literal.lexicalForm).toBe('Hello');
+    expect(v.value).toBe('Hello');
+    expect(v.lang).toBeUndefined();
   });
 
-  it('textValue still accepts a langTaggedLiteral and passes it through', () => {
-    const v = textValue(langTaggedLiteral('Bonjour', 'fr'));
-    expect(v.literal.kind).toBe('LangTaggedLiteral');
+  it('textValue with (text, lang) attaches a language tag', () => {
+    const v = textValue('Bonjour', 'fr');
+    expect(v.lang?.value).toBe('fr');
   });
 
-  it('textValue still accepts a simpleLiteral and passes it through', () => {
-    const lit = simpleLiteral('Hi');
-    const v = textValue(lit);
-    expect(v.literal).toBe(lit);
+  it('textValue is idempotent on a pre-built TextValue', () => {
+    const a = textValue('Hi');
+    expect(textValue(a)).toBe(a);
   });
 
   it('fullDateValue accepts a lexical-form string', () => {
     const v = fullDateValue('2024-06-15');
     expect(v.kind).toBe('FullDateValue');
-    expect(v.literal.kind).toBe('TypedLiteral');
-    expect(v.literal.datatype.value).toBe('http://www.w3.org/2001/XMLSchema#date');
-    expect(v.literal.lexicalForm).toBe('2024-06-15');
+    expect(v.value).toBe('2024-06-15');
   });
 
   it('timeValue accepts a lexical-form string', () => {
     const v = timeValue('10:30:00');
-    expect(v.literal.lexicalForm).toBe('10:30:00');
+    expect(v.value).toBe('10:30:00');
   });
 
   it('dateTimeValue accepts a lexical-form string', () => {
     const v = dateTimeValue('2024-06-15T10:30:00');
-    expect(v.literal.lexicalForm).toBe('2024-06-15T10:30:00');
+    expect(v.value).toBe('2024-06-15T10:30:00');
   });
 });
 
@@ -323,7 +346,7 @@ describe('dateValue smart constructor', () => {
     const v = dateValue('2024-06-15');
     expect(v.kind).toBe('FullDateValue');
     if (v.kind === 'FullDateValue') {
-      expect(v.literal.lexicalForm).toBe('2024-06-15');
+      expect(v.value).toBe('2024-06-15');
     }
   });
 
@@ -384,23 +407,5 @@ describe('External-authority value input widening', () => {
     expect(pubMedIdValue('https://pubmed.ncbi.nlm.nih.gov/12345').kind).toBe('PubMedIdValue');
     expect(rridValue('https://identifiers.org/RRID:AB_12345').kind).toBe('RridValue');
     expect(nihGrantIdValue('https://example.org/nih/grant/1').kind).toBe('NihGrantIdValue');
-  });
-});
-
-describe('literalChoiceValue input widening', () => {
-  it('accepts (text, lang) and wraps as a langTaggedLiteral', () => {
-    const v = literalChoiceValue('Professor', 'en');
-    expect(v.kind).toBe('LiteralChoiceValue');
-    expect(v.literal.kind).toBe('LangTaggedLiteral');
-    expect(v.literal.lexicalForm).toBe('Professor');
-    if (v.literal.kind === 'LangTaggedLiteral') {
-      expect(v.literal.lang.value).toBe('en');
-    }
-  });
-
-  it('still accepts a fully-built Literal', () => {
-    const lit = langTaggedLiteral('Professor', 'en');
-    const v = literalChoiceValue(lit);
-    expect(v.literal).toBe(lit);
   });
 });

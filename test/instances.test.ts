@@ -5,7 +5,6 @@ import {
   attributeValueFieldId,
   attributeValueFieldSpec,
   fieldValue,
-  fullDateLiteral,
   fullDateValue,
   isArtifact,
   isFieldValue,
@@ -13,13 +12,11 @@ import {
   isNestedTemplateInstance,
   isTemplateInstance,
   nestedTemplateInstance,
-  integerNumberLiteral,
   integerNumberValue,
   presentationComponentId,
   richTextComponent,
   schemaArtifactMetadata,
   schemaVersioning,
-  simpleLiteral,
   template,
   templateId,
   templateInstance,
@@ -45,7 +42,7 @@ const studyArmKey = 'study_arm';
 
 describe('FieldValue', () => {
   it('builds a FieldValue with a single value', () => {
-    const fv = fieldValue(titleKey, textValue(simpleLiteral('Hello')));
+    const fv = fieldValue(titleKey, textValue('Hello'));
     expect(fv.kind).toBe('FieldValue');
     expect(fv.key).toBe(titleKey);
     expect(fv.values).toHaveLength(1);
@@ -54,16 +51,16 @@ describe('FieldValue', () => {
   });
 
   it('accepts a bare string as the key', () => {
-    const fv = fieldValue('title', textValue(simpleLiteral('Hello')));
+    const fv = fieldValue('title', textValue('Hello'));
     expect(fv.key).toBe('title');
   });
 
   it('builds a FieldValue with multiple values for a multi-valued field', () => {
     const fv = fieldValue(
       'keywords',
-      textValue(simpleLiteral('alpha')),
-      textValue(simpleLiteral('beta')),
-      textValue(simpleLiteral('gamma')),
+      textValue('alpha'),
+      textValue('beta'),
+      textValue('gamma'),
     );
     expect(fv.values).toHaveLength(3);
   });
@@ -89,7 +86,7 @@ describe('NestedTemplateInstance', () => {
   });
 
   it('supports recursive nesting via InstanceValue', () => {
-    const inner = fieldValue(titleKey, textValue(simpleLiteral('Arm A')));
+    const inner = fieldValue(titleKey, textValue('Arm A'));
     const nti = nestedTemplateInstance(studyArmKey, [inner]);
     expect(nti.values).toHaveLength(1);
     expect(isFieldValue(nti.values[0])).toBe(true);
@@ -133,9 +130,9 @@ describe('TemplateInstance', () => {
     const ti = templateInstance({
       ...baseInit,
       values: [
-        fieldValue(k1, textValue(simpleLiteral('A'))),
+        fieldValue(k1, textValue('A')),
         nestedTemplateInstance(k2),
-        fieldValue(k3, textValue(simpleLiteral('C'))),
+        fieldValue(k3, textValue('C')),
       ],
     });
     expect(ti.values.map((v) => v.key)).toEqual(['a', 'b', 'c']);
@@ -146,10 +143,10 @@ describe('TemplateInstance', () => {
       ...baseInit,
       values: [
         nestedTemplateInstance(studyArmKey, [
-          fieldValue(titleKey, textValue(simpleLiteral('Arm A'))),
+          fieldValue(titleKey, textValue('Arm A')),
         ]),
         nestedTemplateInstance(studyArmKey, [
-          fieldValue(titleKey, textValue(simpleLiteral('Arm B'))),
+          fieldValue(titleKey, textValue('Arm B')),
         ]),
       ],
     });
@@ -162,8 +159,8 @@ describe('TemplateInstance', () => {
       templateInstance({
         ...baseInit,
         values: [
-          fieldValue(titleKey, textValue(simpleLiteral('A'))),
-          fieldValue(titleKey, textValue(simpleLiteral('B'))),
+          fieldValue(titleKey, textValue('A')),
+          fieldValue(titleKey, textValue('B')),
         ],
       }),
     ).toThrow(/Duplicate FieldValue key/);
@@ -174,7 +171,7 @@ describe('TemplateInstance', () => {
       templateInstance({
         ...baseInit,
         values: [
-          fieldValue(titleKey, textValue(simpleLiteral('A'))),
+          fieldValue(titleKey, textValue('A')),
           nestedTemplateInstance(titleKey),
         ],
       }),
@@ -185,7 +182,7 @@ describe('TemplateInstance', () => {
         ...baseInit,
         values: [
           nestedTemplateInstance(titleKey),
-          fieldValue(titleKey, textValue(simpleLiteral('A'))),
+          fieldValue(titleKey, textValue('A')),
         ],
       }),
     ).toThrow(/both a FieldValue and a NestedTemplateInstance/);
@@ -195,8 +192,8 @@ describe('TemplateInstance', () => {
     const ti: TemplateInstance = templateInstance({
       ...baseInit,
       values: [
-        fieldValue('count', integerNumberValue(integerNumberLiteral('1'))),
-        fieldValue('born', fullDateValue(fullDateLiteral('1990-01-01'))),
+        fieldValue('count', integerNumberValue('1')),
+        fieldValue('born', fullDateValue('1990-01-01')),
       ],
     });
     const all: InstanceValue[] = [...ti.values];

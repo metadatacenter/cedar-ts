@@ -29,7 +29,6 @@ import { CedarConstructionError } from '../leaves/index.js';
 export * from './parse-utils.js';
 export * from './collapsed-wrappers.js';
 export * from './multilingual.js';
-export * from './literals.js';
 export * from './metadata.js';
 export * from './embedded-config.js';
 export * from './values.js';

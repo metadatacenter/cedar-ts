@@ -32,8 +32,8 @@ import {
   attributeValueFieldId,
   templateId,
   presentationComponentId,
-  simpleLiteral,
-  integerNumberLiteral,
+  textValue,
+  integerNumberValue,
   textField,
   textFieldSpec,
   template,
@@ -275,11 +275,11 @@ describe('EmbeddedField constructors', () => {
   });
 
   it('rejects a misaligned default value at the type level', () => {
-    // @ts-expect-error IntegerNumberLiteral cannot satisfy a TextField defaultValue (TextLiteral)
+    // @ts-expect-error IntegerNumberValue cannot satisfy a TextField defaultValue (TextValue)
     embeddedTextField({
       key: 'title',
       artifactRef: txtRef,
-      defaultValue: integerNumberLiteral('1'),
+      defaultValue: integerNumberValue('1'),
     });
   });
 
@@ -295,7 +295,7 @@ describe('EmbeddedField constructors', () => {
     embeddedAttributeValueField({
       key: 'attr',
       artifactRef: attrRef,
-      defaultValue: simpleLiteral('x'),
+      defaultValue: textValue('x'),
     });
   });
 
@@ -306,15 +306,15 @@ describe('EmbeddedField constructors', () => {
       valueRequirement: 'required',
       cardinality: cardinality({ min: 1 }),
       visibility: 'visible',
-      defaultValue: simpleLiteral('Untitled'),
+      defaultValue: textValue('Untitled'),
       labelOverride: labelOverride({ label: 'Document Title' }),
       property: property({ iri: 'https://schema.org/name' }),
     });
     expect(ef.valueRequirement).toBe('required');
     expect(ef.cardinality?.min).toBe(1);
     expect(ef.visibility).toBe('visible');
-    expect(ef.defaultValue?.kind).toBe('SimpleLiteral');
-    expect(ef.defaultValue?.lexicalForm).toBe('Untitled');
+    expect(ef.defaultValue?.kind).toBe('TextValue');
+    expect(ef.defaultValue?.value).toBe('Untitled');
     expect(ef.labelOverride?.label).toEqual([{ value: 'Document Title', lang: 'und' }]);
     expect(ef.property?.iri.value).toBe('https://schema.org/name');
   });
@@ -341,8 +341,8 @@ describe('EmbeddedField constructors', () => {
       artifactRef: txtRef,
       defaultValue: 'Untitled',
     });
-    expect(ef.defaultValue?.kind).toBe('SimpleLiteral');
-    expect(ef.defaultValue?.lexicalForm).toBe('Untitled');
+    expect(ef.defaultValue?.kind).toBe('TextValue');
+    expect(ef.defaultValue?.value).toBe('Untitled');
 
     const ef2 = embeddedAttributeValueField({
       key: 'attr',
@@ -351,13 +351,14 @@ describe('EmbeddedField constructors', () => {
     expect(ef2.defaultValue).toBeUndefined();
   });
 
-  it('embeddedIntegerNumberField rejects a string defaultValue', () => {
-    embeddedIntegerNumberField({
+  it('embeddedIntegerNumberField accepts a bare string defaultValue (the lexical form)', () => {
+    const ef = embeddedIntegerNumberField({
       key: 'count',
       artifactRef: numRef,
-      // @ts-expect-error EmbeddedIntegerNumberFieldInit's defaultValue is IntegerNumberLiteral only
-      defaultValue: 'oops',
+      defaultValue: '42',
     });
+    expect(ef.defaultValue?.kind).toBe('IntegerNumberValue');
+    expect(ef.defaultValue?.value).toBe('42');
   });
 
   it('builds a numeric, date, and single-choice embedding without errors', () => {

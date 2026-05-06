@@ -5,17 +5,16 @@
 //
 // All Value variants are tagged on the wire (per the polymorphic-only
 // kind rule); each carries a `kind` property whose value matches the
-// in-memory discriminant. Internal singleton-position productions
-// (literals, ControlledTermValue inside ControlledTermChoiceValue) are
-// untagged on the wire.
+// in-memory discriminant. Internal singleton-position productions (e.g.
+// ControlledTermValue inside ControlledTermChoiceValue) are encoded
+// untagged.
 
-import { CedarConstructionError, iri } from '../leaves/index.js';
+import { CedarConstructionError, REAL_NUMBER_DATATYPE_KINDS, type RealNumberDatatypeKind } from '../leaves/index.js';
 import {
   type TextValue,
   type IntegerNumberValue,
   type RealNumberValue,
   type BooleanValue,
-  type BooleanLiteral,
   type DateValue,
   type YearValue,
   type YearMonthValue,
@@ -41,7 +40,6 @@ import {
   integerNumberValue,
   realNumberValue,
   booleanValue,
-  booleanLiteral,
   yearValue,
   yearMonthValue,
   fullDateValue,
@@ -62,22 +60,13 @@ import {
   controlledTermChoiceValue,
 } from '../field-families/index.js';
 import {
-  serializeLiteral,
-  serializeTextLiteral,
-  serializeTypedLiteralAtPosition,
-  parseTextLiteral,
-  parseFullDateLiteral,
-  parseTimeLiteral,
-  parseDateTimeLiteral,
-  parseLiteral,
-} from './literals.js';
-import {
   serializeMultilingualString,
   parseMultilingualString,
 } from './multilingual.js';
 import {
   expectObject,
   expectString,
+  expectBoolean,
   expectKnownProperties,
   expectKindOneOf,
   rejectNullProperty,
@@ -86,29 +75,58 @@ import {
 // ---- TextValue -------------------------------------------------------
 
 export function serializeTextValue(x: TextValue): unknown {
-  return { kind: 'TextValue', literal: serializeTextLiteral(x.literal) };
+  const out: Record<string, unknown> = { kind: 'TextValue', value: x.value };
+  if (x.lang !== undefined) out['lang'] = x.lang.value;
+  return out;
+}
+
+// Serializes the body of a TextValue at a singleton position (no
+// `kind`). Used for `EmbeddedTextField.defaultValue` and
+// `TextFieldSpec.defaultValue`.
+export function serializeTextValueUntagged(x: TextValue): unknown {
+  const out: Record<string, unknown> = { value: x.value };
+  if (x.lang !== undefined) out['lang'] = x.lang.value;
+  return out;
+}
+
+function readTextValueBody(
+  o: { readonly [k: string]: unknown },
+  where: string,
+): TextValue {
+  rejectNullProperty(o, 'lang');
+  if (!('value' in o)) {
+    throw new CedarConstructionError(`${where}: missing required "value"`);
+  }
+  const value = expectString(o['value'], `${where}.value`);
+  if ('lang' in o) {
+    return textValue(value, expectString(o['lang'], `${where}.lang`));
+  }
+  return textValue(value);
 }
 
 export function parseTextValue(x: unknown, where = 'TextValue'): TextValue {
   const o = expectObject(x, where);
-  expectKnownProperties(o, ['kind', 'literal']);
+  expectKnownProperties(o, ['kind', 'value', 'lang']);
   if (o['kind'] !== 'TextValue') {
     throw new CedarConstructionError(`${where}: expected kind "TextValue"`);
   }
-  if (!('literal' in o)) {
-    throw new CedarConstructionError(`${where}: missing required "literal"`);
-  }
-  return textValue(parseTextLiteral(o['literal'], `${where}.literal`));
+  return readTextValueBody(o, where);
+}
+
+export function parseTextValueUntagged(x: unknown, where = 'TextValue'): TextValue {
+  const o = expectObject(x, where);
+  expectKnownProperties(o, ['value', 'lang']);
+  return readTextValueBody(o, where);
 }
 
 // ---- IntegerNumberValue ----------------------------------------------
-//
-// On the wire IntegerNumberValue.literal is a TypedLiteral whose datatype
-// is xsd:integer. The datatype is always emitted on serialize; on parse
-// we require it.
 
 export function serializeIntegerNumberValue(x: IntegerNumberValue): unknown {
-  return { kind: 'IntegerNumberValue', literal: serializeLiteral(x.literal) };
+  return { kind: 'IntegerNumberValue', value: x.value };
+}
+
+export function serializeIntegerNumberValueUntagged(x: IntegerNumberValue): unknown {
+  return { value: x.value };
 }
 
 export function parseIntegerNumberValue(
@@ -116,29 +134,55 @@ export function parseIntegerNumberValue(
   where = 'IntegerNumberValue',
 ): IntegerNumberValue {
   const o = expectObject(x, where);
-  expectKnownProperties(o, ['kind', 'literal']);
+  expectKnownProperties(o, ['kind', 'value']);
   if (o['kind'] !== 'IntegerNumberValue') {
-    throw new CedarConstructionError(`${where}: expected kind "IntegerNumberValue"`);
-  }
-  if (!('literal' in o)) {
-    throw new CedarConstructionError(`${where}: missing required "literal"`);
-  }
-  const lit = parseLiteral(o['literal'], `${where}.literal`);
-  if (lit.kind !== 'TypedLiteral') {
     throw new CedarConstructionError(
-      `${where}.literal must be a typed literal carrying xsd:integer`,
+      `${where}: expected kind "IntegerNumberValue"`,
     );
   }
-  return integerNumberValue(lit);
+  if (!('value' in o)) {
+    throw new CedarConstructionError(`${where}: missing required "value"`);
+  }
+  return integerNumberValue(expectString(o['value'], `${where}.value`));
+}
+
+export function parseIntegerNumberValueUntagged(
+  x: unknown,
+  where = 'IntegerNumberValue',
+): IntegerNumberValue {
+  const o = expectObject(x, where);
+  expectKnownProperties(o, ['value']);
+  if (!('value' in o)) {
+    throw new CedarConstructionError(`${where}: missing required "value"`);
+  }
+  return integerNumberValue(expectString(o['value'], `${where}.value`));
 }
 
 // ---- RealNumberValue -------------------------------------------------
-//
-// On the wire RealNumberValue.literal is a TypedLiteral whose datatype is
-// one of xsd:decimal | xsd:float | xsd:double.
+
+function parseRealNumberDatatypeAtPos(
+  raw: unknown,
+  where: string,
+): RealNumberDatatypeKind {
+  const s = expectString(raw, where);
+  if (!(REAL_NUMBER_DATATYPE_KINDS as readonly string[]).includes(s)) {
+    throw new CedarConstructionError(
+      `${where}: unknown real-number datatype ${JSON.stringify(s)}; expected one of {${REAL_NUMBER_DATATYPE_KINDS.map((k) => JSON.stringify(k)).join(', ')}}`,
+    );
+  }
+  return s as RealNumberDatatypeKind;
+}
 
 export function serializeRealNumberValue(x: RealNumberValue): unknown {
-  return { kind: 'RealNumberValue', literal: serializeLiteral(x.literal) };
+  return {
+    kind: 'RealNumberValue',
+    value: x.value,
+    datatype: x.datatype,
+  };
+}
+
+export function serializeRealNumberValueUntagged(x: RealNumberValue): unknown {
+  return { value: x.value, datatype: x.datatype };
 }
 
 export function parseRealNumberValue(
@@ -146,77 +190,73 @@ export function parseRealNumberValue(
   where = 'RealNumberValue',
 ): RealNumberValue {
   const o = expectObject(x, where);
-  expectKnownProperties(o, ['kind', 'literal']);
+  expectKnownProperties(o, ['kind', 'value', 'datatype']);
   if (o['kind'] !== 'RealNumberValue') {
     throw new CedarConstructionError(`${where}: expected kind "RealNumberValue"`);
   }
-  if (!('literal' in o)) {
-    throw new CedarConstructionError(`${where}: missing required "literal"`);
+  if (!('value' in o)) {
+    throw new CedarConstructionError(`${where}: missing required "value"`);
   }
-  const lit = parseLiteral(o['literal'], `${where}.literal`);
-  if (lit.kind !== 'TypedLiteral') {
-    throw new CedarConstructionError(
-      `${where}.literal must be a typed literal carrying a real-number datatype`,
-    );
+  if (!('datatype' in o)) {
+    throw new CedarConstructionError(`${where}: missing required "datatype"`);
   }
-  return realNumberValue(lit);
+  return realNumberValue(
+    expectString(o['value'], `${where}.value`),
+    parseRealNumberDatatypeAtPos(o['datatype'], `${where}.datatype`),
+  );
+}
+
+export function parseRealNumberValueUntagged(
+  x: unknown,
+  where = 'RealNumberValue',
+): RealNumberValue {
+  const o = expectObject(x, where);
+  expectKnownProperties(o, ['value', 'datatype']);
+  if (!('value' in o)) {
+    throw new CedarConstructionError(`${where}: missing required "value"`);
+  }
+  if (!('datatype' in o)) {
+    throw new CedarConstructionError(`${where}: missing required "datatype"`);
+  }
+  return realNumberValue(
+    expectString(o['value'], `${where}.value`),
+    parseRealNumberDatatypeAtPos(o['datatype'], `${where}.datatype`),
+  );
 }
 
 // ---- BooleanValue ----------------------------------------------------
-//
-// BooleanValue.literal is a BooleanLiteral whose payload is a JSON
-// boolean (not a string lexical form). The wire shape of BooleanLiteral
-// is `{ value: boolean }` with no datatype; the datatype is implicit
-// xsd:boolean.
 
-function serializeBooleanLiteralAtPosition(x: BooleanLiteral): unknown {
+export function serializeBooleanValue(x: BooleanValue): unknown {
+  return { kind: 'BooleanValue', value: x.value };
+}
+
+export function serializeBooleanValueUntagged(x: BooleanValue): unknown {
   return { value: x.value };
 }
 
-function parseBooleanLiteralAtPosition(
+export function parseBooleanValue(x: unknown, where = 'BooleanValue'): BooleanValue {
+  const o = expectObject(x, where);
+  expectKnownProperties(o, ['kind', 'value']);
+  if (o['kind'] !== 'BooleanValue') {
+    throw new CedarConstructionError(`${where}: expected kind "BooleanValue"`);
+  }
+  if (!('value' in o)) {
+    throw new CedarConstructionError(`${where}: missing required "value"`);
+  }
+  return booleanValue(expectBoolean(o['value'], `${where}.value`));
+}
+
+export function parseBooleanValueUntagged(
   x: unknown,
-  where: string,
-): BooleanLiteral {
+  where = 'BooleanValue',
+): BooleanValue {
   const o = expectObject(x, where);
   expectKnownProperties(o, ['value']);
   if (!('value' in o)) {
     throw new CedarConstructionError(`${where}: missing required "value"`);
   }
-  if (typeof o['value'] !== 'boolean') {
-    throw new CedarConstructionError(
-      `${where}.value must be a JSON boolean`,
-    );
-  }
-  return booleanLiteral(o['value']);
+  return booleanValue(expectBoolean(o['value'], `${where}.value`));
 }
-
-export function serializeBooleanValue(x: BooleanValue): unknown {
-  return {
-    kind: 'BooleanValue',
-    literal: serializeBooleanLiteralAtPosition(x.literal),
-  };
-}
-
-export function parseBooleanValue(x: unknown, where = 'BooleanValue'): BooleanValue {
-  const o = expectObject(x, where);
-  expectKnownProperties(o, ['kind', 'literal']);
-  if (o['kind'] !== 'BooleanValue') {
-    throw new CedarConstructionError(`${where}: expected kind "BooleanValue"`);
-  }
-  if (!('literal' in o)) {
-    throw new CedarConstructionError(`${where}: missing required "literal"`);
-  }
-  return booleanValue(
-    parseBooleanLiteralAtPosition(o['literal'], `${where}.literal`),
-  );
-}
-
-// Exported for the embedded-fields layer (EmbeddedBooleanField default
-// value) to reuse the same shape.
-export {
-  serializeBooleanLiteralAtPosition,
-  parseBooleanLiteralAtPosition,
-};
 
 // ---- DateValue (Year / YearMonth / FullDate) -------------------------
 
@@ -229,10 +269,7 @@ export function serializeYearMonthValue(x: YearMonthValue): unknown {
 }
 
 export function serializeFullDateValue(x: FullDateValue): unknown {
-  return {
-    kind: 'FullDateValue',
-    literal: serializeTypedLiteralAtPosition(x.literal),
-  };
+  return { kind: 'FullDateValue', value: x.value };
 }
 
 export function serializeDateValue(x: DateValue): unknown {
@@ -272,14 +309,11 @@ export function parseFullDateValue(
   where = 'FullDateValue',
 ): FullDateValue {
   const o = expectObject(x, where);
-  expectKnownProperties(o, ['kind', 'literal']);
+  expectKnownProperties(o, ['kind', 'value']);
   if (o['kind'] !== 'FullDateValue') {
     throw new CedarConstructionError(`${where}: expected kind "FullDateValue"`);
   }
-  if (!('literal' in o)) {
-    throw new CedarConstructionError(`${where}: missing required "literal"`);
-  }
-  return fullDateValue(parseFullDateLiteral(o['literal'], `${where}.literal`));
+  return fullDateValue(expectString(o['value'], `${where}.value`));
 }
 
 export function parseDateValue(x: unknown, where = 'DateValue'): DateValue {
@@ -302,29 +336,40 @@ export function parseDateValue(x: unknown, where = 'DateValue'): DateValue {
 // ---- TimeValue / DateTimeValue ---------------------------------------
 
 export function serializeTimeValue(x: TimeValue): unknown {
-  return {
-    kind: 'TimeValue',
-    literal: serializeTypedLiteralAtPosition(x.literal),
-  };
+  return { kind: 'TimeValue', value: x.value };
+}
+
+export function serializeTimeValueUntagged(x: TimeValue): unknown {
+  return { value: x.value };
 }
 
 export function parseTimeValue(x: unknown, where = 'TimeValue'): TimeValue {
   const o = expectObject(x, where);
-  expectKnownProperties(o, ['kind', 'literal']);
+  expectKnownProperties(o, ['kind', 'value']);
   if (o['kind'] !== 'TimeValue') {
     throw new CedarConstructionError(`${where}: expected kind "TimeValue"`);
   }
-  if (!('literal' in o)) {
-    throw new CedarConstructionError(`${where}: missing required "literal"`);
+  return timeValue(expectString(o['value'], `${where}.value`));
+}
+
+export function parseTimeValueUntagged(
+  x: unknown,
+  where = 'TimeValue',
+): TimeValue {
+  const o = expectObject(x, where);
+  expectKnownProperties(o, ['value']);
+  if (!('value' in o)) {
+    throw new CedarConstructionError(`${where}: missing required "value"`);
   }
-  return timeValue(parseTimeLiteral(o['literal'], `${where}.literal`));
+  return timeValue(expectString(o['value'], `${where}.value`));
 }
 
 export function serializeDateTimeValue(x: DateTimeValue): unknown {
-  return {
-    kind: 'DateTimeValue',
-    literal: serializeTypedLiteralAtPosition(x.literal),
-  };
+  return { kind: 'DateTimeValue', value: x.value };
+}
+
+export function serializeDateTimeValueUntagged(x: DateTimeValue): unknown {
+  return { value: x.value };
 }
 
 export function parseDateTimeValue(
@@ -332,14 +377,23 @@ export function parseDateTimeValue(
   where = 'DateTimeValue',
 ): DateTimeValue {
   const o = expectObject(x, where);
-  expectKnownProperties(o, ['kind', 'literal']);
+  expectKnownProperties(o, ['kind', 'value']);
   if (o['kind'] !== 'DateTimeValue') {
     throw new CedarConstructionError(`${where}: expected kind "DateTimeValue"`);
   }
-  if (!('literal' in o)) {
-    throw new CedarConstructionError(`${where}: missing required "literal"`);
+  return dateTimeValue(expectString(o['value'], `${where}.value`));
+}
+
+export function parseDateTimeValueUntagged(
+  x: unknown,
+  where = 'DateTimeValue',
+): DateTimeValue {
+  const o = expectObject(x, where);
+  expectKnownProperties(o, ['value']);
+  if (!('value' in o)) {
+    throw new CedarConstructionError(`${where}: missing required "value"`);
   }
-  return dateTimeValue(parseDateTimeLiteral(o['literal'], `${where}.literal`));
+  return dateTimeValue(expectString(o['value'], `${where}.value`));
 }
 
 // ---- ControlledTermValue ---------------------------------------------
@@ -356,10 +410,6 @@ export function serializeControlledTermValue(x: ControlledTermValue): unknown {
   return out;
 }
 
-// Untagged variant — used at the singleton position inside
-// ControlledTermChoiceValue / ControlledTermChoiceOption (the wire form
-// elides the kind property at those positions per the polymorphic-only
-// rule).
 export function serializeControlledTermValueUntagged(x: ControlledTermValue): unknown {
   const out: Record<string, unknown> = { term: x.term.value };
   if (x.label !== undefined) out['label'] = serializeMultilingualString(x.label);
@@ -424,7 +474,13 @@ export function parseControlledTermValueUntagged(
 // ---- LiteralChoiceValue / ControlledTermChoiceValue / ChoiceValue ----
 
 export function serializeLiteralChoiceValue(x: LiteralChoiceValue): unknown {
-  return { kind: 'LiteralChoiceValue', literal: serializeLiteral(x.literal) };
+  const out: Record<string, unknown> = {
+    kind: 'LiteralChoiceValue',
+    value: x.value,
+  };
+  if (x.lang !== undefined) out['lang'] = x.lang.value;
+  if (x.datatype !== undefined) out['datatype'] = x.datatype.value;
+  return out;
 }
 
 export function parseLiteralChoiceValue(
@@ -432,14 +488,24 @@ export function parseLiteralChoiceValue(
   where = 'LiteralChoiceValue',
 ): LiteralChoiceValue {
   const o = expectObject(x, where);
-  expectKnownProperties(o, ['kind', 'literal']);
+  expectKnownProperties(o, ['kind', 'value', 'lang', 'datatype']);
   if (o['kind'] !== 'LiteralChoiceValue') {
     throw new CedarConstructionError(`${where}: expected kind "LiteralChoiceValue"`);
   }
-  if (!('literal' in o)) {
-    throw new CedarConstructionError(`${where}: missing required "literal"`);
+  rejectNullProperty(o, 'lang');
+  rejectNullProperty(o, 'datatype');
+  if (!('value' in o)) {
+    throw new CedarConstructionError(`${where}: missing required "value"`);
   }
-  return literalChoiceValue(parseLiteral(o['literal'], `${where}.literal`));
+  const init: {
+    value: string;
+    lang?: string;
+    datatype?: string;
+  } = { value: expectString(o['value'], `${where}.value`) };
+  if ('lang' in o) init.lang = expectString(o['lang'], `${where}.lang`);
+  if ('datatype' in o)
+    init.datatype = expectString(o['datatype'], `${where}.datatype`);
+  return literalChoiceValue(init);
 }
 
 export function serializeControlledTermChoiceValue(
@@ -495,8 +561,6 @@ export function serializeLinkValue(x: LinkValue): unknown {
   return out;
 }
 
-// Untagged variant — used at singleton positions where the enclosing
-// production fixes the kind (e.g. EmbeddedLinkField.defaultValue).
 export function serializeLinkValueUntagged(x: LinkValue): unknown {
   const out: Record<string, unknown> = { iri: x.iri.value };
   if (x.label !== undefined) out['label'] = x.label;
@@ -540,30 +604,43 @@ export function parseLinkValueUntagged(
 // ---- EmailValue / PhoneNumberValue ----------------------------------
 
 export function serializeEmailValue(x: EmailValue): unknown {
-  return { kind: 'EmailValue', literal: { value: x.literal.lexicalForm } };
+  return { kind: 'EmailValue', value: x.value };
+}
+
+export function serializeEmailValueUntagged(x: EmailValue): unknown {
+  return { value: x.value };
 }
 
 export function parseEmailValue(x: unknown, where = 'EmailValue'): EmailValue {
   const o = expectObject(x, where);
-  expectKnownProperties(o, ['kind', 'literal']);
+  expectKnownProperties(o, ['kind', 'value']);
   if (o['kind'] !== 'EmailValue') {
     throw new CedarConstructionError(`${where}: expected kind "EmailValue"`);
   }
-  if (!('literal' in o)) {
-    throw new CedarConstructionError(`${where}: missing required "literal"`);
+  if (!('value' in o)) {
+    throw new CedarConstructionError(`${where}: missing required "value"`);
   }
-  // EmailValue.literal is always a SimpleLiteral.
-  const lit = parseTextLiteral(o['literal'], `${where}.literal`);
-  if (lit.kind !== 'SimpleLiteral') {
-    throw new CedarConstructionError(
-      `${where}.literal must be a SimpleLiteral (no lang)`,
-    );
+  return emailValue(expectString(o['value'], `${where}.value`));
+}
+
+export function parseEmailValueUntagged(
+  x: unknown,
+  where = 'EmailValue',
+): EmailValue {
+  const o = expectObject(x, where);
+  expectKnownProperties(o, ['value']);
+  if (!('value' in o)) {
+    throw new CedarConstructionError(`${where}: missing required "value"`);
   }
-  return emailValue(lit);
+  return emailValue(expectString(o['value'], `${where}.value`));
 }
 
 export function serializePhoneNumberValue(x: PhoneNumberValue): unknown {
-  return { kind: 'PhoneNumberValue', literal: { value: x.literal.lexicalForm } };
+  return { kind: 'PhoneNumberValue', value: x.value };
+}
+
+export function serializePhoneNumberValueUntagged(x: PhoneNumberValue): unknown {
+  return { value: x.value };
 }
 
 export function parsePhoneNumberValue(
@@ -571,29 +648,35 @@ export function parsePhoneNumberValue(
   where = 'PhoneNumberValue',
 ): PhoneNumberValue {
   const o = expectObject(x, where);
-  expectKnownProperties(o, ['kind', 'literal']);
+  expectKnownProperties(o, ['kind', 'value']);
   if (o['kind'] !== 'PhoneNumberValue') {
     throw new CedarConstructionError(`${where}: expected kind "PhoneNumberValue"`);
   }
-  if (!('literal' in o)) {
-    throw new CedarConstructionError(`${where}: missing required "literal"`);
+  if (!('value' in o)) {
+    throw new CedarConstructionError(`${where}: missing required "value"`);
   }
-  const lit = parseTextLiteral(o['literal'], `${where}.literal`);
-  if (lit.kind !== 'SimpleLiteral') {
-    throw new CedarConstructionError(
-      `${where}.literal must be a SimpleLiteral (no lang)`,
-    );
+  return phoneNumberValue(expectString(o['value'], `${where}.value`));
+}
+
+export function parsePhoneNumberValueUntagged(
+  x: unknown,
+  where = 'PhoneNumberValue',
+): PhoneNumberValue {
+  const o = expectObject(x, where);
+  expectKnownProperties(o, ['value']);
+  if (!('value' in o)) {
+    throw new CedarConstructionError(`${where}: missing required "value"`);
   }
-  return phoneNumberValue(lit);
+  return phoneNumberValue(expectString(o['value'], `${where}.value`));
 }
 
 // ---- External-authority values ---------------------------------------
 //
-// The in-memory shape uses a typed-IRI wrapper (e.g. OrcidIri) and a plain
-// string `label`. The wire shape is `{ kind, iri: string, label?:
-// MultilingualString }` per wire-grammar.md §4.7. To round-trip a plain
-// string through MultilingualString we encode it as a single-entry array
-// with lang `'und'` and decode by reading the first entry's value.
+// In-memory shape: typed-IRI wrapper (e.g. OrcidIri) and plain string
+// `label`. Wire shape: `{ kind, iri: string, label?: MultilingualString }`
+// per wire-grammar.md §3.7. To round-trip a plain string through
+// MultilingualString we encode it as a single-entry array with lang
+// 'und' and decode by reading the first entry's value.
 
 import { UNDETERMINED_LANG } from '../multilingual.js';
 
@@ -602,7 +685,6 @@ function authorityLabelToWire(label: string): unknown {
 }
 
 function wireLabelToString(x: unknown, where: string): string {
-  // Validate the structure even though we project to a single string.
   const ms = parseMultilingualString(x, where);
   return ms[0]!.value;
 }
@@ -611,25 +693,18 @@ function serializeAuthorityValue(
   kind: string,
   v: { readonly iri: { readonly value: { value: string } | string }; readonly label?: string },
 ): unknown {
-  // The in-memory `iri` is a typed-IRI wrapper carrying { kind, value: Iri };
-  // grab the inner Iri's string value.
   const inner = (v.iri as unknown as { value: { value: string } }).value;
-  const iriString =
-    typeof inner === 'string' ? inner : inner.value;
+  const iriString = typeof inner === 'string' ? inner : inner.value;
   const out: Record<string, unknown> = { kind, iri: iriString };
   if (v.label !== undefined) out['label'] = authorityLabelToWire(v.label);
   return out;
 }
 
-// Untagged authority-value serializer — used at singleton positions
-// (EmbeddedXxxField.defaultValue) where the kind discriminator drops on
-// the wire per the polymorphic-only-kind rule.
 function serializeAuthorityValueUntagged(
   v: { readonly iri: { readonly value: { value: string } | string }; readonly label?: string },
 ): unknown {
   const inner = (v.iri as unknown as { value: { value: string } }).value;
-  const iriString =
-    typeof inner === 'string' ? inner : inner.value;
+  const iriString = typeof inner === 'string' ? inner : inner.value;
   const out: Record<string, unknown> = { iri: iriString };
   if (v.label !== undefined) out['label'] = authorityLabelToWire(v.label);
   return out;
@@ -665,8 +740,6 @@ export const serializeRridValue = (x: RridValue): unknown =>
 export const serializeNihGrantIdValue = (x: NihGrantIdValue): unknown =>
   serializeAuthorityValue('NihGrantIdValue', x);
 
-// Untagged variants — used at singleton positions where the kind drops
-// on the wire (EmbeddedXxxField.defaultValue).
 export const serializeOrcidValueUntagged = (x: OrcidValue): unknown =>
   serializeAuthorityValueUntagged(x);
 export const serializeRorValueUntagged = (x: RorValue): unknown =>
@@ -894,10 +967,4 @@ export function parseValue(x: unknown, where = 'Value'): Value {
   }
 }
 
-// Used as a stable reference in CedarConstructionError messages without
-// importing the whole list at call sites.
 export { VALUE_KINDS };
-
-// Suppress unused-import warning — `iri` is exposed for consistency with
-// other wrapper-importing modules but is not directly used here.
-void iri;

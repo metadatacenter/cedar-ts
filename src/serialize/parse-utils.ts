@@ -100,6 +100,16 @@ export function expectString(x: unknown, where: string): string {
   return x;
 }
 
+// Asserts `x` is a JSON boolean, returning it.
+export function expectBoolean(x: unknown, where: string): boolean {
+  if (typeof x !== 'boolean') {
+    throw new CedarConstructionError(
+      `Expected ${where} to be a boolean; got ${describe(x)}`,
+    );
+  }
+  return x;
+}
+
 // Asserts `x` is a finite JSON number, returning it.
 export function expectNumber(x: unknown, where: string): number {
   if (typeof x !== 'number' || !Number.isFinite(x)) {

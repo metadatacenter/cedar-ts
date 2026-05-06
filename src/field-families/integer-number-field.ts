@@ -11,20 +11,14 @@
 //   - reusable Field artifact    : IntegerNumberField
 //   - Template-embedding wrapper : EmbeddedIntegerNumberField
 //
-// Wire `kind` values: "IntegerNumberField" (artifact),
-// "EmbeddedIntegerNumberField" (embedding), "IntegerNumberValue" (value),
-// "IntegerNumberFieldSpec" (spec).
-//
-// IntegerNumberFieldSpec carries no `datatype` slot — its datatype is
-// fixed at xsd:integer. This contrasts with RealNumberFieldSpec, which
-// carries a datatype enum (decimal | float | double).
+// IntegerNumberValue carries `value: string` (a base-10 integer lexical
+// form). The datatype is fixed at xsd:integer and is not carried.
 
 import {
   type Iri,
   iri,
   parseSemanticVersion,
 } from '../leaves/index.js';
-import type { IntegerNumberLiteral } from '../literals/index.js';
 import type { SchemaArtifactMetadata } from '../metadata/index.js';
 import type { ValueRequirement } from '../embedded/requirement.js';
 import type { Cardinality } from '../embedded/cardinality.js';
@@ -71,13 +65,18 @@ export const integerNumberFieldId = (
 
 export interface IntegerNumberValue {
   readonly kind: 'IntegerNumberValue';
-  readonly literal: IntegerNumberLiteral;
+  readonly value: string;
 }
 
+export type IntegerNumberValueInput = IntegerNumberValue | string;
+
+export function integerNumberValue(value: string): IntegerNumberValue;
+export function integerNumberValue(value: IntegerNumberValue): IntegerNumberValue;
 export function integerNumberValue(
-  literal: IntegerNumberLiteral,
+  value: IntegerNumberValue | string,
 ): IntegerNumberValue {
-  return { kind: 'IntegerNumberValue', literal };
+  if (typeof value !== 'string') return value;
+  return { kind: 'IntegerNumberValue', value };
 }
 
 export function isIntegerNumberValue(x: unknown): x is IntegerNumberValue {
@@ -85,6 +84,12 @@ export function isIntegerNumberValue(x: unknown): x is IntegerNumberValue {
     typeof x === 'object' && x !== null &&
     (x as { kind?: unknown }).kind === 'IntegerNumberValue'
   );
+}
+
+// Best-effort numeric coercion. Returns `NaN` for ill-typed lexical
+// forms; use validation helpers for normative checks.
+export function integerNumberValueToNumber(v: IntegerNumberValue): number {
+  return Number(v.value);
 }
 
 // =====================================================================
@@ -171,13 +176,13 @@ export interface EmbeddedIntegerNumberField {
   readonly visibility?: Visibility;
   readonly labelOverride?: LabelOverride;
   readonly property?: Property;
-  readonly defaultValue?: IntegerNumberLiteral;
+  readonly defaultValue?: IntegerNumberValue;
 }
 
 export interface EmbeddedIntegerNumberFieldInit
   extends EmbeddedFieldInitCommon {
   readonly artifactRef: IntegerNumberFieldReference | IntegerNumberField;
-  readonly defaultValue?: IntegerNumberLiteral;
+  readonly defaultValue?: IntegerNumberValueInput;
 }
 
 export function embeddedIntegerNumberField(
@@ -187,7 +192,12 @@ export function embeddedIntegerNumberField(
     ...assembleCommon(init),
     kind: 'EmbeddedIntegerNumberField',
     artifactRef: fieldRef(init.artifactRef),
-    ...(init.defaultValue !== undefined && { defaultValue: init.defaultValue }),
+    ...(init.defaultValue !== undefined && {
+      defaultValue:
+        typeof init.defaultValue === 'string'
+          ? integerNumberValue(init.defaultValue)
+          : init.defaultValue,
+    }),
   };
   return out;
 }

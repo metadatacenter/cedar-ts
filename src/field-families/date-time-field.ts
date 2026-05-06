@@ -3,27 +3,10 @@
 // / fractional-second precision
 // =====================================================================
 //
-// This file is the complete vertical slice for the date-time field
-// family. Per the cedar-ts convention each family file holds:
-//
-//   - identifier type            : DateTimeFieldId
-//   - instance value             : DateTimeValue
-//   - schema constraints         : DateTimeFieldSpec
-//   - reusable Field artifact    : DateTimeField
-//   - Template-embedding wrapper : EmbeddedDateTimeField
-//
-// Wire `kind` values: "DateTimeField" (artifact), "EmbeddedDateTimeField"
-// (embedding).
-//
-// Owns the `DateTimeValueType` enum. References `DateTimeLiteral` from
-// `src/literals/temporal-literals.ts`. The `defaultValue` slot on
-// `EmbeddedDateTimeField` is a `DateTimeLiteral` directly (no wrapper).
+// DateTimeValue carries `value: string` (an xsd:dateTime lexical
+// form). The datatype is fixed at xsd:dateTime and is not carried.
 
 import { type Iri, iri, parseSemanticVersion } from '../leaves/index.js';
-import {
-  type DateTimeLiteral,
-  dateTimeLiteral,
-} from '../literals/index.js';
 import type { SchemaArtifactMetadata } from '../metadata/index.js';
 import type { ValueRequirement } from '../embedded/requirement.js';
 import type { Cardinality } from '../embedded/cardinality.js';
@@ -44,14 +27,6 @@ import {
 // 1. Identifier
 // =====================================================================
 
-// Identifier for a `DateTimeField` reusable schema artifact: a typed wrapper
-// around the field's IRI. Distinguished at compile time and runtime from
-// sibling field-id types (e.g. `IntegerNumberFieldId`, `EmailFieldId`) so a caller
-// can't accidentally pass a `DateTimeField`'s IRI where (say) a
-// `IntegerNumberField`'s IRI is expected.
-//
-// On the wire this collapses to a plain JSON string IRI; the typed
-// wrapper exists only in memory.
 export interface DateTimeFieldId {
   readonly kind: 'DateTimeFieldId';
   readonly iri: Iri;
@@ -59,12 +34,6 @@ export interface DateTimeFieldId {
 
 export type DateTimeFieldReference = DateTimeFieldId;
 
-// Identifier-wrapper constructor for the DateTime field family.
-// Idempotent: an existing DateTimeFieldId passes through unchanged. A bare
-// string IRI is validated and wrapped via `iri()`; a typed `Iri` is wrapped
-// without re-validation. The DateTimeFieldId wrapper is distinguished from
-// sibling field-id types (e.g. `IntegerNumberFieldId`, `EmailFieldId`) by the
-// per-variant `kind` discriminator.
 export const dateTimeFieldId = (
   v: DateTimeFieldId | Iri | string,
 ): DateTimeFieldId => {
@@ -83,15 +52,16 @@ export const dateTimeFieldId = (
 
 export interface DateTimeValue {
   readonly kind: 'DateTimeValue';
-  readonly literal: DateTimeLiteral;
+  readonly value: string;
 }
 
-// Accepts a DateTimeLiteral or its lexical form directly. See fullDateValue.
-export function dateTimeValue(input: DateTimeLiteral | string): DateTimeValue {
-  return {
-    kind: 'DateTimeValue',
-    literal: typeof input === 'string' ? dateTimeLiteral(input) : input,
-  };
+export type DateTimeValueInput = DateTimeValue | string;
+
+export function dateTimeValue(value: string): DateTimeValue;
+export function dateTimeValue(value: DateTimeValue): DateTimeValue;
+export function dateTimeValue(value: DateTimeValue | string): DateTimeValue {
+  if (typeof value !== 'string') return value;
+  return { kind: 'DateTimeValue', value };
 }
 
 export function isDateTimeValue(x: unknown): x is DateTimeValue {
@@ -105,8 +75,6 @@ export function isDateTimeValue(x: unknown): x is DateTimeValue {
 // 3. FieldSpec
 // =====================================================================
 
-// DateTimeValueType identifies the finest permitted date-time precision.
-// Same strict-truncation rule as TimePrecision applies.
 export type DateTimeValueType =
   | 'dateHourMinute'
   | 'dateHourMinuteSecond'
@@ -191,14 +159,12 @@ export interface EmbeddedDateTimeField {
   readonly visibility?: Visibility;
   readonly labelOverride?: LabelOverride;
   readonly property?: Property;
-  readonly defaultValue?: DateTimeLiteral;
+  readonly defaultValue?: DateTimeValue;
 }
 
-// `defaultValue` accepts a DateTimeLiteral or a plain xsd:dateTime
-// lexical form (wrapped via dateTimeLiteral).
 export interface EmbeddedDateTimeFieldInit extends EmbeddedFieldInitCommon {
   readonly artifactRef: DateTimeFieldReference | DateTimeField;
-  readonly defaultValue?: DateTimeLiteral | string;
+  readonly defaultValue?: DateTimeValueInput;
 }
 
 export function embeddedDateTimeField(
@@ -211,7 +177,7 @@ export function embeddedDateTimeField(
     ...(init.defaultValue !== undefined && {
       defaultValue:
         typeof init.defaultValue === 'string'
-          ? dateTimeLiteral(init.defaultValue)
+          ? dateTimeValue(init.defaultValue)
           : init.defaultValue,
     }),
   };

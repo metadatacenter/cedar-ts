@@ -13,10 +13,6 @@
 //                      leaf types (Iri, LanguageTag, IsoDateTimeStamp),
 //                      CedarConstructionError
 //   - multilingual.ts: LangString, MultilingualString and selectors
-//   - literals/      : the three RDF literal forms (Simple / LangTagged /
-//                      Typed) plus typed-literal aliases
-//                      (IntegerNumberLiteral, RealNumberLiteral,
-//                      FullDateLiteral, …)
 //   - identifiers.ts : top-level artifact identifiers (TemplateId,
 //                      TemplateInstanceId, PresentationComponentId)
 //   - metadata/      : descriptive / lifecycle-metadata / schema-versioning /
@@ -24,7 +20,8 @@
 //   - field-families/: the 20 per-family vertical slices (TextField,
 //                      IntegerNumberField, RealNumberField, BooleanField,
 //                      …, AttributeValueField), plus the Field,
-//                      EmbeddedField, Value, FieldSpec unions
+//                      EmbeddedField, Value, FieldSpec unions. Each Value
+//                      type carries its content directly (no Literal layer).
 //   - presentation/  : presentation components (RichText / Image /
 //                      YoutubeVideo / SectionBreak / PageBreak)
 //   - embedded/      : per-embedding configuration (Cardinality,
@@ -36,7 +33,6 @@
 
 export * from './leaves/index.js';
 export * from './multilingual.js';
-export * from './literals/index.js';
 export * from './identifiers.js';
 export * from './metadata/index.js';
 export * from './field-families/index.js';

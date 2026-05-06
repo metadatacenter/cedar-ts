@@ -3,22 +3,9 @@
 // xsd:float, xsd:double)
 // =====================================================================
 //
-// This file is the complete vertical slice for the real-number field
-// family. Per the cedar-ts convention each family file holds:
-//
-//   - identifier type            : RealNumberFieldId
-//   - instance value             : RealNumberValue
-//   - schema constraints         : RealNumberFieldSpec
-//   - reusable Field artifact    : RealNumberField
-//   - Template-embedding wrapper : EmbeddedRealNumberField
-//
-// Wire `kind` values: "RealNumberField" (artifact),
-// "EmbeddedRealNumberField" (embedding), "RealNumberValue" (value),
-// "RealNumberFieldSpec" (spec).
-//
-// RealNumberFieldSpec carries a `datatype` enum (decimal | float |
-// double) — the family covers three real-valued XSD types that share a
-// configuration template but differ in precision class.
+// RealNumberValue carries `value: string` (a base-10 real-valued
+// lexical form) plus the required `datatype` enum (`decimal | float
+// | double`).
 
 import {
   type Iri,
@@ -26,7 +13,6 @@ import {
   iri,
   parseSemanticVersion,
 } from '../leaves/index.js';
-import type { RealNumberLiteral } from '../literals/index.js';
 import type { SchemaArtifactMetadata } from '../metadata/index.js';
 import type { ValueRequirement } from '../embedded/requirement.js';
 import type { Cardinality } from '../embedded/cardinality.js';
@@ -73,11 +59,21 @@ export const realNumberFieldId = (
 
 export interface RealNumberValue {
   readonly kind: 'RealNumberValue';
-  readonly literal: RealNumberLiteral;
+  readonly value: string;
+  readonly datatype: RealNumberDatatypeKind;
 }
 
-export function realNumberValue(literal: RealNumberLiteral): RealNumberValue {
-  return { kind: 'RealNumberValue', literal };
+export function realNumberValue(
+  value: string,
+  datatype: RealNumberDatatypeKind,
+): RealNumberValue;
+export function realNumberValue(value: RealNumberValue): RealNumberValue;
+export function realNumberValue(
+  value: RealNumberValue | string,
+  datatype?: RealNumberDatatypeKind,
+): RealNumberValue {
+  if (typeof value !== 'string') return value;
+  return { kind: 'RealNumberValue', value, datatype: datatype as RealNumberDatatypeKind };
 }
 
 export function isRealNumberValue(x: unknown): x is RealNumberValue {
@@ -85,6 +81,12 @@ export function isRealNumberValue(x: unknown): x is RealNumberValue {
     typeof x === 'object' && x !== null &&
     (x as { kind?: unknown }).kind === 'RealNumberValue'
   );
+}
+
+// Best-effort numeric coercion. Returns `NaN` for ill-typed lexical
+// forms; use validation helpers for normative checks.
+export function realNumberValueToNumber(v: RealNumberValue): number {
+  return Number(v.value);
 }
 
 // =====================================================================
@@ -171,12 +173,12 @@ export interface EmbeddedRealNumberField {
   readonly visibility?: Visibility;
   readonly labelOverride?: LabelOverride;
   readonly property?: Property;
-  readonly defaultValue?: RealNumberLiteral;
+  readonly defaultValue?: RealNumberValue;
 }
 
 export interface EmbeddedRealNumberFieldInit extends EmbeddedFieldInitCommon {
   readonly artifactRef: RealNumberFieldReference | RealNumberField;
-  readonly defaultValue?: RealNumberLiteral;
+  readonly defaultValue?: RealNumberValue;
 }
 
 export function embeddedRealNumberField(

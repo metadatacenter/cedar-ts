@@ -15,16 +15,18 @@
 // Wire `kind` values: "TextField" (artifact), "EmbeddedTextField"
 // (embedding).
 //
-// The instance value carries a `TextLiteral` (`SimpleLiteral |
-// LangTaggedLiteral`) — see `src/literals/literals.ts`. The
-// `defaultValue` slot on `EmbeddedTextField` and `TextFieldSpec` is
-// also a `TextLiteral` directly (no wrapper).
+// `TextValue` carries its content directly — `value: string` plus
+// optional `lang: LanguageTag`. The `defaultValue` slot on
+// `EmbeddedTextField` and `TextFieldSpec` is also a `TextValue`.
 
-import { type Iri, iri, assertNonNegativeInteger, parseSemanticVersion } from '../leaves/index.js';
 import {
-  type TextLiteral,
-  simpleLiteral,
-} from '../literals/index.js';
+  type Iri,
+  type LanguageTag,
+  iri,
+  languageTag,
+  assertNonNegativeInteger,
+  parseSemanticVersion,
+} from '../leaves/index.js';
 import type { SchemaArtifactMetadata } from '../metadata/index.js';
 import type { ValueRequirement } from '../embedded/requirement.js';
 import type { Cardinality } from '../embedded/cardinality.js';
@@ -42,14 +44,6 @@ import {
 // 1. Identifier
 // =====================================================================
 
-// Identifier for a `TextField` reusable schema artifact: a typed wrapper
-// around the field's IRI. Distinguished at compile time and runtime from
-// sibling field-id types (e.g. `IntegerNumberFieldId`, `EmailFieldId`) so a caller
-// can't accidentally pass a `TextField`'s IRI where (say) a
-// `IntegerNumberField`'s IRI is expected.
-//
-// On the wire this collapses to a plain JSON string IRI; the typed
-// wrapper exists only in memory.
 export interface TextFieldId {
   readonly kind: 'TextFieldId';
   readonly iri: Iri;
@@ -57,12 +51,6 @@ export interface TextFieldId {
 
 export type TextFieldReference = TextFieldId;
 
-// Identifier-wrapper constructor for the Text field family.
-// Idempotent: an existing TextFieldId passes through unchanged. A bare
-// string IRI is validated and wrapped via `iri()`; a typed `Iri` is wrapped
-// without re-validation. The TextFieldId wrapper is distinguished from
-// sibling field-id types (e.g. `IntegerNumberFieldId`, `EmailFieldId`) by the
-// per-variant `kind` discriminator.
 export const textFieldId = (
   v: TextFieldId | Iri | string,
 ): TextFieldId => {
@@ -81,18 +69,26 @@ export const textFieldId = (
 
 export interface TextValue {
   readonly kind: 'TextValue';
-  readonly literal: TextLiteral;
+  readonly value: string;
+  readonly lang?: LanguageTag;
 }
 
-// Accepts a TextLiteral, or a plain string (wrapped as a SimpleLiteral with
-// implicit datatype xsd:string). The string shortcut exists so callers don't
-// have to write textValue(simpleLiteral('x')) when xsd:string is what they
-// mean — pass langTaggedLiteral(...) explicitly when a language tag is needed.
-export function textValue(input: TextLiteral | string): TextValue {
-  return {
-    kind: 'TextValue',
-    literal: typeof input === 'string' ? simpleLiteral(input) : input,
-  };
+export type TextValueInput = TextValue | string;
+
+// Accepts either a bare string (lang absent), or a pre-built TextValue
+// (idempotent passthrough). Pass `lang` explicitly as the second
+// argument to attach a BCP 47 language tag.
+export function textValue(value: string, lang?: string | LanguageTag): TextValue;
+export function textValue(value: TextValue): TextValue;
+export function textValue(
+  value: TextValue | string,
+  lang?: string | LanguageTag,
+): TextValue {
+  if (typeof value !== 'string') return value;
+  if (lang === undefined) return { kind: 'TextValue', value };
+  const tag: LanguageTag =
+    typeof lang === 'string' ? languageTag(lang) : lang;
+  return { kind: 'TextValue', value, lang: tag };
 }
 
 export function isTextValue(x: unknown): x is TextValue {
@@ -106,23 +102,17 @@ export function isTextValue(x: unknown): x is TextValue {
 // 3. FieldSpec
 // =====================================================================
 
-// TextFieldSpec — see grammar.md §Field Specs.
-//   - default value, min/max length, validating regex, single-/multi-line hint
-// All components are optional.
-
 export interface TextFieldSpec {
   readonly kind: 'TextFieldSpec';
-  readonly defaultValue?: TextLiteral;
+  readonly defaultValue?: TextValue;
   readonly minLength?: number;
   readonly maxLength?: number;
   readonly validationRegex?: string;
   readonly renderingHint?: TextRenderingHint;
 }
 
-// `defaultValue` accepts a TextLiteral or a plain string (wrapped as a
-// SimpleLiteral); see textValue/embeddedTextField for the same widening.
 export interface TextFieldSpecInit {
-  readonly defaultValue?: TextLiteral | string;
+  readonly defaultValue?: TextValueInput;
   readonly minLength?: number;
   readonly maxLength?: number;
   readonly validationRegex?: string;
@@ -132,7 +122,7 @@ export interface TextFieldSpecInit {
 export function textFieldSpec(init: TextFieldSpecInit = {}): TextFieldSpec {
   const out: {
     kind: 'TextFieldSpec';
-    defaultValue?: TextLiteral;
+    defaultValue?: TextValue;
     minLength?: number;
     maxLength?: number;
     validationRegex?: string;
@@ -141,7 +131,7 @@ export function textFieldSpec(init: TextFieldSpecInit = {}): TextFieldSpec {
   if (init.defaultValue !== undefined) {
     out.defaultValue =
       typeof init.defaultValue === 'string'
-        ? simpleLiteral(init.defaultValue)
+        ? textValue(init.defaultValue)
         : init.defaultValue;
   }
   if (init.minLength !== undefined) out.minLength = assertNonNegativeInteger(init.minLength);
@@ -196,18 +186,12 @@ export interface EmbeddedTextField {
   readonly visibility?: Visibility;
   readonly labelOverride?: LabelOverride;
   readonly property?: Property;
-  readonly defaultValue?: TextLiteral;
+  readonly defaultValue?: TextValue;
 }
 
-// `defaultValue` accepts a TextLiteral or a plain string (wrapped as a
-// SimpleLiteral with implicit datatype xsd:string). The string shortcut
-// exists so callers don't have to write
-// `embeddedTextField({ ..., defaultValue: simpleLiteral('Hello') })`
-// for the common xsd:string case — pass `langTaggedLiteral(...)`
-// explicitly when a language tag is needed.
 export interface EmbeddedTextFieldInit extends EmbeddedFieldInitCommon {
   readonly artifactRef: TextFieldReference | TextField;
-  readonly defaultValue?: TextLiteral | string;
+  readonly defaultValue?: TextValueInput;
 }
 
 export function embeddedTextField(init: EmbeddedTextFieldInit): EmbeddedTextField {
@@ -218,7 +202,7 @@ export function embeddedTextField(init: EmbeddedTextFieldInit): EmbeddedTextFiel
     ...(init.defaultValue !== undefined && {
       defaultValue:
         typeof init.defaultValue === 'string'
-          ? simpleLiteral(init.defaultValue)
+          ? textValue(init.defaultValue)
           : init.defaultValue,
     }),
   };

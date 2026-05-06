@@ -4,7 +4,6 @@
 // =====================================================================
 
 import { CedarConstructionError, isIri, iri } from '../leaves/index.js';
-import { isLiteral } from '../literals/index.js';
 import {
   type LifecycleMetadata,
   type SchemaVersioning,
@@ -33,9 +32,10 @@ import {
 } from './multilingual.js';
 import { serializeIri, serializeIsoDateTimeStamp } from './collapsed-wrappers.js';
 import {
-  serializeLiteral,
-  parseLiteral,
-} from './literals.js';
+  type AnnotationStringValue,
+  annotationStringValue,
+  isAnnotationStringValue,
+} from '../metadata/annotations.js';
 
 // ---- LifecycleMetadata -----------------------------------------------
 
@@ -128,16 +128,19 @@ export function parseSchemaVersioning(
 // ---- AnnotationValue (property-set discriminated) --------------------
 //
 // Wire form:
-//   { value }                 → SimpleLiteral
-//   { value, lang }           → LangTaggedLiteral
-//   { value, datatype }       → TypedLiteral
+//   { value }                 → AnnotationStringValue (no lang)
+//   { value, lang }           → AnnotationStringValue (lang-tagged)
 //   { iri }                   → Iri (wrapped at this polymorphic position)
 //
-// Multi-match (e.g. {value, iri}) is rejected.
+// An object carrying both `iri` and `value` is non-conforming.
 
 export function serializeAnnotationValue(x: AnnotationValue): unknown {
-  if (isIri(x)) return { iri: x.value };
-  return serializeLiteral(x);
+  if (isAnnotationStringValue(x)) {
+    const out: Record<string, unknown> = { value: x.value };
+    if (x.lang !== undefined) out['lang'] = x.lang.value;
+    return out;
+  }
+  return { iri: x.value };
 }
 
 export function parseAnnotationValue(
@@ -157,7 +160,13 @@ export function parseAnnotationValue(
     return iri(expectString(o['iri'], `${where}.iri`));
   }
   if (hasValue) {
-    return parseLiteral(x, where);
+    expectKnownProperties(o, ['value', 'lang']);
+    rejectNullProperty(o, 'lang');
+    const value = expectString(o['value'], `${where}.value`);
+    if ('lang' in o) {
+      return annotationStringValue(value, expectString(o['lang'], `${where}.lang`));
+    }
+    return annotationStringValue(value);
   }
   throw new CedarConstructionError(
     `${where}: object MUST carry either "iri" or "value"`,
@@ -184,11 +193,12 @@ export function parseAnnotation(x: unknown, where = 'Annotation'): Annotation {
   }
   const propertyIri = expectString(o['property'], `${where}.property`);
   const body = parseAnnotationValue(o['body'], `${where}.body`);
-  if (isLiteral(body)) {
-    return annotation(propertyIri, body);
-  }
   return annotation(propertyIri, body);
 }
+
+// Suppress unused-import warning — `AnnotationStringValue` is exposed as a
+// named import for documentation.
+void (null as unknown as AnnotationStringValue | undefined);
 
 // ---- ArtifactMetadata ------------------------------------------------
 //

@@ -2,20 +2,9 @@
 // Email field family — email address (RFC 5321 / 5322 lexical form)
 // =====================================================================
 //
-// This file is the complete vertical slice for the email field
-// family. Per the cedar-ts convention each family file holds:
-//
-//   - identifier type            : EmailFieldId
-//   - instance value             : EmailValue
-//   - schema constraints         : EmailFieldSpec
-//   - reusable Field artifact    : EmailField
-//   - Template-embedding wrapper : EmbeddedEmailField
-//
-// Wire `kind` values: "EmailField" (artifact), "EmbeddedEmailField"
-// (embedding).
+// EmailValue carries `value: string` directly.
 
 import { type Iri, iri, parseSemanticVersion } from '../leaves/index.js';
-import { type SimpleLiteral, simpleLiteral } from '../literals/index.js';
 import type { SchemaArtifactMetadata } from '../metadata/index.js';
 import type { ValueRequirement } from '../embedded/requirement.js';
 import type { Cardinality } from '../embedded/cardinality.js';
@@ -32,14 +21,6 @@ import {
 // 1. Identifier
 // =====================================================================
 
-// Identifier for a `EmailField` reusable schema artifact: a typed wrapper
-// around the field's IRI. Distinguished at compile time and runtime from
-// sibling field-id types (e.g. `IntegerNumberFieldId`, `EmailFieldId`) so a caller
-// can't accidentally pass a `EmailField`'s IRI where (say) a
-// `IntegerNumberField`'s IRI is expected.
-//
-// On the wire this collapses to a plain JSON string IRI; the typed
-// wrapper exists only in memory.
 export interface EmailFieldId {
   readonly kind: 'EmailFieldId';
   readonly iri: Iri;
@@ -47,12 +28,6 @@ export interface EmailFieldId {
 
 export type EmailFieldReference = EmailFieldId;
 
-// Identifier-wrapper constructor for the Email field family.
-// Idempotent: an existing EmailFieldId passes through unchanged. A bare
-// string IRI is validated and wrapped via `iri()`; a typed `Iri` is wrapped
-// without re-validation. The EmailFieldId wrapper is distinguished from
-// sibling field-id types (e.g. `IntegerNumberFieldId`, `EmailFieldId`) by the
-// per-variant `kind` discriminator.
 export const emailFieldId = (
   v: EmailFieldId | Iri | string,
 ): EmailFieldId => {
@@ -71,14 +46,16 @@ export const emailFieldId = (
 
 export interface EmailValue {
   readonly kind: 'EmailValue';
-  readonly literal: SimpleLiteral;
+  readonly value: string;
 }
 
-export function emailValue(literal: SimpleLiteral | string): EmailValue {
-  return {
-    kind: 'EmailValue',
-    literal: typeof literal === 'string' ? simpleLiteral(literal) : literal,
-  };
+export type EmailValueInput = EmailValue | string;
+
+export function emailValue(value: string): EmailValue;
+export function emailValue(value: EmailValue): EmailValue;
+export function emailValue(value: EmailValue | string): EmailValue {
+  if (typeof value !== 'string') return value;
+  return { kind: 'EmailValue', value };
 }
 
 export function isEmailValue(x: unknown): x is EmailValue {
@@ -141,14 +118,12 @@ export interface EmbeddedEmailField {
   readonly visibility?: Visibility;
   readonly labelOverride?: LabelOverride;
   readonly property?: Property;
-  readonly defaultValue?: SimpleLiteral;
+  readonly defaultValue?: EmailValue;
 }
 
-// `defaultValue` accepts a SimpleLiteral or a plain string (the email
-// lexical form, wrapped via simpleLiteral).
 export interface EmbeddedEmailFieldInit extends EmbeddedFieldInitCommon {
   readonly artifactRef: EmailFieldReference | EmailField;
-  readonly defaultValue?: SimpleLiteral | string;
+  readonly defaultValue?: EmailValueInput;
 }
 
 export function embeddedEmailField(init: EmbeddedEmailFieldInit): EmbeddedEmailField {
@@ -159,7 +134,7 @@ export function embeddedEmailField(init: EmbeddedEmailFieldInit): EmbeddedEmailF
     ...(init.defaultValue !== undefined && {
       defaultValue:
         typeof init.defaultValue === 'string'
-          ? simpleLiteral(init.defaultValue)
+          ? emailValue(init.defaultValue)
           : init.defaultValue,
     }),
   };

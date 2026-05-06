@@ -43,11 +43,7 @@ import {
   dateTimeRenderingHint,
   controlledTermValue,
   integerNumberValue,
-  integerNumberLiteral,
   realNumberValue,
-  realNumberLiteral,
-  typedLiteral,
-  XsdNumericDatatypeIri,
   isTextFieldSpec,
   isIntegerNumberFieldSpec,
   isRealNumberFieldSpec,
@@ -60,7 +56,6 @@ import {
   isPhoneNumberFieldSpec,
   isAttributeValueFieldSpec,
   type FieldSpec,
-  type FieldSpecFor,
 } from '../src/index.js';
 
 describe('TextFieldSpec', () => {
@@ -101,12 +96,12 @@ describe('IntegerNumberFieldSpec', () => {
 
     const fs = integerNumberFieldSpec({
       unit: u,
-      minValue: integerNumberValue(integerNumberLiteral('0')),
-      maxValue: integerNumberValue(integerNumberLiteral('100')),
+      minValue: integerNumberValue('0'),
+      maxValue: integerNumberValue('100'),
       renderingHint: numericRenderingHint(),
     });
     expect(fs.unit).toBe(u);
-    expect(fs.minValue?.literal.lexicalForm).toBe('0');
+    expect(fs.minValue?.value).toBe('0');
   });
 });
 
@@ -120,8 +115,8 @@ describe('RealNumberFieldSpec', () => {
   it('carries decimalPlaces on the rendering hint', () => {
     const fs = realNumberFieldSpec({
       datatype: 'decimal',
-      minValue: realNumberValue(realNumberLiteral('0', 'decimal')),
-      maxValue: realNumberValue(realNumberLiteral('100', 'decimal')),
+      minValue: realNumberValue('0', 'decimal'),
+      maxValue: realNumberValue('100', 'decimal'),
       renderingHint: numericRenderingHint(3),
     });
     expect(fs.renderingHint?.decimalPlaces).toBe(3);
@@ -235,11 +230,15 @@ describe('Controlled-term field spec and sources', () => {
 
 describe('ChoiceFieldSpec', () => {
   it('LiteralSingleChoiceFieldSpec carries one or more LiteralChoiceOption', () => {
-    const o1 = literalChoiceOption(
-      typedLiteral('a', XsdNumericDatatypeIri.integer),
-      { default: true },
-    );
-    const o2 = literalChoiceOption(typedLiteral('b', XsdNumericDatatypeIri.integer));
+    const o1 = literalChoiceOption({
+      value: 'a',
+      datatype: 'http://www.w3.org/2001/XMLSchema#integer',
+      default: true,
+    });
+    const o2 = literalChoiceOption({
+      value: 'b',
+      datatype: 'http://www.w3.org/2001/XMLSchema#integer',
+    });
     const fs = literalSingleChoiceFieldSpec({
       options: [o1, o2],
       renderingHint: 'radio',
@@ -265,7 +264,10 @@ describe('ChoiceFieldSpec', () => {
   });
 
   it('LiteralMultipleChoiceFieldSpec uses MultipleChoiceRenderingHint', () => {
-    const o1 = literalChoiceOption(typedLiteral('a', XsdNumericDatatypeIri.integer));
+    const o1 = literalChoiceOption({
+      value: 'a',
+      datatype: 'http://www.w3.org/2001/XMLSchema#integer',
+    });
     const fs = literalMultipleChoiceFieldSpec({ options: [o1], renderingHint: 'checkbox' });
     expect(fs.kind).toBe('LiteralMultipleChoiceFieldSpec');
     expect(fs.renderingHint).toBe('checkbox');
@@ -283,19 +285,23 @@ describe('ChoiceFieldSpec', () => {
 
   it('literalChoiceOption accepts (text, lang) and (text, lang, options)', () => {
     const plain = literalChoiceOption('Professor', 'en');
-    expect(plain.literal.kind).toBe('LangTaggedLiteral');
-    expect(plain.literal.lexicalForm).toBe('Professor');
+    expect(plain.value).toBe('Professor');
+    expect(plain.lang?.value).toBe('en');
+    expect(plain.datatype).toBeUndefined();
     expect(plain.default).toBeUndefined();
 
     const def = literalChoiceOption('Associate Professor', 'en', { default: true });
     expect(def.default).toBe(true);
 
-    // Existing one-arg Literal form still works.
-    const lit = literalChoiceOption(
-      typedLiteral('a', XsdNumericDatatypeIri.integer),
-      { default: true },
-    );
-    expect(lit.literal.kind).toBe('TypedLiteral');
+    // Init-object form with a datatype.
+    const lit = literalChoiceOption({
+      value: 'a',
+      datatype: 'http://www.w3.org/2001/XMLSchema#integer',
+      default: true,
+    });
+    expect(lit.value).toBe('a');
+    expect(lit.datatype?.value).toBe('http://www.w3.org/2001/XMLSchema#integer');
+    expect(lit.default).toBe(true);
   });
 });
 
@@ -336,10 +342,10 @@ describe('FieldSpec union', () => {
         ontologySource(ontologyReference({ iri: 'http://example.org/o' })),
       ),
       literalSingleChoiceFieldSpec({
-        options: [literalChoiceOption(typedLiteral('a', XsdNumericDatatypeIri.integer))],
+        options: [literalChoiceOption({ value: 'a', datatype: 'http://www.w3.org/2001/XMLSchema#integer' })],
       }),
       literalMultipleChoiceFieldSpec({
-        options: [literalChoiceOption(typedLiteral('a', XsdNumericDatatypeIri.integer))],
+        options: [literalChoiceOption({ value: 'a', datatype: 'http://www.w3.org/2001/XMLSchema#integer' })],
       }),
       linkFieldSpec(),
       emailFieldSpec(),
@@ -358,20 +364,3 @@ describe('FieldSpec union', () => {
   });
 });
 
-describe('FieldSpecFor<K> mapped type (compile-time)', () => {
-  it('resolves to the right spec interface per kind', () => {
-    const t: FieldSpecFor<'text'> = textFieldSpec();
-    const n: FieldSpecFor<'integer_number'> = integerNumberFieldSpec();
-    const d: FieldSpecFor<'date'> = dateFieldSpec({ dateValueType: 'fullDate' });
-    const sc: FieldSpecFor<'single_choice'> = literalSingleChoiceFieldSpec({
-      options: [literalChoiceOption(typedLiteral('a', XsdNumericDatatypeIri.integer))],
-    });
-    expect(t.kind).toBe('TextFieldSpec');
-    expect(n.kind).toBe('IntegerNumberFieldSpec');
-    expect(d.kind).toBe('DateFieldSpec');
-    expect(sc.kind).toBe('LiteralSingleChoiceFieldSpec');
-    // @ts-expect-error an IntegerNumberFieldSpec is not assignable to FieldSpecFor<'text'>
-    const wrong: FieldSpecFor<'text'> = integerNumberFieldSpec();
-    void wrong;
-  });
-});

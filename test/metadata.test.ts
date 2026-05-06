@@ -10,7 +10,7 @@ import {
   artifactMetadata,
   schemaArtifactMetadata,
   iri,
-  langTaggedLiteral,
+  annotationStringValue,
 } from '../src/index.js';
 
 describe('LifecycleMetadata', () => {
@@ -87,14 +87,14 @@ describe('Status and SchemaVersioning', () => {
 });
 
 describe('Annotation', () => {
-  it('literal-valued annotation', () => {
+  it('string-valued annotation', () => {
     const a = annotation(
       'http://purl.org/dc/terms/title',
-      langTaggedLiteral('A study', 'en'),
+      annotationStringValue('A study', 'en'),
     );
     expect(a.property.kind).toBe('Iri');
     expect(a.property.value).toBe('http://purl.org/dc/terms/title');
-    expect(a.body.kind).toBe('LangTaggedLiteral');
+    expect(a.body.kind).toBe('AnnotationStringValue');
     expect(isAnnotationValue(a.body)).toBe(true);
   });
 
@@ -154,7 +154,7 @@ describe('ArtifactMetadata and SchemaArtifactMetadata', () => {
       annotations: [
         annotation(
           'http://purl.org/dc/terms/title',
-          langTaggedLiteral('x', 'en'),
+          annotationStringValue('x', 'en'),
         ),
       ],
     });

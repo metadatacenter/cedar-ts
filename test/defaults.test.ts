@@ -37,72 +37,67 @@ import {
   rridFieldId,
   nihGrantIdFieldId,
   textFieldSpec,
+  textValue,
+  integerNumberValue,
+  realNumberValue,
   controlledTermValue,
   literalChoiceValue,
   linkValue,
-  orcidValue,
   rorValue,
   doiValue,
   pubMedIdValue,
   rridValue,
   nihGrantIdValue,
-  integerNumberLiteral,
-  realNumberLiteral,
-  fullDateLiteral,
-  timeLiteral,
-  dateTimeLiteral,
   yearValue,
   fullDateValue,
-  simpleLiteral,
-  typedLiteral,
-  XsdNumericDatatypeIri,
 } from '../src/index.js';
 
 // =====================================================================
-// Defaults — the 17 XxxDefaultValue wrappers were removed (spec 868ef1c).
-// Each EmbeddedXxxField.defaultValue slot now uses the family-specific
-// underlying type directly. These tests pin that behavior at the
-// constructor layer for each family.
+// Defaults — every EmbeddedXxxField.defaultValue slot uses the
+// family-specific Value type directly (no Literal layer; no
+// XxxDefaultValue wrappers). These tests pin the constructor-layer
+// behaviour for each family.
 // =====================================================================
 
-describe('EmbeddedXxxField.defaultValue (flat, no XxxDefaultValue wrapper)', () => {
-  it('Text — TextLiteral; bare string widens to SimpleLiteral', () => {
+describe('EmbeddedXxxField.defaultValue', () => {
+  it('Text — TextValue; bare string widens', () => {
     const ef = embeddedTextField({
       key: 't',
       artifactRef: textFieldId('https://example.org/x'),
       defaultValue: 'Stanford University',
     });
-    expect(ef.defaultValue?.kind).toBe('SimpleLiteral');
-    if (ef.defaultValue && ef.defaultValue.kind === 'SimpleLiteral') {
-      expect(ef.defaultValue.lexicalForm).toBe('Stanford University');
-    }
-    // Pre-built TextLiteral passes through.
+    expect(ef.defaultValue?.kind).toBe('TextValue');
+    expect(ef.defaultValue?.value).toBe('Stanford University');
+    expect(ef.defaultValue?.lang).toBeUndefined();
+
+    // Pre-built TextValue passes through.
     const ef2 = embeddedTextField({
       key: 't',
       artifactRef: textFieldId('https://example.org/x'),
-      defaultValue: simpleLiteral('Hello'),
+      defaultValue: textValue('Hello'),
     });
-    expect(ef2.defaultValue?.kind).toBe('SimpleLiteral');
+    expect(ef2.defaultValue?.kind).toBe('TextValue');
   });
 
-  it('IntegerNumber — IntegerNumberLiteral (datatype fixed at xsd:integer)', () => {
+  it('IntegerNumber — IntegerNumberValue (datatype fixed at xsd:integer)', () => {
     const ef = embeddedIntegerNumberField({
       key: 'n',
       artifactRef: integerNumberFieldId('https://example.org/x'),
-      defaultValue: integerNumberLiteral('42'),
+      defaultValue: integerNumberValue('42'),
     });
-    expect(ef.defaultValue?.kind).toBe('TypedLiteral');
-    expect(ef.defaultValue?.lexicalForm).toBe('42');
+    expect(ef.defaultValue?.kind).toBe('IntegerNumberValue');
+    expect(ef.defaultValue?.value).toBe('42');
   });
 
-  it('RealNumber — RealNumberLiteral (explicit datatype required at construction)', () => {
+  it('RealNumber — RealNumberValue (carries datatype enum)', () => {
     const ef = embeddedRealNumberField({
       key: 'r',
       artifactRef: realNumberFieldId('https://example.org/x'),
-      defaultValue: realNumberLiteral('3.14', 'decimal'),
+      defaultValue: realNumberValue('3.14', 'decimal'),
     });
-    expect(ef.defaultValue?.kind).toBe('TypedLiteral');
-    expect(ef.defaultValue?.lexicalForm).toBe('3.14');
+    expect(ef.defaultValue?.kind).toBe('RealNumberValue');
+    expect(ef.defaultValue?.value).toBe('3.14');
+    expect(ef.defaultValue?.datatype).toBe('decimal');
   });
 
   it('Date — DateValue (polymorphic; bare string discriminated by lexical shape)', () => {
@@ -124,7 +119,7 @@ describe('EmbeddedXxxField.defaultValue (flat, no XxxDefaultValue wrapper)', () 
     const efPre = embeddedDateField({
       key: 'd',
       artifactRef: dateFieldId('https://example.org/x'),
-      defaultValue: fullDateValue(fullDateLiteral('2024-06-15')),
+      defaultValue: fullDateValue('2024-06-15'),
     });
     expect(efPre.defaultValue?.kind).toBe('FullDateValue');
 
@@ -136,35 +131,22 @@ describe('EmbeddedXxxField.defaultValue (flat, no XxxDefaultValue wrapper)', () 
     expect(efYr.defaultValue?.kind).toBe('YearValue');
   });
 
-  it('Time / DateTime — TimeLiteral / DateTimeLiteral; bare string widens', () => {
+  it('Time / DateTime — TimeValue / DateTimeValue; bare string widens', () => {
     const efT = embeddedTimeField({
       key: 't',
       artifactRef: timeFieldId('https://example.org/x'),
       defaultValue: '10:30:00',
     });
-    expect(efT.defaultValue?.kind).toBe('TypedLiteral');
-    expect(efT.defaultValue?.lexicalForm).toBe('10:30:00');
+    expect(efT.defaultValue?.kind).toBe('TimeValue');
+    expect(efT.defaultValue?.value).toBe('10:30:00');
 
     const efDT = embeddedDateTimeField({
       key: 'dt',
       artifactRef: dateTimeFieldId('https://example.org/x'),
       defaultValue: '2024-06-15T10:30:00',
     });
-    expect(efDT.defaultValue?.kind).toBe('TypedLiteral');
-
-    const efT2 = embeddedTimeField({
-      key: 't',
-      artifactRef: timeFieldId('https://example.org/x'),
-      defaultValue: timeLiteral('11:00:00'),
-    });
-    expect(efT2.defaultValue?.lexicalForm).toBe('11:00:00');
-
-    const efDT2 = embeddedDateTimeField({
-      key: 'dt',
-      artifactRef: dateTimeFieldId('https://example.org/x'),
-      defaultValue: dateTimeLiteral('2024-12-31T23:59:59'),
-    });
-    expect(efDT2.defaultValue?.lexicalForm).toBe('2024-12-31T23:59:59');
+    expect(efDT.defaultValue?.kind).toBe('DateTimeValue');
+    expect(efDT.defaultValue?.value).toBe('2024-06-15T10:30:00');
   });
 
   it('ControlledTerm — ControlledTermValue (kind retained in memory; dropped on the wire)', () => {
@@ -179,7 +161,10 @@ describe('EmbeddedXxxField.defaultValue (flat, no XxxDefaultValue wrapper)', () 
   });
 
   it('SingleChoice / MultipleChoice — ChoiceValue (polymorphic union; kind retained)', () => {
-    const choice = literalChoiceValue(typedLiteral('1', XsdNumericDatatypeIri.integer));
+    const choice = literalChoiceValue({
+      value: '1',
+      datatype: 'http://www.w3.org/2001/XMLSchema#integer',
+    });
     const efS = embeddedSingleChoiceField({
       key: 'sc',
       artifactRef: singleChoiceFieldId('https://example.org/x'),
@@ -205,21 +190,22 @@ describe('EmbeddedXxxField.defaultValue (flat, no XxxDefaultValue wrapper)', () 
     expect(ef.defaultValue?.kind).toBe('LinkValue');
   });
 
-  it('Email / PhoneNumber — SimpleLiteral; bare string widens', () => {
+  it('Email / PhoneNumber — value: string; bare string widens', () => {
     const ef = embeddedEmailField({
       key: 'em',
       artifactRef: emailFieldId('https://example.org/x'),
       defaultValue: 'me@example.org',
     });
-    expect(ef.defaultValue?.kind).toBe('SimpleLiteral');
-    expect(ef.defaultValue?.lexicalForm).toBe('me@example.org');
+    expect(ef.defaultValue?.kind).toBe('EmailValue');
+    expect(ef.defaultValue?.value).toBe('me@example.org');
 
     const ef2 = embeddedPhoneNumberField({
       key: 'ph',
       artifactRef: phoneNumberFieldId('https://example.org/x'),
       defaultValue: '+1-415-555-0100',
     });
-    expect(ef2.defaultValue?.kind).toBe('SimpleLiteral');
+    expect(ef2.defaultValue?.kind).toBe('PhoneNumberValue');
+    expect(ef2.defaultValue?.value).toBe('+1-415-555-0100');
   });
 
   it('External-authority — XxxValue widening (bare string IRI accepted)', () => {
@@ -277,15 +263,15 @@ describe('EmbeddedXxxField.defaultValue (flat, no XxxDefaultValue wrapper)', () 
   });
 });
 
-describe('TextFieldSpec.defaultValue is now TextLiteral (no wrapper)', () => {
-  it('accepts a bare string and stores a SimpleLiteral', () => {
+describe('TextFieldSpec.defaultValue is a TextValue', () => {
+  it('accepts a bare string and stores a TextValue', () => {
     const spec = textFieldSpec({ defaultValue: 'Hello' });
-    expect(spec.defaultValue?.kind).toBe('SimpleLiteral');
-    expect(spec.defaultValue?.lexicalForm).toBe('Hello');
+    expect(spec.defaultValue?.kind).toBe('TextValue');
+    expect(spec.defaultValue?.value).toBe('Hello');
   });
 
-  it('accepts a pre-built TextLiteral', () => {
-    const spec = textFieldSpec({ defaultValue: simpleLiteral('Hi') });
-    expect(spec.defaultValue?.kind).toBe('SimpleLiteral');
+  it('accepts a pre-built TextValue', () => {
+    const spec = textFieldSpec({ defaultValue: textValue('Hi') });
+    expect(spec.defaultValue?.kind).toBe('TextValue');
   });
 });

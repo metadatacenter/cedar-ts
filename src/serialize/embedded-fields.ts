@@ -125,26 +125,30 @@ import {
   parseVisibility,
 } from './embedded-config.js';
 import {
-  serializeTextLiteral,
-  parseTextLiteral,
-  serializeTypedLiteralAtPosition,
-  serializeIntegerNumberLiteralStandalone,
-  parseIntegerNumberLiteralStandalone,
-  serializeRealNumberLiteralStandalone,
-  parseRealNumberLiteralStandalone,
-  parseTimeLiteral,
-  parseDateTimeLiteral,
-  serializeSimpleLiteral,
-} from './literals.js';
-import {
+  serializeTextValueUntagged,
+  parseTextValueUntagged,
+  serializeIntegerNumberValueUntagged,
+  parseIntegerNumberValueUntagged,
+  serializeRealNumberValueUntagged,
+  parseRealNumberValueUntagged,
+  serializeBooleanValueUntagged,
+  parseBooleanValueUntagged,
   serializeDateValue,
   parseDateValue,
+  serializeTimeValueUntagged,
+  parseTimeValueUntagged,
+  serializeDateTimeValueUntagged,
+  parseDateTimeValueUntagged,
   serializeChoiceValue,
   parseChoiceValue,
   serializeControlledTermValueUntagged,
   parseControlledTermValueUntagged,
   serializeLinkValueUntagged,
   parseLinkValueUntagged,
+  serializeEmailValueUntagged,
+  parseEmailValueUntagged,
+  serializePhoneNumberValueUntagged,
+  parsePhoneNumberValueUntagged,
   serializeOrcidValueUntagged,
   serializeRorValueUntagged,
   serializeDoiValueUntagged,
@@ -157,11 +161,7 @@ import {
   parsePubMedIdValueUntagged,
   parseRridValueUntagged,
   parseNihGrantIdValueUntagged,
-  serializeBooleanLiteralAtPosition,
-  parseBooleanLiteralAtPosition,
 } from './values.js';
-import type { SimpleLiteral } from '../literals/index.js';
-import type { BooleanLiteral } from '../field-families/boolean-field.js';
 
 // ---- Common per-embedding properties ---------------------------------
 
@@ -223,7 +223,6 @@ function parseCommonProps(
   return out;
 }
 
-// Allowed-property lists used by the per-family parsers.
 const COMMON_FIELD_PROPS = [
   'kind',
   'key',
@@ -281,19 +280,6 @@ function readShell(
   return out;
 }
 
-// Parses a SimpleLiteral at a defaultValue position — accepts only the
-// `{ value }` shape (no lang, no datatype). Used for email/phone-number
-// default values per the new flat wire form.
-function parseSimpleLiteralAtDefault(x: unknown, where: string): SimpleLiteral {
-  const lit = parseTextLiteral(x, where);
-  if (lit.kind !== 'SimpleLiteral') {
-    throw new CedarConstructionError(
-      `${where}: defaultValue must be a SimpleLiteral (no lang)`,
-    );
-  }
-  return lit;
-}
-
 // ---- Per-family EmbeddedField serializers ---------------------------
 
 export function serializeEmbeddedTextField(x: EmbeddedTextField): unknown {
@@ -304,7 +290,7 @@ export function serializeEmbeddedTextField(x: EmbeddedTextField): unknown {
   };
   serializeCommonProps(x, out);
   if (x.defaultValue !== undefined)
-    out['defaultValue'] = serializeTextLiteral(x.defaultValue);
+    out['defaultValue'] = serializeTextValueUntagged(x.defaultValue);
   return out;
 }
 
@@ -318,7 +304,7 @@ export function parseEmbeddedTextField(
     artifactRef: parseTextFieldId(s.artifactRef, `${where}.artifactRef`),
     ...s.common,
     ...(s.defaultRaw !== undefined && {
-      defaultValue: parseTextLiteral(s.defaultRaw, `${where}.defaultValue`),
+      defaultValue: parseTextValueUntagged(s.defaultRaw, `${where}.defaultValue`),
     }),
   });
 }
@@ -331,7 +317,7 @@ export function serializeEmbeddedIntegerNumberField(x: EmbeddedIntegerNumberFiel
   };
   serializeCommonProps(x, out);
   if (x.defaultValue !== undefined)
-    out['defaultValue'] = serializeIntegerNumberLiteralStandalone(x.defaultValue);
+    out['defaultValue'] = serializeIntegerNumberValueUntagged(x.defaultValue);
   return out;
 }
 
@@ -345,7 +331,7 @@ export function parseEmbeddedIntegerNumberField(
     artifactRef: parseIntegerNumberFieldId(s.artifactRef, `${where}.artifactRef`),
     ...s.common,
     ...(s.defaultRaw !== undefined && {
-      defaultValue: parseIntegerNumberLiteralStandalone(
+      defaultValue: parseIntegerNumberValueUntagged(
         s.defaultRaw,
         `${where}.defaultValue`,
       ),
@@ -361,7 +347,7 @@ export function serializeEmbeddedRealNumberField(x: EmbeddedRealNumberField): un
   };
   serializeCommonProps(x, out);
   if (x.defaultValue !== undefined)
-    out['defaultValue'] = serializeRealNumberLiteralStandalone(x.defaultValue);
+    out['defaultValue'] = serializeRealNumberValueUntagged(x.defaultValue);
   return out;
 }
 
@@ -375,7 +361,7 @@ export function parseEmbeddedRealNumberField(
     artifactRef: parseRealNumberFieldId(s.artifactRef, `${where}.artifactRef`),
     ...s.common,
     ...(s.defaultRaw !== undefined && {
-      defaultValue: parseRealNumberLiteralStandalone(
+      defaultValue: parseRealNumberValueUntagged(
         s.defaultRaw,
         `${where}.defaultValue`,
       ),
@@ -384,9 +370,7 @@ export function parseEmbeddedRealNumberField(
 }
 
 // EmbeddedBooleanField is the one EmbeddedField variant that omits the
-// `cardinality` slot. It uses a bespoke shell to enforce the absence of
-// `cardinality` on the wire (rather than reusing `readShell`, which
-// permits it).
+// `cardinality` slot.
 const BOOLEAN_FIELD_PROPS = [
   'kind',
   'key',
@@ -414,7 +398,7 @@ export function serializeEmbeddedBooleanField(
     out['labelOverride'] = serializeLabelOverride(x.labelOverride);
   if (x.property !== undefined) out['property'] = serializeProperty(x.property);
   if (x.defaultValue !== undefined)
-    out['defaultValue'] = serializeBooleanLiteralAtPosition(x.defaultValue);
+    out['defaultValue'] = serializeBooleanValueUntagged(x.defaultValue);
   return out;
 }
 
@@ -440,34 +424,30 @@ export function parseEmbeddedBooleanField(
   if (!('artifactRef' in o)) {
     throw new CedarConstructionError(`${where}: missing required "artifactRef"`);
   }
-  const init: {
-    key: string;
-    artifactRef: ReturnType<typeof parseBooleanFieldId>;
-    valueRequirement?: ValueRequirement;
-    visibility?: Visibility;
-    labelOverride?: LabelOverride;
-    property?: Property;
-    defaultValue?: BooleanLiteral;
-  } = {
+  const init: Parameters<typeof embeddedBooleanField>[0] = {
     key: expectString(o['key'], `${where}.key`),
     artifactRef: parseBooleanFieldId(o['artifactRef'], `${where}.artifactRef`),
   };
   if ('valueRequirement' in o)
-    init.valueRequirement = parseValueRequirement(
-      o['valueRequirement'],
-      `${where}.valueRequirement`,
-    );
+    (init as { valueRequirement?: ValueRequirement }).valueRequirement =
+      parseValueRequirement(o['valueRequirement'], `${where}.valueRequirement`);
   if ('visibility' in o)
-    init.visibility = parseVisibility(o['visibility'], `${where}.visibility`);
+    (init as { visibility?: Visibility }).visibility = parseVisibility(
+      o['visibility'],
+      `${where}.visibility`,
+    );
   if ('labelOverride' in o)
-    init.labelOverride = parseLabelOverride(
+    (init as { labelOverride?: LabelOverride }).labelOverride = parseLabelOverride(
       o['labelOverride'],
       `${where}.labelOverride`,
     );
   if ('property' in o)
-    init.property = parseProperty(o['property'], `${where}.property`);
+    (init as { property?: Property }).property = parseProperty(
+      o['property'],
+      `${where}.property`,
+    );
   if ('defaultValue' in o)
-    init.defaultValue = parseBooleanLiteralAtPosition(
+    (init as { defaultValue?: unknown }).defaultValue = parseBooleanValueUntagged(
       o['defaultValue'],
       `${where}.defaultValue`,
     );
@@ -509,7 +489,7 @@ export function serializeEmbeddedTimeField(x: EmbeddedTimeField): unknown {
   };
   serializeCommonProps(x, out);
   if (x.defaultValue !== undefined)
-    out['defaultValue'] = serializeTypedLiteralAtPosition(x.defaultValue);
+    out['defaultValue'] = serializeTimeValueUntagged(x.defaultValue);
   return out;
 }
 
@@ -523,7 +503,7 @@ export function parseEmbeddedTimeField(
     artifactRef: parseTimeFieldId(s.artifactRef, `${where}.artifactRef`),
     ...s.common,
     ...(s.defaultRaw !== undefined && {
-      defaultValue: parseTimeLiteral(s.defaultRaw, `${where}.defaultValue`),
+      defaultValue: parseTimeValueUntagged(s.defaultRaw, `${where}.defaultValue`),
     }),
   });
 }
@@ -538,7 +518,7 @@ export function serializeEmbeddedDateTimeField(
   };
   serializeCommonProps(x, out);
   if (x.defaultValue !== undefined)
-    out['defaultValue'] = serializeTypedLiteralAtPosition(x.defaultValue);
+    out['defaultValue'] = serializeDateTimeValueUntagged(x.defaultValue);
   return out;
 }
 
@@ -552,7 +532,10 @@ export function parseEmbeddedDateTimeField(
     artifactRef: parseDateTimeFieldId(s.artifactRef, `${where}.artifactRef`),
     ...s.common,
     ...(s.defaultRaw !== undefined && {
-      defaultValue: parseDateTimeLiteral(s.defaultRaw, `${where}.defaultValue`),
+      defaultValue: parseDateTimeValueUntagged(
+        s.defaultRaw,
+        `${where}.defaultValue`,
+      ),
     }),
   });
 }
@@ -682,7 +665,7 @@ export function serializeEmbeddedEmailField(x: EmbeddedEmailField): unknown {
   };
   serializeCommonProps(x, out);
   if (x.defaultValue !== undefined)
-    out['defaultValue'] = serializeSimpleLiteral(x.defaultValue);
+    out['defaultValue'] = serializeEmailValueUntagged(x.defaultValue);
   return out;
 }
 
@@ -696,10 +679,7 @@ export function parseEmbeddedEmailField(
     artifactRef: parseEmailFieldId(s.artifactRef, `${where}.artifactRef`),
     ...s.common,
     ...(s.defaultRaw !== undefined && {
-      defaultValue: parseSimpleLiteralAtDefault(
-        s.defaultRaw,
-        `${where}.defaultValue`,
-      ),
+      defaultValue: parseEmailValueUntagged(s.defaultRaw, `${where}.defaultValue`),
     }),
   });
 }
@@ -714,7 +694,7 @@ export function serializeEmbeddedPhoneNumberField(
   };
   serializeCommonProps(x, out);
   if (x.defaultValue !== undefined)
-    out['defaultValue'] = serializeSimpleLiteral(x.defaultValue);
+    out['defaultValue'] = serializePhoneNumberValueUntagged(x.defaultValue);
   return out;
 }
 
@@ -728,7 +708,7 @@ export function parseEmbeddedPhoneNumberField(
     artifactRef: parsePhoneNumberFieldId(s.artifactRef, `${where}.artifactRef`),
     ...s.common,
     ...(s.defaultRaw !== undefined && {
-      defaultValue: parseSimpleLiteralAtDefault(
+      defaultValue: parsePhoneNumberValueUntagged(
         s.defaultRaw,
         `${where}.defaultValue`,
       ),
@@ -917,7 +897,6 @@ export function serializeEmbeddedAttributeValueField(
     artifactRef: serializeAttributeValueFieldId(x.artifactRef),
   };
   serializeCommonProps(x, out);
-  // No defaultValue (grammar prohibits).
   return out;
 }
 

@@ -11,10 +11,11 @@
 //   - the temporal RenderingHint variants and the flat-string rendering
 //     hint enums
 
-import { CedarConstructionError } from '../leaves/index.js';
 import {
-  type Literal,
-} from '../literals/index.js';
+  CedarConstructionError,
+  type LanguageTag,
+  type Iri,
+} from '../leaves/index.js';
 import {
   type TextFieldSpec,
   type IntegerNumberFieldSpec,
@@ -137,15 +138,24 @@ import {
   parseRealNumberValue,
   serializeControlledTermValueUntagged,
   parseControlledTermValueUntagged,
+  serializeTextValueUntagged,
+  parseTextValueUntagged,
 } from './values.js';
-import {
-  serializeLiteral,
-  serializeTextLiteral,
-  parseLiteral,
-  parseTextLiteral,
-  parseRealNumberDatatypeKind,
-} from './literals.js';
-import type { TextLiteral } from '../literals/index.js';
+import { REAL_NUMBER_DATATYPE_KINDS, type RealNumberDatatypeKind } from '../leaves/index.js';
+import type { TextValue } from '../field-families/index.js';
+
+function parseRealNumberDatatypeKind(
+  x: unknown,
+  where = 'RealNumberDatatype',
+): RealNumberDatatypeKind {
+  const s = expectString(x, where);
+  if (!(REAL_NUMBER_DATATYPE_KINDS as readonly string[]).includes(s)) {
+    throw new CedarConstructionError(
+      `${where}: unknown real-number datatype ${JSON.stringify(s)}; expected one of {${REAL_NUMBER_DATATYPE_KINDS.map((k) => JSON.stringify(k)).join(', ')}}`,
+    );
+  }
+  return s as RealNumberDatatypeKind;
+}
 
 // ---- Rendering hints (flat string enums + temporal objects) ----------
 
@@ -562,7 +572,9 @@ export function parseControlledTermSource(
 // ---- Choice options --------------------------------------------------
 
 export function serializeLiteralChoiceOption(x: LiteralChoiceOption): unknown {
-  const out: Record<string, unknown> = { literal: serializeLiteral(x.literal) };
+  const out: Record<string, unknown> = { value: x.value };
+  if (x.lang !== undefined) out['lang'] = x.lang.value;
+  if (x.datatype !== undefined) out['datatype'] = x.datatype.value;
   if (x.default === true) out['default'] = true;
   return out;
 }
@@ -572,17 +584,27 @@ export function parseLiteralChoiceOption(
   where = 'LiteralChoiceOption',
 ): LiteralChoiceOption {
   const o = expectObject(x, where);
-  expectKnownProperties(o, ['literal', 'default']);
+  expectKnownProperties(o, ['value', 'lang', 'datatype', 'default']);
+  rejectNullProperty(o, 'lang');
+  rejectNullProperty(o, 'datatype');
   rejectNullProperty(o, 'default');
-  if (!('literal' in o)) {
-    throw new CedarConstructionError(`${where}: missing required "literal"`);
+  if (!('value' in o)) {
+    throw new CedarConstructionError(`${where}: missing required "value"`);
   }
-  const lit: Literal = parseLiteral(o['literal'], `${where}.literal`);
+  const init: {
+    value: string;
+    lang?: string;
+    datatype?: string;
+    default?: boolean;
+  } = { value: expectString(o['value'], `${where}.value`) };
+  if ('lang' in o) init.lang = expectString(o['lang'], `${where}.lang`);
+  if ('datatype' in o)
+    init.datatype = expectString(o['datatype'], `${where}.datatype`);
   if ('default' in o) {
     expectTrue(o['default'], `${where}.default`);
-    return literalChoiceOption(lit, { default: true });
+    init.default = true;
   }
-  return literalChoiceOption(lit);
+  return literalChoiceOption(init);
 }
 
 export function serializeControlledTermChoiceOption(
@@ -619,7 +641,7 @@ export function parseControlledTermChoiceOption(
 export function serializeTextFieldSpec(x: TextFieldSpec): unknown {
   const out: Record<string, unknown> = { kind: 'TextFieldSpec' };
   if (x.defaultValue !== undefined)
-    out['defaultValue'] = serializeTextLiteral(x.defaultValue);
+    out['defaultValue'] = serializeTextValueUntagged(x.defaultValue);
   if (x.minLength !== undefined) out['minLength'] = x.minLength;
   if (x.maxLength !== undefined) out['maxLength'] = x.maxLength;
   if (x.validationRegex !== undefined)
@@ -649,14 +671,14 @@ export function parseTextFieldSpec(
     throw new CedarConstructionError(`${where}: expected kind "TextFieldSpec"`);
   }
   const init: {
-    defaultValue?: TextLiteral;
+    defaultValue?: TextValue;
     minLength?: number;
     maxLength?: number;
     validationRegex?: string;
     renderingHint?: TextRenderingHint;
   } = {};
   if ('defaultValue' in o)
-    init.defaultValue = parseTextLiteral(
+    init.defaultValue = parseTextValueUntagged(
       o['defaultValue'],
       `${where}.defaultValue`,
     );

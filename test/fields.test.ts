@@ -68,8 +68,6 @@ import {
   timeField,
   timeFieldId,
   timeFieldSpec,
-  typedLiteral,
-  XsdNumericDatatypeIri,
   type Field,
   type TextField,
   type DateField,
@@ -189,7 +187,7 @@ describe('Per-family helpers', () => {
         metadata: meta,
         fieldSpec: literalSingleChoiceFieldSpec({
           options: [
-            literalChoiceOption(typedLiteral('a', XsdNumericDatatypeIri.integer)),
+            literalChoiceOption({ value: 'a', datatype: 'http://www.w3.org/2001/XMLSchema#integer' }),
           ],
         }),
       }),
@@ -199,7 +197,7 @@ describe('Per-family helpers', () => {
         metadata: meta,
         fieldSpec: literalMultipleChoiceFieldSpec({
           options: [
-            literalChoiceOption(typedLiteral('a', XsdNumericDatatypeIri.integer)),
+            literalChoiceOption({ value: 'a', datatype: 'http://www.w3.org/2001/XMLSchema#integer' }),
           ],
         }),
       }),

@@ -3,28 +3,11 @@
 // full-date precision
 // =====================================================================
 //
-// This file is the complete vertical slice for the date field
-// family. Per the cedar-ts convention each family file holds:
-//
-//   - identifier type            : DateFieldId
-//   - instance value             : DateValue
-//   - schema constraints         : DateFieldSpec
-//   - reusable Field artifact    : DateField
-//   - Template-embedding wrapper : EmbeddedDateField
-//
-// Wire `kind` values: "DateField" (artifact), "EmbeddedDateField"
-// (embedding).
-//
-// Owns the `DateValueType` enum. References `FullDateLiteral` from
-// `src/literals/temporal-literals.ts`. The `defaultValue` slot on
-// `EmbeddedDateField` is a `DateValue` directly (polymorphic union;
-// kind retained on the wire).
+// DateValue is a discriminated union of YearValue, YearMonthValue, and
+// FullDateValue. All three variants carry their lexical form directly
+// (`value: string`); the datatype is fixed by the variant's `kind`.
 
 import { type Iri, iri, CedarConstructionError, parseSemanticVersion } from '../leaves/index.js';
-import {
-  type FullDateLiteral,
-  fullDateLiteral,
-} from '../literals/index.js';
 import type { SchemaArtifactMetadata } from '../metadata/index.js';
 import type { ValueRequirement } from '../embedded/requirement.js';
 import type { Cardinality } from '../embedded/cardinality.js';
@@ -42,14 +25,6 @@ import {
 // 1. Identifier
 // =====================================================================
 
-// Identifier for a `DateField` reusable schema artifact: a typed wrapper
-// around the field's IRI. Distinguished at compile time and runtime from
-// sibling field-id types (e.g. `IntegerNumberFieldId`, `EmailFieldId`) so a caller
-// can't accidentally pass a `DateField`'s IRI where (say) a
-// `IntegerNumberField`'s IRI is expected.
-//
-// On the wire this collapses to a plain JSON string IRI; the typed
-// wrapper exists only in memory.
 export interface DateFieldId {
   readonly kind: 'DateFieldId';
   readonly iri: Iri;
@@ -57,12 +32,6 @@ export interface DateFieldId {
 
 export type DateFieldReference = DateFieldId;
 
-// Identifier-wrapper constructor for the Date field family.
-// Idempotent: an existing DateFieldId passes through unchanged. A bare
-// string IRI is validated and wrapped via `iri()`; a typed `Iri` is wrapped
-// without re-validation. The DateFieldId wrapper is distinguished from
-// sibling field-id types (e.g. `IntegerNumberFieldId`, `EmailFieldId`) by the
-// per-variant `kind` discriminator.
 export const dateFieldId = (
   v: DateFieldId | Iri | string,
 ): DateFieldId => {
@@ -78,14 +47,6 @@ export const dateFieldId = (
 // =====================================================================
 // 2. Value
 // =====================================================================
-//
-// DateValue is one of:
-//   YearValue       (plain string matching YYYY)
-//   YearMonthValue  (plain string matching YYYY-MM)
-//   FullDateValue   (carries an xsd:date typed literal)
-//
-// Constructors are permissive (accept any string); pattern conformance is
-// checked by validate_date_value in Phase 2.
 
 export interface YearValue {
   readonly kind: 'YearValue';
@@ -107,40 +68,26 @@ export function yearMonthValue(value: string): YearMonthValue {
 
 export interface FullDateValue {
   readonly kind: 'FullDateValue';
-  readonly literal: FullDateLiteral;
+  readonly value: string;
 }
 
-// Accepts a FullDateLiteral or its lexical form directly (wrapped via
-// fullDateLiteral). Lexical conformance to xsd:date is checked at validation,
-// matching the behavior of fullDateLiteral itself.
-export function fullDateValue(input: FullDateLiteral | string): FullDateValue {
-  return {
-    kind: 'FullDateValue',
-    literal: typeof input === 'string' ? fullDateLiteral(input) : input,
-  };
+export function fullDateValue(value: string): FullDateValue {
+  return { kind: 'FullDateValue', value };
 }
 
 export type DateValue = YearValue | YearMonthValue | FullDateValue;
 
-// Lexical-shape discriminators for the three DateValue variants. These match
-// the bare ISO 8601 forms used in everyday metadata; xsd:date's optional
-// trailing time-zone designator is tolerated only on full dates (xsd:gYear and
-// xsd:gYearMonth permit one too, but accepting tz suffixes there would make
-// '2024' vs '2024-...' harder to discriminate cleanly — defer to validation).
+// Lexical-shape discriminators for the three DateValue variants.
 const YEAR_RE = /^\d{4,}$/;
 const YEAR_MONTH_RE = /^\d{4,}-\d{2}$/;
 const FULL_DATE_RE = /^\d{4,}-\d{2}-\d{2}/;
 
-// Smart DateValue constructor. Discriminates a string input by lexical shape:
+// Smart DateValue constructor. Discriminates a string input by lexical
+// shape:
 //   'YYYY'         → YearValue       (xsd:gYear)
 //   'YYYY-MM'      → YearMonthValue  (xsd:gYearMonth)
 //   'YYYY-MM-DD…'  → FullDateValue   (xsd:date; trailing time zone tolerated)
-// A pre-built DateValue passes through; a FullDateLiteral is wrapped as a
-// FullDateValue. Lexical conformance to the chosen XSD datatype is checked
-// at validation, matching the per-variant constructors.
-export function dateValue(
-  input: string | DateValue | FullDateLiteral,
-): DateValue {
+export function dateValue(input: string | DateValue): DateValue {
   if (typeof input === 'string') {
     if (FULL_DATE_RE.test(input)) return fullDateValue(input);
     if (YEAR_MONTH_RE.test(input)) return yearMonthValue(input);
@@ -150,8 +97,7 @@ export function dateValue(
         `expected 'YYYY', 'YYYY-MM', or 'YYYY-MM-DD'`,
     );
   }
-  if (isDateValue(input)) return input;
-  return fullDateValue(input);
+  return input;
 }
 
 export function isYearValue(x: unknown): x is YearValue {
@@ -180,8 +126,6 @@ export function isDateValue(x: unknown): x is DateValue {
 // 3. FieldSpec
 // =====================================================================
 
-// DateValueType selects the granularity of dates accepted by a DateFieldSpec.
-// String-literal union (per nullary-constructor convention).
 export type DateValueType = 'year' | 'yearMonth' | 'fullDate';
 export const DATE_VALUE_TYPES: readonly DateValueType[] = Object.freeze([
   'year',
@@ -258,12 +202,9 @@ export interface EmbeddedDateField {
   readonly defaultValue?: DateValue;
 }
 
-// `defaultValue` accepts a fully-built DateValue, a FullDateLiteral
-// (wrapped as a FullDateValue), or a plain string discriminated by
-// lexical shape ('YYYY', 'YYYY-MM', 'YYYY-MM-DD...'). See dateValue.
 export interface EmbeddedDateFieldInit extends EmbeddedFieldInitCommon {
   readonly artifactRef: DateFieldReference | DateField;
-  readonly defaultValue?: DateValue | FullDateLiteral | string;
+  readonly defaultValue?: DateValue | string;
 }
 
 export function embeddedDateField(init: EmbeddedDateFieldInit): EmbeddedDateField {
