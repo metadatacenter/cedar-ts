@@ -164,7 +164,10 @@ describe('ArtifactMetadata and SchemaArtifactMetadata', () => {
   it('SchemaArtifactMetadata adds schema versioning', () => {
     const m = artifactMetadata({ name: 'Test', lifecycle: tp });
     const sm = schemaArtifactMetadata({ artifact: m, versioning: sv });
-    expect(sm.artifact).toBe(m);
+    // SchemaArtifactMetadata is flat: it spreads the ArtifactMetadata
+    // properties directly alongside `versioning`.
+    expect(sm.name).toBe(m.name);
+    expect(sm.lifecycle).toBe(m.lifecycle);
     expect(sm.versioning).toBe(sv);
   });
 });

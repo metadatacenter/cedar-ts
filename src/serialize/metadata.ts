@@ -300,9 +300,9 @@ export function parseArtifactMetadata(
 
 // ---- SchemaArtifactMetadata ------------------------------------------
 //
-// Wire form is fully flat: the inner `ArtifactMetadata`'s properties
-// are promoted to direct children alongside `versioning`. There is
-// no `artifact` wrapper.
+// In-memory and wire forms are both fully flat: the `ArtifactMetadata`
+// properties sit directly alongside `versioning`. There is no
+// `artifact` wrapper.
 
 const SCHEMA_ARTIFACT_METADATA_KEYS = [
   ...ARTIFACT_METADATA_KEYS,
@@ -311,7 +311,7 @@ const SCHEMA_ARTIFACT_METADATA_KEYS = [
 
 export function serializeSchemaArtifactMetadata(x: SchemaArtifactMetadata): unknown {
   const out: Record<string, unknown> = {};
-  writeArtifactMetadataBody(x.artifact, out);
+  writeArtifactMetadataBody(x, out);
   out['versioning'] = serializeSchemaVersioning(x.versioning);
   return out;
 }

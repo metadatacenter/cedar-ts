@@ -672,41 +672,38 @@ export function parsePhoneNumberValueUntagged(
 
 // ---- External-authority values ---------------------------------------
 //
-// In-memory shape: typed-IRI wrapper (e.g. OrcidIri) and plain string
-// `label`. Wire shape: `{ kind, iri: string, label?: MultilingualString }`
-// per wire-grammar.md §3.7. To round-trip a plain string through
-// MultilingualString we encode it as a single-entry array with lang
-// 'und' and decode by reading the first entry's value.
+// In-memory shape: typed-IRI wrapper (e.g. OrcidIri) and an optional
+// `label` carried as a `MultilingualString`. Wire shape:
+// `{ kind, iri: string, label?: MultilingualString }` per wire-grammar.md
+// §3.7. The label round-trips through `serializeMultilingualString` /
+// `parseMultilingualString` directly.
 
-import { UNDETERMINED_LANG } from '../multilingual.js';
-
-function authorityLabelToWire(label: string): unknown {
-  return [{ value: label, lang: UNDETERMINED_LANG }];
-}
-
-function wireLabelToString(x: unknown, where: string): string {
-  const ms = parseMultilingualString(x, where);
-  return ms[0]!.value;
-}
+import type { MultilingualString } from '../multilingual.js';
 
 function serializeAuthorityValue(
   kind: string,
-  v: { readonly iri: { readonly value: { value: string } | string }; readonly label?: string },
+  v: {
+    readonly iri: { readonly value: { value: string } | string };
+    readonly label?: MultilingualString;
+  },
 ): unknown {
   const inner = (v.iri as unknown as { value: { value: string } }).value;
   const iriString = typeof inner === 'string' ? inner : inner.value;
   const out: Record<string, unknown> = { kind, iri: iriString };
-  if (v.label !== undefined) out['label'] = authorityLabelToWire(v.label);
+  if (v.label !== undefined) out['label'] = serializeMultilingualString(v.label);
   return out;
 }
 
 function serializeAuthorityValueUntagged(
-  v: { readonly iri: { readonly value: { value: string } | string }; readonly label?: string },
+  v: {
+    readonly iri: { readonly value: { value: string } | string };
+    readonly label?: MultilingualString;
+  },
 ): unknown {
   const inner = (v.iri as unknown as { value: { value: string } }).value;
   const iriString = typeof inner === 'string' ? inner : inner.value;
   const out: Record<string, unknown> = { iri: iriString };
-  if (v.label !== undefined) out['label'] = authorityLabelToWire(v.label);
+  if (v.label !== undefined) out['label'] = serializeMultilingualString(v.label);
   return out;
 }
 
@@ -714,16 +711,17 @@ function parseAuthorityFields(
   o: { readonly [k: string]: unknown },
   where: string,
   expectKind: boolean,
-): { iri: string; label?: string } {
+): { iri: string; label?: MultilingualString } {
   expectKnownProperties(o, expectKind ? ['kind', 'iri', 'label'] : ['iri', 'label']);
   rejectNullProperty(o, 'label');
   if (!('iri' in o)) {
     throw new CedarConstructionError(`${where}: missing required "iri"`);
   }
-  const out: { iri: string; label?: string } = {
+  const out: { iri: string; label?: MultilingualString } = {
     iri: expectString(o['iri'], `${where}.iri`),
   };
-  if ('label' in o) out.label = wireLabelToString(o['label'], `${where}.label`);
+  if ('label' in o)
+    out.label = parseMultilingualString(o['label'], `${where}.label`);
   return out;
 }
 
@@ -756,7 +754,7 @@ export const serializeNihGrantIdValueUntagged = (x: NihGrantIdValue): unknown =>
 function parseAuthority<V>(
   x: unknown,
   expectedKind: string,
-  cons: (init: { iri: string; label?: string }) => V,
+  cons: (init: { iri: string; label?: MultilingualString }) => V,
   where: string,
 ): V {
   const o = expectObject(x, where);
@@ -770,7 +768,7 @@ function parseAuthority<V>(
 
 function parseAuthorityUntagged<V>(
   x: unknown,
-  cons: (init: { iri: string; label?: string }) => V,
+  cons: (init: { iri: string; label?: MultilingualString }) => V,
   where: string,
 ): V {
   const o = expectObject(x, where);

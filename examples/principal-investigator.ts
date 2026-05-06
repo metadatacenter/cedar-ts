@@ -179,10 +179,11 @@ const fullName = textField({
   }),
 });
 
-// Single-choice field whose options are LITERAL strings. `literalChoiceOption`
-// accepts a (text, lang) shortcut that wraps as a langTaggedLiteral; pass a
-// fully-built Literal directly for typed-string options. The `default: true`
-// flag marks the entry preselected when the field is rendered.
+// Single-choice field whose options are LITERAL strings.
+// `literalChoiceOption` accepts a (text, lang) shortcut that attaches the
+// language tag directly to the option; pass an init object for a typed
+// (datatype-tagged) option. The `default: true` flag marks the entry
+// preselected when the field is rendered.
 //
 // Use literal-choice when the option set is small, ad-hoc, and not drawn
 // from a published vocabulary. Compare with `academicRank` below,
@@ -437,7 +438,7 @@ export const principalInvestigatorTemplate: Template = template({
     }),
 
     // Literal single-choice — the option labels appear verbatim in instance
-    // values as langTaggedLiterals.
+    // values as LiteralChoiceValues with an optional `lang` tag.
     embeddedSingleChoiceField({
       key: 'academic_title',
       artifactRef: academicTitle,
@@ -526,7 +527,7 @@ export const principalInvestigatorTemplate: Template = template({
 
     // Boolean embedding. Note: no `cardinality` slot is permitted on
     // EmbeddedBooleanField — booleans are inherently single-valued. The
-    // `defaultValue` accepts a BooleanLiteral or a bare boolean shortcut
+    // `defaultValue` accepts a BooleanValue or a bare boolean shortcut
     // (here the bare `false`, which the constructor wraps).
     embeddedBooleanField({
       key: 'accepting_new_students',
@@ -615,8 +616,8 @@ export const exampleInstance: TemplateInstance = templateInstance({
       'full_name',
       textValue('Jane Smith'),
     ),
-    // Literal-choice value: a langTaggedLiteral matching one of the option
-    // labels. The (text, lang) shortcut wraps to a LangTaggedLiteral.
+    // Literal-choice value: a LiteralChoiceValue matching one of the option
+    // labels. The (text, lang) shortcut attaches the language tag directly.
     fieldValue(
       'academic_title',
       literalChoiceValue('Associate Professor', 'en'),
@@ -652,7 +653,7 @@ export const exampleInstance: TemplateInstance = templateInstance({
     ),
     // Boolean value — the PI is accepting new students. The
     // `booleanValue()` constructor accepts a bare JavaScript boolean and
-    // wraps it as a BooleanLiteral.
+    // wraps it as a BooleanValue.
     fieldValue(
       'accepting_new_students',
       booleanValue(true),

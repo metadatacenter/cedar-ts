@@ -19,6 +19,7 @@
 // pattern (`iri` + optional `label`) via `external-authority-shared.ts`.
 
 import { type Iri, iri, parseSemanticVersion } from '../leaves/index.js';
+import type { MultilingualString } from '../multilingual.js';
 import type { SchemaArtifactMetadata } from '../metadata/index.js';
 import type { ValueRequirement } from '../embedded/requirement.js';
 import type { Cardinality } from '../embedded/cardinality.js';
@@ -91,7 +92,7 @@ export const orcidIri = (v: Iri | string): OrcidIri =>
 export interface OrcidValue {
   readonly kind: 'OrcidValue';
   readonly iri: OrcidIri;
-  readonly label?: string;
+  readonly label?: MultilingualString;
 }
 
 function toOrcidIri(v: OrcidIri | Iri | string): OrcidIri {

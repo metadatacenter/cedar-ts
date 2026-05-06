@@ -18,10 +18,15 @@
 //     `isXxxValue` functions.
 
 import type { Iri } from '../leaves/index.js';
+import {
+  type MultilingualString,
+  type MultilingualStringInput,
+  multilingualString,
+} from '../multilingual.js';
 
 // Internal shared helpers for the six external-authority families
 // (orcid, ror, doi, pub-med-id, rrid, nih-grant-id). Each family carries
-// the same shape: { kind: 'XxxValue'; iri: <typed>; label?: string }.
+// the same shape: { kind: 'XxxValue'; iri: <typed>; label?: MultilingualString }.
 //
 // These helpers centralize the authority-value construction pattern so
 // the family files can stay small. They are intentionally not exported
@@ -31,15 +36,18 @@ import type { Iri } from '../leaves/index.js';
 export interface WithLabel<K extends string, I> {
   readonly kind: K;
   readonly iri: I;
-  readonly label?: string;
+  readonly label?: MultilingualString;
 }
 
 export function makeAuthorityValue<K extends string, I>(
   kind: K,
   iriValue: I,
-  label?: string,
+  label?: MultilingualString,
 ): WithLabel<K, I> {
-  const out: { kind: K; iri: I; label?: string } = { kind, iri: iriValue };
+  const out: { kind: K; iri: I; label?: MultilingualString } = {
+    kind,
+    iri: iriValue,
+  };
   if (label !== undefined) out.label = label;
   return out;
 }
@@ -48,14 +56,19 @@ export function makeAuthorityValue<K extends string, I>(
 //   - a bare string IRI                           (no label)
 //   - an Iri                                      (no label)
 //   - the typed authority-specific IRI            (no label)
-//   - an init object { iri, label? }              (with optional label)
+//   - an init object { iri, label? }              (with optional label,
+//                                                   widened via
+//                                                   MultilingualStringInput)
 // The string / Iri / typed-iri shortcuts cover the very common case where
 // only the IRI matters; reach for the init object when a label is needed.
 export type AuthorityValueInput<I> =
   | I
   | Iri
   | string
-  | { readonly iri: I | Iri | string; readonly label?: string };
+  | {
+      readonly iri: I | Iri | string;
+      readonly label?: MultilingualStringInput;
+    };
 
 export function authorityValueFromInput<K extends string, I extends object>(
   kind: K,
@@ -67,7 +80,9 @@ export function authorityValueFromInput<K extends string, I extends object>(
   }
   // Init objects carry an `iri` property; tagged Iri / typed-iri values do not.
   if ('iri' in input) {
-    return makeAuthorityValue(kind, toTypedIri(input.iri), input.label);
+    const label =
+      input.label !== undefined ? multilingualString(input.label) : undefined;
+    return makeAuthorityValue(kind, toTypedIri(input.iri), label);
   }
   return makeAuthorityValue(kind, toTypedIri(input), undefined);
 }

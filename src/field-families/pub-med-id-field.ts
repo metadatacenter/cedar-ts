@@ -19,6 +19,7 @@
 // pattern (`iri` + optional `label`) via `external-authority-shared.ts`.
 
 import { type Iri, iri, parseSemanticVersion } from '../leaves/index.js';
+import type { MultilingualString } from '../multilingual.js';
 import type { SchemaArtifactMetadata } from '../metadata/index.js';
 import type { ValueRequirement } from '../embedded/requirement.js';
 import type { Cardinality } from '../embedded/cardinality.js';
@@ -91,7 +92,7 @@ export const pubMedIri = (v: Iri | string): PubMedIri =>
 export interface PubMedIdValue {
   readonly kind: 'PubMedIdValue';
   readonly iri: PubMedIri;
-  readonly label?: string;
+  readonly label?: MultilingualString;
 }
 
 function toPubMedIri(v: PubMedIri | Iri | string): PubMedIri {

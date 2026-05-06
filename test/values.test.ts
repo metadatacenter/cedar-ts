@@ -221,7 +221,7 @@ describe('External authority values', () => {
     });
     expect(ov.kind).toBe('OrcidValue');
     expect(ov.iri.kind).toBe('OrcidIri');
-    expect(ov.label).toBe('Researcher');
+    expect(ov.label).toEqual([{ value: 'Researcher', lang: 'und' }]);
     expect(isExternalAuthorityValue(ov)).toBe(true);
 
     const rv = rorValue({ iri: 'https://ror.org/05dxps055' });
@@ -397,7 +397,7 @@ describe('External-authority value input widening', () => {
   it('still accepts the init-object form with an optional label', () => {
     const v = doiValue({ iri: 'https://doi.org/10.1000/xyz', label: 'Sample DOI' });
     expect(v.iri.kind).toBe('DoiIri');
-    expect(v.label).toBe('Sample DOI');
+    expect(v.label).toEqual([{ value: 'Sample DOI', lang: 'und' }]);
   });
 
   it('all six families accept a bare string IRI', () => {

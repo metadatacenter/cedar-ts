@@ -64,12 +64,15 @@ export function artifactMetadata(init: ArtifactMetadataInit): ArtifactMetadata {
 }
 
 // SchemaArtifactMetadata adds versioning information for reusable schema
-// artifacts (Template, Field).
-export interface SchemaArtifactMetadata {
-  readonly artifact: ArtifactMetadata;
+// artifacts (Template, Field). The in-memory shape is fully flat: the
+// `ArtifactMetadata` properties sit directly alongside `versioning`.
+export interface SchemaArtifactMetadata extends ArtifactMetadata {
   readonly versioning: SchemaVersioning;
 }
 
+// The init shape composes a pre-built `ArtifactMetadata` with a
+// `versioning` slot — call sites typically build an `ArtifactMetadata`
+// up front and reuse it across artifacts.
 export interface SchemaArtifactMetadataInit {
   readonly artifact: ArtifactMetadata;
   readonly versioning: SchemaVersioning;
@@ -79,7 +82,7 @@ export function schemaArtifactMetadata(
   init: SchemaArtifactMetadataInit,
 ): SchemaArtifactMetadata {
   return {
-    artifact: init.artifact,
+    ...init.artifact,
     versioning: init.versioning,
   };
 }
