@@ -28,10 +28,8 @@ import {
   booleanFieldSpec,
   booleanValue,
   cardinality,
-  controlledTermChoiceOption,
   controlledTermField,
   controlledTermFieldSpec,
-  controlledTermSingleChoiceFieldSpec,
   controlledTermValue,
   dateField,
   dateFieldSpec,
@@ -44,24 +42,24 @@ import {
   embeddedPhoneNumberField,
   embeddedPresentationComponent,
   embeddedRorField,
-  embeddedSingleChoiceField,
+  embeddedSingleValuedEnumField,
   embeddedTextField,
   emailField,
   emailFieldSpec,
   emailValue,
+  enumValue,
   fieldValue,
   fullDateValue,
   isEmbeddedField,
   labelOverride,
-  literalChoiceOption,
-  literalChoiceValue,
-  literalSingleChoiceFieldSpec,
+  meaning,
   ontologyDisplayHint,
   ontologyReference,
   ontologySource,
   orcidField,
   orcidFieldSpec,
   orcidValue,
+  permissibleValue,
   phoneNumberField,
   phoneNumberFieldSpec,
   richTextComponent,
@@ -69,9 +67,10 @@ import {
   rorFieldSpec,
   rorValue,
   schemaArtifactMetadata,
-  schemaVersioning,
+  schemaArtifactVersioning,
   serialize,
-  singleChoiceField,
+  singleValuedEnumField,
+  singleValuedEnumFieldSpec,
   template,
   templateInstance,
   templateInstanceId,
@@ -149,7 +148,7 @@ function artifactMeta(name: string, description: string): ArtifactMetadata {
 function meta(name: string, description: string): SchemaArtifactMetadata {
   return schemaArtifactMetadata({
     artifact: artifactMeta(name, description),
-    versioning: schemaVersioning({
+    versioning: schemaArtifactVersioning({
       version: '1.0.0',
       status: 'draft',
     }),
@@ -179,66 +178,70 @@ const fullName = textField({
   }),
 });
 
-// Single-choice field whose options are LITERAL strings.
-// `literalChoiceOption` accepts a (text, lang) shortcut that attaches the
-// language tag directly to the option; pass an init object for a typed
-// (datatype-tagged) option. The `default: true` flag marks the entry
-// preselected when the field is rendered.
-//
-// Use literal-choice when the option set is small, ad-hoc, and not drawn
-// from a published vocabulary. Compare with `academicRank` below,
-// which is backed by an ontology.
-const academicTitle = singleChoiceField({
+// Single-valued enum field. PermissibleValue is the option type — each
+// entry pairs a canonical Token with optional human-readable label/
+// description and zero-or-more Meaning entries that bind the token to
+// ontology terms. A spec-level `defaultValue` (a Token) marks the
+// pre-selected option.
+const academicTitle = singleValuedEnumField({
   id: `${FIELDS}academic-title`,
   modelVersion: MODEL_VERSION,
-  metadata: meta('Academic Title', 'Academic rank or position (literal label).'),
-  fieldSpec: literalSingleChoiceFieldSpec({
-    options: [
-      literalChoiceOption('Professor', 'en'),
-      literalChoiceOption('Associate Professor', 'en', { default: true }),
-      literalChoiceOption('Assistant Professor', 'en'),
-      literalChoiceOption('Lecturer', 'en'),
-      literalChoiceOption('Research Scientist', 'en'),
+  metadata: meta('Academic Title', 'Academic rank or position.'),
+  fieldSpec: singleValuedEnumFieldSpec({
+    permissibleValues: [
+      permissibleValue({ value: 'professor', label: 'Professor' }),
+      permissibleValue({
+        value: 'associate-professor',
+        label: 'Associate Professor',
+      }),
+      permissibleValue({
+        value: 'assistant-professor',
+        label: 'Assistant Professor',
+      }),
+      permissibleValue({ value: 'lecturer', label: 'Lecturer' }),
+      permissibleValue({
+        value: 'research-scientist',
+        label: 'Research Scientist',
+      }),
     ],
+    defaultValue: 'associate-professor',
   }),
 });
 
-// Single-choice field whose options are CONTROLLED-TERM values drawn from a
-// published vocabulary. Each option pairs an IRI (the term identifier) with
-// a human-readable label. Selecting an option yields a ControlledTermValue
-// at the instance, not a plain string — see `exampleInstance` below.
-//
-// The IRIs here resolve to terms in the OBO Role Ontology (RoleO).
-const academicRank = singleChoiceField({
+// Single-valued enum whose permissible values are bound, via Meaning
+// entries, to terms in an external ontology — here the OBO Role Ontology
+// (RoleO). RDF projection of an instance EnumValue follows the bound
+// term IRIs rather than the bare token.
+const academicRank = singleValuedEnumField({
   id: `${FIELDS}academic-rank`,
   modelVersion: MODEL_VERSION,
   metadata: meta(
     'Academic Rank',
-    'Academic rank drawn from the OBO Role Ontology (RoleO).',
+    'Academic rank backed by the OBO Role Ontology (RoleO).',
   ),
-  fieldSpec: controlledTermSingleChoiceFieldSpec({
-    options: [
-      controlledTermChoiceOption(
-        controlledTermValue(
-            {
-              term: ROLEO_FULL_PROFESSOR,
-              label: 'Full Professor'
-            }),
-      ),
-      controlledTermChoiceOption(
-        controlledTermValue({
-          term: ROLEO_ASSOCIATE_PROFESSOR,
-          label: 'Associate Professor',
-        }),
-        { default: true },
-      ),
-      controlledTermChoiceOption(
-        controlledTermValue({
-          term: ROLEO_ASSISTANT_PROFESSOR,
-          label: 'Assistant Professor',
-        }),
-      ),
+  fieldSpec: singleValuedEnumFieldSpec({
+    permissibleValues: [
+      permissibleValue({
+        value: 'full-professor',
+        label: 'Full Professor',
+        meanings: [meaning({ iri: ROLEO_FULL_PROFESSOR, label: 'Full Professor' })],
+      }),
+      permissibleValue({
+        value: 'associate-professor',
+        label: 'Associate Professor',
+        meanings: [
+          meaning({ iri: ROLEO_ASSOCIATE_PROFESSOR, label: 'Associate Professor' }),
+        ],
+      }),
+      permissibleValue({
+        value: 'assistant-professor',
+        label: 'Assistant Professor',
+        meanings: [
+          meaning({ iri: ROLEO_ASSISTANT_PROFESSOR, label: 'Assistant Professor' }),
+        ],
+      }),
     ],
+    defaultValue: 'associate-professor',
   }),
 });
 
@@ -437,26 +440,22 @@ export const principalInvestigatorTemplate: Template = template({
       property: 'https://schema.org/name',
     }),
 
-    // Literal single-choice — the option labels appear verbatim in instance
-    // values as LiteralChoiceValues with an optional `lang` tag.
-    embeddedSingleChoiceField({
+    // Single-valued enum — instance values are EnumValues carrying a Token
+    // matching one of the spec's permissibleValues.
+    embeddedSingleValuedEnumField({
       key: 'academic_title',
       artifactRef: academicTitle,
       valueRequirement: 'required',
-      // The `property` slot accepts a bare-string IRI; the (iri, label)
-      // object form below adds an optional human-readable label for the
-      // semantic property — useful for renderers that surface RDF predicate
-      // information in the UI.
       property: {
         iri: 'https://schema.org/jobTitle',
         label: 'job title',
       },
     }),
 
-    // Controlled-term single-choice — the selected option is encoded as a
-    // ControlledTermValue (term IRI plus optional label/notation/preferred
-    // label) rather than a literal string.
-    embeddedSingleChoiceField({
+    // Single-valued enum whose permissibleValues bind to ontology terms via
+    // Meaning entries. Instance values still carry a Token; RDF projection
+    // resolves the bound term IRI.
+    embeddedSingleValuedEnumField({
       key: 'academic_rank',
       artifactRef: academicRank,
       valueRequirement: 'recommended',
@@ -616,21 +615,11 @@ export const exampleInstance: TemplateInstance = templateInstance({
       'full_name',
       textValue('Jane Smith'),
     ),
-    // Literal-choice value: a LiteralChoiceValue matching one of the option
-    // labels. The (text, lang) shortcut attaches the language tag directly.
-    fieldValue(
-      'academic_title',
-      literalChoiceValue('Associate Professor', 'en'),
-    ),
-    // Controlled-term value: an IRI from the academic-rank ontology, plus
-    // an optional human-readable label.
-    fieldValue(
-      'academic_rank',
-      controlledTermValue({
-        term: ROLEO_ASSOCIATE_PROFESSOR,
-        label: 'Associate Professor',
-      }),
-    ),
+    // Enum value: a Token referring to one of the spec's permissibleValues.
+    fieldValue('academic_title', enumValue('associate-professor')),
+    // Same shape for an ontology-backed enum — RDF projection follows the
+    // spec's Meaning bindings.
+    fieldValue('academic_rank', enumValue('associate-professor')),
     fieldValue(
       'email',
       emailValue('jane.smith@stanford.edu'),

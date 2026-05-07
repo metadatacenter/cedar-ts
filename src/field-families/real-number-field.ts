@@ -36,7 +36,6 @@ export interface RealNumberFieldId {
   readonly iri: Iri;
 }
 
-export type RealNumberFieldReference = RealNumberFieldId;
 
 export const realNumberFieldId = (
   v: RealNumberFieldId | Iri | string,
@@ -167,7 +166,7 @@ export const realNumberField = (init: RealNumberFieldInit): RealNumberField =>
 export interface EmbeddedRealNumberField {
   readonly kind: 'EmbeddedRealNumberField';
   readonly key: string;
-  readonly artifactRef: RealNumberFieldReference;
+  readonly artifactRef: RealNumberFieldId;
   readonly valueRequirement?: ValueRequirement;
   readonly cardinality?: Cardinality;
   readonly visibility?: Visibility;
@@ -177,7 +176,7 @@ export interface EmbeddedRealNumberField {
 }
 
 export interface EmbeddedRealNumberFieldInit extends EmbeddedFieldInitCommon {
-  readonly artifactRef: RealNumberFieldReference | RealNumberField;
+  readonly artifactRef: RealNumberFieldId | RealNumberField;
   readonly defaultValue?: RealNumberValue;
 }
 

@@ -1,4 +1,9 @@
 import { type Iri, iri, parseSemanticVersion } from '../leaves/index.js';
+import {
+  type MultilingualString,
+  type MultilingualStringInput,
+  multilingualString,
+} from '../multilingual.js';
 import type { ArtifactMetadata } from '../metadata/index.js';
 import { type PresentationComponentId, presentationComponentId } from '../identifiers.js';
 
@@ -47,6 +52,9 @@ export interface ImageComponent {
   readonly modelVersion: string;
   readonly metadata: ArtifactMetadata;
   readonly image: Iri;
+  // Accessibility metadata: short alt-text label and longer description.
+  readonly label?: MultilingualString;
+  readonly description?: MultilingualString;
 }
 
 export interface ImageComponentInit {
@@ -54,16 +62,29 @@ export interface ImageComponentInit {
   readonly modelVersion: string;
   readonly metadata: ArtifactMetadata;
   readonly image: Iri | string;
+  readonly label?: MultilingualStringInput;
+  readonly description?: MultilingualStringInput;
 }
 
 export function imageComponent(init: ImageComponentInit): ImageComponent {
-  return {
+  const out: {
+    kind: 'ImageComponent';
+    id: PresentationComponentId;
+    modelVersion: string;
+    metadata: ArtifactMetadata;
+    image: Iri;
+    label?: MultilingualString;
+    description?: MultilingualString;
+  } = {
     kind: 'ImageComponent',
     id: toPresentationComponentId(init.id),
     modelVersion: parseSemanticVersion(init.modelVersion),
     metadata: init.metadata,
     image: typeof init.image === 'string' ? iri(init.image) : init.image,
   };
+  if (init.label !== undefined) out.label = multilingualString(init.label);
+  if (init.description !== undefined) out.description = multilingualString(init.description);
+  return out;
 }
 
 export interface YoutubeVideoComponent {
@@ -72,6 +93,9 @@ export interface YoutubeVideoComponent {
   readonly modelVersion: string;
   readonly metadata: ArtifactMetadata;
   readonly video: Iri;
+  // Accessibility metadata: short alt-text / caption-title and longer description.
+  readonly label?: MultilingualString;
+  readonly description?: MultilingualString;
 }
 
 export interface YoutubeVideoComponentInit {
@@ -79,18 +103,31 @@ export interface YoutubeVideoComponentInit {
   readonly modelVersion: string;
   readonly metadata: ArtifactMetadata;
   readonly video: Iri | string;
+  readonly label?: MultilingualStringInput;
+  readonly description?: MultilingualStringInput;
 }
 
 export function youtubeVideoComponent(
   init: YoutubeVideoComponentInit,
 ): YoutubeVideoComponent {
-  return {
+  const out: {
+    kind: 'YoutubeVideoComponent';
+    id: PresentationComponentId;
+    modelVersion: string;
+    metadata: ArtifactMetadata;
+    video: Iri;
+    label?: MultilingualString;
+    description?: MultilingualString;
+  } = {
     kind: 'YoutubeVideoComponent',
     id: toPresentationComponentId(init.id),
     modelVersion: parseSemanticVersion(init.modelVersion),
     metadata: init.metadata,
     video: typeof init.video === 'string' ? iri(init.video) : init.video,
   };
+  if (init.label !== undefined) out.label = multilingualString(init.label);
+  if (init.description !== undefined) out.description = multilingualString(init.description);
+  return out;
 }
 
 export interface SectionBreakComponent {

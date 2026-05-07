@@ -6,7 +6,7 @@
 //
 //   - LifecycleMetadata             (lifecycle-metadata.ts):
 //       creation and modification timestamps and agents
-//   - SchemaVersioning + Status     (schema-versioning.ts):
+//   - SchemaArtifactVersioning + Status     (schema-artifact-versioning.ts):
 //       artifact version, lifecycle status, model version
 //   - Annotation + AnnotationValue  (annotations.ts):
 //       arbitrary RDF-flavored annotations on an artifact
@@ -14,7 +14,7 @@
 //       the bundle (descriptive properties + lifecycle + annotations)
 //       carried by every Artifact except those that need versioning too
 //   - SchemaArtifactMetadata        (artifact-metadata.ts):
-//       ArtifactMetadata + SchemaVersioning, carried by reusable
+//       ArtifactMetadata + SchemaArtifactVersioning, carried by reusable
 //       schema artifacts (Field and Template)
 
 export {
@@ -27,15 +27,18 @@ export {
   type Status,
   STATUSES,
   isStatus,
-  type SchemaVersioning,
-  type SchemaVersioningInit,
-  schemaVersioning,
-} from './schema-versioning.js';
+  type SchemaArtifactVersioning,
+  type SchemaArtifactVersioningInit,
+  schemaArtifactVersioning,
+} from './schema-artifact-versioning.js';
 
 export {
   type AnnotationStringValue,
   annotationStringValue,
   isAnnotationStringValue,
+  type AnnotationIriValue,
+  annotationIriValue,
+  isAnnotationIriValue,
   type AnnotationValue,
   isAnnotationValue,
   type Annotation,

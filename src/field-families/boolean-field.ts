@@ -26,7 +26,6 @@ export interface BooleanFieldId {
   readonly iri: Iri;
 }
 
-export type BooleanFieldReference = BooleanFieldId;
 
 export const booleanFieldId = (
   v: BooleanFieldId | Iri | string,
@@ -125,7 +124,7 @@ export const booleanField = (init: BooleanFieldInit): BooleanField =>
 export interface EmbeddedBooleanField {
   readonly kind: 'EmbeddedBooleanField';
   readonly key: string;
-  readonly artifactRef: BooleanFieldReference;
+  readonly artifactRef: BooleanFieldId;
   readonly valueRequirement?: ValueRequirement;
   readonly visibility?: Visibility;
   readonly labelOverride?: LabelOverride;
@@ -135,7 +134,7 @@ export interface EmbeddedBooleanField {
 
 export interface EmbeddedBooleanFieldInit {
   readonly key: string;
-  readonly artifactRef: BooleanFieldReference | BooleanField;
+  readonly artifactRef: BooleanFieldId | BooleanField;
   readonly valueRequirement?: ValueRequirement;
   readonly visibility?: Visibility;
   readonly labelOverride?: LabelOverride;
@@ -149,7 +148,7 @@ export function embeddedBooleanField(
   const out: {
     kind: 'EmbeddedBooleanField';
     key: string;
-    artifactRef: BooleanFieldReference;
+    artifactRef: BooleanFieldId;
     valueRequirement?: ValueRequirement;
     visibility?: Visibility;
     labelOverride?: LabelOverride;

@@ -15,7 +15,7 @@
 //   - multilingual.ts: LangString, MultilingualString and selectors
 //   - identifiers.ts : top-level artifact identifiers (TemplateId,
 //                      TemplateInstanceId, PresentationComponentId)
-//   - metadata/      : descriptive / lifecycle-metadata / schema-versioning /
+//   - metadata/      : descriptive / lifecycle-metadata / schema-artifact-versioning /
 //                      annotations / artifact-metadata
 //   - field-families/: the 20 per-family vertical slices (TextField,
 //                      IntegerNumberField, RealNumberField, BooleanField,

@@ -43,6 +43,11 @@ import {
   serializeArtifactMetadata,
   parseArtifactMetadata,
 } from './metadata.js';
+import {
+  serializeMultilingualString,
+  parseMultilingualString,
+} from './multilingual.js';
+import { rejectNullProperty } from './parse-utils.js';
 
 // ---- RichTextComponent ----------------------------------------------
 
@@ -85,13 +90,17 @@ export function parseRichTextComponent(
 // ---- ImageComponent --------------------------------------------------
 
 export function serializeImageComponent(x: ImageComponent): unknown {
-  return {
+  const out: Record<string, unknown> = {
     kind: 'ImageComponent',
     id: serializePresentationComponentId(x.id),
     modelVersion: x.modelVersion,
     metadata: serializeArtifactMetadata(x.metadata),
     image: x.image.value,
   };
+  if (x.label !== undefined) out['label'] = serializeMultilingualString(x.label);
+  if (x.description !== undefined)
+    out['description'] = serializeMultilingualString(x.description);
+  return out;
 }
 
 export function parseImageComponent(
@@ -99,7 +108,17 @@ export function parseImageComponent(
   where = 'ImageComponent',
 ): ImageComponent {
   const o = expectObject(x, where);
-  expectKnownProperties(o, ['kind', 'id', 'modelVersion', 'metadata', 'image']);
+  expectKnownProperties(o, [
+    'kind',
+    'id',
+    'modelVersion',
+    'metadata',
+    'image',
+    'label',
+    'description',
+  ]);
+  rejectNullProperty(o, 'label');
+  rejectNullProperty(o, 'description');
   if (o['kind'] !== 'ImageComponent') {
     throw new CedarConstructionError(
       `${where}: expected kind "ImageComponent"`,
@@ -112,12 +131,23 @@ export function parseImageComponent(
       );
     }
   }
-  return imageComponent({
+  const init: Parameters<typeof imageComponent>[0] = {
     id: parsePresentationComponentId(o['id'], `${where}.id`),
     modelVersion: expectString(o['modelVersion'], `${where}.modelVersion`),
     metadata: parseArtifactMetadata(o['metadata'], `${where}.metadata`),
     image: expectString(o['image'], `${where}.image`),
-  });
+  };
+  if ('label' in o)
+    (init as { label?: unknown }).label = parseMultilingualString(
+      o['label'],
+      `${where}.label`,
+    );
+  if ('description' in o)
+    (init as { description?: unknown }).description = parseMultilingualString(
+      o['description'],
+      `${where}.description`,
+    );
+  return imageComponent(init);
 }
 
 // ---- YoutubeVideoComponent -------------------------------------------
@@ -125,13 +155,17 @@ export function parseImageComponent(
 export function serializeYoutubeVideoComponent(
   x: YoutubeVideoComponent,
 ): unknown {
-  return {
+  const out: Record<string, unknown> = {
     kind: 'YoutubeVideoComponent',
     id: serializePresentationComponentId(x.id),
     modelVersion: x.modelVersion,
     metadata: serializeArtifactMetadata(x.metadata),
     video: x.video.value,
   };
+  if (x.label !== undefined) out['label'] = serializeMultilingualString(x.label);
+  if (x.description !== undefined)
+    out['description'] = serializeMultilingualString(x.description);
+  return out;
 }
 
 export function parseYoutubeVideoComponent(
@@ -139,7 +173,17 @@ export function parseYoutubeVideoComponent(
   where = 'YoutubeVideoComponent',
 ): YoutubeVideoComponent {
   const o = expectObject(x, where);
-  expectKnownProperties(o, ['kind', 'id', 'modelVersion', 'metadata', 'video']);
+  expectKnownProperties(o, [
+    'kind',
+    'id',
+    'modelVersion',
+    'metadata',
+    'video',
+    'label',
+    'description',
+  ]);
+  rejectNullProperty(o, 'label');
+  rejectNullProperty(o, 'description');
   if (o['kind'] !== 'YoutubeVideoComponent') {
     throw new CedarConstructionError(
       `${where}: expected kind "YoutubeVideoComponent"`,
@@ -152,12 +196,23 @@ export function parseYoutubeVideoComponent(
       );
     }
   }
-  return youtubeVideoComponent({
+  const init: Parameters<typeof youtubeVideoComponent>[0] = {
     id: parsePresentationComponentId(o['id'], `${where}.id`),
     modelVersion: expectString(o['modelVersion'], `${where}.modelVersion`),
     metadata: parseArtifactMetadata(o['metadata'], `${where}.metadata`),
     video: expectString(o['video'], `${where}.video`),
-  });
+  };
+  if ('label' in o)
+    (init as { label?: unknown }).label = parseMultilingualString(
+      o['label'],
+      `${where}.label`,
+    );
+  if ('description' in o)
+    (init as { description?: unknown }).description = parseMultilingualString(
+      o['description'],
+      `${where}.description`,
+    );
+  return youtubeVideoComponent(init);
 }
 
 // ---- SectionBreakComponent / PageBreakComponent ----------------------

@@ -53,7 +53,6 @@ export interface NihGrantIdFieldId {
   readonly iri: Iri;
 }
 
-export type NihGrantIdFieldReference = NihGrantIdFieldId;
 
 // Identifier-wrapper constructor for the NihGrantId field family.
 // Idempotent: an existing NihGrantIdFieldId passes through unchanged. A bare
@@ -152,7 +151,7 @@ export const nihGrantIdField = (init: NihGrantIdFieldInit): NihGrantIdField =>
 export interface EmbeddedNihGrantIdField {
   readonly kind: 'EmbeddedNihGrantIdField';
   readonly key: string;
-  readonly artifactRef: NihGrantIdFieldReference;
+  readonly artifactRef: NihGrantIdFieldId;
   readonly valueRequirement?: ValueRequirement;
   readonly cardinality?: Cardinality;
   readonly visibility?: Visibility;
@@ -162,7 +161,7 @@ export interface EmbeddedNihGrantIdField {
 }
 
 export interface EmbeddedNihGrantIdFieldInit extends EmbeddedFieldInitCommon {
-  readonly artifactRef: NihGrantIdFieldReference | NihGrantIdField;
+  readonly artifactRef: NihGrantIdFieldId | NihGrantIdField;
   readonly defaultValue?: NihGrantIdValue | AuthorityValueInput<NihGrantIri>;
 }
 

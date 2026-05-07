@@ -15,11 +15,8 @@ import {
   isYearMonthValue,
   isFullDateValue,
   controlledTermValue,
-  literalChoiceValue,
-  controlledTermChoiceValue,
-  isLiteralChoiceValue,
-  isControlledTermChoiceValue,
-  isChoiceValue,
+  enumValue,
+  isEnumValue,
   linkValue,
   emailValue,
   phoneNumberValue,
@@ -140,41 +137,12 @@ describe('ControlledTermValue', () => {
   });
 });
 
-describe('ChoiceValue', () => {
-  it('LiteralChoiceValue (typed) carries a datatype IRI', () => {
-    const cv = literalChoiceValue({
-      value: '1',
-      datatype: 'http://www.w3.org/2001/XMLSchema#integer',
-    });
-    expect(isLiteralChoiceValue(cv)).toBe(true);
-    expect(isChoiceValue(cv)).toBe(true);
-    expect(cv.datatype?.value).toBe(
-      'http://www.w3.org/2001/XMLSchema#integer',
-    );
-  });
-
-  it('LiteralChoiceValue (lang-tagged) carries a lang', () => {
-    const cv = literalChoiceValue('Professor', 'en');
-    expect(cv.lang?.value).toBe('en');
-  });
-
-  it('LiteralChoiceValue (plain) carries neither lang nor datatype', () => {
-    const cv = literalChoiceValue('Plain');
-    expect(cv.lang).toBeUndefined();
-    expect(cv.datatype).toBeUndefined();
-  });
-
-  it('LiteralChoiceValue rejects both lang and datatype together', () => {
-    expect(() =>
-      literalChoiceValue({ value: 'x', lang: 'en', datatype: 'http://example.org/d' }),
-    ).toThrow();
-  });
-
-  it('ControlledTermChoiceValue wraps a ControlledTermValue', () => {
-    const ctv = controlledTermValue({ term: 'http://example.org/t' });
-    const cv = controlledTermChoiceValue(ctv);
-    expect(isControlledTermChoiceValue(cv)).toBe(true);
-    expect(isChoiceValue(cv)).toBe(true);
+describe('EnumValue', () => {
+  it('carries a Token value', () => {
+    const ev = enumValue('professor');
+    expect(ev.kind).toBe('EnumValue');
+    expect(ev.value).toBe('professor');
+    expect(isEnumValue(ev)).toBe(true);
   });
 });
 
@@ -182,7 +150,7 @@ describe('LinkValue', () => {
   it('carries an Iri and optional label', () => {
     const lv = linkValue({ iri: 'https://example.org', label: 'Example' });
     expect(lv.iri.value).toBe('https://example.org');
-    expect(lv.label).toBe('Example');
+    expect(lv.label).toEqual([{ value: 'Example', lang: 'und' }]);
   });
 
   it('omits label when not provided (exactOptionalPropertyTypes)', () => {
@@ -273,9 +241,7 @@ describe('Value union recognition', () => {
     expect(
       isValue(controlledTermValue({ term: 'http://example.org/t' })),
     ).toBe(true);
-    expect(
-      isValue(literalChoiceValue({ value: '1', datatype: 'http://www.w3.org/2001/XMLSchema#integer' })),
-    ).toBe(true);
+    expect(isValue(enumValue('option-1'))).toBe(true);
     expect(isValue(linkValue({ iri: 'https://example.org' }))).toBe(true);
     expect(isValue(emailValue('me@example.org'))).toBe(true);
     expect(

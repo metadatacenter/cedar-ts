@@ -8,7 +8,7 @@ import {
   isTemplate,
   presentationComponentId,
   schemaArtifactMetadata,
-  schemaVersioning,
+  schemaArtifactVersioning,
   template,
   templateId,
   lifecycleMetadata,
@@ -27,7 +27,7 @@ const tp = lifecycleMetadata({
 });
 const meta = schemaArtifactMetadata({
   artifact: artifactMetadata({ name: 'Demo Template', lifecycle: tp }),
-  versioning: schemaVersioning({
+  versioning: schemaArtifactVersioning({
     version: '1.0.0',
     status: 'draft',
   }),

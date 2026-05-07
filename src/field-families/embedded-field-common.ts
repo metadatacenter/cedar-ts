@@ -13,8 +13,8 @@
 //     valueRequirement, cardinality, visibility, labelOverride,
 //     property) shared by the 19 cardinality-carrying EmbeddedField
 //     variants. Called by their `embeddedXxxField` constructors.
-//   - fieldRef() — extracts the FieldReference from a Field artifact, or
-//     passes through a typed reference. Called by every
+//   - fieldRef() — extracts the FieldId from a Field artifact, or
+//     passes through a typed FieldId. Called by every
 //     `embeddedXxxField` constructor (all 20 variants).
 //
 // Not re-exported from `index.ts`; consumed only by the family files
@@ -28,7 +28,7 @@ import type { LabelOverride } from '../embedded/label-override.js';
 import { type Property, type PropertyInput, property } from '../embedded/property.js';
 
 // Internal helper module for the 18 EmbeddedField family constructors.
-// Centralizes the common-property assembly and the Field-to-FieldReference
+// Centralizes the common-property assembly and the Field-to-FieldId
 // extraction so each family file can stay focused on its own concrete shape.
 // Not exported from the package barrel.
 
@@ -64,7 +64,7 @@ export function assembleCommon(init: EmbeddedFieldInitCommon): AssembledCommon {
 
 // Set of every Field-family `kind` discriminant. Used by `fieldRef` to
 // decide whether `input` is a reusable Field artifact (in which case its
-// `.id` is extracted) or already a FieldReference (in which case it is
+// `.id` is extracted) or already a FieldId (in which case it is
 // returned as-is).
 const FIELD_VARIANT_KINDS: ReadonlySet<string> = new Set([
   'TextField',
@@ -75,8 +75,8 @@ const FIELD_VARIANT_KINDS: ReadonlySet<string> = new Set([
   'TimeField',
   'DateTimeField',
   'ControlledTermField',
-  'SingleChoiceField',
-  'MultipleChoiceField',
+  'SingleValuedEnumField',
+  'MultiValuedEnumField',
   'LinkField',
   'EmailField',
   'PhoneNumberField',
@@ -90,10 +90,10 @@ const FIELD_VARIANT_KINDS: ReadonlySet<string> = new Set([
 ]);
 
 // Extracts the .id from a Field artifact, or passes through if input is
-// already a FieldReference. Used by the per-family constructors so callers
+// already a FieldId. Used by the per-family constructors so callers
 // can write `artifactRef: fullName` instead of `artifactRef: fullName.id`. The
 // conditional return type carries the per-family precision through to the
-// caller (e.g. fieldRef(TextField | TextFieldReference) → TextFieldReference).
+// caller (e.g. fieldRef(TextField | TextFieldId) → TextFieldId).
 //
 // A reusable Field artifact is recognized by a `kind` matching the
 // `${Name}Field` pattern excluding the `Embedded${Name}Field` family — but

@@ -15,8 +15,8 @@ import {
   type EmbeddedTimeField,
   type EmbeddedDateTimeField,
   type EmbeddedControlledTermField,
-  type EmbeddedSingleChoiceField,
-  type EmbeddedMultipleChoiceField,
+  type EmbeddedSingleValuedEnumField,
+  type EmbeddedMultiValuedEnumField,
   type EmbeddedLinkField,
   type EmbeddedEmailField,
   type EmbeddedPhoneNumberField,
@@ -35,8 +35,8 @@ import {
   embeddedTimeField,
   embeddedDateTimeField,
   embeddedControlledTermField,
-  embeddedSingleChoiceField,
-  embeddedMultipleChoiceField,
+  embeddedSingleValuedEnumField,
+  embeddedMultiValuedEnumField,
   embeddedLinkField,
   embeddedEmailField,
   embeddedPhoneNumberField,
@@ -75,8 +75,8 @@ import {
   serializeTimeFieldId,
   serializeDateTimeFieldId,
   serializeControlledTermFieldId,
-  serializeSingleChoiceFieldId,
-  serializeMultipleChoiceFieldId,
+  serializeSingleValuedEnumFieldId,
+  serializeMultiValuedEnumFieldId,
   serializeLinkFieldId,
   serializeEmailFieldId,
   serializePhoneNumberFieldId,
@@ -97,8 +97,8 @@ import {
   parseTimeFieldId,
   parseDateTimeFieldId,
   parseControlledTermFieldId,
-  parseSingleChoiceFieldId,
-  parseMultipleChoiceFieldId,
+  parseSingleValuedEnumFieldId,
+  parseMultiValuedEnumFieldId,
   parseLinkFieldId,
   parseEmailFieldId,
   parsePhoneNumberFieldId,
@@ -139,8 +139,8 @@ import {
   parseTimeValueUntagged,
   serializeDateTimeValueUntagged,
   parseDateTimeValueUntagged,
-  serializeChoiceValue,
-  parseChoiceValue,
+  serializeEnumValueUntagged,
+  parseEnumValueUntagged,
   serializeControlledTermValueUntagged,
   parseControlledTermValueUntagged,
   serializeLinkValueUntagged,
@@ -572,61 +572,128 @@ export function parseEmbeddedControlledTermField(
   });
 }
 
-export function serializeEmbeddedSingleChoiceField(
-  x: EmbeddedSingleChoiceField,
+// EmbeddedSingleValuedEnumField — no cardinality slot.
+const SINGLE_VALUED_ENUM_FIELD_PROPS = [
+  'kind',
+  'key',
+  'artifactRef',
+  'valueRequirement',
+  'visibility',
+  'defaultValue',
+  'labelOverride',
+  'property',
+];
+
+export function serializeEmbeddedSingleValuedEnumField(
+  x: EmbeddedSingleValuedEnumField,
 ): unknown {
   const out: Record<string, unknown> = {
-    kind: 'EmbeddedSingleChoiceField',
+    kind: 'EmbeddedSingleValuedEnumField',
     key: x.key,
-    artifactRef: serializeSingleChoiceFieldId(x.artifactRef),
+    artifactRef: serializeSingleValuedEnumFieldId(x.artifactRef),
   };
-  serializeCommonProps(x, out);
+  if (x.valueRequirement !== undefined)
+    out['valueRequirement'] = serializeValueRequirement(x.valueRequirement);
+  if (x.visibility !== undefined)
+    out['visibility'] = serializeVisibility(x.visibility);
+  if (x.labelOverride !== undefined)
+    out['labelOverride'] = serializeLabelOverride(x.labelOverride);
+  if (x.property !== undefined) out['property'] = serializeProperty(x.property);
   if (x.defaultValue !== undefined)
-    out['defaultValue'] = serializeChoiceValue(x.defaultValue);
+    out['defaultValue'] = serializeEnumValueUntagged(x.defaultValue);
   return out;
 }
 
-export function parseEmbeddedSingleChoiceField(
+export function parseEmbeddedSingleValuedEnumField(
   x: unknown,
-  where = 'EmbeddedSingleChoiceField',
-): EmbeddedSingleChoiceField {
-  const s = readShell(x, 'EmbeddedSingleChoiceField', where, true);
-  return embeddedSingleChoiceField({
-    key: s.key,
-    artifactRef: parseSingleChoiceFieldId(s.artifactRef, `${where}.artifactRef`),
-    ...s.common,
-    ...(s.defaultRaw !== undefined && {
-      defaultValue: parseChoiceValue(s.defaultRaw, `${where}.defaultValue`),
-    }),
-  });
+  where = 'EmbeddedSingleValuedEnumField',
+): EmbeddedSingleValuedEnumField {
+  const o = expectObject(x, where);
+  expectKnownProperties(o, SINGLE_VALUED_ENUM_FIELD_PROPS);
+  rejectNullProperty(o, 'valueRequirement');
+  rejectNullProperty(o, 'visibility');
+  rejectNullProperty(o, 'labelOverride');
+  rejectNullProperty(o, 'property');
+  rejectNullProperty(o, 'defaultValue');
+  if (o['kind'] !== 'EmbeddedSingleValuedEnumField') {
+    throw new CedarConstructionError(
+      `${where}: expected kind "EmbeddedSingleValuedEnumField"; got ${JSON.stringify(o['kind'])}`,
+    );
+  }
+  if (!('key' in o)) {
+    throw new CedarConstructionError(`${where}: missing required "key"`);
+  }
+  if (!('artifactRef' in o)) {
+    throw new CedarConstructionError(`${where}: missing required "artifactRef"`);
+  }
+  const init: Parameters<typeof embeddedSingleValuedEnumField>[0] = {
+    key: expectString(o['key'], `${where}.key`),
+    artifactRef: parseSingleValuedEnumFieldId(
+      o['artifactRef'],
+      `${where}.artifactRef`,
+    ),
+  };
+  if ('valueRequirement' in o)
+    (init as { valueRequirement?: ValueRequirement }).valueRequirement =
+      parseValueRequirement(o['valueRequirement'], `${where}.valueRequirement`);
+  if ('visibility' in o)
+    (init as { visibility?: Visibility }).visibility = parseVisibility(
+      o['visibility'],
+      `${where}.visibility`,
+    );
+  if ('labelOverride' in o)
+    (init as { labelOverride?: LabelOverride }).labelOverride = parseLabelOverride(
+      o['labelOverride'],
+      `${where}.labelOverride`,
+    );
+  if ('property' in o)
+    (init as { property?: Property }).property = parseProperty(
+      o['property'],
+      `${where}.property`,
+    );
+  if ('defaultValue' in o)
+    (init as { defaultValue?: unknown }).defaultValue = parseEnumValueUntagged(
+      o['defaultValue'],
+      `${where}.defaultValue`,
+    );
+  return embeddedSingleValuedEnumField(init);
 }
 
-export function serializeEmbeddedMultipleChoiceField(
-  x: EmbeddedMultipleChoiceField,
+export function serializeEmbeddedMultiValuedEnumField(
+  x: EmbeddedMultiValuedEnumField,
 ): unknown {
   const out: Record<string, unknown> = {
-    kind: 'EmbeddedMultipleChoiceField',
+    kind: 'EmbeddedMultiValuedEnumField',
     key: x.key,
-    artifactRef: serializeMultipleChoiceFieldId(x.artifactRef),
+    artifactRef: serializeMultiValuedEnumFieldId(x.artifactRef),
   };
   serializeCommonProps(x, out);
   if (x.defaultValue !== undefined)
-    out['defaultValue'] = serializeChoiceValue(x.defaultValue);
+    out['defaultValue'] = x.defaultValue.map(serializeEnumValueUntagged);
   return out;
 }
 
-export function parseEmbeddedMultipleChoiceField(
+export function parseEmbeddedMultiValuedEnumField(
   x: unknown,
-  where = 'EmbeddedMultipleChoiceField',
-): EmbeddedMultipleChoiceField {
-  const s = readShell(x, 'EmbeddedMultipleChoiceField', where, true);
-  return embeddedMultipleChoiceField({
+  where = 'EmbeddedMultiValuedEnumField',
+): EmbeddedMultiValuedEnumField {
+  const s = readShell(x, 'EmbeddedMultiValuedEnumField', where, true);
+  let defaultValue: readonly import('../field-families/index.js').EnumValue[] | undefined;
+  if (s.defaultRaw !== undefined) {
+    if (!Array.isArray(s.defaultRaw)) {
+      throw new CedarConstructionError(
+        `${where}.defaultValue: expected an array of EnumValue`,
+      );
+    }
+    defaultValue = (s.defaultRaw as readonly unknown[]).map((e, i) =>
+      parseEnumValueUntagged(e, `${where}.defaultValue[${i}]`),
+    );
+  }
+  return embeddedMultiValuedEnumField({
     key: s.key,
-    artifactRef: parseMultipleChoiceFieldId(s.artifactRef, `${where}.artifactRef`),
+    artifactRef: parseMultiValuedEnumFieldId(s.artifactRef, `${where}.artifactRef`),
     ...s.common,
-    ...(s.defaultRaw !== undefined && {
-      defaultValue: parseChoiceValue(s.defaultRaw, `${where}.defaultValue`),
-    }),
+    ...(defaultValue !== undefined && { defaultValue }),
   });
 }
 
@@ -946,8 +1013,6 @@ export function serializeEmbeddedPresentationComponent(
   };
   if (x.visibility !== undefined)
     out['visibility'] = serializeVisibility(x.visibility);
-  if (x.labelOverride !== undefined)
-    out['labelOverride'] = serializeLabelOverride(x.labelOverride);
   return out;
 }
 
@@ -961,10 +1026,8 @@ export function parseEmbeddedPresentationComponent(
     'key',
     'artifactRef',
     'visibility',
-    'labelOverride',
   ]);
   rejectNullProperty(o, 'visibility');
-  rejectNullProperty(o, 'labelOverride');
   if (o['kind'] !== 'EmbeddedPresentationComponent') {
     throw new CedarConstructionError(
       `${where}: expected kind "EmbeddedPresentationComponent"`,
@@ -980,7 +1043,6 @@ export function parseEmbeddedPresentationComponent(
     key: string;
     artifactRef: ReturnType<typeof parsePresentationComponentId>;
     visibility?: Visibility;
-    labelOverride?: LabelOverride;
   } = {
     key: expectString(o['key'], `${where}.key`),
     artifactRef: parsePresentationComponentId(
@@ -990,11 +1052,6 @@ export function parseEmbeddedPresentationComponent(
   };
   if ('visibility' in o)
     init.visibility = parseVisibility(o['visibility'], `${where}.visibility`);
-  if ('labelOverride' in o)
-    init.labelOverride = parseLabelOverride(
-      o['labelOverride'],
-      `${where}.labelOverride`,
-    );
   return embeddedPresentationComponent(init);
 }
 
@@ -1009,8 +1066,8 @@ const EMBEDDED_FIELD_KINDS = [
   'EmbeddedTimeField',
   'EmbeddedDateTimeField',
   'EmbeddedControlledTermField',
-  'EmbeddedSingleChoiceField',
-  'EmbeddedMultipleChoiceField',
+  'EmbeddedSingleValuedEnumField',
+  'EmbeddedMultiValuedEnumField',
   'EmbeddedLinkField',
   'EmbeddedEmailField',
   'EmbeddedPhoneNumberField',
@@ -1041,10 +1098,10 @@ export function serializeEmbeddedField(x: EmbeddedField): unknown {
       return serializeEmbeddedDateTimeField(x);
     case 'EmbeddedControlledTermField':
       return serializeEmbeddedControlledTermField(x);
-    case 'EmbeddedSingleChoiceField':
-      return serializeEmbeddedSingleChoiceField(x);
-    case 'EmbeddedMultipleChoiceField':
-      return serializeEmbeddedMultipleChoiceField(x);
+    case 'EmbeddedSingleValuedEnumField':
+      return serializeEmbeddedSingleValuedEnumField(x);
+    case 'EmbeddedMultiValuedEnumField':
+      return serializeEmbeddedMultiValuedEnumField(x);
     case 'EmbeddedLinkField':
       return serializeEmbeddedLinkField(x);
     case 'EmbeddedEmailField':
@@ -1091,10 +1148,10 @@ export function parseEmbeddedField(
       return parseEmbeddedDateTimeField(x, where);
     case 'EmbeddedControlledTermField':
       return parseEmbeddedControlledTermField(x, where);
-    case 'EmbeddedSingleChoiceField':
-      return parseEmbeddedSingleChoiceField(x, where);
-    case 'EmbeddedMultipleChoiceField':
-      return parseEmbeddedMultipleChoiceField(x, where);
+    case 'EmbeddedSingleValuedEnumField':
+      return parseEmbeddedSingleValuedEnumField(x, where);
+    case 'EmbeddedMultiValuedEnumField':
+      return parseEmbeddedMultiValuedEnumField(x, where);
     case 'EmbeddedLinkField':
       return parseEmbeddedLinkField(x, where);
     case 'EmbeddedEmailField':

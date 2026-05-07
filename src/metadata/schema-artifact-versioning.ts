@@ -11,21 +11,21 @@ export function isStatus(x: unknown): x is Status {
   return x === 'draft' || x === 'published';
 }
 
-export interface SchemaVersioning {
+export interface SchemaArtifactVersioning {
   readonly version: string;
   readonly status: Status;
   readonly previousVersion?: Iri;
   readonly derivedFrom?: Iri;
 }
 
-export interface SchemaVersioningInit {
+export interface SchemaArtifactVersioningInit {
   readonly version: string;
   readonly status: Status;
   readonly previousVersion?: Iri | string;
   readonly derivedFrom?: Iri | string;
 }
 
-export function schemaVersioning(init: SchemaVersioningInit): SchemaVersioning {
+export function schemaArtifactVersioning(init: SchemaArtifactVersioningInit): SchemaArtifactVersioning {
   const out: {
     version: string;
     status: Status;

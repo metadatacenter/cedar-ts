@@ -16,6 +16,11 @@
 // (embedding).
 
 import { type Iri, iri, parseSemanticVersion } from '../leaves/index.js';
+import {
+  type MultilingualString,
+  type MultilingualStringInput,
+  multilingualString,
+} from '../multilingual.js';
 import type { SchemaArtifactMetadata } from '../metadata/index.js';
 import type { ValueRequirement } from '../embedded/requirement.js';
 import type { Cardinality } from '../embedded/cardinality.js';
@@ -45,7 +50,6 @@ export interface LinkFieldId {
   readonly iri: Iri;
 }
 
-export type LinkFieldReference = LinkFieldId;
 
 // Identifier-wrapper constructor for the Link field family.
 // Idempotent: an existing LinkFieldId passes through unchanged. A bare
@@ -72,20 +76,20 @@ export const linkFieldId = (
 export interface LinkValue {
   readonly kind: 'LinkValue';
   readonly iri: Iri;
-  readonly label?: string;
+  readonly label?: MultilingualString;
 }
 
 export interface LinkValueInit {
   readonly iri: Iri | string;
-  readonly label?: string;
+  readonly label?: MultilingualStringInput;
 }
 
 export function linkValue(init: LinkValueInit): LinkValue {
-  const out: { kind: 'LinkValue'; iri: Iri; label?: string } = {
+  const out: { kind: 'LinkValue'; iri: Iri; label?: MultilingualString } = {
     kind: 'LinkValue',
     iri: typeof init.iri === 'string' ? iri(init.iri) : init.iri,
   };
-  if (init.label !== undefined) out.label = init.label;
+  if (init.label !== undefined) out.label = multilingualString(init.label);
   return out;
 }
 
@@ -148,7 +152,7 @@ export const linkField = (init: LinkFieldInit): LinkField =>
 export interface EmbeddedLinkField {
   readonly kind: 'EmbeddedLinkField';
   readonly key: string;
-  readonly artifactRef: LinkFieldReference;
+  readonly artifactRef: LinkFieldId;
   readonly valueRequirement?: ValueRequirement;
   readonly cardinality?: Cardinality;
   readonly visibility?: Visibility;
@@ -158,7 +162,7 @@ export interface EmbeddedLinkField {
 }
 
 export interface EmbeddedLinkFieldInit extends EmbeddedFieldInitCommon {
-  readonly artifactRef: LinkFieldReference | LinkField;
+  readonly artifactRef: LinkFieldId | LinkField;
   readonly defaultValue?: LinkValue;
 }
 

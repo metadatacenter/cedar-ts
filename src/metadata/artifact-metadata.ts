@@ -4,7 +4,7 @@ import {
   multilingualString,
 } from '../multilingual.js';
 import type { LifecycleMetadata } from './lifecycle-metadata.js';
-import type { SchemaVersioning } from './schema-versioning.js';
+import type { SchemaArtifactVersioning } from './schema-artifact-versioning.js';
 import type { Annotation } from './annotations.js';
 
 // ArtifactMetadata bundles the metadata common to all artifacts other than
@@ -67,7 +67,7 @@ export function artifactMetadata(init: ArtifactMetadataInit): ArtifactMetadata {
 // artifacts (Template, Field). The in-memory shape is fully flat: the
 // `ArtifactMetadata` properties sit directly alongside `versioning`.
 export interface SchemaArtifactMetadata extends ArtifactMetadata {
-  readonly versioning: SchemaVersioning;
+  readonly versioning: SchemaArtifactVersioning;
 }
 
 // The init shape composes a pre-built `ArtifactMetadata` with a
@@ -75,7 +75,7 @@ export interface SchemaArtifactMetadata extends ArtifactMetadata {
 // up front and reuse it across artifacts.
 export interface SchemaArtifactMetadataInit {
   readonly artifact: ArtifactMetadata;
-  readonly versioning: SchemaVersioning;
+  readonly versioning: SchemaArtifactVersioning;
 }
 
 export function schemaArtifactMetadata(

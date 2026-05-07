@@ -32,8 +32,8 @@ import {
   type TimeFieldId,
   type DateTimeFieldId,
   type ControlledTermFieldId,
-  type SingleChoiceFieldId,
-  type MultipleChoiceFieldId,
+  type SingleValuedEnumFieldId,
+  type MultiValuedEnumFieldId,
   type LinkFieldId,
   type EmailFieldId,
   type PhoneNumberFieldId,
@@ -52,8 +52,8 @@ import {
   timeFieldId,
   dateTimeFieldId,
   controlledTermFieldId,
-  singleChoiceFieldId,
-  multipleChoiceFieldId,
+  singleValuedEnumFieldId,
+  multiValuedEnumFieldId,
   linkFieldId,
   emailFieldId,
   phoneNumberFieldId,
@@ -108,8 +108,8 @@ export const serializeDateFieldId = (x: DateFieldId): string => x.iri.value;
 export const serializeTimeFieldId = (x: TimeFieldId): string => x.iri.value;
 export const serializeDateTimeFieldId = (x: DateTimeFieldId): string => x.iri.value;
 export const serializeControlledTermFieldId = (x: ControlledTermFieldId): string => x.iri.value;
-export const serializeSingleChoiceFieldId = (x: SingleChoiceFieldId): string => x.iri.value;
-export const serializeMultipleChoiceFieldId = (x: MultipleChoiceFieldId): string => x.iri.value;
+export const serializeSingleValuedEnumFieldId = (x: SingleValuedEnumFieldId): string => x.iri.value;
+export const serializeMultiValuedEnumFieldId = (x: MultiValuedEnumFieldId): string => x.iri.value;
 export const serializeLinkFieldId = (x: LinkFieldId): string => x.iri.value;
 export const serializeEmailFieldId = (x: EmailFieldId): string => x.iri.value;
 export const serializePhoneNumberFieldId = (x: PhoneNumberFieldId): string => x.iri.value;
@@ -137,10 +137,10 @@ export const parseDateTimeFieldId = (x: unknown, w = 'DateTimeFieldId'): DateTim
   dateTimeFieldId(expectString(x, w));
 export const parseControlledTermFieldId = (x: unknown, w = 'ControlledTermFieldId'): ControlledTermFieldId =>
   controlledTermFieldId(expectString(x, w));
-export const parseSingleChoiceFieldId = (x: unknown, w = 'SingleChoiceFieldId'): SingleChoiceFieldId =>
-  singleChoiceFieldId(expectString(x, w));
-export const parseMultipleChoiceFieldId = (x: unknown, w = 'MultipleChoiceFieldId'): MultipleChoiceFieldId =>
-  multipleChoiceFieldId(expectString(x, w));
+export const parseSingleValuedEnumFieldId = (x: unknown, w = 'SingleValuedEnumFieldId'): SingleValuedEnumFieldId =>
+  singleValuedEnumFieldId(expectString(x, w));
+export const parseMultiValuedEnumFieldId = (x: unknown, w = 'MultiValuedEnumFieldId'): MultiValuedEnumFieldId =>
+  multiValuedEnumFieldId(expectString(x, w));
 export const parseLinkFieldId = (x: unknown, w = 'LinkFieldId'): LinkFieldId =>
   linkFieldId(expectString(x, w));
 export const parseEmailFieldId = (x: unknown, w = 'EmailFieldId'): EmailFieldId =>

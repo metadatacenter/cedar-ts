@@ -54,7 +54,6 @@ export interface PubMedIdFieldId {
   readonly iri: Iri;
 }
 
-export type PubMedIdFieldReference = PubMedIdFieldId;
 
 // Identifier-wrapper constructor for the PubMedId field family.
 // Idempotent: an existing PubMedIdFieldId passes through unchanged. A bare
@@ -152,7 +151,7 @@ export const pubMedIdField = (init: PubMedIdFieldInit): PubMedIdField =>
 export interface EmbeddedPubMedIdField {
   readonly kind: 'EmbeddedPubMedIdField';
   readonly key: string;
-  readonly artifactRef: PubMedIdFieldReference;
+  readonly artifactRef: PubMedIdFieldId;
   readonly valueRequirement?: ValueRequirement;
   readonly cardinality?: Cardinality;
   readonly visibility?: Visibility;
@@ -162,7 +161,7 @@ export interface EmbeddedPubMedIdField {
 }
 
 export interface EmbeddedPubMedIdFieldInit extends EmbeddedFieldInitCommon {
-  readonly artifactRef: PubMedIdFieldReference | PubMedIdField;
+  readonly artifactRef: PubMedIdFieldId | PubMedIdField;
   readonly defaultValue?: PubMedIdValue | AuthorityValueInput<PubMedIri>;
 }
 

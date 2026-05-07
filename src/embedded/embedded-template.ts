@@ -1,5 +1,5 @@
 import { parseAsciiIdentifier } from '../leaves/index.js';
-import type { TemplateReference } from '../identifiers.js';
+import type { TemplateId } from '../identifiers.js';
 import type { Template } from '../template.js';
 import type { ValueRequirement } from './requirement.js';
 import type { Cardinality } from './cardinality.js';
@@ -15,7 +15,7 @@ import { type Property, type PropertyInput, property } from './property.js';
 export interface EmbeddedTemplate {
   readonly kind: 'EmbeddedTemplate';
   readonly key: string;
-  readonly artifactRef: TemplateReference;
+  readonly artifactRef: TemplateId;
   readonly valueRequirement?: ValueRequirement;
   readonly cardinality?: Cardinality;
   readonly visibility?: Visibility;
@@ -23,11 +23,11 @@ export interface EmbeddedTemplate {
   readonly property?: Property;
 }
 
-// `artifactRef` accepts either the typed TemplateReference or the reusable
+// `artifactRef` accepts either the typed TemplateId or the reusable
 // Template artifact itself; the constructor extracts `.id` from the latter.
 export interface EmbeddedTemplateInit {
   readonly key: string;
-  readonly artifactRef: TemplateReference | Template;
+  readonly artifactRef: TemplateId | Template;
   readonly valueRequirement?: ValueRequirement;
   readonly cardinality?: Cardinality;
   readonly visibility?: Visibility;
@@ -39,7 +39,7 @@ export function embeddedTemplate(init: EmbeddedTemplateInit): EmbeddedTemplate {
   const out: {
     kind: 'EmbeddedTemplate';
     key: string;
-    artifactRef: TemplateReference;
+    artifactRef: TemplateId;
     valueRequirement?: ValueRequirement;
     cardinality?: Cardinality;
     visibility?: Visibility;

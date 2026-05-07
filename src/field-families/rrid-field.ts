@@ -53,7 +53,6 @@ export interface RridFieldId {
   readonly iri: Iri;
 }
 
-export type RridFieldReference = RridFieldId;
 
 // Identifier-wrapper constructor for the Rrid field family.
 // Idempotent: an existing RridFieldId passes through unchanged. A bare
@@ -151,7 +150,7 @@ export const rridField = (init: RridFieldInit): RridField =>
 export interface EmbeddedRridField {
   readonly kind: 'EmbeddedRridField';
   readonly key: string;
-  readonly artifactRef: RridFieldReference;
+  readonly artifactRef: RridFieldId;
   readonly valueRequirement?: ValueRequirement;
   readonly cardinality?: Cardinality;
   readonly visibility?: Visibility;
@@ -161,7 +160,7 @@ export interface EmbeddedRridField {
 }
 
 export interface EmbeddedRridFieldInit extends EmbeddedFieldInitCommon {
-  readonly artifactRef: RridFieldReference | RridField;
+  readonly artifactRef: RridFieldId | RridField;
   readonly defaultValue?: RridValue | AuthorityValueInput<RridIri>;
 }
 

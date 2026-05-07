@@ -2,16 +2,13 @@ import {
   type Iri,
   type LanguageTag,
   iri,
-  isIri,
   languageTag,
 } from '../leaves/index.js';
 
 // Annotation — see grammar.md §Annotations.
-// Pairs an annotation property IRI with an annotation value. The value is
-// either a plain (optionally language-tagged) string or an IRI.
-//
-// AnnotationValue is the union AnnotationStringValue | Iri. The two arms
-// are distinguished by which property the encoded object carries.
+// Pairs an annotation property IRI with an annotation value. AnnotationValue
+// is a discriminated union: AnnotationStringValue | AnnotationIriValue. Both
+// variants are kind-tagged objects.
 
 export interface AnnotationStringValue {
   readonly kind: 'AnnotationStringValue';
@@ -35,10 +32,29 @@ export function isAnnotationStringValue(x: unknown): x is AnnotationStringValue 
   );
 }
 
-export type AnnotationValue = AnnotationStringValue | Iri;
+export interface AnnotationIriValue {
+  readonly kind: 'AnnotationIriValue';
+  readonly iri: Iri;
+}
+
+export function annotationIriValue(value: Iri | string): AnnotationIriValue {
+  return {
+    kind: 'AnnotationIriValue',
+    iri: typeof value === 'string' ? iri(value) : value,
+  };
+}
+
+export function isAnnotationIriValue(x: unknown): x is AnnotationIriValue {
+  return (
+    typeof x === 'object' && x !== null &&
+    (x as { kind?: unknown }).kind === 'AnnotationIriValue'
+  );
+}
+
+export type AnnotationValue = AnnotationStringValue | AnnotationIriValue;
 
 export const isAnnotationValue = (x: unknown): x is AnnotationValue =>
-  isAnnotationStringValue(x) || isIri(x);
+  isAnnotationStringValue(x) || isAnnotationIriValue(x);
 
 export interface Annotation {
   readonly property: Iri;

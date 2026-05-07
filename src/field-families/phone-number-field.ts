@@ -26,7 +26,6 @@ export interface PhoneNumberFieldId {
   readonly iri: Iri;
 }
 
-export type PhoneNumberFieldReference = PhoneNumberFieldId;
 
 export const phoneNumberFieldId = (
   v: PhoneNumberFieldId | Iri | string,
@@ -113,7 +112,7 @@ export const phoneNumberField = (init: PhoneNumberFieldInit): PhoneNumberField =
 export interface EmbeddedPhoneNumberField {
   readonly kind: 'EmbeddedPhoneNumberField';
   readonly key: string;
-  readonly artifactRef: PhoneNumberFieldReference;
+  readonly artifactRef: PhoneNumberFieldId;
   readonly valueRequirement?: ValueRequirement;
   readonly cardinality?: Cardinality;
   readonly visibility?: Visibility;
@@ -123,7 +122,7 @@ export interface EmbeddedPhoneNumberField {
 }
 
 export interface EmbeddedPhoneNumberFieldInit extends EmbeddedFieldInitCommon {
-  readonly artifactRef: PhoneNumberFieldReference | PhoneNumberField;
+  readonly artifactRef: PhoneNumberFieldId | PhoneNumberField;
   readonly defaultValue?: PhoneNumberValueInput;
 }
 

@@ -5,9 +5,9 @@
 //
 // All Value variants are tagged on the wire (per the polymorphic-only
 // kind rule); each carries a `kind` property whose value matches the
-// in-memory discriminant. Internal singleton-position productions (e.g.
-// ControlledTermValue inside ControlledTermChoiceValue) are encoded
-// untagged.
+// in-memory discriminant. Singleton-position values (e.g. an EnumValue
+// at an EmbeddedSingleValuedEnumField.defaultValue slot) are encoded
+// untagged via the per-type `Untagged` helpers.
 
 import { CedarConstructionError, REAL_NUMBER_DATATYPE_KINDS, type RealNumberDatatypeKind } from '../leaves/index.js';
 import {
@@ -32,9 +32,7 @@ import {
   type RridValue,
   type NihGrantIdValue,
   type AttributeValue,
-  type LiteralChoiceValue,
-  type ControlledTermChoiceValue,
-  type ChoiceValue,
+  type EnumValue,
   type Value,
   textValue,
   integerNumberValue,
@@ -56,13 +54,13 @@ import {
   rridValue,
   nihGrantIdValue,
   attributeValue,
-  literalChoiceValue,
-  controlledTermChoiceValue,
+  enumValue,
 } from '../field-families/index.js';
 import {
   serializeMultilingualString,
   parseMultilingualString,
 } from './multilingual.js';
+import type { MultilingualString } from '../multilingual.js';
 import {
   expectObject,
   expectString,
@@ -471,99 +469,51 @@ export function parseControlledTermValueUntagged(
   return parseControlledTermValueBody(o, where, false);
 }
 
-// ---- LiteralChoiceValue / ControlledTermChoiceValue / ChoiceValue ----
+// ---- EnumValue -------------------------------------------------------
 
-export function serializeLiteralChoiceValue(x: LiteralChoiceValue): unknown {
-  const out: Record<string, unknown> = {
-    kind: 'LiteralChoiceValue',
-    value: x.value,
-  };
-  if (x.lang !== undefined) out['lang'] = x.lang.value;
-  if (x.datatype !== undefined) out['datatype'] = x.datatype.value;
-  return out;
+export function serializeEnumValue(x: EnumValue): unknown {
+  return { kind: 'EnumValue', value: x.value };
 }
 
-export function parseLiteralChoiceValue(
-  x: unknown,
-  where = 'LiteralChoiceValue',
-): LiteralChoiceValue {
-  const o = expectObject(x, where);
-  expectKnownProperties(o, ['kind', 'value', 'lang', 'datatype']);
-  if (o['kind'] !== 'LiteralChoiceValue') {
-    throw new CedarConstructionError(`${where}: expected kind "LiteralChoiceValue"`);
-  }
-  rejectNullProperty(o, 'lang');
-  rejectNullProperty(o, 'datatype');
-  if (!('value' in o)) {
-    throw new CedarConstructionError(`${where}: missing required "value"`);
-  }
-  const init: {
-    value: string;
-    lang?: string;
-    datatype?: string;
-  } = { value: expectString(o['value'], `${where}.value`) };
-  if ('lang' in o) init.lang = expectString(o['lang'], `${where}.lang`);
-  if ('datatype' in o)
-    init.datatype = expectString(o['datatype'], `${where}.datatype`);
-  return literalChoiceValue(init);
+export function serializeEnumValueUntagged(x: EnumValue): unknown {
+  return { value: x.value };
 }
 
-export function serializeControlledTermChoiceValue(
-  x: ControlledTermChoiceValue,
-): unknown {
-  return {
-    kind: 'ControlledTermChoiceValue',
-    value: serializeControlledTermValueUntagged(x.value),
-  };
-}
-
-export function parseControlledTermChoiceValue(
-  x: unknown,
-  where = 'ControlledTermChoiceValue',
-): ControlledTermChoiceValue {
+export function parseEnumValue(x: unknown, where = 'EnumValue'): EnumValue {
   const o = expectObject(x, where);
   expectKnownProperties(o, ['kind', 'value']);
-  if (o['kind'] !== 'ControlledTermChoiceValue') {
-    throw new CedarConstructionError(
-      `${where}: expected kind "ControlledTermChoiceValue"`,
-    );
+  if (o['kind'] !== 'EnumValue') {
+    throw new CedarConstructionError(`${where}: expected kind "EnumValue"`);
   }
   if (!('value' in o)) {
     throw new CedarConstructionError(`${where}: missing required "value"`);
   }
-  return controlledTermChoiceValue(
-    parseControlledTermValueUntagged(o['value'], `${where}.value`),
-  );
+  return enumValue(expectString(o['value'], `${where}.value`));
 }
 
-export function serializeChoiceValue(x: ChoiceValue): unknown {
-  if (x.kind === 'LiteralChoiceValue') return serializeLiteralChoiceValue(x);
-  return serializeControlledTermChoiceValue(x);
-}
-
-export function parseChoiceValue(x: unknown, where = 'ChoiceValue'): ChoiceValue {
+export function parseEnumValueUntagged(
+  x: unknown,
+  where = 'EnumValue',
+): EnumValue {
   const o = expectObject(x, where);
-  const k = expectKindOneOf(
-    o,
-    ['LiteralChoiceValue', 'ControlledTermChoiceValue'] as const,
-    where,
-  );
-  return k === 'LiteralChoiceValue'
-    ? parseLiteralChoiceValue(x, where)
-    : parseControlledTermChoiceValue(x, where);
+  expectKnownProperties(o, ['value']);
+  if (!('value' in o)) {
+    throw new CedarConstructionError(`${where}: missing required "value"`);
+  }
+  return enumValue(expectString(o['value'], `${where}.value`));
 }
 
 // ---- LinkValue -------------------------------------------------------
 
 export function serializeLinkValue(x: LinkValue): unknown {
   const out: Record<string, unknown> = { kind: 'LinkValue', iri: x.iri.value };
-  if (x.label !== undefined) out['label'] = x.label;
+  if (x.label !== undefined) out['label'] = serializeMultilingualString(x.label);
   return out;
 }
 
 export function serializeLinkValueUntagged(x: LinkValue): unknown {
   const out: Record<string, unknown> = { iri: x.iri.value };
-  if (x.label !== undefined) out['label'] = x.label;
+  if (x.label !== undefined) out['label'] = serializeMultilingualString(x.label);
   return out;
 }
 
@@ -577,10 +527,11 @@ export function parseLinkValue(x: unknown, where = 'LinkValue'): LinkValue {
   if (!('iri' in o)) {
     throw new CedarConstructionError(`${where}: missing required "iri"`);
   }
-  const init: { iri: string; label?: string } = {
+  const init: { iri: string; label?: MultilingualString } = {
     iri: expectString(o['iri'], `${where}.iri`),
   };
-  if ('label' in o) init.label = expectString(o['label'], `${where}.label`);
+  if ('label' in o)
+    init.label = parseMultilingualString(o['label'], `${where}.label`);
   return linkValue(init);
 }
 
@@ -594,10 +545,11 @@ export function parseLinkValueUntagged(
   if (!('iri' in o)) {
     throw new CedarConstructionError(`${where}: missing required "iri"`);
   }
-  const init: { iri: string; label?: string } = {
+  const init: { iri: string; label?: MultilingualString } = {
     iri: expectString(o['iri'], `${where}.iri`),
   };
-  if ('label' in o) init.label = expectString(o['label'], `${where}.label`);
+  if ('label' in o)
+    init.label = parseMultilingualString(o['label'], `${where}.label`);
   return linkValue(init);
 }
 
@@ -677,8 +629,6 @@ export function parsePhoneNumberValueUntagged(
 // `{ kind, iri: string, label?: MultilingualString }` per wire-grammar.md
 // §3.7. The label round-trips through `serializeMultilingualString` /
 // `parseMultilingualString` directly.
-
-import type { MultilingualString } from '../multilingual.js';
 
 function serializeAuthorityValue(
   kind: string,
@@ -851,8 +801,7 @@ const VALUE_KINDS = [
   'TimeValue',
   'DateTimeValue',
   'ControlledTermValue',
-  'LiteralChoiceValue',
-  'ControlledTermChoiceValue',
+  'EnumValue',
   'LinkValue',
   'EmailValue',
   'PhoneNumberValue',
@@ -887,10 +836,8 @@ export function serializeValue(x: Value): unknown {
       return serializeDateTimeValue(x);
     case 'ControlledTermValue':
       return serializeControlledTermValue(x);
-    case 'LiteralChoiceValue':
-      return serializeLiteralChoiceValue(x);
-    case 'ControlledTermChoiceValue':
-      return serializeControlledTermChoiceValue(x);
+    case 'EnumValue':
+      return serializeEnumValue(x);
     case 'LinkValue':
       return serializeLinkValue(x);
     case 'EmailValue':
@@ -938,10 +885,8 @@ export function parseValue(x: unknown, where = 'Value'): Value {
       return parseDateTimeValue(x, where);
     case 'ControlledTermValue':
       return parseControlledTermValue(x, where);
-    case 'LiteralChoiceValue':
-      return parseLiteralChoiceValue(x, where);
-    case 'ControlledTermChoiceValue':
-      return parseControlledTermChoiceValue(x, where);
+    case 'EnumValue':
+      return parseEnumValue(x, where);
     case 'LinkValue':
       return parseLinkValue(x, where);
     case 'EmailValue':

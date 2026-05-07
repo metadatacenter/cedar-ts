@@ -29,7 +29,6 @@ export interface TimeFieldId {
   readonly iri: Iri;
 }
 
-export type TimeFieldReference = TimeFieldId;
 
 export const timeFieldId = (
   v: TimeFieldId | Iri | string,
@@ -82,10 +81,10 @@ export const TIME_PRECISIONS: readonly TimePrecision[] = Object.freeze([
   'hourMinuteSecondFraction',
 ]);
 
-export type TimezoneRequirement = 'required' | 'notRequired';
+export type TimezoneRequirement = 'timezoneRequired' | 'timezoneNotRequired';
 export const TIMEZONE_REQUIREMENTS: readonly TimezoneRequirement[] = Object.freeze([
-  'required',
-  'notRequired',
+  'timezoneRequired',
+  'timezoneNotRequired',
 ]);
 
 export interface TimeFieldSpec {
@@ -154,7 +153,7 @@ export const timeField = (init: TimeFieldInit): TimeField =>
 export interface EmbeddedTimeField {
   readonly kind: 'EmbeddedTimeField';
   readonly key: string;
-  readonly artifactRef: TimeFieldReference;
+  readonly artifactRef: TimeFieldId;
   readonly valueRequirement?: ValueRequirement;
   readonly cardinality?: Cardinality;
   readonly visibility?: Visibility;
@@ -164,7 +163,7 @@ export interface EmbeddedTimeField {
 }
 
 export interface EmbeddedTimeFieldInit extends EmbeddedFieldInitCommon {
-  readonly artifactRef: TimeFieldReference | TimeField;
+  readonly artifactRef: TimeFieldId | TimeField;
   readonly defaultValue?: TimeValueInput;
 }
 

@@ -4,24 +4,21 @@
 //
 // Cross-cutting type module. Each rendering-hint type is a small
 // configuration object carried by a specific FieldSpec family to
-// influence how the field is rendered. They are NOT field-family-
-// specific in the same vertical-slice sense as everything else in this
-// folder — instead, multiple field families reference particular hint
-// types as the type of their `renderingHint?` slot.
+// influence how the field is rendered.
 //
 // Holds:
 //
 //   - the union RenderingHint
 //   - per-family hint types: TextRenderingHint, NumericRenderingHint,
-//     SingleChoiceRenderingHint, MultipleChoiceRenderingHint,
-//     DateRenderingHint, TimeRenderingHint, DateTimeRenderingHint
+//     SingleValuedEnumRenderingHint, MultiValuedEnumRenderingHint,
+//     BooleanRenderingHint, DateRenderingHint, TimeRenderingHint,
+//     DateTimeRenderingHint
 //   - related enums: DateComponentOrder, TimeFormat
-
-// Rendering hints. Each hint is typed to a specific FieldSpec family so that
-// only compatible combinations are expressible. Where the grammar uses
-// nullary constructors only (e.g. SingleLineTextRenderingHint vs
-// MultiLineTextRenderingHint), the hint is a string-literal union for
-// simpler comparison and serialization.
+//
+// Rendering hints are typed to a specific FieldSpec family so that
+// only compatible combinations are expressible. Where the spec admits
+// only flat string-literal alternatives (e.g. "singleLine" |
+// "multiLine"), the hint is a string-literal union.
 
 export type TextRenderingHint = 'singleLine' | 'multiLine';
 export const TEXT_RENDERING_HINTS: readonly TextRenderingHint[] = Object.freeze([
@@ -29,13 +26,13 @@ export const TEXT_RENDERING_HINTS: readonly TextRenderingHint[] = Object.freeze(
   'multiLine',
 ]);
 
-export type SingleChoiceRenderingHint = 'radio' | 'singleSelectDropdown';
-export const SINGLE_CHOICE_RENDERING_HINTS: readonly SingleChoiceRenderingHint[] =
-  Object.freeze(['radio', 'singleSelectDropdown']);
+export type SingleValuedEnumRenderingHint = 'radio' | 'dropdown';
+export const SINGLE_VALUED_ENUM_RENDERING_HINTS: readonly SingleValuedEnumRenderingHint[] =
+  Object.freeze(['radio', 'dropdown']);
 
-export type MultipleChoiceRenderingHint = 'checkbox' | 'multiSelectDropdown';
-export const MULTIPLE_CHOICE_RENDERING_HINTS: readonly MultipleChoiceRenderingHint[] =
-  Object.freeze(['checkbox', 'multiSelectDropdown']);
+export type MultiValuedEnumRenderingHint = 'checkbox' | 'multiSelect';
+export const MULTI_VALUED_ENUM_RENDERING_HINTS: readonly MultiValuedEnumRenderingHint[] =
+  Object.freeze(['checkbox', 'multiSelect']);
 
 // NumericRenderingHint is shared by IntegerNumberFieldSpec and
 // RealNumberFieldSpec. It carries an optional `decimalPlaces` value that
@@ -43,11 +40,6 @@ export const MULTIPLE_CHOICE_RENDERING_HINTS: readonly MultipleChoiceRenderingHi
 // decimal point. `decimalPlaces` is a presentation concern only — it does
 // NOT constrain the lexical form of submitted values; encoders and
 // decoders MUST NOT enforce a precision cap based on this slot.
-//
-// On RealNumberFieldSpec, `decimalPlaces` controls display rounding for
-// decimal/float/double values. On IntegerNumberFieldSpec, the slot is
-// meaningless (integers have no fractional part); a value of `0` is
-// harmless and conventionally omitted.
 export interface NumericRenderingHint {
   readonly decimalPlaces?: number;
 }
@@ -58,12 +50,16 @@ export function numericRenderingHint(decimalPlaces?: number): NumericRenderingHi
   return out;
 }
 
-// BooleanRenderingHint distinguishes the two ways a boolean can render:
-// a checkbox (single labelled toggle box) or a toggle (slider/switch).
-export type BooleanRenderingHint = 'checkbox' | 'toggle';
+// BooleanRenderingHint admits four widget choices distinguished by how
+// they handle the *unset* state of a boolean field. `radio` and
+// `dropdown` faithfully represent the unset state; `checkbox` and
+// `toggle` cannot distinguish *false* from *unset*.
+export type BooleanRenderingHint = 'checkbox' | 'toggle' | 'radio' | 'dropdown';
 export const BOOLEAN_RENDERING_HINTS: readonly BooleanRenderingHint[] = Object.freeze([
   'checkbox',
   'toggle',
+  'radio',
+  'dropdown',
 ]);
 
 // DateComponentOrder is the ordering used by DateRenderingHint to display
@@ -83,11 +79,7 @@ export const TIME_FORMATS: readonly TimeFormat[] = Object.freeze([
   'twentyFourHour',
 ]);
 
-// Temporal rendering hints carry only their configuration component. Each
-// hint occupies a singleton position on its FieldSpec, so there is no need
-// for a `kind` discriminant; each family has only one possible widget, so
-// there is no need for a `widget` field either. (See spec/serialization.md
-// §6 and grammar.md §Temporal Field Specs.)
+// Temporal rendering hints carry only their configuration component.
 
 export interface DateRenderingHint {
   readonly componentOrder?: DateComponentOrder;
@@ -121,8 +113,8 @@ export function dateTimeRenderingHint(timeFormat?: TimeFormat): DateTimeRenderin
 
 export type RenderingHint =
   | TextRenderingHint
-  | SingleChoiceRenderingHint
-  | MultipleChoiceRenderingHint
+  | SingleValuedEnumRenderingHint
+  | MultiValuedEnumRenderingHint
   | NumericRenderingHint
   | BooleanRenderingHint
   | DateRenderingHint

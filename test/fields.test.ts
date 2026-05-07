@@ -7,9 +7,6 @@ import {
   controlledTermField,
   controlledTermFieldId,
   controlledTermFieldSpec,
-  controlledTermSingleChoiceFieldSpec,
-  controlledTermChoiceOption,
-  controlledTermValue,
   dateField,
   dateFieldId,
   dateFieldSpec,
@@ -26,11 +23,13 @@ import {
   linkField,
   linkFieldId,
   linkFieldSpec,
-  literalChoiceOption,
-  literalSingleChoiceFieldSpec,
-  multipleChoiceField,
-  multipleChoiceFieldId,
-  literalMultipleChoiceFieldSpec,
+  permissibleValue,
+  singleValuedEnumField,
+  singleValuedEnumFieldId,
+  singleValuedEnumFieldSpec,
+  multiValuedEnumField,
+  multiValuedEnumFieldId,
+  multiValuedEnumFieldSpec,
   nihGrantIdField,
   nihGrantIdFieldId,
   nihGrantIdFieldSpec,
@@ -58,9 +57,7 @@ import {
   rridFieldId,
   rridFieldSpec,
   schemaArtifactMetadata,
-  schemaVersioning,
-  singleChoiceField,
-  singleChoiceFieldId,
+  schemaArtifactVersioning,
   lifecycleMetadata,
   textField,
   textFieldId,
@@ -82,7 +79,7 @@ const tp = lifecycleMetadata({
 });
 const meta = schemaArtifactMetadata({
   artifact: artifactMetadata({ name: 'X', lifecycle: tp }),
-  versioning: schemaVersioning({
+  versioning: schemaArtifactVersioning({
     version: '1.0.0',
     status: 'draft',
   }),
@@ -181,24 +178,20 @@ describe('Per-family helpers', () => {
           ontologySource(ontologyReference({ ontologyIri: 'https://example.org/o' })),
         ),
       }),
-      singleChoiceField({
-        id: singleChoiceFieldId('https://example.org/sc'),
+      singleValuedEnumField({
+        id: singleValuedEnumFieldId('https://example.org/sc'),
         modelVersion: MV,
         metadata: meta,
-        fieldSpec: literalSingleChoiceFieldSpec({
-          options: [
-            literalChoiceOption({ value: 'a', datatype: 'http://www.w3.org/2001/XMLSchema#integer' }),
-          ],
+        fieldSpec: singleValuedEnumFieldSpec({
+          permissibleValues: [permissibleValue({ value: 'a' })],
         }),
       }),
-      multipleChoiceField({
-        id: multipleChoiceFieldId('https://example.org/mc'),
+      multiValuedEnumField({
+        id: multiValuedEnumFieldId('https://example.org/mc'),
         modelVersion: MV,
         metadata: meta,
-        fieldSpec: literalMultipleChoiceFieldSpec({
-          options: [
-            literalChoiceOption({ value: 'a', datatype: 'http://www.w3.org/2001/XMLSchema#integer' }),
-          ],
+        fieldSpec: multiValuedEnumFieldSpec({
+          permissibleValues: [permissibleValue({ value: 'a' })],
         }),
       }),
       linkField({ id: linkFieldId('https://example.org/lk'), modelVersion: MV, metadata: meta, fieldSpec: linkFieldSpec() }),
@@ -236,18 +229,19 @@ describe('Per-family helpers', () => {
     for (const f of all) expect(isField(f)).toBe(true);
   });
 
-  it('controlled-term single-choice field accepts ontology-backed options', () => {
-    const ctv = controlledTermValue({ termIri: 'https://example.org/term/1' });
-    const f = singleChoiceField({
-      id: singleChoiceFieldId('https://example.org/sc'),
+  it('single-valued enum field carries permissible values', () => {
+    const f = singleValuedEnumField({
+      id: singleValuedEnumFieldId('https://example.org/sc'),
       modelVersion: MV,
       metadata: meta,
-      fieldSpec: controlledTermSingleChoiceFieldSpec({
-        options: [controlledTermChoiceOption(ctv)],
-        renderingHint: 'singleSelectDropdown',
+      fieldSpec: singleValuedEnumFieldSpec({
+        permissibleValues: [
+          permissibleValue({ value: 'one', label: 'One' }),
+        ],
+        renderingHint: 'dropdown',
       }),
     });
-    expect(f.fieldSpec.kind).toBe('ControlledTermSingleChoiceFieldSpec');
+    expect(f.fieldSpec.kind).toBe('SingleValuedEnumFieldSpec');
   });
 });
 
@@ -271,7 +265,7 @@ describe('Field kind narrowing', () => {
     const kinds: Field['kind'][] = [
       'TextField', 'IntegerNumberField', 'RealNumberField', 'BooleanField',
       'DateField', 'TimeField', 'DateTimeField',
-      'ControlledTermField', 'SingleChoiceField', 'MultipleChoiceField',
+      'ControlledTermField', 'SingleValuedEnumField', 'MultiValuedEnumField',
       'LinkField', 'EmailField', 'PhoneNumberField',
       'OrcidField', 'RorField', 'DoiField', 'PubMedIdField', 'RridField', 'NihGrantIdField',
       'AttributeValueField',

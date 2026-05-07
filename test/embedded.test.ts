@@ -15,7 +15,7 @@ import {
   embeddedTextField,
   embeddedIntegerNumberField,
   embeddedDateField,
-  embeddedSingleChoiceField,
+  embeddedSingleValuedEnumField,
   embeddedAttributeValueField,
   embeddedTemplate,
   isEmbeddedTemplate,
@@ -28,7 +28,7 @@ import {
   textFieldId,
   integerNumberFieldId,
   dateFieldId,
-  singleChoiceFieldId,
+  singleValuedEnumFieldId,
   attributeValueFieldId,
   templateId,
   presentationComponentId,
@@ -41,7 +41,7 @@ import {
   artifactMetadata,
   lifecycleMetadata,
   schemaArtifactMetadata,
-  schemaVersioning,
+  schemaArtifactVersioning,
 } from '../src/index.js';
 
 // Shared fixtures for tests that need to construct full Field / Template /
@@ -54,7 +54,7 @@ const tp = lifecycleMetadata({
 });
 const meta = schemaArtifactMetadata({
   artifact: artifactMetadata({ name: 'X', lifecycle: tp }),
-  versioning: schemaVersioning({
+  versioning: schemaArtifactVersioning({
     version: '1.0.0',
     status: 'draft',
   }),
@@ -237,7 +237,7 @@ describe('LabelOverride and Property', () => {
 const txtRef = textFieldId('https://example.org/fields/title');
 const numRef = integerNumberFieldId('https://example.org/fields/age');
 const dateRef = dateFieldId('https://example.org/fields/born');
-const choiceRef = singleChoiceFieldId('https://example.org/fields/sex');
+const enumRef = singleValuedEnumFieldId('https://example.org/fields/sex');
 const attrRef = attributeValueFieldId('https://example.org/fields/attr');
 
 describe('EmbeddedField constructors', () => {
@@ -361,10 +361,10 @@ describe('EmbeddedField constructors', () => {
     expect(ef.defaultValue?.value).toBe('42');
   });
 
-  it('builds a numeric, date, and single-choice embedding without errors', () => {
+  it('builds a numeric, date, and single-valued-enum embedding without errors', () => {
     embeddedIntegerNumberField({ key: 'age', artifactRef: numRef });
     embeddedDateField({ key: 'born', artifactRef: dateRef });
-    embeddedSingleChoiceField({ key: 'sex', artifactRef: choiceRef });
+    embeddedSingleValuedEnumField({ key: 'sex', artifactRef: enumRef });
   });
 });
 

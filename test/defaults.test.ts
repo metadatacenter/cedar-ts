@@ -7,8 +7,8 @@ import {
   embeddedTimeField,
   embeddedDateTimeField,
   embeddedControlledTermField,
-  embeddedSingleChoiceField,
-  embeddedMultipleChoiceField,
+  embeddedSingleValuedEnumField,
+  embeddedMultiValuedEnumField,
   embeddedLinkField,
   embeddedEmailField,
   embeddedPhoneNumberField,
@@ -25,8 +25,8 @@ import {
   timeFieldId,
   dateTimeFieldId,
   controlledTermFieldId,
-  singleChoiceFieldId,
-  multipleChoiceFieldId,
+  singleValuedEnumFieldId,
+  multiValuedEnumFieldId,
   linkFieldId,
   emailFieldId,
   phoneNumberFieldId,
@@ -41,7 +41,7 @@ import {
   integerNumberValue,
   realNumberValue,
   controlledTermValue,
-  literalChoiceValue,
+  enumValue,
   linkValue,
   rorValue,
   doiValue,
@@ -160,24 +160,28 @@ describe('EmbeddedXxxField.defaultValue', () => {
     expect(ef.defaultValue).toBe(cv);
   });
 
-  it('SingleChoice / MultipleChoice — ChoiceValue (polymorphic union; kind retained)', () => {
-    const choice = literalChoiceValue({
-      value: '1',
-      datatype: 'http://www.w3.org/2001/XMLSchema#integer',
-    });
-    const efS = embeddedSingleChoiceField({
+  it('SingleValuedEnum — single EnumValue default', () => {
+    const ev = enumValue('option-1');
+    const efS = embeddedSingleValuedEnumField({
       key: 'sc',
-      artifactRef: singleChoiceFieldId('https://example.org/x'),
-      defaultValue: choice,
+      artifactRef: singleValuedEnumFieldId('https://example.org/x'),
+      defaultValue: ev,
     });
-    expect(efS.defaultValue?.kind).toBe('LiteralChoiceValue');
+    expect(efS.defaultValue?.kind).toBe('EnumValue');
+    expect(efS.defaultValue?.value).toBe('option-1');
+  });
 
-    const efM = embeddedMultipleChoiceField({
+  it('MultiValuedEnum — sequence of EnumValue defaults', () => {
+    const a = enumValue('a');
+    const b = enumValue('b');
+    const efM = embeddedMultiValuedEnumField({
       key: 'mc',
-      artifactRef: multipleChoiceFieldId('https://example.org/x'),
-      defaultValue: choice,
+      artifactRef: multiValuedEnumFieldId('https://example.org/x'),
+      defaultValue: [a, b],
     });
-    expect(efM.defaultValue?.kind).toBe('LiteralChoiceValue');
+    expect(efM.defaultValue?.length).toBe(2);
+    expect(efM.defaultValue?.[0]?.kind).toBe('EnumValue');
+    expect(efM.defaultValue?.[1]?.value).toBe('b');
   });
 
   it('Link — LinkValue (kind dropped on the wire)', () => {

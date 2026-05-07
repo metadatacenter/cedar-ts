@@ -26,7 +26,6 @@ export interface EmailFieldId {
   readonly iri: Iri;
 }
 
-export type EmailFieldReference = EmailFieldId;
 
 export const emailFieldId = (
   v: EmailFieldId | Iri | string,
@@ -112,7 +111,7 @@ export const emailField = (init: EmailFieldInit): EmailField =>
 export interface EmbeddedEmailField {
   readonly kind: 'EmbeddedEmailField';
   readonly key: string;
-  readonly artifactRef: EmailFieldReference;
+  readonly artifactRef: EmailFieldId;
   readonly valueRequirement?: ValueRequirement;
   readonly cardinality?: Cardinality;
   readonly visibility?: Visibility;
@@ -122,7 +121,7 @@ export interface EmbeddedEmailField {
 }
 
 export interface EmbeddedEmailFieldInit extends EmbeddedFieldInitCommon {
-  readonly artifactRef: EmailFieldReference | EmailField;
+  readonly artifactRef: EmailFieldId | EmailField;
   readonly defaultValue?: EmailValueInput;
 }
 

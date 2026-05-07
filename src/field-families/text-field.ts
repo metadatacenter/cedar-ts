@@ -49,7 +49,6 @@ export interface TextFieldId {
   readonly iri: Iri;
 }
 
-export type TextFieldReference = TextFieldId;
 
 export const textFieldId = (
   v: TextFieldId | Iri | string,
@@ -180,7 +179,7 @@ export const textField = (init: TextFieldInit): TextField =>
 export interface EmbeddedTextField {
   readonly kind: 'EmbeddedTextField';
   readonly key: string;
-  readonly artifactRef: TextFieldReference;
+  readonly artifactRef: TextFieldId;
   readonly valueRequirement?: ValueRequirement;
   readonly cardinality?: Cardinality;
   readonly visibility?: Visibility;
@@ -190,7 +189,7 @@ export interface EmbeddedTextField {
 }
 
 export interface EmbeddedTextFieldInit extends EmbeddedFieldInitCommon {
-  readonly artifactRef: TextFieldReference | TextField;
+  readonly artifactRef: TextFieldId | TextField;
   readonly defaultValue?: TextValueInput;
 }
 

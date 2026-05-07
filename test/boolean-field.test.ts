@@ -12,7 +12,7 @@ import {
   isEmbeddedField,
   lifecycleMetadata,
   schemaArtifactMetadata,
-  schemaVersioning,
+  schemaArtifactVersioning,
   serialize,
   parseTemplate,
   template,
@@ -28,7 +28,7 @@ const tp = lifecycleMetadata({
 
 const meta = schemaArtifactMetadata({
   artifact: artifactMetadata({ name: 'Boolean field test', lifecycle: tp }),
-  versioning: schemaVersioning({ version: '1.0.0', status: 'draft' }),
+  versioning: schemaArtifactVersioning({ version: '1.0.0', status: 'draft' }),
 });
 
 const MV = '0.1.0';

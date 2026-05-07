@@ -1,7 +1,7 @@
 import { CedarConstructionError, parseSemanticVersion } from '../leaves/index.js';
 import {
   type TemplateInstanceId,
-  type TemplateReference,
+  type TemplateId,
   templateInstanceId,
   templateId,
 } from '../identifiers.js';
@@ -23,7 +23,7 @@ export interface TemplateInstance {
   readonly id: TemplateInstanceId;
   readonly modelVersion: string;
   readonly metadata: ArtifactMetadata;
-  readonly templateRef: TemplateReference;
+  readonly templateRef: TemplateId;
   readonly values: readonly InstanceValue[];
 }
 
@@ -31,7 +31,7 @@ export interface TemplateInstanceInit {
   readonly id: TemplateInstanceId | string;
   readonly modelVersion: string;
   readonly metadata: ArtifactMetadata;
-  readonly templateRef: TemplateReference | string;
+  readonly templateRef: TemplateId | string;
   readonly values?: readonly InstanceValue[];
 }
 

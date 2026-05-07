@@ -1,0 +1,175 @@
+// =====================================================================
+// SingleValuedEnum field family — exactly one selection from a declared
+// set of permissible values
+// =====================================================================
+//
+// Per the cedar-ts convention each family file holds:
+//
+//   - identifier type            : SingleValuedEnumFieldId
+//   - instance value             : EnumValue (shared with multi-valued)
+//   - schema constraints         : SingleValuedEnumFieldSpec
+//   - reusable Field artifact    : SingleValuedEnumField
+//   - Template-embedding wrapper : EmbeddedSingleValuedEnumField
+//
+// Wire `kind` values: "SingleValuedEnumField" (artifact),
+// "EmbeddedSingleValuedEnumField" (embedding). The embedding carries no
+// `cardinality` slot (single-valued enum is implicit, parallel to boolean).
+
+import { type Iri, iri, parseSemanticVersion } from '../leaves/index.js';
+import type { SchemaArtifactMetadata } from '../metadata/index.js';
+import type { ValueRequirement } from '../embedded/requirement.js';
+import type { Visibility } from '../embedded/visibility.js';
+import type { LabelOverride } from '../embedded/label-override.js';
+import { type Property, type PropertyInput, property } from '../embedded/property.js';
+import { parseAsciiIdentifier } from '../leaves/index.js';
+import type { SingleValuedEnumRenderingHint } from './rendering-hints.js';
+import type { PermissibleValue, Token, EnumValue } from './enum-shared.js';
+import { fieldRef } from './embedded-field-common.js';
+
+// =====================================================================
+// 1. Identifier
+// =====================================================================
+
+export interface SingleValuedEnumFieldId {
+  readonly kind: 'SingleValuedEnumFieldId';
+  readonly iri: Iri;
+}
+
+export const singleValuedEnumFieldId = (
+  v: SingleValuedEnumFieldId | Iri | string,
+): SingleValuedEnumFieldId => {
+  if (
+    typeof v !== 'string' &&
+    (v as { kind?: unknown }).kind === 'SingleValuedEnumFieldId'
+  ) {
+    return v as SingleValuedEnumFieldId;
+  }
+  return {
+    kind: 'SingleValuedEnumFieldId',
+    iri: typeof v === 'string' ? iri(v) : (v as Iri),
+  };
+};
+
+// =====================================================================
+// 2. Value — see ./enum-shared.ts (EnumValue)
+// =====================================================================
+
+// =====================================================================
+// 3. FieldSpec
+// =====================================================================
+
+export interface SingleValuedEnumFieldSpec {
+  readonly kind: 'SingleValuedEnumFieldSpec';
+  readonly permissibleValues: readonly [PermissibleValue, ...PermissibleValue[]];
+  // Spec-level default; a bare Token referring to one of permissibleValues.
+  readonly defaultValue?: Token;
+  readonly renderingHint?: SingleValuedEnumRenderingHint;
+}
+
+export interface SingleValuedEnumFieldSpecInit {
+  readonly permissibleValues: readonly [PermissibleValue, ...PermissibleValue[]];
+  readonly defaultValue?: Token;
+  readonly renderingHint?: SingleValuedEnumRenderingHint;
+}
+
+export function singleValuedEnumFieldSpec(
+  init: SingleValuedEnumFieldSpecInit,
+): SingleValuedEnumFieldSpec {
+  const out: {
+    kind: 'SingleValuedEnumFieldSpec';
+    permissibleValues: readonly [PermissibleValue, ...PermissibleValue[]];
+    defaultValue?: Token;
+    renderingHint?: SingleValuedEnumRenderingHint;
+  } = {
+    kind: 'SingleValuedEnumFieldSpec',
+    permissibleValues: init.permissibleValues,
+  };
+  if (init.defaultValue !== undefined) out.defaultValue = init.defaultValue;
+  if (init.renderingHint !== undefined) out.renderingHint = init.renderingHint;
+  return out;
+}
+
+export const isSingleValuedEnumFieldSpec = (
+  x: unknown,
+): x is SingleValuedEnumFieldSpec =>
+  typeof x === 'object' && x !== null &&
+  (x as { kind?: unknown }).kind === 'SingleValuedEnumFieldSpec';
+
+// =====================================================================
+// 4. Field artifact
+// =====================================================================
+
+export interface SingleValuedEnumField {
+  readonly kind: 'SingleValuedEnumField';
+  readonly id: SingleValuedEnumFieldId;
+  readonly modelVersion: string;
+  readonly metadata: SchemaArtifactMetadata;
+  readonly fieldSpec: SingleValuedEnumFieldSpec;
+}
+
+export interface SingleValuedEnumFieldInit {
+  readonly id: SingleValuedEnumFieldId | Iri | string;
+  readonly modelVersion: string;
+  readonly metadata: SchemaArtifactMetadata;
+  readonly fieldSpec: SingleValuedEnumFieldSpec;
+}
+
+export const singleValuedEnumField = (
+  init: SingleValuedEnumFieldInit,
+): SingleValuedEnumField => ({
+  kind: 'SingleValuedEnumField',
+  id: singleValuedEnumFieldId(init.id),
+  modelVersion: parseSemanticVersion(init.modelVersion),
+  metadata: init.metadata,
+  fieldSpec: init.fieldSpec,
+});
+
+// =====================================================================
+// 5. EmbeddedField — no cardinality (single-valued enum is implicit)
+// =====================================================================
+
+export interface EmbeddedSingleValuedEnumField {
+  readonly kind: 'EmbeddedSingleValuedEnumField';
+  readonly key: string;
+  readonly artifactRef: SingleValuedEnumFieldId;
+  readonly valueRequirement?: ValueRequirement;
+  readonly visibility?: Visibility;
+  readonly labelOverride?: LabelOverride;
+  readonly property?: Property;
+  readonly defaultValue?: EnumValue;
+}
+
+export interface EmbeddedSingleValuedEnumFieldInit {
+  readonly key: string;
+  readonly artifactRef: SingleValuedEnumFieldId | SingleValuedEnumField;
+  readonly valueRequirement?: ValueRequirement;
+  readonly visibility?: Visibility;
+  readonly labelOverride?: LabelOverride;
+  readonly property?: PropertyInput;
+  readonly defaultValue?: EnumValue;
+}
+
+export function embeddedSingleValuedEnumField(
+  init: EmbeddedSingleValuedEnumFieldInit,
+): EmbeddedSingleValuedEnumField {
+  const out: {
+    kind: 'EmbeddedSingleValuedEnumField';
+    key: string;
+    artifactRef: SingleValuedEnumFieldId;
+    valueRequirement?: ValueRequirement;
+    visibility?: Visibility;
+    labelOverride?: LabelOverride;
+    property?: Property;
+    defaultValue?: EnumValue;
+  } = {
+    kind: 'EmbeddedSingleValuedEnumField',
+    key: parseAsciiIdentifier(init.key),
+    artifactRef: fieldRef(init.artifactRef),
+  };
+  if (init.valueRequirement !== undefined) out.valueRequirement = init.valueRequirement;
+  if (init.visibility !== undefined) out.visibility = init.visibility;
+  if (init.labelOverride !== undefined) out.labelOverride = init.labelOverride;
+  if (init.property !== undefined) out.property = property(init.property);
+  if (init.defaultValue !== undefined) out.defaultValue = init.defaultValue;
+  return out;
+}

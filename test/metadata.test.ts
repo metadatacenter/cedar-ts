@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   CedarConstructionError,
   lifecycleMetadata,
-  schemaVersioning,
+  schemaArtifactVersioning,
   STATUSES,
   isStatus,
   annotation,
@@ -48,7 +48,7 @@ describe('LifecycleMetadata', () => {
   });
 });
 
-describe('Status and SchemaVersioning', () => {
+describe('Status and SchemaArtifactVersioning', () => {
   it('Status admits exactly draft and published', () => {
     expect(STATUSES).toEqual(['draft', 'published']);
     expect(isStatus('draft')).toBe(true);
@@ -56,8 +56,8 @@ describe('Status and SchemaVersioning', () => {
     expect(isStatus('retracted')).toBe(false);
   });
 
-  it('SchemaVersioning parses semver strings and accepts optional lineage', () => {
-    const sv = schemaVersioning({
+  it('SchemaArtifactVersioning parses semver strings and accepts optional lineage', () => {
+    const sv = schemaArtifactVersioning({
       version: '1.2.3',
       status: 'published',
       previousVersion: 'https://example.org/templates/t/1.2.2',
@@ -72,12 +72,12 @@ describe('Status and SchemaVersioning', () => {
 
   it('rejects malformed semver', () => {
     expect(() =>
-      schemaVersioning({ version: '1.0', status: 'draft' }),
+      schemaArtifactVersioning({ version: '1.0', status: 'draft' }),
     ).toThrow(CedarConstructionError);
   });
 
   it('omits optional lineage fields when absent', () => {
-    const sv = schemaVersioning({
+    const sv = schemaArtifactVersioning({
       version: '1.0.0',
       status: 'draft',
     });
@@ -114,7 +114,7 @@ describe('ArtifactMetadata and SchemaArtifactMetadata', () => {
     modifiedOn: '2024-01-01T00:00:00Z',
     modifiedBy: 'https://example.org/u',
   });
-  const sv = schemaVersioning({
+  const sv = schemaArtifactVersioning({
     version: '0.1.0',
     status: 'draft',
   });

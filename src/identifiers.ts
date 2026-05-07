@@ -59,10 +59,6 @@ export const isTemplateInstanceId = (x: unknown): x is TemplateInstanceId =>
   typeof x === 'object' && x !== null &&
   (x as { kind?: unknown }).kind === 'TemplateInstanceId';
 
-// References mirror their identifier shapes.
-export type TemplateReference = TemplateId;
-export type PresentationComponentReference = PresentationComponentId;
-
 // Union of all artifact identifier shapes.
 export type ArtifactIdentifier =
   | FieldId

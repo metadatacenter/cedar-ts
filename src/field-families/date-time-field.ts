@@ -32,7 +32,6 @@ export interface DateTimeFieldId {
   readonly iri: Iri;
 }
 
-export type DateTimeFieldReference = DateTimeFieldId;
 
 export const dateTimeFieldId = (
   v: DateTimeFieldId | Iri | string,
@@ -153,7 +152,7 @@ export const dateTimeField = (init: DateTimeFieldInit): DateTimeField =>
 export interface EmbeddedDateTimeField {
   readonly kind: 'EmbeddedDateTimeField';
   readonly key: string;
-  readonly artifactRef: DateTimeFieldReference;
+  readonly artifactRef: DateTimeFieldId;
   readonly valueRequirement?: ValueRequirement;
   readonly cardinality?: Cardinality;
   readonly visibility?: Visibility;
@@ -163,7 +162,7 @@ export interface EmbeddedDateTimeField {
 }
 
 export interface EmbeddedDateTimeFieldInit extends EmbeddedFieldInitCommon {
-  readonly artifactRef: DateTimeFieldReference | DateTimeField;
+  readonly artifactRef: DateTimeFieldId | DateTimeField;
   readonly defaultValue?: DateTimeValueInput;
 }
 

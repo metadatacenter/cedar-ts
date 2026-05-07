@@ -54,7 +54,6 @@ export interface DoiFieldId {
   readonly iri: Iri;
 }
 
-export type DoiFieldReference = DoiFieldId;
 
 // Identifier-wrapper constructor for the Doi field family.
 // Idempotent: an existing DoiFieldId passes through unchanged. A bare
@@ -152,7 +151,7 @@ export const doiField = (init: DoiFieldInit): DoiField =>
 export interface EmbeddedDoiField {
   readonly kind: 'EmbeddedDoiField';
   readonly key: string;
-  readonly artifactRef: DoiFieldReference;
+  readonly artifactRef: DoiFieldId;
   readonly valueRequirement?: ValueRequirement;
   readonly cardinality?: Cardinality;
   readonly visibility?: Visibility;
@@ -162,7 +161,7 @@ export interface EmbeddedDoiField {
 }
 
 export interface EmbeddedDoiFieldInit extends EmbeddedFieldInitCommon {
-  readonly artifactRef: DoiFieldReference | DoiField;
+  readonly artifactRef: DoiFieldId | DoiField;
   readonly defaultValue?: DoiValue | AuthorityValueInput<DoiIri>;
 }
 

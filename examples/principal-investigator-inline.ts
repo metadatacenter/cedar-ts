@@ -19,11 +19,8 @@ import {
   artifactMetadata,
   type ArtifactMetadata,
   cardinality,
-  controlledTermChoiceOption,
   controlledTermField,
   controlledTermFieldSpec,
-  controlledTermSingleChoiceFieldSpec,
-  controlledTermValue,
   dateField,
   dateFieldSpec,
   emailField,
@@ -35,16 +32,16 @@ import {
   embeddedPhoneNumberField,
   embeddedPresentationComponent,
   embeddedRorField,
-  embeddedSingleChoiceField,
+  embeddedSingleValuedEnumField,
   embeddedTextField,
   labelOverride,
-  literalChoiceOption,
-  literalSingleChoiceFieldSpec,
+  meaning,
   ontologyDisplayHint,
   ontologyReference,
   ontologySource,
   orcidField,
   orcidFieldSpec,
+  permissibleValue,
   phoneNumberField,
   phoneNumberFieldSpec,
   richTextComponent,
@@ -52,9 +49,10 @@ import {
   rorFieldSpec,
   schemaArtifactMetadata,
   type SchemaArtifactMetadata,
-  schemaVersioning,
+  schemaArtifactVersioning,
   serialize,
-  singleChoiceField,
+  singleValuedEnumField,
+  singleValuedEnumFieldSpec,
   template,
   type Template,
   lifecycleMetadata,
@@ -106,7 +104,7 @@ function artifactMeta(name: string, description: string): ArtifactMetadata {
 function meta(name: string, description: string): SchemaArtifactMetadata {
   return schemaArtifactMetadata({
     artifact: artifactMeta(name, description),
-    versioning: schemaVersioning({
+    versioning: schemaArtifactVersioning({
       version: '1.0.0',
       status: 'draft',
     }),
@@ -175,65 +173,83 @@ export const principalInvestigatorTemplate: Template = template({
       property: 'https://schema.org/name',
     }),
 
-    // Literal single-choice — option labels appear verbatim in instances
-    // as LiteralChoiceValues with an optional `lang` tag.
-    embeddedSingleChoiceField({
+    // Single-valued enum — instance values are EnumValues carrying a
+    // Token matching one of the spec's permissibleValues.
+    embeddedSingleValuedEnumField({
       key: 'academic_title',
-      artifactRef: singleChoiceField({
+      artifactRef: singleValuedEnumField({
         id: `${FIELDS}academic-title`,
         modelVersion: MODEL_VERSION,
-        metadata: meta('Academic Title', 'Academic rank or position (literal label).'),
-        fieldSpec: literalSingleChoiceFieldSpec({
-          options: [
-            literalChoiceOption('Professor', 'en'),
-            literalChoiceOption('Associate Professor', 'en', { default: true }),
-            literalChoiceOption('Assistant Professor', 'en'),
-            literalChoiceOption('Lecturer', 'en'),
-            literalChoiceOption('Research Scientist', 'en'),
+        metadata: meta('Academic Title', 'Academic rank or position.'),
+        fieldSpec: singleValuedEnumFieldSpec({
+          permissibleValues: [
+            permissibleValue({ value: 'professor', label: 'Professor' }),
+            permissibleValue({
+              value: 'associate-professor',
+              label: 'Associate Professor',
+            }),
+            permissibleValue({
+              value: 'assistant-professor',
+              label: 'Assistant Professor',
+            }),
+            permissibleValue({ value: 'lecturer', label: 'Lecturer' }),
+            permissibleValue({
+              value: 'research-scientist',
+              label: 'Research Scientist',
+            }),
           ],
+          defaultValue: 'associate-professor',
         }),
       }),
       valueRequirement: 'required',
-      // The (iri, label) object form for `property` adds an optional
-      // human-readable label for the semantic property.
       property: {
         iri: 'https://schema.org/jobTitle',
         label: 'job title',
       },
     }),
 
-    // Controlled-term single-choice — selecting an option yields a
-    // ControlledTermValue (term IRI + optional label/notation/preferred
-    // label) rather than a literal string. Term IRIs here resolve into
-    // the OBO Role Ontology (RoleO).
-    embeddedSingleChoiceField({
+    // Single-valued enum whose permissibleValues bind to ontology terms
+    // via Meaning entries. RDF projection follows the bound term IRIs.
+    embeddedSingleValuedEnumField({
       key: 'academic_rank',
-      artifactRef: singleChoiceField({
+      artifactRef: singleValuedEnumField({
         id: `${FIELDS}academic-rank`,
         modelVersion: MODEL_VERSION,
         metadata: meta(
           'Academic Rank',
-          'Academic rank drawn from the OBO Role Ontology (RoleO).',
+          'Academic rank backed by the OBO Role Ontology (RoleO).',
         ),
-        fieldSpec: controlledTermSingleChoiceFieldSpec({
-          options: [
-            controlledTermChoiceOption(
-              controlledTermValue({ term: ROLEO_FULL_PROFESSOR, label: 'Professor' }),
-            ),
-            controlledTermChoiceOption(
-              controlledTermValue({
-                term: ROLEO_ASSOCIATE_PROFESSOR,
-                label: 'Associate Professor',
-              }),
-              { default: true },
-            ),
-            controlledTermChoiceOption(
-              controlledTermValue({
-                term: ROLEO_ASSISTANT_PROFESSOR,
-                label: 'Assistant Professor',
-              }),
-            ),
+        fieldSpec: singleValuedEnumFieldSpec({
+          permissibleValues: [
+            permissibleValue({
+              value: 'full-professor',
+              label: 'Professor',
+              meanings: [
+                meaning({ iri: ROLEO_FULL_PROFESSOR, label: 'Full Professor' }),
+              ],
+            }),
+            permissibleValue({
+              value: 'associate-professor',
+              label: 'Associate Professor',
+              meanings: [
+                meaning({
+                  iri: ROLEO_ASSOCIATE_PROFESSOR,
+                  label: 'Associate Professor',
+                }),
+              ],
+            }),
+            permissibleValue({
+              value: 'assistant-professor',
+              label: 'Assistant Professor',
+              meanings: [
+                meaning({
+                  iri: ROLEO_ASSISTANT_PROFESSOR,
+                  label: 'Assistant Professor',
+                }),
+              ],
+            }),
           ],
+          defaultValue: 'associate-professor',
         }),
       }),
       valueRequirement: 'recommended',

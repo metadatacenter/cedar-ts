@@ -14,10 +14,8 @@
 //     attribute-value-field.ts) — each contributes a FieldId, Value,
 //     FieldSpec, Field, and EmbeddedField type
 //   - rendering hints                 (rendering-hints.ts)
-//   - choice-shared types             (choice-shared.ts):
-//       LiteralChoiceOption, ControlledTermChoiceOption,
-//       LiteralChoiceValue, ControlledTermChoiceValue,
-//       ChoiceValue (union)
+//   - enum-shared types               (enum-shared.ts):
+//       Token, PermissibleValue, Meaning, EnumValue
 //
 // Plus this file defines:
 //
@@ -25,7 +23,6 @@
 //     FieldId
 //   - the union-level predicates: isField, isEmbeddedField, isValue,
 //     isFieldSpec, isFieldId
-//   - reference-alias types: FieldReference (= FieldId)
 //
 // Internal helpers that are NOT re-exported (private to this folder):
 //
@@ -36,7 +33,7 @@
 //     families
 
 export * from './rendering-hints.js';
-export * from './choice-shared.js';
+export * from './enum-shared.js';
 
 export * from './text-field.js';
 export * from './unit.js';
@@ -47,8 +44,8 @@ export * from './date-field.js';
 export * from './time-field.js';
 export * from './date-time-field.js';
 export * from './controlled-term-field.js';
-export * from './single-choice-field.js';
-export * from './multiple-choice-field.js';
+export * from './single-valued-enum-field.js';
+export * from './multi-valued-enum-field.js';
 export * from './link-field.js';
 export * from './email-field.js';
 export * from './phone-number-field.js';
@@ -84,17 +81,16 @@ import type {
   EmbeddedControlledTermField,
 } from './controlled-term-field.js';
 import type {
-  SingleChoiceField,
-  LiteralSingleChoiceFieldSpec,
-  ControlledTermSingleChoiceFieldSpec,
-  EmbeddedSingleChoiceField,
-} from './single-choice-field.js';
+  SingleValuedEnumField,
+  SingleValuedEnumFieldSpec,
+  EmbeddedSingleValuedEnumField,
+} from './single-valued-enum-field.js';
 import type {
-  MultipleChoiceField,
-  LiteralMultipleChoiceFieldSpec,
-  ControlledTermMultipleChoiceFieldSpec,
-  EmbeddedMultipleChoiceField,
-} from './multiple-choice-field.js';
+  MultiValuedEnumField,
+  MultiValuedEnumFieldSpec,
+  EmbeddedMultiValuedEnumField,
+} from './multi-valued-enum-field.js';
+import type { EnumValue } from './enum-shared.js';
 import type { LinkField, LinkFieldSpec, LinkValue, EmbeddedLinkField } from './link-field.js';
 import type { EmailField, EmailFieldSpec, EmailValue, EmbeddedEmailField } from './email-field.js';
 import type { PhoneNumberField, PhoneNumberFieldSpec, PhoneNumberValue, EmbeddedPhoneNumberField } from './phone-number-field.js';
@@ -110,13 +106,13 @@ import type {
   AttributeValue,
   EmbeddedAttributeValueField,
 } from './attribute-value-field.js';
-import type { ChoiceValue } from './choice-shared.js';
 
 // =====================================================================
 // Field union
 // =====================================================================
 
 export type NumericField = IntegerNumberField | RealNumberField;
+export type EnumField = SingleValuedEnumField | MultiValuedEnumField;
 
 export type Field =
   | TextField
@@ -127,8 +123,8 @@ export type Field =
   | TimeField
   | DateTimeField
   | ControlledTermField
-  | SingleChoiceField
-  | MultipleChoiceField
+  | SingleValuedEnumField
+  | MultiValuedEnumField
   | LinkField
   | EmailField
   | PhoneNumberField
@@ -149,8 +145,8 @@ const FIELD_KINDS: ReadonlySet<string> = new Set([
   'TimeField',
   'DateTimeField',
   'ControlledTermField',
-  'SingleChoiceField',
-  'MultipleChoiceField',
+  'SingleValuedEnumField',
+  'MultiValuedEnumField',
   'LinkField',
   'EmailField',
   'PhoneNumberField',
@@ -183,8 +179,8 @@ export type EmbeddedField =
   | EmbeddedTimeField
   | EmbeddedDateTimeField
   | EmbeddedControlledTermField
-  | EmbeddedSingleChoiceField
-  | EmbeddedMultipleChoiceField
+  | EmbeddedSingleValuedEnumField
+  | EmbeddedMultiValuedEnumField
   | EmbeddedLinkField
   | EmbeddedEmailField
   | EmbeddedPhoneNumberField
@@ -205,8 +201,8 @@ const EMBEDDED_FIELD_KINDS: ReadonlySet<string> = new Set([
   'EmbeddedTimeField',
   'EmbeddedDateTimeField',
   'EmbeddedControlledTermField',
-  'EmbeddedSingleChoiceField',
-  'EmbeddedMultipleChoiceField',
+  'EmbeddedSingleValuedEnumField',
+  'EmbeddedMultiValuedEnumField',
   'EmbeddedLinkField',
   'EmbeddedEmailField',
   'EmbeddedPhoneNumberField',
@@ -230,9 +226,6 @@ export function isEmbeddedField(x: unknown): x is EmbeddedField {
 // FieldSpec union
 // =====================================================================
 
-// SingleChoiceFieldSpec / MultipleChoiceFieldSpec each hold two concrete
-// variants; we list the variants directly so each member of FieldSpec has
-// a unique top-level `kind` discriminant.
 export type NumericFieldSpec = IntegerNumberFieldSpec | RealNumberFieldSpec;
 
 export type FieldSpec =
@@ -244,10 +237,8 @@ export type FieldSpec =
   | TimeFieldSpec
   | DateTimeFieldSpec
   | ControlledTermFieldSpec
-  | LiteralSingleChoiceFieldSpec
-  | ControlledTermSingleChoiceFieldSpec
-  | LiteralMultipleChoiceFieldSpec
-  | ControlledTermMultipleChoiceFieldSpec
+  | SingleValuedEnumFieldSpec
+  | MultiValuedEnumFieldSpec
   | LinkFieldSpec
   | EmailFieldSpec
   | PhoneNumberFieldSpec
@@ -268,10 +259,8 @@ const FIELD_SPEC_KINDS: ReadonlySet<string> = new Set([
   'TimeFieldSpec',
   'DateTimeFieldSpec',
   'ControlledTermFieldSpec',
-  'LiteralSingleChoiceFieldSpec',
-  'ControlledTermSingleChoiceFieldSpec',
-  'LiteralMultipleChoiceFieldSpec',
-  'ControlledTermMultipleChoiceFieldSpec',
+  'SingleValuedEnumFieldSpec',
+  'MultiValuedEnumFieldSpec',
   'LinkFieldSpec',
   'EmailFieldSpec',
   'PhoneNumberFieldSpec',
@@ -295,8 +284,7 @@ export function isFieldSpec(x: unknown): x is FieldSpec {
 // =====================================================================
 
 // External-authority value union, retained for callers that target the
-// six external-authority families collectively (matches the previous
-// ExternalAuthorityValue surface from src/values/).
+// six external-authority families collectively.
 export type ExternalAuthorityValue =
   | OrcidValue
   | RorValue
@@ -318,8 +306,6 @@ export function isExternalAuthorityValue(x: unknown): x is ExternalAuthorityValu
   );
 }
 
-// External-authority spec union; matches the previous
-// ExternalAuthorityFieldSpec surface from src/field-specs/.
 export type ExternalAuthorityFieldSpec =
   | OrcidFieldSpec
   | RorFieldSpec
@@ -343,8 +329,6 @@ export function isExternalAuthorityFieldSpec(
   );
 }
 
-// Contact field spec union (Email | PhoneNumber); preserved from the
-// previous src/field-specs/contact-field-specs.ts surface.
 export type ContactFieldSpec = EmailFieldSpec | PhoneNumberFieldSpec;
 
 export type NumericValue = IntegerNumberValue | RealNumberValue;
@@ -358,7 +342,7 @@ export type Value =
   | TimeValue
   | DateTimeValue
   | ControlledTermValue
-  | ChoiceValue
+  | EnumValue
   | LinkValue
   | EmailValue
   | PhoneNumberValue
@@ -376,8 +360,7 @@ const VALUE_KINDS: ReadonlySet<string> = new Set([
   'TimeValue',
   'DateTimeValue',
   'ControlledTermValue',
-  'LiteralChoiceValue',
-  'ControlledTermChoiceValue',
+  'EnumValue',
   'LinkValue',
   'EmailValue',
   'PhoneNumberValue',
@@ -408,8 +391,8 @@ import type { DateFieldId } from './date-field.js';
 import type { TimeFieldId } from './time-field.js';
 import type { DateTimeFieldId } from './date-time-field.js';
 import type { ControlledTermFieldId } from './controlled-term-field.js';
-import type { SingleChoiceFieldId } from './single-choice-field.js';
-import type { MultipleChoiceFieldId } from './multiple-choice-field.js';
+import type { SingleValuedEnumFieldId } from './single-valued-enum-field.js';
+import type { MultiValuedEnumFieldId } from './multi-valued-enum-field.js';
 import type { LinkFieldId } from './link-field.js';
 import type { EmailFieldId } from './email-field.js';
 import type { PhoneNumberFieldId } from './phone-number-field.js';
@@ -430,8 +413,8 @@ export type FieldId =
   | TimeFieldId
   | DateTimeFieldId
   | ControlledTermFieldId
-  | SingleChoiceFieldId
-  | MultipleChoiceFieldId
+  | SingleValuedEnumFieldId
+  | MultiValuedEnumFieldId
   | LinkFieldId
   | EmailFieldId
   | PhoneNumberFieldId
@@ -443,11 +426,6 @@ export type FieldId =
   | NihGrantIdFieldId
   | AttributeValueFieldId;
 
-// FieldReference is structurally identical to FieldId; the alias documents
-// the role distinction (an identifier names a reusable artifact; a reference
-// expresses the intention to embed it).
-export type FieldReference = FieldId;
-
 const FIELD_ID_KINDS: ReadonlySet<string> = new Set([
   'TextFieldId',
   'IntegerNumberFieldId',
@@ -457,8 +435,8 @@ const FIELD_ID_KINDS: ReadonlySet<string> = new Set([
   'TimeFieldId',
   'DateTimeFieldId',
   'ControlledTermFieldId',
-  'SingleChoiceFieldId',
-  'MultipleChoiceFieldId',
+  'SingleValuedEnumFieldId',
+  'MultiValuedEnumFieldId',
   'LinkFieldId',
   'EmailFieldId',
   'PhoneNumberFieldId',

@@ -30,7 +30,6 @@ export interface DateFieldId {
   readonly iri: Iri;
 }
 
-export type DateFieldReference = DateFieldId;
 
 export const dateFieldId = (
   v: DateFieldId | Iri | string,
@@ -193,7 +192,7 @@ export const dateField = (init: DateFieldInit): DateField =>
 export interface EmbeddedDateField {
   readonly kind: 'EmbeddedDateField';
   readonly key: string;
-  readonly artifactRef: DateFieldReference;
+  readonly artifactRef: DateFieldId;
   readonly valueRequirement?: ValueRequirement;
   readonly cardinality?: Cardinality;
   readonly visibility?: Visibility;
@@ -203,7 +202,7 @@ export interface EmbeddedDateField {
 }
 
 export interface EmbeddedDateFieldInit extends EmbeddedFieldInitCommon {
-  readonly artifactRef: DateFieldReference | DateField;
+  readonly artifactRef: DateFieldId | DateField;
   readonly defaultValue?: DateValue | string;
 }
 

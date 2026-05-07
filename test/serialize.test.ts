@@ -10,11 +10,8 @@ import {
   attributeValueField,
   attributeValueFieldSpec,
   cardinality,
-  controlledTermChoiceOption,
-  controlledTermChoiceValue,
   controlledTermField,
   controlledTermFieldSpec,
-  controlledTermSingleChoiceFieldSpec,
   controlledTermValue,
   dateField,
   dateFieldSpec,
@@ -30,7 +27,7 @@ import {
   embeddedDoiField,
   embeddedEmailField,
   embeddedLinkField,
-  embeddedMultipleChoiceField,
+  embeddedMultiValuedEnumField,
   embeddedNihGrantIdField,
   embeddedIntegerNumberField,
   embeddedRealNumberField,
@@ -40,7 +37,7 @@ import {
   embeddedPubMedIdField,
   embeddedRorField,
   embeddedRridField,
-  embeddedSingleChoiceField,
+  embeddedSingleValuedEnumField,
   embeddedTemplate,
   embeddedTextField,
   embeddedTimeField,
@@ -54,10 +51,12 @@ import {
   linkField,
   linkFieldSpec,
   linkValue,
-  literalChoiceOption,
-  literalChoiceValue,
-  literalSingleChoiceFieldSpec,
-  multipleChoiceField,
+  permissibleValue,
+  enumValue,
+  singleValuedEnumFieldSpec,
+  multiValuedEnumFieldSpec,
+  multiValuedEnumField,
+  singleValuedEnumField,
   nestedTemplateInstance,
   nihGrantIdField,
   nihGrantIdFieldSpec,
@@ -90,9 +89,8 @@ import {
   rridFieldSpec,
   rridValue,
   schemaArtifactMetadata,
-  schemaVersioning,
+  schemaArtifactVersioning,
   sectionBreakComponent,
-  singleChoiceField,
   template,
   templateId,
   templateInstance,
@@ -152,6 +150,7 @@ import {
   iri,
   annotation,
   annotationStringValue,
+  annotationIriValue,
   property,
   attributeValueFieldId,
   controlledTermFieldId,
@@ -160,7 +159,7 @@ import {
   doiFieldId,
   emailFieldId,
   linkFieldId,
-  multipleChoiceFieldId,
+  multiValuedEnumFieldId,
   nihGrantIdFieldId,
   integerNumberFieldId,
   realNumberFieldId,
@@ -169,7 +168,7 @@ import {
   pubMedIdFieldId,
   rorFieldId,
   rridFieldId,
-  singleChoiceFieldId,
+  singleValuedEnumFieldId,
   textFieldId,
   timeFieldId,
   presentationComponentId,
@@ -186,7 +185,7 @@ const tp = lifecycleMetadata({
 const am = artifactMetadata({ name: 'Demo', lifecycle: tp });
 const sam = schemaArtifactMetadata({
   artifact: am,
-  versioning: schemaVersioning({
+  versioning: schemaArtifactVersioning({
     version: '1.0.0',
     status: 'draft',
   }),
@@ -229,21 +228,7 @@ const valueSamples = [
     'ControlledTermValue',
     controlledTermValue({ term: 'http://example.org/term/1', label: 'Term One' }),
   ],
-  ['LiteralChoiceValue (lang)', literalChoiceValue('Yes', 'en')],
-  [
-    'LiteralChoiceValue (typed)',
-    literalChoiceValue({
-      value: '42',
-      datatype: 'http://www.w3.org/2001/XMLSchema#integer',
-    }),
-  ],
-  ['LiteralChoiceValue (plain)', literalChoiceValue('plain')],
-  [
-    'ControlledTermChoiceValue',
-    controlledTermChoiceValue(
-      controlledTermValue({ term: 'http://example.org/c/1', label: 'C1' }),
-    ),
-  ],
+  ['EnumValue', enumValue('option-a')],
   ['LinkValue', linkValue({ iri: 'https://example.org/' })],
   ['LinkValue (with label)', linkValue({ iri: 'https://example.org/', label: 'Home' })],
   ['EmailValue', emailValue('user@example.org')],
@@ -287,16 +272,6 @@ describe('Value round-trip', () => {
     });
   });
 
-  it('LiteralChoiceValue rejects multi-match (lang AND datatype) on parse', () => {
-    expect(() =>
-      parseValue({
-        kind: 'LiteralChoiceValue',
-        value: 'x',
-        lang: 'en',
-        datatype: 'http://www.w3.org/2001/XMLSchema#string',
-      }),
-    ).toThrow(/mutually exclusive/);
-  });
 });
 
 // ---- Cardinality / Property / LabelOverride --------------------------
@@ -343,40 +318,52 @@ describe('LabelOverride round-trip', () => {
   });
 });
 
-// ---- AnnotationValue (property-set discrimination) -------------------
+// ---- AnnotationValue (kind-discriminated) ----------------------------
 
 describe('AnnotationValue round-trip', () => {
-  it('Iri arm wraps as { iri }', () => {
-    const a = iri('https://example.org/x');
+  it('AnnotationIriValue arm carries kind+iri', () => {
+    const a = annotationIriValue('https://example.org/x');
     expect(serializeAnnotationValue(a)).toEqual({
+      kind: 'AnnotationIriValue',
       iri: 'https://example.org/x',
     });
-    const back = parseAnnotationValue({ iri: 'https://example.org/x' });
-    expect((back as { value: string }).value).toBe('https://example.org/x');
+    const back = parseAnnotationValue({
+      kind: 'AnnotationIriValue',
+      iri: 'https://example.org/x',
+    });
+    expect((back as { kind: string }).kind).toBe('AnnotationIriValue');
   });
 
-  it('AnnotationStringValue arm wraps as { value }', () => {
+  it('AnnotationStringValue arm carries kind+value', () => {
     const sv = annotationStringValue('foo');
-    expect(serializeAnnotationValue(sv)).toEqual({ value: 'foo' });
-    const back = parseAnnotationValue({ value: 'foo' });
+    expect(serializeAnnotationValue(sv)).toEqual({
+      kind: 'AnnotationStringValue',
+      value: 'foo',
+    });
+    const back = parseAnnotationValue({
+      kind: 'AnnotationStringValue',
+      value: 'foo',
+    });
     expect((back as { kind: string }).kind).toBe('AnnotationStringValue');
   });
 
   it('AnnotationStringValue with lang', () => {
     const sv = annotationStringValue('foo', 'en');
-    expect(serializeAnnotationValue(sv)).toEqual({ value: 'foo', lang: 'en' });
-    const back = parseAnnotationValue({ value: 'foo', lang: 'en' });
+    expect(serializeAnnotationValue(sv)).toEqual({
+      kind: 'AnnotationStringValue',
+      value: 'foo',
+      lang: 'en',
+    });
+    const back = parseAnnotationValue({
+      kind: 'AnnotationStringValue',
+      value: 'foo',
+      lang: 'en',
+    });
     expect((back as { kind: string }).kind).toBe('AnnotationStringValue');
   });
 
-  it('rejects multi-match { iri, value }', () => {
-    expect(() =>
-      parseAnnotationValue({ iri: 'https://example.org/x', value: 'oops' }),
-    ).toThrow(/MUST NOT carry both/);
-  });
-
-  it('rejects no-match {}', () => {
-    expect(() => parseAnnotationValue({})).toThrow(/MUST carry/);
+  it('rejects unknown kind', () => {
+    expect(() => parseAnnotationValue({ kind: 'oops' })).toThrow(/AnnotationStringValue/);
   });
 });
 
@@ -388,17 +375,20 @@ describe('Annotation round-trip', () => {
     const wire = serializeAnnotation(a);
     expect(wire).toEqual({
       property: 'https://example.org/p',
-      body: { value: 'foo' },
+      body: { kind: 'AnnotationStringValue', value: 'foo' },
     });
     expect(parseAnnotation(wire)).toEqual(a);
   });
 
   it('with iri body', () => {
-    const a = annotation('https://example.org/p', iri('https://example.org/o'));
+    const a = annotation(
+      'https://example.org/p',
+      annotationIriValue('https://example.org/o'),
+    );
     const wire = serializeAnnotation(a);
     expect(wire).toEqual({
       property: 'https://example.org/p',
-      body: { iri: 'https://example.org/o' },
+      body: { kind: 'AnnotationIriValue', iri: 'https://example.org/o' },
     });
     expect(parseAnnotation(wire)).toEqual(a);
   });
@@ -450,18 +440,19 @@ const fieldSpecSamples = [
     ),
   ],
   [
-    'LiteralSingleChoiceFieldSpec',
-    literalSingleChoiceFieldSpec({
-      options: [literalChoiceOption('A', 'en'), literalChoiceOption('B', 'en')],
+    'SingleValuedEnumFieldSpec',
+    singleValuedEnumFieldSpec({
+      permissibleValues: [
+        permissibleValue({ value: 'a', label: 'A' }),
+        permissibleValue({ value: 'b', label: 'B' }),
+      ],
     }),
   ],
   [
-    'ControlledTermSingleChoiceFieldSpec',
-    controlledTermSingleChoiceFieldSpec({
-      options: [
-        controlledTermChoiceOption(
-          controlledTermValue({ term: 'http://example.org/c/1', label: 'C1' }),
-        ),
+    'MultiValuedEnumFieldSpec',
+    multiValuedEnumFieldSpec({
+      permissibleValues: [
+        permissibleValue({ value: 'a', label: 'A' }),
       ],
     }),
   ],
@@ -563,14 +554,26 @@ describe('EmbeddedXxxField.defaultValue wire-form', () => {
     expect(parseEmbeddedField(wire)).toEqual(e);
   });
 
-  it('SingleChoice — emits ChoiceValue with kind retained', () => {
-    const e = embeddedSingleChoiceField({
+  it('SingleValuedEnum — emits EnumValue with kind dropped', () => {
+    const e = embeddedSingleValuedEnumField({
       key: 'sc',
-      artifactRef: singleChoiceFieldId('https://example.org/x'),
-      defaultValue: literalChoiceValue('Yes', 'en'),
+      artifactRef: singleValuedEnumFieldId('https://example.org/x'),
+      defaultValue: enumValue('yes'),
     });
-    const wire = serializeEmbeddedField(e) as { defaultValue: { kind: string } };
-    expect(wire.defaultValue.kind).toBe('LiteralChoiceValue');
+    const wire = serializeEmbeddedField(e) as { defaultValue: Record<string, unknown> };
+    expect(wire.defaultValue['kind']).toBeUndefined();
+    expect(wire.defaultValue['value']).toBe('yes');
+    expect(parseEmbeddedField(wire)).toEqual(e);
+  });
+
+  it('MultiValuedEnum — emits an array of untagged EnumValue', () => {
+    const e = embeddedMultiValuedEnumField({
+      key: 'mc',
+      artifactRef: multiValuedEnumFieldId('https://example.org/x'),
+      defaultValue: [enumValue('a'), enumValue('b')],
+    });
+    const wire = serializeEmbeddedField(e) as { defaultValue: unknown };
+    expect(wire.defaultValue).toEqual([{ value: 'a' }, { value: 'b' }]);
     expect(parseEmbeddedField(wire)).toEqual(e);
   });
 
@@ -583,7 +586,7 @@ describe('EmbeddedXxxField.defaultValue wire-form', () => {
     const wire = serializeEmbeddedField(e) as { defaultValue: Record<string, unknown> };
     expect(wire.defaultValue['kind']).toBeUndefined();
     expect(wire.defaultValue['iri']).toBe('https://example.org');
-    expect(wire.defaultValue['label']).toBe('Example');
+    expect(wire.defaultValue['label']).toEqual([{ value: 'Example', lang: 'und' }]);
     expect(parseEmbeddedField(wire)).toEqual(e);
   });
 
@@ -757,29 +760,28 @@ const fieldSamples = [
     }),
   ],
   [
-    'SingleChoiceField (literal)',
-    singleChoiceField({
-      id: 'https://example.org/fields/single-lit',
+    'SingleValuedEnumField',
+    singleValuedEnumField({
+      id: 'https://example.org/fields/single-enum',
       modelVersion: MV,
       metadata: sam,
-      fieldSpec: literalSingleChoiceFieldSpec({
-        options: [literalChoiceOption('A', 'en')],
+      fieldSpec: singleValuedEnumFieldSpec({
+        permissibleValues: [permissibleValue({ value: 'a', label: 'A' })],
       }),
     }),
   ],
   [
-    'MultipleChoiceField (literal)',
-    multipleChoiceField({
-      id: 'https://example.org/fields/multi-lit',
+    'MultiValuedEnumField',
+    multiValuedEnumField({
+      id: 'https://example.org/fields/multi-enum',
       modelVersion: MV,
       metadata: sam,
-      fieldSpec: {
-        kind: 'LiteralMultipleChoiceFieldSpec',
-        options: [
-          literalChoiceOption('A', 'en'),
-          literalChoiceOption('B', 'en'),
+      fieldSpec: multiValuedEnumFieldSpec({
+        permissibleValues: [
+          permissibleValue({ value: 'a', label: 'A' }),
+          permissibleValue({ value: 'b', label: 'B' }),
         ],
-      } as const,
+      }),
     }),
   ],
 ] as const;
@@ -915,17 +917,17 @@ describe('EmbeddedField round-trip', () => {
       }),
     ],
     [
-      'EmbeddedSingleChoiceField',
-      embeddedSingleChoiceField({
+      'EmbeddedSingleValuedEnumField',
+      embeddedSingleValuedEnumField({
         key: 'sc',
-        artifactRef: singleChoiceFieldId('https://example.org/fields/sc'),
+        artifactRef: singleValuedEnumFieldId('https://example.org/fields/sc'),
       }),
     ],
     [
-      'EmbeddedMultipleChoiceField',
-      embeddedMultipleChoiceField({
+      'EmbeddedMultiValuedEnumField',
+      embeddedMultiValuedEnumField({
         key: 'mc',
-        artifactRef: multipleChoiceFieldId('https://example.org/fields/mc'),
+        artifactRef: multiValuedEnumFieldId('https://example.org/fields/mc'),
       }),
     ],
     [

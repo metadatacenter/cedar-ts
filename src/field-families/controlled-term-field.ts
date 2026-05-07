@@ -62,7 +62,6 @@ export interface ControlledTermFieldId {
   readonly iri: Iri;
 }
 
-export type ControlledTermFieldReference = ControlledTermFieldId;
 
 // Identifier-wrapper constructor for the ControlledTerm field family.
 // Idempotent: an existing ControlledTermFieldId passes through unchanged. A bare
@@ -202,14 +201,14 @@ export interface BranchSource {
   readonly kind: 'BranchSource';
   readonly ontology: OntologyReference;
   readonly rootTermIri: Iri;
-  readonly rootTermLabel: MultilingualString;
+  readonly rootTermLabel?: MultilingualString;
   readonly maxTraversalDepth?: number;
 }
 
 export interface BranchSourceInit {
   readonly ontology: OntologyReference;
   readonly rootTermIri: Iri | string;
-  readonly rootTermLabel: MultilingualStringInput;
+  readonly rootTermLabel?: MultilingualStringInput;
   readonly maxTraversalDepth?: number;
 }
 
@@ -218,15 +217,16 @@ export function branchSource(init: BranchSourceInit): BranchSource {
     kind: 'BranchSource';
     ontology: OntologyReference;
     rootTermIri: Iri;
-    rootTermLabel: MultilingualString;
+    rootTermLabel?: MultilingualString;
     maxTraversalDepth?: number;
   } = {
     kind: 'BranchSource',
     ontology: init.ontology,
     rootTermIri:
       typeof init.rootTermIri === 'string' ? iri(init.rootTermIri) : init.rootTermIri,
-    rootTermLabel: multilingualString(init.rootTermLabel),
   };
+  if (init.rootTermLabel !== undefined)
+    out.rootTermLabel = multilingualString(init.rootTermLabel);
   if (init.maxTraversalDepth !== undefined)
     out.maxTraversalDepth = assertNonNegativeInteger(init.maxTraversalDepth);
   return out;
@@ -234,24 +234,29 @@ export function branchSource(init: BranchSourceInit): BranchSource {
 
 export interface ControlledTermClass {
   readonly term: Iri;
-  readonly label: MultilingualString;
+  readonly label?: MultilingualString;
   readonly ontology: OntologyReference;
 }
 
 export interface ControlledTermClassInit {
   readonly term: Iri | string;
-  readonly label: MultilingualStringInput;
+  readonly label?: MultilingualStringInput;
   readonly ontology: OntologyReference;
 }
 
 export function controlledTermClass(
   init: ControlledTermClassInit,
 ): ControlledTermClass {
-  return {
+  const out: {
+    term: Iri;
+    label?: MultilingualString;
+    ontology: OntologyReference;
+  } = {
     term: typeof init.term === 'string' ? iri(init.term) : init.term,
-    label: multilingualString(init.label),
     ontology: init.ontology,
   };
+  if (init.label !== undefined) out.label = multilingualString(init.label);
+  return out;
 }
 
 export interface ClassSource {
@@ -351,7 +356,7 @@ export const controlledTermField = (
 export interface EmbeddedControlledTermField {
   readonly kind: 'EmbeddedControlledTermField';
   readonly key: string;
-  readonly artifactRef: ControlledTermFieldReference;
+  readonly artifactRef: ControlledTermFieldId;
   readonly valueRequirement?: ValueRequirement;
   readonly cardinality?: Cardinality;
   readonly visibility?: Visibility;
@@ -361,7 +366,7 @@ export interface EmbeddedControlledTermField {
 }
 
 export interface EmbeddedControlledTermFieldInit extends EmbeddedFieldInitCommon {
-  readonly artifactRef: ControlledTermFieldReference | ControlledTermField;
+  readonly artifactRef: ControlledTermFieldId | ControlledTermField;
   readonly defaultValue?: ControlledTermValue;
 }
 

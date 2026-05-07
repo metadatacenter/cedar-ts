@@ -14,8 +14,8 @@ import {
   type TimeField,
   type DateTimeField,
   type ControlledTermField,
-  type SingleChoiceField,
-  type MultipleChoiceField,
+  type SingleValuedEnumField,
+  type MultiValuedEnumField,
   type LinkField,
   type EmailField,
   type PhoneNumberField,
@@ -26,8 +26,6 @@ import {
   type RridField,
   type NihGrantIdField,
   type AttributeValueField,
-  type SingleChoiceFieldSpec,
-  type MultipleChoiceFieldSpec,
   textField,
   integerNumberField,
   realNumberField,
@@ -36,8 +34,8 @@ import {
   timeField,
   dateTimeField,
   controlledTermField,
-  singleChoiceField,
-  multipleChoiceField,
+  singleValuedEnumField,
+  multiValuedEnumField,
   linkField,
   emailField,
   phoneNumberField,
@@ -64,8 +62,8 @@ import {
   serializeTimeFieldId,
   serializeDateTimeFieldId,
   serializeControlledTermFieldId,
-  serializeSingleChoiceFieldId,
-  serializeMultipleChoiceFieldId,
+  serializeSingleValuedEnumFieldId,
+  serializeMultiValuedEnumFieldId,
   serializeLinkFieldId,
   serializeEmailFieldId,
   serializePhoneNumberFieldId,
@@ -84,8 +82,8 @@ import {
   parseTimeFieldId,
   parseDateTimeFieldId,
   parseControlledTermFieldId,
-  parseSingleChoiceFieldId,
-  parseMultipleChoiceFieldId,
+  parseSingleValuedEnumFieldId,
+  parseMultiValuedEnumFieldId,
   parseLinkFieldId,
   parseEmailFieldId,
   parsePhoneNumberFieldId,
@@ -110,10 +108,8 @@ import {
   serializeTimeFieldSpec,
   serializeDateTimeFieldSpec,
   serializeControlledTermFieldSpec,
-  serializeLiteralSingleChoiceFieldSpec,
-  serializeControlledTermSingleChoiceFieldSpec,
-  serializeLiteralMultipleChoiceFieldSpec,
-  serializeControlledTermMultipleChoiceFieldSpec,
+  serializeSingleValuedEnumFieldSpec,
+  serializeMultiValuedEnumFieldSpec,
   serializeLinkFieldSpec,
   serializeEmailFieldSpec,
   serializePhoneNumberFieldSpec,
@@ -132,10 +128,8 @@ import {
   parseTimeFieldSpec,
   parseDateTimeFieldSpec,
   parseControlledTermFieldSpec,
-  parseLiteralSingleChoiceFieldSpec,
-  parseControlledTermSingleChoiceFieldSpec,
-  parseLiteralMultipleChoiceFieldSpec,
-  parseControlledTermMultipleChoiceFieldSpec,
+  parseSingleValuedEnumFieldSpec,
+  parseMultiValuedEnumFieldSpec,
   parseLinkFieldSpec,
   parseEmailFieldSpec,
   parsePhoneNumberFieldSpec,
@@ -344,77 +338,57 @@ export function parseControlledTermField(
   });
 }
 
-export function serializeSingleChoiceField(x: SingleChoiceField): unknown {
-  const fieldSpec =
-    x.fieldSpec.kind === 'LiteralSingleChoiceFieldSpec'
-      ? serializeLiteralSingleChoiceFieldSpec(x.fieldSpec)
-      : serializeControlledTermSingleChoiceFieldSpec(x.fieldSpec);
-  return {
-    kind: 'SingleChoiceField',
-    id: serializeSingleChoiceFieldId(x.id),
-    modelVersion: x.modelVersion,
-    metadata: serializeSchemaArtifactMetadata(x.metadata),
-    fieldSpec,
-  };
-}
+export const serializeSingleValuedEnumField = (
+  x: SingleValuedEnumField,
+): unknown => ({
+  kind: 'SingleValuedEnumField',
+  id: serializeSingleValuedEnumFieldId(x.id),
+  modelVersion: x.modelVersion,
+  metadata: serializeSchemaArtifactMetadata(x.metadata),
+  fieldSpec: serializeSingleValuedEnumFieldSpec(x.fieldSpec),
+});
 
-export function parseSingleChoiceField(
+export function parseSingleValuedEnumField(
   x: unknown,
-  where = 'SingleChoiceField',
-): SingleChoiceField {
-  const s = parseFieldShell<SingleChoiceField>(x, 'SingleChoiceField', where);
-  const specObj = expectObject(s.fieldSpec, `${where}.fieldSpec`);
-  const k = expectKindOneOf(
-    specObj,
-    ['LiteralSingleChoiceFieldSpec', 'ControlledTermSingleChoiceFieldSpec'] as const,
-    `${where}.fieldSpec`,
+  where = 'SingleValuedEnumField',
+): SingleValuedEnumField {
+  const s = parseFieldShell<SingleValuedEnumField>(
+    x,
+    'SingleValuedEnumField',
+    where,
   );
-  const fieldSpec: SingleChoiceFieldSpec =
-    k === 'LiteralSingleChoiceFieldSpec'
-      ? parseLiteralSingleChoiceFieldSpec(s.fieldSpec, `${where}.fieldSpec`)
-      : parseControlledTermSingleChoiceFieldSpec(s.fieldSpec, `${where}.fieldSpec`);
-  return singleChoiceField({
-    id: parseSingleChoiceFieldId(s.id, `${where}.id`),
+  return singleValuedEnumField({
+    id: parseSingleValuedEnumFieldId(s.id, `${where}.id`),
     modelVersion: s.modelVersion,
     metadata: parseSchemaArtifactMetadata(s.metadata, `${where}.metadata`),
-    fieldSpec,
+    fieldSpec: parseSingleValuedEnumFieldSpec(s.fieldSpec, `${where}.fieldSpec`),
   });
 }
 
-export function serializeMultipleChoiceField(x: MultipleChoiceField): unknown {
-  const fieldSpec =
-    x.fieldSpec.kind === 'LiteralMultipleChoiceFieldSpec'
-      ? serializeLiteralMultipleChoiceFieldSpec(x.fieldSpec)
-      : serializeControlledTermMultipleChoiceFieldSpec(x.fieldSpec);
-  return {
-    kind: 'MultipleChoiceField',
-    id: serializeMultipleChoiceFieldId(x.id),
-    modelVersion: x.modelVersion,
-    metadata: serializeSchemaArtifactMetadata(x.metadata),
-    fieldSpec,
-  };
-}
+export const serializeMultiValuedEnumField = (
+  x: MultiValuedEnumField,
+): unknown => ({
+  kind: 'MultiValuedEnumField',
+  id: serializeMultiValuedEnumFieldId(x.id),
+  modelVersion: x.modelVersion,
+  metadata: serializeSchemaArtifactMetadata(x.metadata),
+  fieldSpec: serializeMultiValuedEnumFieldSpec(x.fieldSpec),
+});
 
-export function parseMultipleChoiceField(
+export function parseMultiValuedEnumField(
   x: unknown,
-  where = 'MultipleChoiceField',
-): MultipleChoiceField {
-  const s = parseFieldShell<MultipleChoiceField>(x, 'MultipleChoiceField', where);
-  const specObj = expectObject(s.fieldSpec, `${where}.fieldSpec`);
-  const k = expectKindOneOf(
-    specObj,
-    ['LiteralMultipleChoiceFieldSpec', 'ControlledTermMultipleChoiceFieldSpec'] as const,
-    `${where}.fieldSpec`,
+  where = 'MultiValuedEnumField',
+): MultiValuedEnumField {
+  const s = parseFieldShell<MultiValuedEnumField>(
+    x,
+    'MultiValuedEnumField',
+    where,
   );
-  const fieldSpec: MultipleChoiceFieldSpec =
-    k === 'LiteralMultipleChoiceFieldSpec'
-      ? parseLiteralMultipleChoiceFieldSpec(s.fieldSpec, `${where}.fieldSpec`)
-      : parseControlledTermMultipleChoiceFieldSpec(s.fieldSpec, `${where}.fieldSpec`);
-  return multipleChoiceField({
-    id: parseMultipleChoiceFieldId(s.id, `${where}.id`),
+  return multiValuedEnumField({
+    id: parseMultiValuedEnumFieldId(s.id, `${where}.id`),
     modelVersion: s.modelVersion,
     metadata: parseSchemaArtifactMetadata(s.metadata, `${where}.metadata`),
-    fieldSpec,
+    fieldSpec: parseMultiValuedEnumFieldSpec(s.fieldSpec, `${where}.fieldSpec`),
   });
 }
 
@@ -621,8 +595,8 @@ const FIELD_KINDS = [
   'TimeField',
   'DateTimeField',
   'ControlledTermField',
-  'SingleChoiceField',
-  'MultipleChoiceField',
+  'SingleValuedEnumField',
+  'MultiValuedEnumField',
   'LinkField',
   'EmailField',
   'PhoneNumberField',
@@ -653,10 +627,10 @@ export function serializeField(x: Field): unknown {
       return serializeDateTimeField(x);
     case 'ControlledTermField':
       return serializeControlledTermField(x);
-    case 'SingleChoiceField':
-      return serializeSingleChoiceField(x);
-    case 'MultipleChoiceField':
-      return serializeMultipleChoiceField(x);
+    case 'SingleValuedEnumField':
+      return serializeSingleValuedEnumField(x);
+    case 'MultiValuedEnumField':
+      return serializeMultiValuedEnumField(x);
     case 'LinkField':
       return serializeLinkField(x);
     case 'EmailField':
@@ -700,10 +674,10 @@ export function parseField(x: unknown, where = 'Field'): Field {
       return parseDateTimeField(x, where);
     case 'ControlledTermField':
       return parseControlledTermField(x, where);
-    case 'SingleChoiceField':
-      return parseSingleChoiceField(x, where);
-    case 'MultipleChoiceField':
-      return parseMultipleChoiceField(x, where);
+    case 'SingleValuedEnumField':
+      return parseSingleValuedEnumField(x, where);
+    case 'MultiValuedEnumField':
+      return parseMultiValuedEnumField(x, where);
     case 'LinkField':
       return parseLinkField(x, where);
     case 'EmailField':

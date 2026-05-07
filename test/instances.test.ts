@@ -16,7 +16,7 @@ import {
   presentationComponentId,
   richTextComponent,
   schemaArtifactMetadata,
-  schemaVersioning,
+  schemaArtifactVersioning,
   template,
   templateId,
   templateInstance,
@@ -204,7 +204,7 @@ describe('TemplateInstance', () => {
 describe('Artifact union', () => {
   const meta = schemaArtifactMetadata({
     artifact: am,
-    versioning: schemaVersioning({
+    versioning: schemaArtifactVersioning({
       version: '1.0.0',
       status: 'draft',
     }),

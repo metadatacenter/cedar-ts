@@ -1,19 +1,19 @@
 // =====================================================================
 // metadata — wire-form serialize/parse for the lifecycle-metadata,
-// schema-versioning, annotations, and artifact-metadata productions.
+// schema-artifact-versioning, annotations, and artifact-metadata productions.
 // =====================================================================
 
-import { CedarConstructionError, isIri, iri } from '../leaves/index.js';
+import { CedarConstructionError } from '../leaves/index.js';
 import {
   type LifecycleMetadata,
-  type SchemaVersioning,
+  type SchemaArtifactVersioning,
   type Status,
   type Annotation,
   type AnnotationValue,
   type ArtifactMetadata,
   type SchemaArtifactMetadata,
   lifecycleMetadata,
-  schemaVersioning,
+  schemaArtifactVersioning,
   annotation,
   artifactMetadata,
   schemaArtifactMetadata,
@@ -32,9 +32,10 @@ import {
 } from './multilingual.js';
 import { serializeIri, serializeIsoDateTimeStamp } from './collapsed-wrappers.js';
 import {
-  type AnnotationStringValue,
   annotationStringValue,
+  annotationIriValue,
   isAnnotationStringValue,
+  isAnnotationIriValue,
 } from '../metadata/annotations.js';
 
 // ---- LifecycleMetadata -----------------------------------------------
@@ -67,7 +68,7 @@ export function parseLifecycleMetadata(
   });
 }
 
-// ---- SchemaVersioning + Status ---------------------------------------
+// ---- SchemaArtifactVersioning + Status ---------------------------------------
 
 const STATUS_VALUES = ['draft', 'published'] as const;
 
@@ -79,7 +80,7 @@ export function parseStatus(x: unknown, where = 'Status'): Status {
   return expectStringEnum(x, STATUS_VALUES, where);
 }
 
-export function serializeSchemaVersioning(x: SchemaVersioning): unknown {
+export function serializeSchemaArtifactVersioning(x: SchemaArtifactVersioning): unknown {
   const out: Record<string, unknown> = {
     version: x.version,
     status: x.status,
@@ -90,10 +91,10 @@ export function serializeSchemaVersioning(x: SchemaVersioning): unknown {
   return out;
 }
 
-export function parseSchemaVersioning(
+export function parseSchemaArtifactVersioning(
   x: unknown,
-  where = 'SchemaVersioning',
-): SchemaVersioning {
+  where = 'SchemaArtifactVersioning',
+): SchemaArtifactVersioning {
   const o = expectObject(x, where);
   expectKnownProperties(o, [
     'version',
@@ -122,25 +123,25 @@ export function parseSchemaVersioning(
     init.previousVersion = expectString(o['previousVersion'], `${where}.previousVersion`);
   if ('derivedFrom' in o)
     init.derivedFrom = expectString(o['derivedFrom'], `${where}.derivedFrom`);
-  return schemaVersioning(init);
+  return schemaArtifactVersioning(init);
 }
 
-// ---- AnnotationValue (property-set discriminated) --------------------
+// ---- AnnotationValue (kind-discriminated) ----------------------------
 //
-// Wire form:
-//   { value }                 → AnnotationStringValue (no lang)
-//   { value, lang }           → AnnotationStringValue (lang-tagged)
-//   { iri }                   → Iri (wrapped at this polymorphic position)
-//
-// An object carrying both `iri` and `value` is non-conforming.
+// Wire form (per wire-grammar.md §5.4):
+//   { kind: "AnnotationStringValue", value, lang? }
+//   { kind: "AnnotationIriValue", iri }
 
 export function serializeAnnotationValue(x: AnnotationValue): unknown {
   if (isAnnotationStringValue(x)) {
-    const out: Record<string, unknown> = { value: x.value };
+    const out: Record<string, unknown> = {
+      kind: 'AnnotationStringValue',
+      value: x.value,
+    };
     if (x.lang !== undefined) out['lang'] = x.lang.value;
     return out;
   }
-  return { iri: x.value };
+  return { kind: 'AnnotationIriValue', iri: x.iri.value };
 }
 
 export function parseAnnotationValue(
@@ -148,30 +149,34 @@ export function parseAnnotationValue(
   where = 'AnnotationValue',
 ): AnnotationValue {
   const o = expectObject(x, where);
-  const hasIri = 'iri' in o;
-  const hasValue = 'value' in o;
-  if (hasIri && hasValue) {
-    throw new CedarConstructionError(
-      `${where}: object MUST NOT carry both "iri" and "value"`,
-    );
-  }
-  if (hasIri) {
-    expectKnownProperties(o, ['iri']);
-    return iri(expectString(o['iri'], `${where}.iri`));
-  }
-  if (hasValue) {
-    expectKnownProperties(o, ['value', 'lang']);
+  const k = o['kind'];
+  if (k === 'AnnotationStringValue') {
+    expectKnownProperties(o, ['kind', 'value', 'lang']);
     rejectNullProperty(o, 'lang');
+    if (!('value' in o)) {
+      throw new CedarConstructionError(`${where}: missing required "value"`);
+    }
     const value = expectString(o['value'], `${where}.value`);
     if ('lang' in o) {
       return annotationStringValue(value, expectString(o['lang'], `${where}.lang`));
     }
     return annotationStringValue(value);
   }
+  if (k === 'AnnotationIriValue') {
+    expectKnownProperties(o, ['kind', 'iri']);
+    if (!('iri' in o)) {
+      throw new CedarConstructionError(`${where}: missing required "iri"`);
+    }
+    return annotationIriValue(expectString(o['iri'], `${where}.iri`));
+  }
   throw new CedarConstructionError(
-    `${where}: object MUST carry either "iri" or "value"`,
+    `${where}: expected kind "AnnotationStringValue" or "AnnotationIriValue"; got ${JSON.stringify(k)}`,
   );
 }
+
+// Suppress unused-import warning — `isAnnotationIriValue` is exposed
+// through the metadata barrel.
+void isAnnotationIriValue;
 
 // ---- Annotation ------------------------------------------------------
 
@@ -195,10 +200,6 @@ export function parseAnnotation(x: unknown, where = 'Annotation'): Annotation {
   const body = parseAnnotationValue(o['body'], `${where}.body`);
   return annotation(propertyIri, body);
 }
-
-// Suppress unused-import warning — `AnnotationStringValue` is exposed as a
-// named import for documentation.
-void (null as unknown as AnnotationStringValue | undefined);
 
 // ---- ArtifactMetadata ------------------------------------------------
 //
@@ -312,7 +313,7 @@ const SCHEMA_ARTIFACT_METADATA_KEYS = [
 export function serializeSchemaArtifactMetadata(x: SchemaArtifactMetadata): unknown {
   const out: Record<string, unknown> = {};
   writeArtifactMetadataBody(x, out);
-  out['versioning'] = serializeSchemaVersioning(x.versioning);
+  out['versioning'] = serializeSchemaArtifactVersioning(x.versioning);
   return out;
 }
 
@@ -327,6 +328,6 @@ export function parseSchemaArtifactMetadata(
   }
   return schemaArtifactMetadata({
     artifact: readArtifactMetadataBody(o, where),
-    versioning: parseSchemaVersioning(o['versioning'], `${where}.versioning`),
+    versioning: parseSchemaArtifactVersioning(o['versioning'], `${where}.versioning`),
   });
 }

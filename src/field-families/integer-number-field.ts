@@ -42,7 +42,6 @@ export interface IntegerNumberFieldId {
   readonly iri: Iri;
 }
 
-export type IntegerNumberFieldReference = IntegerNumberFieldId;
 
 export const integerNumberFieldId = (
   v: IntegerNumberFieldId | Iri | string,
@@ -170,7 +169,7 @@ export const integerNumberField = (
 export interface EmbeddedIntegerNumberField {
   readonly kind: 'EmbeddedIntegerNumberField';
   readonly key: string;
-  readonly artifactRef: IntegerNumberFieldReference;
+  readonly artifactRef: IntegerNumberFieldId;
   readonly valueRequirement?: ValueRequirement;
   readonly cardinality?: Cardinality;
   readonly visibility?: Visibility;
@@ -181,7 +180,7 @@ export interface EmbeddedIntegerNumberField {
 
 export interface EmbeddedIntegerNumberFieldInit
   extends EmbeddedFieldInitCommon {
-  readonly artifactRef: IntegerNumberFieldReference | IntegerNumberField;
+  readonly artifactRef: IntegerNumberFieldId | IntegerNumberField;
   readonly defaultValue?: IntegerNumberValueInput;
 }
 

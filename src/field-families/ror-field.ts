@@ -54,7 +54,6 @@ export interface RorFieldId {
   readonly iri: Iri;
 }
 
-export type RorFieldReference = RorFieldId;
 
 // Identifier-wrapper constructor for the Ror field family.
 // Idempotent: an existing RorFieldId passes through unchanged. A bare
@@ -152,7 +151,7 @@ export const rorField = (init: RorFieldInit): RorField =>
 export interface EmbeddedRorField {
   readonly kind: 'EmbeddedRorField';
   readonly key: string;
-  readonly artifactRef: RorFieldReference;
+  readonly artifactRef: RorFieldId;
   readonly valueRequirement?: ValueRequirement;
   readonly cardinality?: Cardinality;
   readonly visibility?: Visibility;
@@ -162,7 +161,7 @@ export interface EmbeddedRorField {
 }
 
 export interface EmbeddedRorFieldInit extends EmbeddedFieldInitCommon {
-  readonly artifactRef: RorFieldReference | RorField;
+  readonly artifactRef: RorFieldId | RorField;
   readonly defaultValue?: RorValue | AuthorityValueInput<RorIri>;
 }
 

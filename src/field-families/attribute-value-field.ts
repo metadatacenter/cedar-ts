@@ -53,7 +53,6 @@ export interface AttributeValueFieldId {
   readonly iri: Iri;
 }
 
-export type AttributeValueFieldReference = AttributeValueFieldId;
 
 // Identifier-wrapper constructor for the AttributeValue field family.
 // Idempotent: an existing AttributeValueFieldId passes through unchanged. A bare
@@ -153,7 +152,7 @@ export const attributeValueField = (
 export interface EmbeddedAttributeValueField {
   readonly kind: 'EmbeddedAttributeValueField';
   readonly key: string;
-  readonly artifactRef: AttributeValueFieldReference;
+  readonly artifactRef: AttributeValueFieldId;
   readonly valueRequirement?: ValueRequirement;
   readonly cardinality?: Cardinality;
   readonly visibility?: Visibility;
@@ -163,7 +162,7 @@ export interface EmbeddedAttributeValueField {
 }
 
 export interface EmbeddedAttributeValueFieldInit extends EmbeddedFieldInitCommon {
-  readonly artifactRef: AttributeValueFieldReference | AttributeValueField;
+  readonly artifactRef: AttributeValueFieldId | AttributeValueField;
   // Grammar prohibits a default value for attribute-value fields.
 }
 

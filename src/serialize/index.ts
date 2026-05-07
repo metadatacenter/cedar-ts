@@ -93,8 +93,8 @@ export function serialize(x: SerializableArtifact): unknown {
     case 'TimeField':
     case 'DateTimeField':
     case 'ControlledTermField':
-    case 'SingleChoiceField':
-    case 'MultipleChoiceField':
+    case 'SingleValuedEnumField':
+    case 'MultiValuedEnumField':
     case 'LinkField':
     case 'EmailField':
     case 'PhoneNumberField':
@@ -192,8 +192,8 @@ export function parseArtifact(
     case 'TimeField':
     case 'DateTimeField':
     case 'ControlledTermField':
-    case 'SingleChoiceField':
-    case 'MultipleChoiceField':
+    case 'SingleValuedEnumField':
+    case 'MultiValuedEnumField':
     case 'LinkField':
     case 'EmailField':
     case 'PhoneNumberField':

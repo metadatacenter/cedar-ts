@@ -1,30 +1,29 @@
 import { parseAsciiIdentifier } from '../leaves/index.js';
-import type { PresentationComponentReference } from '../identifiers.js';
+import type { PresentationComponentId } from '../identifiers.js';
 import type { PresentationComponent } from '../presentation/index.js';
 import type { Visibility } from './visibility.js';
-import type { LabelOverride } from './label-override.js';
 
 // EmbeddedPresentationComponent — see grammar.md §Embedded Artifacts.
 // Contributes presentational structure within a Template without producing
-// instance data. Carries no value requirement, cardinality, default value, or
-// property — it does not bear data.
+// instance data. Carries no value requirement, cardinality, default value,
+// label override, or property — it bears no data and exists purely to
+// contribute presentational structure. The only embedding-level property
+// it carries is Visibility.
 
 export interface EmbeddedPresentationComponent {
   readonly kind: 'EmbeddedPresentationComponent';
   readonly key: string;
-  readonly artifactRef: PresentationComponentReference;
+  readonly artifactRef: PresentationComponentId;
   readonly visibility?: Visibility;
-  readonly labelOverride?: LabelOverride;
 }
 
-// `artifactRef` accepts either the typed PresentationComponentReference or the
+// `artifactRef` accepts either the typed PresentationComponentId or the
 // reusable PresentationComponent artifact itself; the constructor extracts
 // `.id` from the latter.
 export interface EmbeddedPresentationComponentInit {
   readonly key: string;
-  readonly artifactRef: PresentationComponentReference | PresentationComponent;
+  readonly artifactRef: PresentationComponentId | PresentationComponent;
   readonly visibility?: Visibility;
-  readonly labelOverride?: LabelOverride;
 }
 
 export function embeddedPresentationComponent(
@@ -33,9 +32,8 @@ export function embeddedPresentationComponent(
   const out: {
     kind: 'EmbeddedPresentationComponent';
     key: string;
-    artifactRef: PresentationComponentReference;
+    artifactRef: PresentationComponentId;
     visibility?: Visibility;
-    labelOverride?: LabelOverride;
   } = {
     kind: 'EmbeddedPresentationComponent',
     key: parseAsciiIdentifier(init.key),
@@ -45,7 +43,6 @@ export function embeddedPresentationComponent(
         : init.artifactRef.id,
   };
   if (init.visibility !== undefined) out.visibility = init.visibility;
-  if (init.labelOverride !== undefined) out.labelOverride = init.labelOverride;
   return out;
 }
 

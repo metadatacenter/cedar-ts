@@ -17,15 +17,13 @@ import {
   classSource,
   controlledTermClass,
   valueSetSource,
-  literalChoiceOption,
-  controlledTermChoiceOption,
-  literalSingleChoiceFieldSpec,
-  controlledTermSingleChoiceFieldSpec,
-  literalMultipleChoiceFieldSpec,
-  controlledTermMultipleChoiceFieldSpec,
-  isSingleChoiceFieldSpec,
-  isMultipleChoiceFieldSpec,
-  isChoiceFieldSpec,
+  permissibleValue,
+  meaning,
+  singleValuedEnumFieldSpec,
+  multiValuedEnumFieldSpec,
+  isSingleValuedEnumFieldSpec,
+  isMultiValuedEnumFieldSpec,
+  isEnumFieldSpec,
   linkFieldSpec,
   emailFieldSpec,
   phoneNumberFieldSpec,
@@ -41,7 +39,6 @@ import {
   dateRenderingHint,
   timeRenderingHint,
   dateTimeRenderingHint,
-  controlledTermValue,
   integerNumberValue,
   realNumberValue,
   isTextFieldSpec,
@@ -137,11 +134,11 @@ describe('Temporal field specs', () => {
   it('TimeFieldSpec carries optional precision, timezone requirement, and rendering hint', () => {
     const fs = timeFieldSpec({
       timePrecision: 'hourMinuteSecond',
-      timezoneRequirement: 'required',
+      timezoneRequirement: 'timezoneRequired',
       renderingHint: timeRenderingHint('twentyFourHour'),
     });
     expect(fs.timePrecision).toBe('hourMinuteSecond');
-    expect(fs.timezoneRequirement).toBe('required');
+    expect(fs.timezoneRequirement).toBe('timezoneRequired');
     expect(fs.renderingHint?.timeFormat).toBe('twentyFourHour');
     expect(isTimeFieldSpec(fs)).toBe(true);
   });
@@ -149,11 +146,11 @@ describe('Temporal field specs', () => {
   it('DateTimeFieldSpec carries a value type and optional timezone requirement', () => {
     const fs = dateTimeFieldSpec({
       dateTimeValueType: 'dateHourMinuteSecondFraction',
-      timezoneRequirement: 'notRequired',
+      timezoneRequirement: 'timezoneNotRequired',
       renderingHint: dateTimeRenderingHint('twelveHour'),
     });
     expect(fs.dateTimeValueType).toBe('dateHourMinuteSecondFraction');
-    expect(fs.timezoneRequirement).toBe('notRequired');
+    expect(fs.timezoneRequirement).toBe('timezoneNotRequired');
     expect(isDateTimeFieldSpec(fs)).toBe(true);
   });
 });
@@ -228,80 +225,49 @@ describe('Controlled-term field spec and sources', () => {
   });
 });
 
-describe('ChoiceFieldSpec', () => {
-  it('LiteralSingleChoiceFieldSpec carries one or more LiteralChoiceOption', () => {
-    const o1 = literalChoiceOption({
-      value: 'a',
-      datatype: 'http://www.w3.org/2001/XMLSchema#integer',
-      default: true,
-    });
-    const o2 = literalChoiceOption({
-      value: 'b',
-      datatype: 'http://www.w3.org/2001/XMLSchema#integer',
-    });
-    const fs = literalSingleChoiceFieldSpec({
-      options: [o1, o2],
+describe('EnumFieldSpec', () => {
+  it('SingleValuedEnumFieldSpec carries one or more PermissibleValue', () => {
+    const pv1 = permissibleValue({ value: 'a', label: 'Alpha' });
+    const pv2 = permissibleValue({ value: 'b', label: 'Beta' });
+    const fs = singleValuedEnumFieldSpec({
+      permissibleValues: [pv1, pv2],
+      defaultValue: 'a',
       renderingHint: 'radio',
     });
-    expect(fs.kind).toBe('LiteralSingleChoiceFieldSpec');
-    expect(fs.options.length).toBe(2);
-    expect(fs.options[0]?.default).toBe(true);
-    expect(fs.options[1]?.default).toBeUndefined();
+    expect(fs.kind).toBe('SingleValuedEnumFieldSpec');
+    expect(fs.permissibleValues.length).toBe(2);
+    expect(fs.defaultValue).toBe('a');
     expect(fs.renderingHint).toBe('radio');
-    expect(isSingleChoiceFieldSpec(fs)).toBe(true);
-    expect(isChoiceFieldSpec(fs)).toBe(true);
+    expect(isSingleValuedEnumFieldSpec(fs)).toBe(true);
+    expect(isEnumFieldSpec(fs)).toBe(true);
   });
 
-  it('ControlledTermSingleChoiceFieldSpec carries controlled-term options', () => {
-    const ctv = controlledTermValue({ term: 'http://example.org/t/1', label: 'One' });
-    const opt = controlledTermChoiceOption(ctv, { default: true });
-    const fs = controlledTermSingleChoiceFieldSpec({
-      options: [opt],
-      renderingHint: 'singleSelectDropdown',
-    });
-    expect(fs.kind).toBe('ControlledTermSingleChoiceFieldSpec');
-    expect(fs.options[0]?.default).toBe(true);
+  it('PermissibleValue carries optional Meaning entries', () => {
+    const m = meaning({ iri: 'http://example.org/m/1', label: 'Meaning One' });
+    const pv = permissibleValue({ value: 'x', meanings: [m] });
+    expect(pv.meanings.length).toBe(1);
+    expect(pv.meanings[0]?.iri.value).toBe('http://example.org/m/1');
   });
 
-  it('LiteralMultipleChoiceFieldSpec uses MultipleChoiceRenderingHint', () => {
-    const o1 = literalChoiceOption({
-      value: 'a',
-      datatype: 'http://www.w3.org/2001/XMLSchema#integer',
+  it('MultiValuedEnumFieldSpec uses MultiValuedEnumRenderingHint', () => {
+    const pv = permissibleValue({ value: 'a' });
+    const fs = multiValuedEnumFieldSpec({
+      permissibleValues: [pv],
+      renderingHint: 'checkbox',
     });
-    const fs = literalMultipleChoiceFieldSpec({ options: [o1], renderingHint: 'checkbox' });
-    expect(fs.kind).toBe('LiteralMultipleChoiceFieldSpec');
+    expect(fs.kind).toBe('MultiValuedEnumFieldSpec');
     expect(fs.renderingHint).toBe('checkbox');
-    expect(isMultipleChoiceFieldSpec(fs)).toBe(true);
+    expect(isMultiValuedEnumFieldSpec(fs)).toBe(true);
   });
 
-  it('ControlledTermMultipleChoiceFieldSpec', () => {
-    const ctv = controlledTermValue({ term: 'http://example.org/t/1' });
-    const fs = controlledTermMultipleChoiceFieldSpec({
-      options: [controlledTermChoiceOption(ctv)],
-      renderingHint: 'multiSelectDropdown',
+  it('MultiValuedEnumFieldSpec carries optional defaultValues', () => {
+    const pv1 = permissibleValue({ value: 'a' });
+    const pv2 = permissibleValue({ value: 'b' });
+    const fs = multiValuedEnumFieldSpec({
+      permissibleValues: [pv1, pv2],
+      defaultValues: ['a', 'b'],
     });
-    expect(fs.kind).toBe('ControlledTermMultipleChoiceFieldSpec');
-  });
-
-  it('literalChoiceOption accepts (text, lang) and (text, lang, options)', () => {
-    const plain = literalChoiceOption('Professor', 'en');
-    expect(plain.value).toBe('Professor');
-    expect(plain.lang?.value).toBe('en');
-    expect(plain.datatype).toBeUndefined();
-    expect(plain.default).toBeUndefined();
-
-    const def = literalChoiceOption('Associate Professor', 'en', { default: true });
-    expect(def.default).toBe(true);
-
-    // Init-object form with a datatype.
-    const lit = literalChoiceOption({
-      value: 'a',
-      datatype: 'http://www.w3.org/2001/XMLSchema#integer',
-      default: true,
-    });
-    expect(lit.value).toBe('a');
-    expect(lit.datatype?.value).toBe('http://www.w3.org/2001/XMLSchema#integer');
-    expect(lit.default).toBe(true);
+    expect(fs.defaultValues).toEqual(['a', 'b']);
   });
 });
 
@@ -341,11 +307,11 @@ describe('FieldSpec union', () => {
       controlledTermFieldSpec(
         ontologySource(ontologyReference({ iri: 'http://example.org/o' })),
       ),
-      literalSingleChoiceFieldSpec({
-        options: [literalChoiceOption({ value: 'a', datatype: 'http://www.w3.org/2001/XMLSchema#integer' })],
+      singleValuedEnumFieldSpec({
+        permissibleValues: [permissibleValue({ value: 'a' })],
       }),
-      literalMultipleChoiceFieldSpec({
-        options: [literalChoiceOption({ value: 'a', datatype: 'http://www.w3.org/2001/XMLSchema#integer' })],
+      multiValuedEnumFieldSpec({
+        permissibleValues: [permissibleValue({ value: 'a' })],
       }),
       linkFieldSpec(),
       emailFieldSpec(),

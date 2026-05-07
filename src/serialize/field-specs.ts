@@ -7,7 +7,7 @@
 //   - Unit
 //   - OntologyReference / OntologyDisplayHint / ControlledTermClass
 //   - ControlledTermSource (Ontology / Branch / Class / ValueSet)
-//   - LiteralChoiceOption / ControlledTermChoiceOption
+//   - PermissibleValue / Meaning
 //   - the temporal RenderingHint variants and the flat-string rendering
 //     hint enums
 
@@ -27,10 +27,8 @@ import {
   type TimeFieldSpec,
   type DateTimeFieldSpec,
   type ControlledTermFieldSpec,
-  type LiteralSingleChoiceFieldSpec,
-  type ControlledTermSingleChoiceFieldSpec,
-  type LiteralMultipleChoiceFieldSpec,
-  type ControlledTermMultipleChoiceFieldSpec,
+  type SingleValuedEnumFieldSpec,
+  type MultiValuedEnumFieldSpec,
   type LinkFieldSpec,
   type EmailFieldSpec,
   type PhoneNumberFieldSpec,
@@ -42,7 +40,6 @@ import {
   type NihGrantIdFieldSpec,
   type AttributeValueFieldSpec,
   type FieldSpec,
-  type ControlledTermValue,
   type Unit,
   type OntologyReference,
   type OntologyDisplayHint,
@@ -52,8 +49,9 @@ import {
   type BranchSource,
   type ClassSource,
   type ValueSetSource,
-  type LiteralChoiceOption,
-  type ControlledTermChoiceOption,
+  type PermissibleValue,
+  type Meaning,
+  type Token,
   type DateValueType,
   type TimePrecision,
   type TimezoneRequirement,
@@ -64,8 +62,8 @@ import {
   type TextRenderingHint,
   type NumericRenderingHint,
   type BooleanRenderingHint,
-  type SingleChoiceRenderingHint,
-  type MultipleChoiceRenderingHint,
+  type SingleValuedEnumRenderingHint,
+  type MultiValuedEnumRenderingHint,
   type DateComponentOrder,
   type TimeFormat,
   textFieldSpec,
@@ -76,10 +74,8 @@ import {
   timeFieldSpec,
   dateTimeFieldSpec,
   controlledTermFieldSpec,
-  literalSingleChoiceFieldSpec,
-  controlledTermSingleChoiceFieldSpec,
-  literalMultipleChoiceFieldSpec,
-  controlledTermMultipleChoiceFieldSpec,
+  singleValuedEnumFieldSpec,
+  multiValuedEnumFieldSpec,
   linkFieldSpec,
   emailFieldSpec,
   phoneNumberFieldSpec,
@@ -98,16 +94,15 @@ import {
   branchSource,
   classSource,
   valueSetSource,
-  literalChoiceOption,
-  controlledTermChoiceOption,
-  literalChoiceValue,
+  permissibleValue,
+  meaning,
   DATE_VALUE_TYPES,
   TIME_PRECISIONS,
   TIMEZONE_REQUIREMENTS,
   DATE_TIME_VALUE_TYPES,
   TEXT_RENDERING_HINTS,
-  SINGLE_CHOICE_RENDERING_HINTS,
-  MULTIPLE_CHOICE_RENDERING_HINTS,
+  SINGLE_VALUED_ENUM_RENDERING_HINTS,
+  MULTI_VALUED_ENUM_RENDERING_HINTS,
   BOOLEAN_RENDERING_HINTS,
   DATE_COMPONENT_ORDERS,
   TIME_FORMATS,
@@ -117,13 +112,13 @@ import {
 } from '../field-families/index.js';
 import {
   expectObject,
+  expectArray,
   expectNonEmptyArray,
   expectString,
   expectNumber,
   expectKnownProperties,
   expectKindOneOf,
   expectStringEnum,
-  expectTrue,
   rejectNullProperty,
 } from './parse-utils.js';
 import { serializeIri } from './collapsed-wrappers.js';
@@ -136,8 +131,6 @@ import {
   parseIntegerNumberValue,
   serializeRealNumberValue,
   parseRealNumberValue,
-  serializeControlledTermValueUntagged,
-  parseControlledTermValueUntagged,
   serializeTextValueUntagged,
   parseTextValueUntagged,
 } from './values.js';
@@ -190,23 +183,23 @@ export const parseBooleanRenderingHint = (
   w = 'BooleanRenderingHint',
 ): BooleanRenderingHint => expectStringEnum(x, BOOLEAN_RENDERING_HINTS, w);
 
-export const serializeSingleChoiceRenderingHint = (
-  x: SingleChoiceRenderingHint,
+export const serializeSingleValuedEnumRenderingHint = (
+  x: SingleValuedEnumRenderingHint,
 ): string => x;
-export const parseSingleChoiceRenderingHint = (
+export const parseSingleValuedEnumRenderingHint = (
   x: unknown,
-  w = 'SingleChoiceRenderingHint',
-): SingleChoiceRenderingHint =>
-  expectStringEnum(x, SINGLE_CHOICE_RENDERING_HINTS, w);
+  w = 'SingleValuedEnumRenderingHint',
+): SingleValuedEnumRenderingHint =>
+  expectStringEnum(x, SINGLE_VALUED_ENUM_RENDERING_HINTS, w);
 
-export const serializeMultipleChoiceRenderingHint = (
-  x: MultipleChoiceRenderingHint,
+export const serializeMultiValuedEnumRenderingHint = (
+  x: MultiValuedEnumRenderingHint,
 ): string => x;
-export const parseMultipleChoiceRenderingHint = (
+export const parseMultiValuedEnumRenderingHint = (
   x: unknown,
-  w = 'MultipleChoiceRenderingHint',
-): MultipleChoiceRenderingHint =>
-  expectStringEnum(x, MULTIPLE_CHOICE_RENDERING_HINTS, w);
+  w = 'MultiValuedEnumRenderingHint',
+): MultiValuedEnumRenderingHint =>
+  expectStringEnum(x, MULTI_VALUED_ENUM_RENDERING_HINTS, w);
 
 export function serializeDateRenderingHint(x: DateRenderingHint): unknown {
   const out: Record<string, unknown> = {};
@@ -361,11 +354,12 @@ export function parseOntologyReference(
 }
 
 export function serializeControlledTermClass(x: ControlledTermClass): unknown {
-  return {
+  const out: Record<string, unknown> = {
     term: serializeIri(x.term),
-    label: serializeMultilingualString(x.label),
     ontology: serializeOntologyReference(x.ontology),
   };
+  if (x.label !== undefined) out['label'] = serializeMultilingualString(x.label);
+  return out;
 }
 
 export function parseControlledTermClass(
@@ -374,20 +368,24 @@ export function parseControlledTermClass(
 ): ControlledTermClass {
   const o = expectObject(x, where);
   expectKnownProperties(o, ['term', 'label', 'ontology']);
+  rejectNullProperty(o, 'label');
   if (!('term' in o)) {
     throw new CedarConstructionError(`${where}: missing required "term"`);
-  }
-  if (!('label' in o)) {
-    throw new CedarConstructionError(`${where}: missing required "label"`);
   }
   if (!('ontology' in o)) {
     throw new CedarConstructionError(`${where}: missing required "ontology"`);
   }
-  return controlledTermClass({
+  const init: {
+    term: string;
+    label?: ReturnType<typeof parseMultilingualString>;
+    ontology: OntologyReference;
+  } = {
     term: expectString(o['term'], `${where}.term`),
-    label: parseMultilingualString(o['label'], `${where}.label`),
     ontology: parseOntologyReference(o['ontology'], `${where}.ontology`),
-  });
+  };
+  if ('label' in o)
+    init.label = parseMultilingualString(o['label'], `${where}.label`);
+  return controlledTermClass(init);
 }
 
 // ---- ControlledTermSource (union) -----------------------------------
@@ -419,8 +417,9 @@ export function serializeBranchSource(x: BranchSource): unknown {
     kind: 'BranchSource',
     ontology: serializeOntologyReference(x.ontology),
     rootTermIri: serializeIri(x.rootTermIri),
-    rootTermLabel: serializeMultilingualString(x.rootTermLabel),
   };
+  if (x.rootTermLabel !== undefined)
+    out['rootTermLabel'] = serializeMultilingualString(x.rootTermLabel);
   if (x.maxTraversalDepth !== undefined)
     out['maxTraversalDepth'] = x.maxTraversalDepth;
   return out;
@@ -435,6 +434,7 @@ export function parseBranchSource(x: unknown, where = 'BranchSource'): BranchSou
     'rootTermLabel',
     'maxTraversalDepth',
   ]);
+  rejectNullProperty(o, 'rootTermLabel');
   rejectNullProperty(o, 'maxTraversalDepth');
   if (o['kind'] !== 'BranchSource') {
     throw new CedarConstructionError(`${where}: expected kind "BranchSource"`);
@@ -445,22 +445,20 @@ export function parseBranchSource(x: unknown, where = 'BranchSource'): BranchSou
   if (!('rootTermIri' in o)) {
     throw new CedarConstructionError(`${where}: missing required "rootTermIri"`);
   }
-  if (!('rootTermLabel' in o)) {
-    throw new CedarConstructionError(`${where}: missing required "rootTermLabel"`);
-  }
   const init: {
     ontology: OntologyReference;
     rootTermIri: string;
-    rootTermLabel: ReturnType<typeof parseMultilingualString>;
+    rootTermLabel?: ReturnType<typeof parseMultilingualString>;
     maxTraversalDepth?: number;
   } = {
     ontology: parseOntologyReference(o['ontology'], `${where}.ontology`),
     rootTermIri: expectString(o['rootTermIri'], `${where}.rootTermIri`),
-    rootTermLabel: parseMultilingualString(
+  };
+  if ('rootTermLabel' in o)
+    init.rootTermLabel = parseMultilingualString(
       o['rootTermLabel'],
       `${where}.rootTermLabel`,
-    ),
-  };
+    );
   if ('maxTraversalDepth' in o)
     init.maxTraversalDepth = expectNumber(
       o['maxTraversalDepth'],
@@ -569,71 +567,69 @@ export function parseControlledTermSource(
   }
 }
 
-// ---- Choice options --------------------------------------------------
+// ---- Meaning / PermissibleValue --------------------------------------
 
-export function serializeLiteralChoiceOption(x: LiteralChoiceOption): unknown {
-  const out: Record<string, unknown> = { value: x.value };
-  if (x.lang !== undefined) out['lang'] = x.lang.value;
-  if (x.datatype !== undefined) out['datatype'] = x.datatype.value;
-  if (x.default === true) out['default'] = true;
+export function serializeMeaning(x: Meaning): unknown {
+  const out: Record<string, unknown> = { iri: serializeIri(x.iri) };
+  if (x.label !== undefined) out['label'] = serializeMultilingualString(x.label);
   return out;
 }
 
-export function parseLiteralChoiceOption(
-  x: unknown,
-  where = 'LiteralChoiceOption',
-): LiteralChoiceOption {
+export function parseMeaning(x: unknown, where = 'Meaning'): Meaning {
   const o = expectObject(x, where);
-  expectKnownProperties(o, ['value', 'lang', 'datatype', 'default']);
-  rejectNullProperty(o, 'lang');
-  rejectNullProperty(o, 'datatype');
-  rejectNullProperty(o, 'default');
+  expectKnownProperties(o, ['iri', 'label']);
+  rejectNullProperty(o, 'label');
+  if (!('iri' in o)) {
+    throw new CedarConstructionError(`${where}: missing required "iri"`);
+  }
+  const init: {
+    iri: string;
+    label?: ReturnType<typeof parseMultilingualString>;
+  } = { iri: expectString(o['iri'], `${where}.iri`) };
+  if ('label' in o)
+    init.label = parseMultilingualString(o['label'], `${where}.label`);
+  return meaning(init);
+}
+
+export function serializePermissibleValue(x: PermissibleValue): unknown {
+  const out: Record<string, unknown> = { value: x.value };
+  if (x.label !== undefined) out['label'] = serializeMultilingualString(x.label);
+  if (x.description !== undefined)
+    out['description'] = serializeMultilingualString(x.description);
+  if (x.meanings.length > 0) out['meanings'] = x.meanings.map(serializeMeaning);
+  return out;
+}
+
+export function parsePermissibleValue(
+  x: unknown,
+  where = 'PermissibleValue',
+): PermissibleValue {
+  const o = expectObject(x, where);
+  expectKnownProperties(o, ['value', 'label', 'description', 'meanings']);
+  rejectNullProperty(o, 'label');
+  rejectNullProperty(o, 'description');
+  rejectNullProperty(o, 'meanings');
   if (!('value' in o)) {
     throw new CedarConstructionError(`${where}: missing required "value"`);
   }
   const init: {
     value: string;
-    lang?: string;
-    datatype?: string;
-    default?: boolean;
+    label?: ReturnType<typeof parseMultilingualString>;
+    description?: ReturnType<typeof parseMultilingualString>;
+    meanings?: readonly Meaning[];
   } = { value: expectString(o['value'], `${where}.value`) };
-  if ('lang' in o) init.lang = expectString(o['lang'], `${where}.lang`);
-  if ('datatype' in o)
-    init.datatype = expectString(o['datatype'], `${where}.datatype`);
-  if ('default' in o) {
-    expectTrue(o['default'], `${where}.default`);
-    init.default = true;
+  if ('label' in o)
+    init.label = parseMultilingualString(o['label'], `${where}.label`);
+  if ('description' in o)
+    init.description = parseMultilingualString(
+      o['description'],
+      `${where}.description`,
+    );
+  if ('meanings' in o) {
+    const arr = expectArray(o['meanings'], `${where}.meanings`);
+    init.meanings = arr.map((e, i) => parseMeaning(e, `${where}.meanings[${i}]`));
   }
-  return literalChoiceOption(init);
-}
-
-export function serializeControlledTermChoiceOption(
-  x: ControlledTermChoiceOption,
-): unknown {
-  const out: Record<string, unknown> = {
-    value: serializeControlledTermValueUntagged(x.value),
-  };
-  if (x.default === true) out['default'] = true;
-  return out;
-}
-
-export function parseControlledTermChoiceOption(
-  x: unknown,
-  where = 'ControlledTermChoiceOption',
-): ControlledTermChoiceOption {
-  const o = expectObject(x, where);
-  expectKnownProperties(o, ['value', 'default']);
-  rejectNullProperty(o, 'default');
-  if (!('value' in o)) {
-    throw new CedarConstructionError(`${where}: missing required "value"`);
-  }
-  const v: ControlledTermValue = parseControlledTermValueUntagged(
-    o['value'],
-    `${where}.value`,
-  );
-  return controlledTermChoiceOption(v, {
-    default: 'default' in o ? expectTrue(o['default'], `${where}.default`) : false,
-  });
+  return permissibleValue(init);
 }
 
 // ---- TextFieldSpec ---------------------------------------------------
@@ -1036,194 +1032,124 @@ export function parseControlledTermFieldSpec(
   );
 }
 
-// ---- Choice FieldSpecs ----------------------------------------------
+// ---- Enum FieldSpecs -------------------------------------------------
 
-export function serializeLiteralSingleChoiceFieldSpec(
-  x: LiteralSingleChoiceFieldSpec,
+export function serializeSingleValuedEnumFieldSpec(
+  x: SingleValuedEnumFieldSpec,
 ): unknown {
   const out: Record<string, unknown> = {
-    kind: 'LiteralSingleChoiceFieldSpec',
-    options: x.options.map(serializeLiteralChoiceOption),
+    kind: 'SingleValuedEnumFieldSpec',
+    permissibleValues: x.permissibleValues.map(serializePermissibleValue),
   };
+  if (x.defaultValue !== undefined) out['defaultValue'] = x.defaultValue;
   if (x.renderingHint !== undefined)
-    out['renderingHint'] = serializeSingleChoiceRenderingHint(x.renderingHint);
+    out['renderingHint'] = serializeSingleValuedEnumRenderingHint(x.renderingHint);
   return out;
 }
 
-export function parseLiteralSingleChoiceFieldSpec(
+export function parseSingleValuedEnumFieldSpec(
   x: unknown,
-  where = 'LiteralSingleChoiceFieldSpec',
-): LiteralSingleChoiceFieldSpec {
+  where = 'SingleValuedEnumFieldSpec',
+): SingleValuedEnumFieldSpec {
   const o = expectObject(x, where);
-  expectKnownProperties(o, ['kind', 'options', 'renderingHint']);
+  expectKnownProperties(o, [
+    'kind',
+    'permissibleValues',
+    'defaultValue',
+    'renderingHint',
+  ]);
+  rejectNullProperty(o, 'defaultValue');
   rejectNullProperty(o, 'renderingHint');
-  if (o['kind'] !== 'LiteralSingleChoiceFieldSpec') {
+  if (o['kind'] !== 'SingleValuedEnumFieldSpec') {
     throw new CedarConstructionError(
-      `${where}: expected kind "LiteralSingleChoiceFieldSpec"`,
+      `${where}: expected kind "SingleValuedEnumFieldSpec"`,
     );
   }
-  if (!('options' in o)) {
-    throw new CedarConstructionError(`${where}: missing required "options"`);
+  if (!('permissibleValues' in o)) {
+    throw new CedarConstructionError(
+      `${where}: missing required "permissibleValues"`,
+    );
   }
-  const arr = expectNonEmptyArray(o['options'], `${where}.options`);
-  const options = arr.map((e, i) =>
-    parseLiteralChoiceOption(e, `${where}.options[${i}]`),
+  const arr = expectNonEmptyArray(o['permissibleValues'], `${where}.permissibleValues`);
+  const permissibleValues = arr.map((e, i) =>
+    parsePermissibleValue(e, `${where}.permissibleValues[${i}]`),
   );
   const init: {
-    options: readonly [LiteralChoiceOption, ...LiteralChoiceOption[]];
-    renderingHint?: SingleChoiceRenderingHint;
-  } = { options: options as [LiteralChoiceOption, ...LiteralChoiceOption[]] };
-  if ('renderingHint' in o)
-    init.renderingHint = parseSingleChoiceRenderingHint(
-      o['renderingHint'],
-      `${where}.renderingHint`,
-    );
-  return literalSingleChoiceFieldSpec(init);
-}
-
-export function serializeControlledTermSingleChoiceFieldSpec(
-  x: ControlledTermSingleChoiceFieldSpec,
-): unknown {
-  const out: Record<string, unknown> = {
-    kind: 'ControlledTermSingleChoiceFieldSpec',
-    options: x.options.map(serializeControlledTermChoiceOption),
-  };
-  if (x.renderingHint !== undefined)
-    out['renderingHint'] = serializeSingleChoiceRenderingHint(x.renderingHint);
-  return out;
-}
-
-export function parseControlledTermSingleChoiceFieldSpec(
-  x: unknown,
-  where = 'ControlledTermSingleChoiceFieldSpec',
-): ControlledTermSingleChoiceFieldSpec {
-  const o = expectObject(x, where);
-  expectKnownProperties(o, ['kind', 'options', 'renderingHint']);
-  rejectNullProperty(o, 'renderingHint');
-  if (o['kind'] !== 'ControlledTermSingleChoiceFieldSpec') {
-    throw new CedarConstructionError(
-      `${where}: expected kind "ControlledTermSingleChoiceFieldSpec"`,
-    );
-  }
-  if (!('options' in o)) {
-    throw new CedarConstructionError(`${where}: missing required "options"`);
-  }
-  const arr = expectNonEmptyArray(o['options'], `${where}.options`);
-  const options = arr.map((e, i) =>
-    parseControlledTermChoiceOption(e, `${where}.options[${i}]`),
-  );
-  const init: {
-    options: readonly [
-      ControlledTermChoiceOption,
-      ...ControlledTermChoiceOption[],
-    ];
-    renderingHint?: SingleChoiceRenderingHint;
+    permissibleValues: readonly [PermissibleValue, ...PermissibleValue[]];
+    defaultValue?: Token;
+    renderingHint?: SingleValuedEnumRenderingHint;
   } = {
-    options: options as [
-      ControlledTermChoiceOption,
-      ...ControlledTermChoiceOption[],
-    ],
+    permissibleValues: permissibleValues as [PermissibleValue, ...PermissibleValue[]],
   };
+  if ('defaultValue' in o)
+    init.defaultValue = expectString(o['defaultValue'], `${where}.defaultValue`);
   if ('renderingHint' in o)
-    init.renderingHint = parseSingleChoiceRenderingHint(
+    init.renderingHint = parseSingleValuedEnumRenderingHint(
       o['renderingHint'],
       `${where}.renderingHint`,
     );
-  return controlledTermSingleChoiceFieldSpec(init);
+  return singleValuedEnumFieldSpec(init);
 }
 
-export function serializeLiteralMultipleChoiceFieldSpec(
-  x: LiteralMultipleChoiceFieldSpec,
+export function serializeMultiValuedEnumFieldSpec(
+  x: MultiValuedEnumFieldSpec,
 ): unknown {
   const out: Record<string, unknown> = {
-    kind: 'LiteralMultipleChoiceFieldSpec',
-    options: x.options.map(serializeLiteralChoiceOption),
+    kind: 'MultiValuedEnumFieldSpec',
+    permissibleValues: x.permissibleValues.map(serializePermissibleValue),
   };
+  if (x.defaultValues.length > 0) out['defaultValues'] = [...x.defaultValues];
   if (x.renderingHint !== undefined)
-    out['renderingHint'] = serializeMultipleChoiceRenderingHint(x.renderingHint);
+    out['renderingHint'] = serializeMultiValuedEnumRenderingHint(x.renderingHint);
   return out;
 }
 
-export function parseLiteralMultipleChoiceFieldSpec(
+export function parseMultiValuedEnumFieldSpec(
   x: unknown,
-  where = 'LiteralMultipleChoiceFieldSpec',
-): LiteralMultipleChoiceFieldSpec {
+  where = 'MultiValuedEnumFieldSpec',
+): MultiValuedEnumFieldSpec {
   const o = expectObject(x, where);
-  expectKnownProperties(o, ['kind', 'options', 'renderingHint']);
+  expectKnownProperties(o, [
+    'kind',
+    'permissibleValues',
+    'defaultValues',
+    'renderingHint',
+  ]);
+  rejectNullProperty(o, 'defaultValues');
   rejectNullProperty(o, 'renderingHint');
-  if (o['kind'] !== 'LiteralMultipleChoiceFieldSpec') {
+  if (o['kind'] !== 'MultiValuedEnumFieldSpec') {
     throw new CedarConstructionError(
-      `${where}: expected kind "LiteralMultipleChoiceFieldSpec"`,
+      `${where}: expected kind "MultiValuedEnumFieldSpec"`,
     );
   }
-  if (!('options' in o)) {
-    throw new CedarConstructionError(`${where}: missing required "options"`);
+  if (!('permissibleValues' in o)) {
+    throw new CedarConstructionError(
+      `${where}: missing required "permissibleValues"`,
+    );
   }
-  const arr = expectNonEmptyArray(o['options'], `${where}.options`);
-  const options = arr.map((e, i) =>
-    parseLiteralChoiceOption(e, `${where}.options[${i}]`),
+  const arr = expectNonEmptyArray(o['permissibleValues'], `${where}.permissibleValues`);
+  const permissibleValues = arr.map((e, i) =>
+    parsePermissibleValue(e, `${where}.permissibleValues[${i}]`),
   );
   const init: {
-    options: readonly [LiteralChoiceOption, ...LiteralChoiceOption[]];
-    renderingHint?: MultipleChoiceRenderingHint;
-  } = { options: options as [LiteralChoiceOption, ...LiteralChoiceOption[]] };
-  if ('renderingHint' in o)
-    init.renderingHint = parseMultipleChoiceRenderingHint(
-      o['renderingHint'],
-      `${where}.renderingHint`,
-    );
-  return literalMultipleChoiceFieldSpec(init);
-}
-
-export function serializeControlledTermMultipleChoiceFieldSpec(
-  x: ControlledTermMultipleChoiceFieldSpec,
-): unknown {
-  const out: Record<string, unknown> = {
-    kind: 'ControlledTermMultipleChoiceFieldSpec',
-    options: x.options.map(serializeControlledTermChoiceOption),
-  };
-  if (x.renderingHint !== undefined)
-    out['renderingHint'] = serializeMultipleChoiceRenderingHint(x.renderingHint);
-  return out;
-}
-
-export function parseControlledTermMultipleChoiceFieldSpec(
-  x: unknown,
-  where = 'ControlledTermMultipleChoiceFieldSpec',
-): ControlledTermMultipleChoiceFieldSpec {
-  const o = expectObject(x, where);
-  expectKnownProperties(o, ['kind', 'options', 'renderingHint']);
-  rejectNullProperty(o, 'renderingHint');
-  if (o['kind'] !== 'ControlledTermMultipleChoiceFieldSpec') {
-    throw new CedarConstructionError(
-      `${where}: expected kind "ControlledTermMultipleChoiceFieldSpec"`,
-    );
-  }
-  if (!('options' in o)) {
-    throw new CedarConstructionError(`${where}: missing required "options"`);
-  }
-  const arr = expectNonEmptyArray(o['options'], `${where}.options`);
-  const options = arr.map((e, i) =>
-    parseControlledTermChoiceOption(e, `${where}.options[${i}]`),
-  );
-  const init: {
-    options: readonly [
-      ControlledTermChoiceOption,
-      ...ControlledTermChoiceOption[],
-    ];
-    renderingHint?: MultipleChoiceRenderingHint;
+    permissibleValues: readonly [PermissibleValue, ...PermissibleValue[]];
+    defaultValues?: readonly Token[];
+    renderingHint?: MultiValuedEnumRenderingHint;
   } = {
-    options: options as [
-      ControlledTermChoiceOption,
-      ...ControlledTermChoiceOption[],
-    ],
+    permissibleValues: permissibleValues as [PermissibleValue, ...PermissibleValue[]],
   };
+  if ('defaultValues' in o) {
+    const dvArr = expectArray(o['defaultValues'], `${where}.defaultValues`);
+    init.defaultValues = dvArr.map((e, i) =>
+      expectString(e, `${where}.defaultValues[${i}]`),
+    );
+  }
   if ('renderingHint' in o)
-    init.renderingHint = parseMultipleChoiceRenderingHint(
+    init.renderingHint = parseMultiValuedEnumRenderingHint(
       o['renderingHint'],
       `${where}.renderingHint`,
     );
-  return controlledTermMultipleChoiceFieldSpec(init);
+  return multiValuedEnumFieldSpec(init);
 }
 
 // ---- Empty FieldSpec families ----------------------------------------
@@ -1313,10 +1239,8 @@ const FIELD_SPEC_KINDS = [
   'TimeFieldSpec',
   'DateTimeFieldSpec',
   'ControlledTermFieldSpec',
-  'LiteralSingleChoiceFieldSpec',
-  'ControlledTermSingleChoiceFieldSpec',
-  'LiteralMultipleChoiceFieldSpec',
-  'ControlledTermMultipleChoiceFieldSpec',
+  'SingleValuedEnumFieldSpec',
+  'MultiValuedEnumFieldSpec',
   'LinkFieldSpec',
   'EmailFieldSpec',
   'PhoneNumberFieldSpec',
@@ -1347,14 +1271,10 @@ export function serializeFieldSpec(x: FieldSpec): unknown {
       return serializeDateTimeFieldSpec(x);
     case 'ControlledTermFieldSpec':
       return serializeControlledTermFieldSpec(x);
-    case 'LiteralSingleChoiceFieldSpec':
-      return serializeLiteralSingleChoiceFieldSpec(x);
-    case 'ControlledTermSingleChoiceFieldSpec':
-      return serializeControlledTermSingleChoiceFieldSpec(x);
-    case 'LiteralMultipleChoiceFieldSpec':
-      return serializeLiteralMultipleChoiceFieldSpec(x);
-    case 'ControlledTermMultipleChoiceFieldSpec':
-      return serializeControlledTermMultipleChoiceFieldSpec(x);
+    case 'SingleValuedEnumFieldSpec':
+      return serializeSingleValuedEnumFieldSpec(x);
+    case 'MultiValuedEnumFieldSpec':
+      return serializeMultiValuedEnumFieldSpec(x);
     case 'LinkFieldSpec':
       return serializeLinkFieldSpec(x);
     case 'EmailFieldSpec':
@@ -1398,14 +1318,10 @@ export function parseFieldSpec(x: unknown, where = 'FieldSpec'): FieldSpec {
       return parseDateTimeFieldSpec(x, where);
     case 'ControlledTermFieldSpec':
       return parseControlledTermFieldSpec(x, where);
-    case 'LiteralSingleChoiceFieldSpec':
-      return parseLiteralSingleChoiceFieldSpec(x, where);
-    case 'ControlledTermSingleChoiceFieldSpec':
-      return parseControlledTermSingleChoiceFieldSpec(x, where);
-    case 'LiteralMultipleChoiceFieldSpec':
-      return parseLiteralMultipleChoiceFieldSpec(x, where);
-    case 'ControlledTermMultipleChoiceFieldSpec':
-      return parseControlledTermMultipleChoiceFieldSpec(x, where);
+    case 'SingleValuedEnumFieldSpec':
+      return parseSingleValuedEnumFieldSpec(x, where);
+    case 'MultiValuedEnumFieldSpec':
+      return parseMultiValuedEnumFieldSpec(x, where);
     case 'LinkFieldSpec':
       return parseLinkFieldSpec(x, where);
     case 'EmailFieldSpec':
@@ -1429,7 +1345,3 @@ export function parseFieldSpec(x: unknown, where = 'FieldSpec'): FieldSpec {
   }
 }
 
-// Suppress unused-import warning — `literalChoiceValue` is exposed so the
-// re-export pattern is consistent with other shared types but is not used
-// in this module's body.
-void literalChoiceValue;

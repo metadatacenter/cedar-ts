@@ -54,7 +54,6 @@ export interface OrcidFieldId {
   readonly iri: Iri;
 }
 
-export type OrcidFieldReference = OrcidFieldId;
 
 // Identifier-wrapper constructor for the Orcid field family.
 // Idempotent: an existing OrcidFieldId passes through unchanged. A bare
@@ -152,7 +151,7 @@ export const orcidField = (init: OrcidFieldInit): OrcidField =>
 export interface EmbeddedOrcidField {
   readonly kind: 'EmbeddedOrcidField';
   readonly key: string;
-  readonly artifactRef: OrcidFieldReference;
+  readonly artifactRef: OrcidFieldId;
   readonly valueRequirement?: ValueRequirement;
   readonly cardinality?: Cardinality;
   readonly visibility?: Visibility;
@@ -165,7 +164,7 @@ export interface EmbeddedOrcidField {
 // widened inputs accepted by orcidValue (a bare string IRI, an Iri,
 // a typed OrcidIri, or an init object with iri+label).
 export interface EmbeddedOrcidFieldInit extends EmbeddedFieldInitCommon {
-  readonly artifactRef: OrcidFieldReference | OrcidField;
+  readonly artifactRef: OrcidFieldId | OrcidField;
   readonly defaultValue?: OrcidValue | AuthorityValueInput<OrcidIri>;
 }
 
