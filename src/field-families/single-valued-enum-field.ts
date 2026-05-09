@@ -23,7 +23,7 @@ import type { LabelOverride } from '../embedded/label-override.js';
 import { type Property, type PropertyInput, property } from '../embedded/property.js';
 import { parseAsciiIdentifier } from '../leaves/index.js';
 import type { SingleValuedEnumRenderingHint } from './rendering-hints.js';
-import type { PermissibleValue, Token, EnumValue } from './enum-shared.js';
+import { type PermissibleValue, type EnumValue, enumValue } from './enum-shared.js';
 import { fieldRef } from './embedded-field-common.js';
 
 // =====================================================================
@@ -61,14 +61,15 @@ export const singleValuedEnumFieldId = (
 export interface SingleValuedEnumFieldSpec {
   readonly kind: 'SingleValuedEnumFieldSpec';
   readonly permissibleValues: readonly [PermissibleValue, ...PermissibleValue[]];
-  // Spec-level default; a bare Token referring to one of permissibleValues.
-  readonly defaultValue?: Token;
+  // Spec-level default; an EnumValue whose token must equal one of
+  // permissibleValues' value tokens.
+  readonly defaultValue?: EnumValue;
   readonly renderingHint?: SingleValuedEnumRenderingHint;
 }
 
 export interface SingleValuedEnumFieldSpecInit {
   readonly permissibleValues: readonly [PermissibleValue, ...PermissibleValue[]];
-  readonly defaultValue?: Token;
+  readonly defaultValue?: EnumValue | string;
   readonly renderingHint?: SingleValuedEnumRenderingHint;
 }
 
@@ -78,13 +79,17 @@ export function singleValuedEnumFieldSpec(
   const out: {
     kind: 'SingleValuedEnumFieldSpec';
     permissibleValues: readonly [PermissibleValue, ...PermissibleValue[]];
-    defaultValue?: Token;
+    defaultValue?: EnumValue;
     renderingHint?: SingleValuedEnumRenderingHint;
   } = {
     kind: 'SingleValuedEnumFieldSpec',
     permissibleValues: init.permissibleValues,
   };
-  if (init.defaultValue !== undefined) out.defaultValue = init.defaultValue;
+  if (init.defaultValue !== undefined)
+    out.defaultValue =
+      typeof init.defaultValue === 'string'
+        ? enumValue(init.defaultValue)
+        : init.defaultValue;
   if (init.renderingHint !== undefined) out.renderingHint = init.renderingHint;
   return out;
 }

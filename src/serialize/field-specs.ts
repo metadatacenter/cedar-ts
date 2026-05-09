@@ -51,7 +51,7 @@ import {
   type ValueSetSource,
   type PermissibleValue,
   type Meaning,
-  type Token,
+  type EnumValue,
   type DateValueType,
   type TimePrecision,
   type TimezoneRequirement,
@@ -133,6 +133,8 @@ import {
   parseRealNumberValue,
   serializeTextValue,
   parseTextValue,
+  serializeEnumValue,
+  parseEnumValue,
 } from './values.js';
 import { REAL_NUMBER_DATATYPE_KINDS, type RealNumberDatatypeKind } from '../leaves/index.js';
 import type { TextValue } from '../field-families/index.js';
@@ -1041,7 +1043,8 @@ export function serializeSingleValuedEnumFieldSpec(
     kind: 'SingleValuedEnumFieldSpec',
     permissibleValues: x.permissibleValues.map(serializePermissibleValue),
   };
-  if (x.defaultValue !== undefined) out['defaultValue'] = x.defaultValue;
+  if (x.defaultValue !== undefined)
+    out['defaultValue'] = serializeEnumValue(x.defaultValue);
   if (x.renderingHint !== undefined)
     out['renderingHint'] = serializeSingleValuedEnumRenderingHint(x.renderingHint);
   return out;
@@ -1076,13 +1079,13 @@ export function parseSingleValuedEnumFieldSpec(
   );
   const init: {
     permissibleValues: readonly [PermissibleValue, ...PermissibleValue[]];
-    defaultValue?: Token;
+    defaultValue?: EnumValue;
     renderingHint?: SingleValuedEnumRenderingHint;
   } = {
     permissibleValues: permissibleValues as [PermissibleValue, ...PermissibleValue[]],
   };
   if ('defaultValue' in o)
-    init.defaultValue = expectString(o['defaultValue'], `${where}.defaultValue`);
+    init.defaultValue = parseEnumValue(o['defaultValue'], `${where}.defaultValue`);
   if ('renderingHint' in o)
     init.renderingHint = parseSingleValuedEnumRenderingHint(
       o['renderingHint'],
@@ -1098,7 +1101,8 @@ export function serializeMultiValuedEnumFieldSpec(
     kind: 'MultiValuedEnumFieldSpec',
     permissibleValues: x.permissibleValues.map(serializePermissibleValue),
   };
-  if (x.defaultValues.length > 0) out['defaultValues'] = [...x.defaultValues];
+  if (x.defaultValues.length > 0)
+    out['defaultValues'] = x.defaultValues.map(serializeEnumValue);
   if (x.renderingHint !== undefined)
     out['renderingHint'] = serializeMultiValuedEnumRenderingHint(x.renderingHint);
   return out;
@@ -1133,7 +1137,7 @@ export function parseMultiValuedEnumFieldSpec(
   );
   const init: {
     permissibleValues: readonly [PermissibleValue, ...PermissibleValue[]];
-    defaultValues?: readonly Token[];
+    defaultValues?: readonly EnumValue[];
     renderingHint?: MultiValuedEnumRenderingHint;
   } = {
     permissibleValues: permissibleValues as [PermissibleValue, ...PermissibleValue[]],
@@ -1141,7 +1145,7 @@ export function parseMultiValuedEnumFieldSpec(
   if ('defaultValues' in o) {
     const dvArr = expectArray(o['defaultValues'], `${where}.defaultValues`);
     init.defaultValues = dvArr.map((e, i) =>
-      expectString(e, `${where}.defaultValues[${i}]`),
+      parseEnumValue(e, `${where}.defaultValues[${i}]`),
     );
   }
   if ('renderingHint' in o)

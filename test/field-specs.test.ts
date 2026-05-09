@@ -236,7 +236,7 @@ describe('EnumFieldSpec', () => {
     });
     expect(fs.kind).toBe('SingleValuedEnumFieldSpec');
     expect(fs.permissibleValues.length).toBe(2);
-    expect(fs.defaultValue).toBe('a');
+    expect(fs.defaultValue).toEqual({ kind: 'EnumValue', value: 'a' });
     expect(fs.renderingHint).toBe('radio');
     expect(isSingleValuedEnumFieldSpec(fs)).toBe(true);
     expect(isEnumFieldSpec(fs)).toBe(true);
@@ -260,14 +260,17 @@ describe('EnumFieldSpec', () => {
     expect(isMultiValuedEnumFieldSpec(fs)).toBe(true);
   });
 
-  it('MultiValuedEnumFieldSpec carries optional defaultValues', () => {
+  it('MultiValuedEnumFieldSpec carries optional defaultValues as EnumValue entries', () => {
     const pv1 = permissibleValue({ value: 'a' });
     const pv2 = permissibleValue({ value: 'b' });
     const fs = multiValuedEnumFieldSpec({
       permissibleValues: [pv1, pv2],
       defaultValues: ['a', 'b'],
     });
-    expect(fs.defaultValues).toEqual(['a', 'b']);
+    expect(fs.defaultValues).toEqual([
+      { kind: 'EnumValue', value: 'a' },
+      { kind: 'EnumValue', value: 'b' },
+    ]);
   });
 });
 

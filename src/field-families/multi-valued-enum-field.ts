@@ -27,7 +27,7 @@ import {
   fieldRef,
 } from './embedded-field-common.js';
 import type { MultiValuedEnumRenderingHint } from './rendering-hints.js';
-import type { PermissibleValue, Token, EnumValue } from './enum-shared.js';
+import { type PermissibleValue, type EnumValue, enumValue } from './enum-shared.js';
 
 // =====================================================================
 // 1. Identifier
@@ -64,14 +64,15 @@ export const multiValuedEnumFieldId = (
 export interface MultiValuedEnumFieldSpec {
   readonly kind: 'MultiValuedEnumFieldSpec';
   readonly permissibleValues: readonly [PermissibleValue, ...PermissibleValue[]];
-  // Spec-level defaults; bare Tokens referring to entries of permissibleValues.
-  readonly defaultValues: readonly Token[];
+  // Spec-level defaults; EnumValue entries whose tokens must each equal one
+  // of permissibleValues' value tokens.
+  readonly defaultValues: readonly EnumValue[];
   readonly renderingHint?: MultiValuedEnumRenderingHint;
 }
 
 export interface MultiValuedEnumFieldSpecInit {
   readonly permissibleValues: readonly [PermissibleValue, ...PermissibleValue[]];
-  readonly defaultValues?: readonly Token[];
+  readonly defaultValues?: readonly (EnumValue | string)[];
   readonly renderingHint?: MultiValuedEnumRenderingHint;
 }
 
@@ -81,12 +82,17 @@ export function multiValuedEnumFieldSpec(
   const out: {
     kind: 'MultiValuedEnumFieldSpec';
     permissibleValues: readonly [PermissibleValue, ...PermissibleValue[]];
-    defaultValues: readonly Token[];
+    defaultValues: readonly EnumValue[];
     renderingHint?: MultiValuedEnumRenderingHint;
   } = {
     kind: 'MultiValuedEnumFieldSpec',
     permissibleValues: init.permissibleValues,
-    defaultValues: init.defaultValues ?? [],
+    defaultValues:
+      init.defaultValues === undefined
+        ? []
+        : init.defaultValues.map((v) =>
+            typeof v === 'string' ? enumValue(v) : v,
+          ),
   };
   if (init.renderingHint !== undefined) out.renderingHint = init.renderingHint;
   return out;
