@@ -22,6 +22,7 @@ import {
   type RealNumberFieldSpec,
   type IntegerNumberValue,
   type RealNumberValue,
+  type BooleanValue,
   type BooleanFieldSpec,
   type DateFieldSpec,
   type TimeFieldSpec,
@@ -131,13 +132,56 @@ import {
   parseIntegerNumberValue,
   serializeRealNumberValue,
   parseRealNumberValue,
+  serializeBooleanValue,
+  parseBooleanValue,
   serializeTextValue,
   parseTextValue,
   serializeEnumValue,
   parseEnumValue,
+  serializeDateValue,
+  parseDateValue,
+  serializeTimeValue,
+  parseTimeValue,
+  serializeDateTimeValue,
+  parseDateTimeValue,
+  serializeControlledTermValue,
+  parseControlledTermValue,
+  serializeLinkValue,
+  parseLinkValue,
+  serializeEmailValue,
+  parseEmailValue,
+  serializePhoneNumberValue,
+  parsePhoneNumberValue,
+  serializeOrcidValue,
+  parseOrcidValue,
+  serializeRorValue,
+  parseRorValue,
+  serializeDoiValue,
+  parseDoiValue,
+  serializePubMedIdValue,
+  parsePubMedIdValue,
+  serializeRridValue,
+  parseRridValue,
+  serializeNihGrantIdValue,
+  parseNihGrantIdValue,
 } from './values.js';
 import { REAL_NUMBER_DATATYPE_KINDS, type RealNumberDatatypeKind } from '../leaves/index.js';
-import type { TextValue } from '../field-families/index.js';
+import type {
+  TextValue,
+  DateValue,
+  TimeValue,
+  DateTimeValue,
+  ControlledTermValue,
+  LinkValue,
+  EmailValue,
+  PhoneNumberValue,
+  OrcidValue,
+  RorValue,
+  DoiValue,
+  PubMedIdValue,
+  RridValue,
+  NihGrantIdValue,
+} from '../field-families/index.js';
 
 function parseRealNumberDatatypeKind(
   x: unknown,
@@ -705,6 +749,8 @@ export function serializeIntegerNumberFieldSpec(
   const out: Record<string, unknown> = {
     kind: 'IntegerNumberFieldSpec',
   };
+  if (x.defaultValue !== undefined)
+    out['defaultValue'] = serializeIntegerNumberValue(x.defaultValue);
   if (x.unit !== undefined) out['unit'] = serializeUnit(x.unit);
   if (x.minValue !== undefined)
     out['minValue'] = serializeIntegerNumberValue(x.minValue);
@@ -722,12 +768,13 @@ export function parseIntegerNumberFieldSpec(
   const o = expectObject(x, where);
   expectKnownProperties(o, [
     'kind',
+    'defaultValue',
     'unit',
     'minValue',
     'maxValue',
     'renderingHint',
   ]);
-  for (const k of ['unit', 'minValue', 'maxValue', 'renderingHint']) {
+  for (const k of ['defaultValue', 'unit', 'minValue', 'maxValue', 'renderingHint']) {
     rejectNullProperty(o, k);
   }
   if (o['kind'] !== 'IntegerNumberFieldSpec') {
@@ -736,11 +783,17 @@ export function parseIntegerNumberFieldSpec(
     );
   }
   const init: {
+    defaultValue?: IntegerNumberValue;
     unit?: Unit;
     minValue?: IntegerNumberValue;
     maxValue?: IntegerNumberValue;
     renderingHint?: NumericRenderingHint;
   } = {};
+  if ('defaultValue' in o)
+    init.defaultValue = parseIntegerNumberValue(
+      o['defaultValue'],
+      `${where}.defaultValue`,
+    );
   if ('unit' in o) init.unit = parseUnit(o['unit'], `${where}.unit`);
   if ('minValue' in o)
     init.minValue = parseIntegerNumberValue(o['minValue'], `${where}.minValue`);
@@ -763,6 +816,8 @@ export function serializeRealNumberFieldSpec(
     kind: 'RealNumberFieldSpec',
     datatype: x.datatype,
   };
+  if (x.defaultValue !== undefined)
+    out['defaultValue'] = serializeRealNumberValue(x.defaultValue);
   if (x.unit !== undefined) out['unit'] = serializeUnit(x.unit);
   if (x.minValue !== undefined)
     out['minValue'] = serializeRealNumberValue(x.minValue);
@@ -781,12 +836,13 @@ export function parseRealNumberFieldSpec(
   expectKnownProperties(o, [
     'kind',
     'datatype',
+    'defaultValue',
     'unit',
     'minValue',
     'maxValue',
     'renderingHint',
   ]);
-  for (const k of ['unit', 'minValue', 'maxValue', 'renderingHint']) {
+  for (const k of ['defaultValue', 'unit', 'minValue', 'maxValue', 'renderingHint']) {
     rejectNullProperty(o, k);
   }
   if (o['kind'] !== 'RealNumberFieldSpec') {
@@ -799,6 +855,7 @@ export function parseRealNumberFieldSpec(
   }
   const init: {
     datatype: ReturnType<typeof parseRealNumberDatatypeKind>;
+    defaultValue?: RealNumberValue;
     unit?: Unit;
     minValue?: RealNumberValue;
     maxValue?: RealNumberValue;
@@ -806,6 +863,11 @@ export function parseRealNumberFieldSpec(
   } = {
     datatype: parseRealNumberDatatypeKind(o['datatype'], `${where}.datatype`),
   };
+  if ('defaultValue' in o)
+    init.defaultValue = parseRealNumberValue(
+      o['defaultValue'],
+      `${where}.defaultValue`,
+    );
   if ('unit' in o) init.unit = parseUnit(o['unit'], `${where}.unit`);
   if ('minValue' in o)
     init.minValue = parseRealNumberValue(o['minValue'], `${where}.minValue`);
@@ -825,6 +887,8 @@ export function serializeBooleanFieldSpec(x: BooleanFieldSpec): unknown {
   const out: Record<string, unknown> = {
     kind: 'BooleanFieldSpec',
   };
+  if (x.defaultValue !== undefined)
+    out['defaultValue'] = serializeBooleanValue(x.defaultValue);
   if (x.renderingHint !== undefined)
     out['renderingHint'] = serializeBooleanRenderingHint(x.renderingHint);
   return out;
@@ -835,12 +899,18 @@ export function parseBooleanFieldSpec(
   where = 'BooleanFieldSpec',
 ): BooleanFieldSpec {
   const o = expectObject(x, where);
-  expectKnownProperties(o, ['kind', 'renderingHint']);
+  expectKnownProperties(o, ['kind', 'defaultValue', 'renderingHint']);
+  rejectNullProperty(o, 'defaultValue');
   rejectNullProperty(o, 'renderingHint');
   if (o['kind'] !== 'BooleanFieldSpec') {
     throw new CedarConstructionError(`${where}: expected kind "BooleanFieldSpec"`);
   }
-  const init: { renderingHint?: BooleanRenderingHint } = {};
+  const init: {
+    defaultValue?: BooleanValue;
+    renderingHint?: BooleanRenderingHint;
+  } = {};
+  if ('defaultValue' in o)
+    init.defaultValue = parseBooleanValue(o['defaultValue'], `${where}.defaultValue`);
   if ('renderingHint' in o)
     init.renderingHint = parseBooleanRenderingHint(
       o['renderingHint'],
@@ -856,6 +926,8 @@ export function serializeDateFieldSpec(x: DateFieldSpec): unknown {
     kind: 'DateFieldSpec',
     dateValueType: x.dateValueType,
   };
+  if (x.defaultValue !== undefined)
+    out['defaultValue'] = serializeDateValue(x.defaultValue);
   if (x.renderingHint !== undefined)
     out['renderingHint'] = serializeDateRenderingHint(x.renderingHint);
   return out;
@@ -866,7 +938,13 @@ export function parseDateFieldSpec(
   where = 'DateFieldSpec',
 ): DateFieldSpec {
   const o = expectObject(x, where);
-  expectKnownProperties(o, ['kind', 'dateValueType', 'renderingHint']);
+  expectKnownProperties(o, [
+    'kind',
+    'dateValueType',
+    'defaultValue',
+    'renderingHint',
+  ]);
+  rejectNullProperty(o, 'defaultValue');
   rejectNullProperty(o, 'renderingHint');
   if (o['kind'] !== 'DateFieldSpec') {
     throw new CedarConstructionError(`${where}: expected kind "DateFieldSpec"`);
@@ -874,13 +952,19 @@ export function parseDateFieldSpec(
   if (!('dateValueType' in o)) {
     throw new CedarConstructionError(`${where}: missing required "dateValueType"`);
   }
-  const init: { dateValueType: DateValueType; renderingHint?: DateRenderingHint } = {
+  const init: {
+    dateValueType: DateValueType;
+    defaultValue?: DateValue;
+    renderingHint?: DateRenderingHint;
+  } = {
     dateValueType: expectStringEnum<DateValueType>(
       o['dateValueType'],
       DATE_VALUE_TYPES,
       `${where}.dateValueType`,
     ),
   };
+  if ('defaultValue' in o)
+    init.defaultValue = parseDateValue(o['defaultValue'], `${where}.defaultValue`);
   if ('renderingHint' in o)
     init.renderingHint = parseDateRenderingHint(
       o['renderingHint'],
@@ -891,6 +975,8 @@ export function parseDateFieldSpec(
 
 export function serializeTimeFieldSpec(x: TimeFieldSpec): unknown {
   const out: Record<string, unknown> = { kind: 'TimeFieldSpec' };
+  if (x.defaultValue !== undefined)
+    out['defaultValue'] = serializeTimeValue(x.defaultValue);
   if (x.timePrecision !== undefined) out['timePrecision'] = x.timePrecision;
   if (x.timezoneRequirement !== undefined)
     out['timezoneRequirement'] = x.timezoneRequirement;
@@ -906,21 +992,30 @@ export function parseTimeFieldSpec(
   const o = expectObject(x, where);
   expectKnownProperties(o, [
     'kind',
+    'defaultValue',
     'timePrecision',
     'timezoneRequirement',
     'renderingHint',
   ]);
-  for (const k of ['timePrecision', 'timezoneRequirement', 'renderingHint']) {
+  for (const k of [
+    'defaultValue',
+    'timePrecision',
+    'timezoneRequirement',
+    'renderingHint',
+  ]) {
     rejectNullProperty(o, k);
   }
   if (o['kind'] !== 'TimeFieldSpec') {
     throw new CedarConstructionError(`${where}: expected kind "TimeFieldSpec"`);
   }
   const init: {
+    defaultValue?: TimeValue;
     timePrecision?: TimePrecision;
     timezoneRequirement?: TimezoneRequirement;
     renderingHint?: TimeRenderingHint;
   } = {};
+  if ('defaultValue' in o)
+    init.defaultValue = parseTimeValue(o['defaultValue'], `${where}.defaultValue`);
   if ('timePrecision' in o)
     init.timePrecision = expectStringEnum<TimePrecision>(
       o['timePrecision'],
@@ -946,6 +1041,8 @@ export function serializeDateTimeFieldSpec(x: DateTimeFieldSpec): unknown {
     kind: 'DateTimeFieldSpec',
     dateTimeValueType: x.dateTimeValueType,
   };
+  if (x.defaultValue !== undefined)
+    out['defaultValue'] = serializeDateTimeValue(x.defaultValue);
   if (x.timezoneRequirement !== undefined)
     out['timezoneRequirement'] = x.timezoneRequirement;
   if (x.renderingHint !== undefined)
@@ -961,10 +1058,11 @@ export function parseDateTimeFieldSpec(
   expectKnownProperties(o, [
     'kind',
     'dateTimeValueType',
+    'defaultValue',
     'timezoneRequirement',
     'renderingHint',
   ]);
-  for (const k of ['timezoneRequirement', 'renderingHint']) {
+  for (const k of ['defaultValue', 'timezoneRequirement', 'renderingHint']) {
     rejectNullProperty(o, k);
   }
   if (o['kind'] !== 'DateTimeFieldSpec') {
@@ -977,6 +1075,7 @@ export function parseDateTimeFieldSpec(
   }
   const init: {
     dateTimeValueType: DateTimeValueType;
+    defaultValue?: DateTimeValue;
     timezoneRequirement?: TimezoneRequirement;
     renderingHint?: DateTimeRenderingHint;
   } = {
@@ -986,6 +1085,11 @@ export function parseDateTimeFieldSpec(
       `${where}.dateTimeValueType`,
     ),
   };
+  if ('defaultValue' in o)
+    init.defaultValue = parseDateTimeValue(
+      o['defaultValue'],
+      `${where}.defaultValue`,
+    );
   if ('timezoneRequirement' in o)
     init.timezoneRequirement = expectStringEnum<TimezoneRequirement>(
       o['timezoneRequirement'],
@@ -1005,10 +1109,13 @@ export function parseDateTimeFieldSpec(
 export function serializeControlledTermFieldSpec(
   x: ControlledTermFieldSpec,
 ): unknown {
-  return {
+  const out: Record<string, unknown> = {
     kind: 'ControlledTermFieldSpec',
     sources: x.sources.map(serializeControlledTermSource),
   };
+  if (x.defaultValue !== undefined)
+    out['defaultValue'] = serializeControlledTermValue(x.defaultValue);
+  return out;
 }
 
 export function parseControlledTermFieldSpec(
@@ -1016,7 +1123,8 @@ export function parseControlledTermFieldSpec(
   where = 'ControlledTermFieldSpec',
 ): ControlledTermFieldSpec {
   const o = expectObject(x, where);
-  expectKnownProperties(o, ['kind', 'sources']);
+  expectKnownProperties(o, ['kind', 'sources', 'defaultValue']);
+  rejectNullProperty(o, 'defaultValue');
   if (o['kind'] !== 'ControlledTermFieldSpec') {
     throw new CedarConstructionError(
       `${where}: expected kind "ControlledTermFieldSpec"`,
@@ -1029,9 +1137,18 @@ export function parseControlledTermFieldSpec(
   const sources = arr.map((e, i) =>
     parseControlledTermSource(e, `${where}.sources[${i}]`),
   );
-  return controlledTermFieldSpec(
-    ...(sources as [ControlledTermSource, ...ControlledTermSource[]]),
-  );
+  const init: {
+    sources: readonly [ControlledTermSource, ...ControlledTermSource[]];
+    defaultValue?: ControlledTermValue;
+  } = {
+    sources: sources as [ControlledTermSource, ...ControlledTermSource[]],
+  };
+  if ('defaultValue' in o)
+    init.defaultValue = parseControlledTermValue(
+      o['defaultValue'],
+      `${where}.defaultValue`,
+    );
+  return controlledTermFieldSpec(init);
 }
 
 // ---- Enum FieldSpecs -------------------------------------------------
@@ -1156,81 +1273,148 @@ export function parseMultiValuedEnumFieldSpec(
   return multiValuedEnumFieldSpec(init);
 }
 
-// ---- Empty FieldSpec families ----------------------------------------
+// ---- Default-only FieldSpec families ---------------------------------
+//
+// Nine families have only an optional `defaultValue` slot at the model
+// level (Link, Email, PhoneNumber, plus the 6 external authority
+// families). Each is round-tripped through a small generic helper that
+// captures its Value type and tagged-value (de)serializer pair.
 
-function emptySpec<T extends { kind: string }>(
+function defaultOnlySpec<T extends { kind: string; defaultValue?: V }, V>(
   expectedKind: T['kind'],
-  ctor: () => T,
+  ctor: (init?: { defaultValue?: V }) => T,
+  serializeValue: (v: V) => unknown,
+  parseValueFn: (x: unknown, where?: string) => V,
 ): {
   serialize: (x: T) => unknown;
   parse: (x: unknown, where?: string) => T;
 } {
   return {
-    serialize: (x: T) => ({ kind: x.kind }),
+    serialize: (x: T): unknown => {
+      const out: Record<string, unknown> = { kind: x.kind };
+      if (x.defaultValue !== undefined)
+        out['defaultValue'] = serializeValue(x.defaultValue);
+      return out;
+    },
     parse: (x: unknown, where: string = expectedKind): T => {
       const o = expectObject(x, where);
-      expectKnownProperties(o, ['kind']);
+      expectKnownProperties(o, ['kind', 'defaultValue']);
+      rejectNullProperty(o, 'defaultValue');
       if (o['kind'] !== expectedKind) {
         throw new CedarConstructionError(
           `${where}: expected kind ${JSON.stringify(expectedKind)}`,
         );
       }
-      return ctor();
+      const init: { defaultValue?: V } = {};
+      if ('defaultValue' in o)
+        init.defaultValue = parseValueFn(o['defaultValue'], `${where}.defaultValue`);
+      return ctor(init);
     },
   };
 }
 
-const linkSpecHelpers = emptySpec<LinkFieldSpec>('LinkFieldSpec', linkFieldSpec);
+const linkSpecHelpers = defaultOnlySpec<LinkFieldSpec, LinkValue>(
+  'LinkFieldSpec',
+  linkFieldSpec,
+  serializeLinkValue,
+  parseLinkValue,
+);
 export const serializeLinkFieldSpec = linkSpecHelpers.serialize;
 export const parseLinkFieldSpec = linkSpecHelpers.parse;
 
-const emailSpecHelpers = emptySpec<EmailFieldSpec>('EmailFieldSpec', emailFieldSpec);
+const emailSpecHelpers = defaultOnlySpec<EmailFieldSpec, EmailValue>(
+  'EmailFieldSpec',
+  emailFieldSpec,
+  serializeEmailValue,
+  parseEmailValue,
+);
 export const serializeEmailFieldSpec = emailSpecHelpers.serialize;
 export const parseEmailFieldSpec = emailSpecHelpers.parse;
 
-const phoneSpecHelpers = emptySpec<PhoneNumberFieldSpec>(
+const phoneSpecHelpers = defaultOnlySpec<PhoneNumberFieldSpec, PhoneNumberValue>(
   'PhoneNumberFieldSpec',
   phoneNumberFieldSpec,
+  serializePhoneNumberValue,
+  parsePhoneNumberValue,
 );
 export const serializePhoneNumberFieldSpec = phoneSpecHelpers.serialize;
 export const parsePhoneNumberFieldSpec = phoneSpecHelpers.parse;
 
-const orcidSpecHelpers = emptySpec<OrcidFieldSpec>('OrcidFieldSpec', orcidFieldSpec);
+const orcidSpecHelpers = defaultOnlySpec<OrcidFieldSpec, OrcidValue>(
+  'OrcidFieldSpec',
+  orcidFieldSpec,
+  serializeOrcidValue,
+  parseOrcidValue,
+);
 export const serializeOrcidFieldSpec = orcidSpecHelpers.serialize;
 export const parseOrcidFieldSpec = orcidSpecHelpers.parse;
 
-const rorSpecHelpers = emptySpec<RorFieldSpec>('RorFieldSpec', rorFieldSpec);
+const rorSpecHelpers = defaultOnlySpec<RorFieldSpec, RorValue>(
+  'RorFieldSpec',
+  rorFieldSpec,
+  serializeRorValue,
+  parseRorValue,
+);
 export const serializeRorFieldSpec = rorSpecHelpers.serialize;
 export const parseRorFieldSpec = rorSpecHelpers.parse;
 
-const doiSpecHelpers = emptySpec<DoiFieldSpec>('DoiFieldSpec', doiFieldSpec);
+const doiSpecHelpers = defaultOnlySpec<DoiFieldSpec, DoiValue>(
+  'DoiFieldSpec',
+  doiFieldSpec,
+  serializeDoiValue,
+  parseDoiValue,
+);
 export const serializeDoiFieldSpec = doiSpecHelpers.serialize;
 export const parseDoiFieldSpec = doiSpecHelpers.parse;
 
-const pubMedIdSpecHelpers = emptySpec<PubMedIdFieldSpec>(
+const pubMedIdSpecHelpers = defaultOnlySpec<PubMedIdFieldSpec, PubMedIdValue>(
   'PubMedIdFieldSpec',
   pubMedIdFieldSpec,
+  serializePubMedIdValue,
+  parsePubMedIdValue,
 );
 export const serializePubMedIdFieldSpec = pubMedIdSpecHelpers.serialize;
 export const parsePubMedIdFieldSpec = pubMedIdSpecHelpers.parse;
 
-const rridSpecHelpers = emptySpec<RridFieldSpec>('RridFieldSpec', rridFieldSpec);
+const rridSpecHelpers = defaultOnlySpec<RridFieldSpec, RridValue>(
+  'RridFieldSpec',
+  rridFieldSpec,
+  serializeRridValue,
+  parseRridValue,
+);
 export const serializeRridFieldSpec = rridSpecHelpers.serialize;
 export const parseRridFieldSpec = rridSpecHelpers.parse;
 
-const nihGrantIdSpecHelpers = emptySpec<NihGrantIdFieldSpec>(
+const nihGrantIdSpecHelpers = defaultOnlySpec<NihGrantIdFieldSpec, NihGrantIdValue>(
   'NihGrantIdFieldSpec',
   nihGrantIdFieldSpec,
+  serializeNihGrantIdValue,
+  parseNihGrantIdValue,
 );
 export const serializeNihGrantIdFieldSpec = nihGrantIdSpecHelpers.serialize;
 export const parseNihGrantIdFieldSpec = nihGrantIdSpecHelpers.parse;
 
-const attrValSpecHelpers = emptySpec<AttributeValueFieldSpec>(
-  'AttributeValueFieldSpec',
-  attributeValueFieldSpec,
-);
-export const serializeAttributeValueFieldSpec = attrValSpecHelpers.serialize;
-export const parseAttributeValueFieldSpec = attrValSpecHelpers.parse;
+// AttributeValueFieldSpec has no defaultValue slot — serialize as
+// { kind } only.
+export function serializeAttributeValueFieldSpec(
+  x: AttributeValueFieldSpec,
+): unknown {
+  return { kind: x.kind };
+}
+
+export function parseAttributeValueFieldSpec(
+  x: unknown,
+  where = 'AttributeValueFieldSpec',
+): AttributeValueFieldSpec {
+  const o = expectObject(x, where);
+  expectKnownProperties(o, ['kind']);
+  if (o['kind'] !== 'AttributeValueFieldSpec') {
+    throw new CedarConstructionError(
+      `${where}: expected kind "AttributeValueFieldSpec"`,
+    );
+  }
+  return attributeValueFieldSpec();
+}
 
 // ---- FieldSpec union -------------------------------------------------
 

@@ -307,12 +307,53 @@ export type ControlledTermSource =
 export interface ControlledTermFieldSpec {
   readonly kind: 'ControlledTermFieldSpec';
   readonly sources: readonly [ControlledTermSource, ...ControlledTermSource[]];
+  readonly defaultValue?: ControlledTermValue;
 }
 
+export interface ControlledTermFieldSpecInit {
+  readonly sources: readonly [ControlledTermSource, ...ControlledTermSource[]];
+  readonly defaultValue?: ControlledTermValue;
+}
+
+// Two calling conventions, kept for ergonomic parity with prior cedar-ts:
+//   - rest-args form (sources only):
+//       controlledTermFieldSpec(s1, s2, …)
+//   - init-object form (sources + optional defaultValue):
+//       controlledTermFieldSpec({ sources: [...], defaultValue })
+export function controlledTermFieldSpec(
+  init: ControlledTermFieldSpecInit,
+): ControlledTermFieldSpec;
 export function controlledTermFieldSpec(
   ...sources: [ControlledTermSource, ...ControlledTermSource[]]
+): ControlledTermFieldSpec;
+export function controlledTermFieldSpec(
+  ...args:
+    | [ControlledTermFieldSpecInit]
+    | [ControlledTermSource, ...ControlledTermSource[]]
 ): ControlledTermFieldSpec {
-  return { kind: 'ControlledTermFieldSpec', sources };
+  if (
+    args.length === 1 &&
+    typeof args[0] === 'object' &&
+    args[0] !== null &&
+    !('kind' in (args[0] as object) && (args[0] as { kind: string }).kind.endsWith('Source')) &&
+    'sources' in (args[0] as object)
+  ) {
+    const init = args[0] as ControlledTermFieldSpecInit;
+    const out: {
+      kind: 'ControlledTermFieldSpec';
+      sources: readonly [ControlledTermSource, ...ControlledTermSource[]];
+      defaultValue?: ControlledTermValue;
+    } = { kind: 'ControlledTermFieldSpec', sources: init.sources };
+    if (init.defaultValue !== undefined) out.defaultValue = init.defaultValue;
+    return out;
+  }
+  return {
+    kind: 'ControlledTermFieldSpec',
+    sources: args as unknown as readonly [
+      ControlledTermSource,
+      ...ControlledTermSource[],
+    ],
+  };
 }
 
 export const isControlledTermFieldSpec = (x: unknown): x is ControlledTermFieldSpec =>

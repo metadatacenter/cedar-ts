@@ -109,9 +109,26 @@ export const isOrcidValue = (x: unknown): x is OrcidValue =>
 // 3. FieldSpec
 // =====================================================================
 
-export interface OrcidFieldSpec { readonly kind: 'OrcidFieldSpec'; }
+export interface OrcidFieldSpec {
+  readonly kind: 'OrcidFieldSpec';
+  readonly defaultValue?: OrcidValue;
+}
 
-export const orcidFieldSpec = (): OrcidFieldSpec => ({ kind: 'OrcidFieldSpec' });
+export interface OrcidFieldSpecInit {
+  readonly defaultValue?: OrcidValue | AuthorityValueInput<OrcidIri>;
+}
+
+export function orcidFieldSpec(init?: OrcidFieldSpecInit): OrcidFieldSpec {
+  const out: { kind: 'OrcidFieldSpec'; defaultValue?: OrcidValue } = {
+    kind: 'OrcidFieldSpec',
+  };
+  if (init?.defaultValue !== undefined) {
+    out.defaultValue = isOrcidValue(init.defaultValue)
+      ? init.defaultValue
+      : orcidValue(init.defaultValue);
+  }
+  return out;
+}
 
 export const isOrcidFieldSpec = (x: unknown): x is OrcidFieldSpec =>
   isTaggedKind(x, 'OrcidFieldSpec');

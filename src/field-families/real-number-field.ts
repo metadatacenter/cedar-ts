@@ -95,6 +95,7 @@ export function realNumberValueToNumber(v: RealNumberValue): number {
 export interface RealNumberFieldSpec {
   readonly kind: 'RealNumberFieldSpec';
   readonly datatype: RealNumberDatatypeKind;
+  readonly defaultValue?: RealNumberValue;
   readonly unit?: Unit;
   readonly minValue?: RealNumberValue;
   readonly maxValue?: RealNumberValue;
@@ -103,6 +104,7 @@ export interface RealNumberFieldSpec {
 
 export interface RealNumberFieldSpecInit {
   readonly datatype: RealNumberDatatypeKind;
+  readonly defaultValue?: RealNumberValue;
   readonly unit?: Unit;
   readonly minValue?: RealNumberValue;
   readonly maxValue?: RealNumberValue;
@@ -115,11 +117,13 @@ export function realNumberFieldSpec(
   const out: {
     kind: 'RealNumberFieldSpec';
     datatype: RealNumberDatatypeKind;
+    defaultValue?: RealNumberValue;
     unit?: Unit;
     minValue?: RealNumberValue;
     maxValue?: RealNumberValue;
     renderingHint?: NumericRenderingHint;
   } = { kind: 'RealNumberFieldSpec', datatype: init.datatype };
+  if (init.defaultValue !== undefined) out.defaultValue = init.defaultValue;
   if (init.unit !== undefined) out.unit = init.unit;
   if (init.minValue !== undefined) out.minValue = init.minValue;
   if (init.maxValue !== undefined) out.maxValue = init.maxValue;

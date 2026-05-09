@@ -104,14 +104,24 @@ export function isLinkValue(x: unknown): x is LinkValue {
 // 3. FieldSpec
 // =====================================================================
 
-// LinkFieldSpec is a body-less spec at the model level. The kind discriminant
-// alone is sufficient; the field's value rules are fixed by the
-// FieldSpec-to-Value correspondence.
+// LinkFieldSpec carries only an optional defaultValue at the model level.
+// The field's value rules are fixed by the FieldSpec-to-Value correspondence.
 export interface LinkFieldSpec {
   readonly kind: 'LinkFieldSpec';
+  readonly defaultValue?: LinkValue;
 }
 
-export const linkFieldSpec = (): LinkFieldSpec => ({ kind: 'LinkFieldSpec' });
+export interface LinkFieldSpecInit {
+  readonly defaultValue?: LinkValue;
+}
+
+export function linkFieldSpec(init?: LinkFieldSpecInit): LinkFieldSpec {
+  const out: { kind: 'LinkFieldSpec'; defaultValue?: LinkValue } = {
+    kind: 'LinkFieldSpec',
+  };
+  if (init?.defaultValue !== undefined) out.defaultValue = init.defaultValue;
+  return out;
+}
 
 export const isLinkFieldSpec = (x: unknown): x is LinkFieldSpec =>
   typeof x === 'object' && x !== null &&

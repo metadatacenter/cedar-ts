@@ -87,12 +87,14 @@ export const DATE_TIME_VALUE_TYPES: readonly DateTimeValueType[] = Object.freeze
 export interface DateTimeFieldSpec {
   readonly kind: 'DateTimeFieldSpec';
   readonly dateTimeValueType: DateTimeValueType;
+  readonly defaultValue?: DateTimeValue;
   readonly timezoneRequirement?: TimezoneRequirement;
   readonly renderingHint?: DateTimeRenderingHint;
 }
 
 export interface DateTimeFieldSpecInit {
   readonly dateTimeValueType: DateTimeValueType;
+  readonly defaultValue?: DateTimeValueInput;
   readonly timezoneRequirement?: TimezoneRequirement;
   readonly renderingHint?: DateTimeRenderingHint;
 }
@@ -101,9 +103,16 @@ export function dateTimeFieldSpec(init: DateTimeFieldSpecInit): DateTimeFieldSpe
   const out: {
     kind: 'DateTimeFieldSpec';
     dateTimeValueType: DateTimeValueType;
+    defaultValue?: DateTimeValue;
     timezoneRequirement?: TimezoneRequirement;
     renderingHint?: DateTimeRenderingHint;
   } = { kind: 'DateTimeFieldSpec', dateTimeValueType: init.dateTimeValueType };
+  if (init.defaultValue !== undefined) {
+    out.defaultValue =
+      typeof init.defaultValue === 'string'
+        ? dateTimeValue(init.defaultValue)
+        : init.defaultValue;
+  }
   if (init.timezoneRequirement !== undefined)
     out.timezoneRequirement = init.timezoneRequirement;
   if (init.renderingHint !== undefined) out.renderingHint = init.renderingHint;

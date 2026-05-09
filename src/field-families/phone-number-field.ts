@@ -70,9 +70,27 @@ export function isPhoneNumberValue(x: unknown): x is PhoneNumberValue {
 
 export interface PhoneNumberFieldSpec {
   readonly kind: 'PhoneNumberFieldSpec';
+  readonly defaultValue?: PhoneNumberValue;
 }
-export const phoneNumberFieldSpec = (): PhoneNumberFieldSpec =>
-  ({ kind: 'PhoneNumberFieldSpec' });
+
+export interface PhoneNumberFieldSpecInit {
+  readonly defaultValue?: PhoneNumberValueInput;
+}
+
+export function phoneNumberFieldSpec(
+  init?: PhoneNumberFieldSpecInit,
+): PhoneNumberFieldSpec {
+  const out: { kind: 'PhoneNumberFieldSpec'; defaultValue?: PhoneNumberValue } = {
+    kind: 'PhoneNumberFieldSpec',
+  };
+  if (init?.defaultValue !== undefined) {
+    out.defaultValue =
+      typeof init.defaultValue === 'string'
+        ? phoneNumberValue(init.defaultValue)
+        : init.defaultValue;
+  }
+  return out;
+}
 export const isPhoneNumberFieldSpec = (x: unknown): x is PhoneNumberFieldSpec =>
   typeof x === 'object' && x !== null &&
   (x as { kind?: unknown }).kind === 'PhoneNumberFieldSpec';

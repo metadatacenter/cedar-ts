@@ -108,9 +108,26 @@ export const isRridValue = (x: unknown): x is RridValue =>
 // 3. FieldSpec
 // =====================================================================
 
-export interface RridFieldSpec { readonly kind: 'RridFieldSpec'; }
+export interface RridFieldSpec {
+  readonly kind: 'RridFieldSpec';
+  readonly defaultValue?: RridValue;
+}
 
-export const rridFieldSpec = (): RridFieldSpec => ({ kind: 'RridFieldSpec' });
+export interface RridFieldSpecInit {
+  readonly defaultValue?: RridValue | AuthorityValueInput<RridIri>;
+}
+
+export function rridFieldSpec(init?: RridFieldSpecInit): RridFieldSpec {
+  const out: { kind: 'RridFieldSpec'; defaultValue?: RridValue } = {
+    kind: 'RridFieldSpec',
+  };
+  if (init?.defaultValue !== undefined) {
+    out.defaultValue = isRridValue(init.defaultValue)
+      ? init.defaultValue
+      : rridValue(init.defaultValue);
+  }
+  return out;
+}
 
 export const isRridFieldSpec = (x: unknown): x is RridFieldSpec =>
   isTaggedKind(x, 'RridFieldSpec');

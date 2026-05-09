@@ -109,9 +109,26 @@ export const isDoiValue = (x: unknown): x is DoiValue =>
 // 3. FieldSpec
 // =====================================================================
 
-export interface DoiFieldSpec { readonly kind: 'DoiFieldSpec'; }
+export interface DoiFieldSpec {
+  readonly kind: 'DoiFieldSpec';
+  readonly defaultValue?: DoiValue;
+}
 
-export const doiFieldSpec = (): DoiFieldSpec => ({ kind: 'DoiFieldSpec' });
+export interface DoiFieldSpecInit {
+  readonly defaultValue?: DoiValue | AuthorityValueInput<DoiIri>;
+}
+
+export function doiFieldSpec(init?: DoiFieldSpecInit): DoiFieldSpec {
+  const out: { kind: 'DoiFieldSpec'; defaultValue?: DoiValue } = {
+    kind: 'DoiFieldSpec',
+  };
+  if (init?.defaultValue !== undefined) {
+    out.defaultValue = isDoiValue(init.defaultValue)
+      ? init.defaultValue
+      : doiValue(init.defaultValue);
+  }
+  return out;
+}
 
 export const isDoiFieldSpec = (x: unknown): x is DoiFieldSpec =>
   isTaggedKind(x, 'DoiFieldSpec');

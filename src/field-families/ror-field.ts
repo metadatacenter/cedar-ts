@@ -109,9 +109,26 @@ export const isRorValue = (x: unknown): x is RorValue =>
 // 3. FieldSpec
 // =====================================================================
 
-export interface RorFieldSpec { readonly kind: 'RorFieldSpec'; }
+export interface RorFieldSpec {
+  readonly kind: 'RorFieldSpec';
+  readonly defaultValue?: RorValue;
+}
 
-export const rorFieldSpec = (): RorFieldSpec => ({ kind: 'RorFieldSpec' });
+export interface RorFieldSpecInit {
+  readonly defaultValue?: RorValue | AuthorityValueInput<RorIri>;
+}
+
+export function rorFieldSpec(init?: RorFieldSpecInit): RorFieldSpec {
+  const out: { kind: 'RorFieldSpec'; defaultValue?: RorValue } = {
+    kind: 'RorFieldSpec',
+  };
+  if (init?.defaultValue !== undefined) {
+    out.defaultValue = isRorValue(init.defaultValue)
+      ? init.defaultValue
+      : rorValue(init.defaultValue);
+  }
+  return out;
+}
 
 export const isRorFieldSpec = (x: unknown): x is RorFieldSpec =>
   isTaggedKind(x, 'RorFieldSpec');

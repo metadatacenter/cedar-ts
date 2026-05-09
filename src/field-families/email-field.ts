@@ -70,8 +70,25 @@ export function isEmailValue(x: unknown): x is EmailValue {
 
 export interface EmailFieldSpec {
   readonly kind: 'EmailFieldSpec';
+  readonly defaultValue?: EmailValue;
 }
-export const emailFieldSpec = (): EmailFieldSpec => ({ kind: 'EmailFieldSpec' });
+
+export interface EmailFieldSpecInit {
+  readonly defaultValue?: EmailValueInput;
+}
+
+export function emailFieldSpec(init?: EmailFieldSpecInit): EmailFieldSpec {
+  const out: { kind: 'EmailFieldSpec'; defaultValue?: EmailValue } = {
+    kind: 'EmailFieldSpec',
+  };
+  if (init?.defaultValue !== undefined) {
+    out.defaultValue =
+      typeof init.defaultValue === 'string'
+        ? emailValue(init.defaultValue)
+        : init.defaultValue;
+  }
+  return out;
+}
 export const isEmailFieldSpec = (x: unknown): x is EmailFieldSpec =>
   typeof x === 'object' && x !== null &&
   (x as { kind?: unknown }).kind === 'EmailFieldSpec';

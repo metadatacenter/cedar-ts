@@ -135,11 +135,17 @@ export const DATE_VALUE_TYPES: readonly DateValueType[] = Object.freeze([
 export interface DateFieldSpec {
   readonly kind: 'DateFieldSpec';
   readonly dateValueType: DateValueType;
+  // When present, the DateValue arm MUST match `dateValueType`:
+  //   year      → YearValue
+  //   yearMonth → YearMonthValue
+  //   fullDate  → FullDateValue
+  readonly defaultValue?: DateValue;
   readonly renderingHint?: DateRenderingHint;
 }
 
 export interface DateFieldSpecInit {
   readonly dateValueType: DateValueType;
+  readonly defaultValue?: DateValue | string;
   readonly renderingHint?: DateRenderingHint;
 }
 
@@ -147,10 +153,35 @@ export function dateFieldSpec(init: DateFieldSpecInit): DateFieldSpec {
   const out: {
     kind: 'DateFieldSpec';
     dateValueType: DateValueType;
+    defaultValue?: DateValue;
     renderingHint?: DateRenderingHint;
   } = { kind: 'DateFieldSpec', dateValueType: init.dateValueType };
+  if (init.defaultValue !== undefined) {
+    const dv = isDateValue(init.defaultValue)
+      ? init.defaultValue
+      : dateValue(init.defaultValue);
+    assertDateValueArmMatchesType(dv, init.dateValueType, 'DateFieldSpec.defaultValue');
+    out.defaultValue = dv;
+  }
   if (init.renderingHint !== undefined) out.renderingHint = init.renderingHint;
   return out;
+}
+
+// Enforces the cross-slot invariant that `defaultValue`'s DateValue arm
+// agrees with `dateValueType`. Used by both DateFieldSpec and
+// EmbeddedDateField; the same check applies at both layers.
+export function assertDateValueArmMatchesType(
+  v: DateValue,
+  t: DateValueType,
+  where: string,
+): void {
+  const expected =
+    t === 'year' ? 'YearValue' : t === 'yearMonth' ? 'YearMonthValue' : 'FullDateValue';
+  if (v.kind !== expected) {
+    throw new CedarConstructionError(
+      `${where}: dateValueType "${t}" requires a ${expected}, got ${v.kind}`,
+    );
+  }
 }
 
 export const isDateFieldSpec = (x: unknown): x is DateFieldSpec =>

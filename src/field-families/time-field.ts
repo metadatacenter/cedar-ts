@@ -89,12 +89,14 @@ export const TIMEZONE_REQUIREMENTS: readonly TimezoneRequirement[] = Object.free
 
 export interface TimeFieldSpec {
   readonly kind: 'TimeFieldSpec';
+  readonly defaultValue?: TimeValue;
   readonly timePrecision?: TimePrecision;
   readonly timezoneRequirement?: TimezoneRequirement;
   readonly renderingHint?: TimeRenderingHint;
 }
 
 export interface TimeFieldSpecInit {
+  readonly defaultValue?: TimeValueInput;
   readonly timePrecision?: TimePrecision;
   readonly timezoneRequirement?: TimezoneRequirement;
   readonly renderingHint?: TimeRenderingHint;
@@ -103,10 +105,17 @@ export interface TimeFieldSpecInit {
 export function timeFieldSpec(init: TimeFieldSpecInit = {}): TimeFieldSpec {
   const out: {
     kind: 'TimeFieldSpec';
+    defaultValue?: TimeValue;
     timePrecision?: TimePrecision;
     timezoneRequirement?: TimezoneRequirement;
     renderingHint?: TimeRenderingHint;
   } = { kind: 'TimeFieldSpec' };
+  if (init.defaultValue !== undefined) {
+    out.defaultValue =
+      typeof init.defaultValue === 'string'
+        ? timeValue(init.defaultValue)
+        : init.defaultValue;
+  }
   if (init.timePrecision !== undefined) out.timePrecision = init.timePrecision;
   if (init.timezoneRequirement !== undefined)
     out.timezoneRequirement = init.timezoneRequirement;

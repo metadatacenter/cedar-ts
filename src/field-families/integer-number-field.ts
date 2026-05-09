@@ -97,6 +97,7 @@ export function integerNumberValueToNumber(v: IntegerNumberValue): number {
 
 export interface IntegerNumberFieldSpec {
   readonly kind: 'IntegerNumberFieldSpec';
+  readonly defaultValue?: IntegerNumberValue;
   readonly unit?: Unit;
   readonly minValue?: IntegerNumberValue;
   readonly maxValue?: IntegerNumberValue;
@@ -104,6 +105,7 @@ export interface IntegerNumberFieldSpec {
 }
 
 export interface IntegerNumberFieldSpecInit {
+  readonly defaultValue?: IntegerNumberValueInput;
   readonly unit?: Unit;
   readonly minValue?: IntegerNumberValue;
   readonly maxValue?: IntegerNumberValue;
@@ -115,11 +117,18 @@ export function integerNumberFieldSpec(
 ): IntegerNumberFieldSpec {
   const out: {
     kind: 'IntegerNumberFieldSpec';
+    defaultValue?: IntegerNumberValue;
     unit?: Unit;
     minValue?: IntegerNumberValue;
     maxValue?: IntegerNumberValue;
     renderingHint?: NumericRenderingHint;
   } = { kind: 'IntegerNumberFieldSpec' };
+  if (init?.defaultValue !== undefined) {
+    out.defaultValue =
+      typeof init.defaultValue === 'string'
+        ? integerNumberValue(init.defaultValue)
+        : init.defaultValue;
+  }
   if (init?.unit !== undefined) out.unit = init.unit;
   if (init?.minValue !== undefined) out.minValue = init.minValue;
   if (init?.maxValue !== undefined) out.maxValue = init.maxValue;

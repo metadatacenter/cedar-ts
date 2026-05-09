@@ -70,17 +70,27 @@ export function isBooleanValue(x: unknown): x is BooleanValue {
 
 export interface BooleanFieldSpec {
   readonly kind: 'BooleanFieldSpec';
+  readonly defaultValue?: BooleanValue;
   readonly renderingHint?: BooleanRenderingHint;
 }
 
 export interface BooleanFieldSpecInit {
+  readonly defaultValue?: BooleanValueInput;
   readonly renderingHint?: BooleanRenderingHint;
 }
 
 export function booleanFieldSpec(init?: BooleanFieldSpecInit): BooleanFieldSpec {
-  const out: { kind: 'BooleanFieldSpec'; renderingHint?: BooleanRenderingHint } = {
-    kind: 'BooleanFieldSpec',
-  };
+  const out: {
+    kind: 'BooleanFieldSpec';
+    defaultValue?: BooleanValue;
+    renderingHint?: BooleanRenderingHint;
+  } = { kind: 'BooleanFieldSpec' };
+  if (init?.defaultValue !== undefined) {
+    out.defaultValue =
+      typeof init.defaultValue === 'boolean'
+        ? booleanValue(init.defaultValue)
+        : init.defaultValue;
+  }
   if (init?.renderingHint !== undefined) out.renderingHint = init.renderingHint;
   return out;
 }

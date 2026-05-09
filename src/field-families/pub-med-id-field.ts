@@ -109,9 +109,26 @@ export const isPubMedIdValue = (x: unknown): x is PubMedIdValue =>
 // 3. FieldSpec
 // =====================================================================
 
-export interface PubMedIdFieldSpec { readonly kind: 'PubMedIdFieldSpec'; }
+export interface PubMedIdFieldSpec {
+  readonly kind: 'PubMedIdFieldSpec';
+  readonly defaultValue?: PubMedIdValue;
+}
 
-export const pubMedIdFieldSpec = (): PubMedIdFieldSpec => ({ kind: 'PubMedIdFieldSpec' });
+export interface PubMedIdFieldSpecInit {
+  readonly defaultValue?: PubMedIdValue | AuthorityValueInput<PubMedIri>;
+}
+
+export function pubMedIdFieldSpec(init?: PubMedIdFieldSpecInit): PubMedIdFieldSpec {
+  const out: { kind: 'PubMedIdFieldSpec'; defaultValue?: PubMedIdValue } = {
+    kind: 'PubMedIdFieldSpec',
+  };
+  if (init?.defaultValue !== undefined) {
+    out.defaultValue = isPubMedIdValue(init.defaultValue)
+      ? init.defaultValue
+      : pubMedIdValue(init.defaultValue);
+  }
+  return out;
+}
 
 export const isPubMedIdFieldSpec = (x: unknown): x is PubMedIdFieldSpec =>
   isTaggedKind(x, 'PubMedIdFieldSpec');

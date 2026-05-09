@@ -108,10 +108,28 @@ export const isNihGrantIdValue = (x: unknown): x is NihGrantIdValue =>
 // 3. FieldSpec
 // =====================================================================
 
-export interface NihGrantIdFieldSpec { readonly kind: 'NihGrantIdFieldSpec'; }
+export interface NihGrantIdFieldSpec {
+  readonly kind: 'NihGrantIdFieldSpec';
+  readonly defaultValue?: NihGrantIdValue;
+}
 
-export const nihGrantIdFieldSpec = (): NihGrantIdFieldSpec =>
-  ({ kind: 'NihGrantIdFieldSpec' });
+export interface NihGrantIdFieldSpecInit {
+  readonly defaultValue?: NihGrantIdValue | AuthorityValueInput<NihGrantIri>;
+}
+
+export function nihGrantIdFieldSpec(
+  init?: NihGrantIdFieldSpecInit,
+): NihGrantIdFieldSpec {
+  const out: { kind: 'NihGrantIdFieldSpec'; defaultValue?: NihGrantIdValue } = {
+    kind: 'NihGrantIdFieldSpec',
+  };
+  if (init?.defaultValue !== undefined) {
+    out.defaultValue = isNihGrantIdValue(init.defaultValue)
+      ? init.defaultValue
+      : nihGrantIdValue(init.defaultValue);
+  }
+  return out;
+}
 
 export const isNihGrantIdFieldSpec = (x: unknown): x is NihGrantIdFieldSpec =>
   isTaggedKind(x, 'NihGrantIdFieldSpec');
