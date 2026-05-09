@@ -496,36 +496,45 @@ describe('FieldSpec round-trip', () => {
 // ---- EmbeddedField defaultValue wire-form round-trips ----------------
 
 describe('EmbeddedXxxField.defaultValue wire-form', () => {
-  it('Text — emits { value [, lang] } (no kind, no wrapper)', () => {
+  it('Text — emits { kind, value [, lang] }', () => {
     const e = embeddedTextField({
       key: 't',
       artifactRef: textFieldId('https://example.org/x'),
       defaultValue: 'Stanford University',
     });
     const wire = serializeEmbeddedField(e) as { defaultValue: unknown };
-    expect(wire.defaultValue).toEqual({ value: 'Stanford University' });
+    expect(wire.defaultValue).toEqual({
+      kind: 'TextValue',
+      value: 'Stanford University',
+    });
     expect(parseEmbeddedField(wire)).toEqual(e);
   });
 
-  it('IntegerNumber — emits { value } (datatype elided)', () => {
+  it('IntegerNumber — emits { kind, value }', () => {
     const e = embeddedIntegerNumberField({
       key: 'n',
       artifactRef: integerNumberFieldId('https://example.org/x'),
       defaultValue: '42',
     });
-    const wire = serializeEmbeddedField(e) as { defaultValue: { value: string } };
+    const wire = serializeEmbeddedField(e) as {
+      defaultValue: { kind: string; value: string };
+    };
+    expect(wire.defaultValue.kind).toBe('IntegerNumberValue');
     expect(wire.defaultValue.value).toBe('42');
     expect((wire.defaultValue as { datatype?: string }).datatype).toBeUndefined();
     expect(parseEmbeddedField(wire)).toEqual(e);
   });
 
-  it('RealNumber — emits { value, datatype }', () => {
+  it('RealNumber — emits { kind, value, datatype }', () => {
     const e = embeddedRealNumberField({
       key: 'r',
       artifactRef: realNumberFieldId('https://example.org/x'),
       defaultValue: realNumberValue('3.14', 'decimal'),
     });
-    const wire = serializeEmbeddedField(e) as { defaultValue: { value: string; datatype: string } };
+    const wire = serializeEmbeddedField(e) as {
+      defaultValue: { kind: string; value: string; datatype: string };
+    };
+    expect(wire.defaultValue.kind).toBe('RealNumberValue');
     expect(wire.defaultValue.value).toBe('3.14');
     expect(wire.defaultValue.datatype).toBe('decimal');
     expect(parseEmbeddedField(wire)).toEqual(e);
@@ -542,73 +551,79 @@ describe('EmbeddedXxxField.defaultValue wire-form', () => {
     expect(parseEmbeddedField(wire)).toEqual(e);
   });
 
-  it('ControlledTerm — emits ControlledTermValue with kind dropped', () => {
+  it('ControlledTerm — emits ControlledTermValue with kind retained', () => {
     const e = embeddedControlledTermField({
       key: 'ct',
       artifactRef: controlledTermFieldId('https://example.org/x'),
       defaultValue: controlledTermValue({ term: 'http://example.org/term/1' }),
     });
     const wire = serializeEmbeddedField(e) as { defaultValue: Record<string, unknown> };
-    expect(wire.defaultValue['kind']).toBeUndefined();
+    expect(wire.defaultValue['kind']).toBe('ControlledTermValue');
     expect(wire.defaultValue['term']).toBe('http://example.org/term/1');
     expect(parseEmbeddedField(wire)).toEqual(e);
   });
 
-  it('SingleValuedEnum — emits EnumValue with kind dropped', () => {
+  it('SingleValuedEnum — emits EnumValue with kind retained', () => {
     const e = embeddedSingleValuedEnumField({
       key: 'sc',
       artifactRef: singleValuedEnumFieldId('https://example.org/x'),
       defaultValue: enumValue('yes'),
     });
     const wire = serializeEmbeddedField(e) as { defaultValue: Record<string, unknown> };
-    expect(wire.defaultValue['kind']).toBeUndefined();
+    expect(wire.defaultValue['kind']).toBe('EnumValue');
     expect(wire.defaultValue['value']).toBe('yes');
     expect(parseEmbeddedField(wire)).toEqual(e);
   });
 
-  it('MultiValuedEnum — emits an array of untagged EnumValue', () => {
+  it('MultiValuedEnum — emits an array of EnumValue with kind retained', () => {
     const e = embeddedMultiValuedEnumField({
       key: 'mc',
       artifactRef: multiValuedEnumFieldId('https://example.org/x'),
       defaultValue: [enumValue('a'), enumValue('b')],
     });
     const wire = serializeEmbeddedField(e) as { defaultValue: unknown };
-    expect(wire.defaultValue).toEqual([{ value: 'a' }, { value: 'b' }]);
+    expect(wire.defaultValue).toEqual([
+      { kind: 'EnumValue', value: 'a' },
+      { kind: 'EnumValue', value: 'b' },
+    ]);
     expect(parseEmbeddedField(wire)).toEqual(e);
   });
 
-  it('Link — emits LinkValue with kind dropped', () => {
+  it('Link — emits LinkValue with kind retained', () => {
     const e = embeddedLinkField({
       key: 'l',
       artifactRef: linkFieldId('https://example.org/x'),
       defaultValue: linkValue({ iri: 'https://example.org', label: 'Example' }),
     });
     const wire = serializeEmbeddedField(e) as { defaultValue: Record<string, unknown> };
-    expect(wire.defaultValue['kind']).toBeUndefined();
+    expect(wire.defaultValue['kind']).toBe('LinkValue');
     expect(wire.defaultValue['iri']).toBe('https://example.org');
     expect(wire.defaultValue['label']).toEqual([{ value: 'Example', lang: 'und' }]);
     expect(parseEmbeddedField(wire)).toEqual(e);
   });
 
-  it('Email — emits { value } untagged', () => {
+  it('Email — emits { kind, value }', () => {
     const e = embeddedEmailField({
       key: 'em',
       artifactRef: emailFieldId('https://example.org/x'),
       defaultValue: 'jane@example.org',
     });
     const wire = serializeEmbeddedField(e) as { defaultValue: unknown };
-    expect(wire.defaultValue).toEqual({ value: 'jane@example.org' });
+    expect(wire.defaultValue).toEqual({
+      kind: 'EmailValue',
+      value: 'jane@example.org',
+    });
     expect(parseEmbeddedField(wire)).toEqual(e);
   });
 
-  it('Orcid — emits OrcidValue with kind dropped', () => {
+  it('Orcid — emits OrcidValue with kind retained', () => {
     const e = embeddedOrcidField({
       key: 'or',
       artifactRef: orcidFieldId('https://example.org/x'),
       defaultValue: 'https://orcid.org/0000-0002-1825-0097',
     });
     const wire = serializeEmbeddedField(e) as { defaultValue: Record<string, unknown> };
-    expect(wire.defaultValue['kind']).toBeUndefined();
+    expect(wire.defaultValue['kind']).toBe('OrcidValue');
     expect(wire.defaultValue['iri']).toBe('https://orcid.org/0000-0002-1825-0097');
     expect(parseEmbeddedField(wire)).toEqual(e);
   });

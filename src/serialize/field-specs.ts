@@ -131,8 +131,8 @@ import {
   parseIntegerNumberValue,
   serializeRealNumberValue,
   parseRealNumberValue,
-  serializeTextValueUntagged,
-  parseTextValueUntagged,
+  serializeTextValue,
+  parseTextValue,
 } from './values.js';
 import { REAL_NUMBER_DATATYPE_KINDS, type RealNumberDatatypeKind } from '../leaves/index.js';
 import type { TextValue } from '../field-families/index.js';
@@ -637,7 +637,7 @@ export function parsePermissibleValue(
 export function serializeTextFieldSpec(x: TextFieldSpec): unknown {
   const out: Record<string, unknown> = { kind: 'TextFieldSpec' };
   if (x.defaultValue !== undefined)
-    out['defaultValue'] = serializeTextValueUntagged(x.defaultValue);
+    out['defaultValue'] = serializeTextValue(x.defaultValue);
   if (x.minLength !== undefined) out['minLength'] = x.minLength;
   if (x.maxLength !== undefined) out['maxLength'] = x.maxLength;
   if (x.validationRegex !== undefined)
@@ -674,7 +674,7 @@ export function parseTextFieldSpec(
     renderingHint?: TextRenderingHint;
   } = {};
   if ('defaultValue' in o)
-    init.defaultValue = parseTextValueUntagged(
+    init.defaultValue = parseTextValue(
       o['defaultValue'],
       `${where}.defaultValue`,
     );
