@@ -56,6 +56,7 @@ import {
   type DateValueType,
   type TimePrecision,
   type TimezoneRequirement,
+  type LangTagRequirement,
   type DateTimeValueType,
   type DateRenderingHint,
   type TimeRenderingHint,
@@ -100,6 +101,7 @@ import {
   DATE_VALUE_TYPES,
   TIME_PRECISIONS,
   TIMEZONE_REQUIREMENTS,
+  LANG_TAG_REQUIREMENTS,
   DATE_TIME_VALUE_TYPES,
   TEXT_RENDERING_HINTS,
   SINGLE_VALUED_ENUM_RENDERING_HINTS,
@@ -688,6 +690,8 @@ export function serializeTextFieldSpec(x: TextFieldSpec): unknown {
   if (x.maxLength !== undefined) out['maxLength'] = x.maxLength;
   if (x.validationRegex !== undefined)
     out['validationRegex'] = x.validationRegex;
+  if (x.langTagRequirement !== undefined)
+    out['langTagRequirement'] = x.langTagRequirement;
   if (x.renderingHint !== undefined)
     out['renderingHint'] = serializeTextRenderingHint(x.renderingHint);
   return out;
@@ -704,9 +708,17 @@ export function parseTextFieldSpec(
     'minLength',
     'maxLength',
     'validationRegex',
+    'langTagRequirement',
     'renderingHint',
   ]);
-  for (const k of ['defaultValue', 'minLength', 'maxLength', 'validationRegex', 'renderingHint']) {
+  for (const k of [
+    'defaultValue',
+    'minLength',
+    'maxLength',
+    'validationRegex',
+    'langTagRequirement',
+    'renderingHint',
+  ]) {
     rejectNullProperty(o, k);
   }
   if (o['kind'] !== 'TextFieldSpec') {
@@ -717,6 +729,7 @@ export function parseTextFieldSpec(
     minLength?: number;
     maxLength?: number;
     validationRegex?: string;
+    langTagRequirement?: LangTagRequirement;
     renderingHint?: TextRenderingHint;
   } = {};
   if ('defaultValue' in o)
@@ -732,6 +745,12 @@ export function parseTextFieldSpec(
     init.validationRegex = expectString(
       o['validationRegex'],
       `${where}.validationRegex`,
+    );
+  if ('langTagRequirement' in o)
+    init.langTagRequirement = expectStringEnum<LangTagRequirement>(
+      o['langTagRequirement'],
+      LANG_TAG_REQUIREMENTS,
+      `${where}.langTagRequirement`,
     );
   if ('renderingHint' in o)
     init.renderingHint = parseTextRenderingHint(

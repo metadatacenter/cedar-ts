@@ -77,6 +77,20 @@ describe('TextFieldSpec', () => {
     expect(fs.renderingHint).toBe('multiLine');
     expect(isTextFieldSpec(fs)).toBe(true);
   });
+
+  it('carries an optional langTagRequirement', () => {
+    const required = textFieldSpec({ langTagRequirement: 'langTagRequired' });
+    expect(required.langTagRequirement).toBe('langTagRequired');
+
+    const forbidden = textFieldSpec({ langTagRequirement: 'langTagForbidden' });
+    expect(forbidden.langTagRequirement).toBe('langTagForbidden');
+
+    const optional = textFieldSpec({ langTagRequirement: 'langTagOptional' });
+    expect(optional.langTagRequirement).toBe('langTagOptional');
+
+    const absent = textFieldSpec();
+    expect('langTagRequirement' in absent).toBe(false);
+  });
 });
 
 describe('IntegerNumberFieldSpec', () => {

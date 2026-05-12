@@ -101,12 +101,23 @@ export function isTextValue(x: unknown): x is TextValue {
 // 3. FieldSpec
 // =====================================================================
 
+export type LangTagRequirement =
+  | 'langTagRequired'
+  | 'langTagOptional'
+  | 'langTagForbidden';
+export const LANG_TAG_REQUIREMENTS: readonly LangTagRequirement[] = Object.freeze([
+  'langTagRequired',
+  'langTagOptional',
+  'langTagForbidden',
+]);
+
 export interface TextFieldSpec {
   readonly kind: 'TextFieldSpec';
   readonly defaultValue?: TextValue;
   readonly minLength?: number;
   readonly maxLength?: number;
   readonly validationRegex?: string;
+  readonly langTagRequirement?: LangTagRequirement;
   readonly renderingHint?: TextRenderingHint;
 }
 
@@ -115,6 +126,7 @@ export interface TextFieldSpecInit {
   readonly minLength?: number;
   readonly maxLength?: number;
   readonly validationRegex?: string;
+  readonly langTagRequirement?: LangTagRequirement;
   readonly renderingHint?: TextRenderingHint;
 }
 
@@ -125,6 +137,7 @@ export function textFieldSpec(init: TextFieldSpecInit = {}): TextFieldSpec {
     minLength?: number;
     maxLength?: number;
     validationRegex?: string;
+    langTagRequirement?: LangTagRequirement;
     renderingHint?: TextRenderingHint;
   } = { kind: 'TextFieldSpec' };
   if (init.defaultValue !== undefined) {
@@ -136,6 +149,8 @@ export function textFieldSpec(init: TextFieldSpecInit = {}): TextFieldSpec {
   if (init.minLength !== undefined) out.minLength = assertNonNegativeInteger(init.minLength);
   if (init.maxLength !== undefined) out.maxLength = assertNonNegativeInteger(init.maxLength);
   if (init.validationRegex !== undefined) out.validationRegex = init.validationRegex;
+  if (init.langTagRequirement !== undefined)
+    out.langTagRequirement = init.langTagRequirement;
   if (init.renderingHint !== undefined) out.renderingHint = init.renderingHint;
   return out;
 }
