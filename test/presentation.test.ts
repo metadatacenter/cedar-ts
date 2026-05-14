@@ -24,7 +24,7 @@ const tp = lifecycleMetadata({
   modifiedOn: '2024-01-01T00:00:00Z',
   modifiedBy: 'https://example.org/u',
 });
-const meta = artifactMetadata({ name: 'X', lifecycle: tp });
+const meta = artifactMetadata({ preferredLabel: 'X', lifecycle: tp });
 const id = presentationComponentId('https://example.org/pc/1');
 const MV = '2.0.0';
 

@@ -34,7 +34,7 @@ const tp = lifecycleMetadata({
   modifiedOn: '2024-01-01T00:00:00Z',
   modifiedBy: 'https://example.org/u',
 });
-const am = artifactMetadata({ name: 'Demo Instance', lifecycle: tp });
+const am = artifactMetadata({ preferredLabel: 'Demo Instance', lifecycle: tp });
 
 const tref = templateId('https://example.org/templates/demo');
 const titleKey = 'title';

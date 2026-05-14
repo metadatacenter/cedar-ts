@@ -136,18 +136,18 @@ const lifecycleTimestamps = {
 };
 
 // Returns plain ArtifactMetadata (no version / status / model-version).
-function artifactMeta(name: string, description: string): ArtifactMetadata {
+function artifactMeta(preferredLabel: string, description: string): ArtifactMetadata {
   return artifactMetadata({
-    name,
+    preferredLabel,
     description,
     lifecycle: lifecycleMetadata(lifecycleTimestamps),
   });
 }
 
 // Returns SchemaArtifactMetadata. Required by every Field and Template.
-function meta(name: string, description: string): SchemaArtifactMetadata {
+function meta(preferredLabel: string, description: string): SchemaArtifactMetadata {
   return schemaArtifactMetadata({
-    artifact: artifactMeta(name, description),
+    artifact: artifactMeta(preferredLabel, description),
     versioning: schemaArtifactVersioning({
       version: '1.0.0',
       status: 'draft',
@@ -223,7 +223,7 @@ const academicRank = singleValuedEnumField({
     permissibleValues: [
       permissibleValue({
         value: 'full-professor',
-        label: 'Full Professor',
+        label: {value: 'Full Professor', lang: 'en'},
         meanings: [meaning({ iri: ROLEO_FULL_PROFESSOR, label: 'Full Professor' })],
       }),
       permissibleValue({
@@ -481,7 +481,7 @@ export const principalInvestigatorTemplate: Template = template({
       valueRequirement: 'recommended',
       property: 'https://schema.org/identifier',
       // labelOverride supplies template-local labels that override the
-      // reusable Field's metadata.name in this embedding context only.
+      // reusable Field's metadata.preferredLabel in this embedding context only.
       // Each label position accepts any MultilingualString input shape;
       // here we use the map form for the primary label.
       labelOverride: labelOverride({

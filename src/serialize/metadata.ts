@@ -209,10 +209,9 @@ export function parseAnnotation(x: unknown, where = 'Annotation'): Annotation {
 // are elided.
 
 const ARTIFACT_METADATA_KEYS = [
-  'name',
+  'preferredLabel',
   'description',
   'identifier',
-  'preferredLabel',
   'altLabels',
   'lifecycle',
   'annotations',
@@ -222,12 +221,10 @@ function writeArtifactMetadataBody(
   x: ArtifactMetadata,
   out: Record<string, unknown>,
 ): void {
-  out['name'] = serializeMultilingualString(x.name);
+  out['preferredLabel'] = serializeMultilingualString(x.preferredLabel);
   if (x.description !== undefined)
     out['description'] = serializeMultilingualString(x.description);
   if (x.identifier !== undefined) out['identifier'] = x.identifier;
-  if (x.preferredLabel !== undefined)
-    out['preferredLabel'] = serializeMultilingualString(x.preferredLabel);
   if (x.altLabels.length > 0)
     out['altLabels'] = x.altLabels.map(serializeMultilingualString);
   out['lifecycle'] = serializeLifecycleMetadata(x.lifecycle);
@@ -241,9 +238,8 @@ function readArtifactMetadataBody(
 ): ArtifactMetadata {
   rejectNullProperty(o, 'description');
   rejectNullProperty(o, 'identifier');
-  rejectNullProperty(o, 'preferredLabel');
-  if (!('name' in o)) {
-    throw new CedarConstructionError(`${where}: missing required "name"`);
+  if (!('preferredLabel' in o)) {
+    throw new CedarConstructionError(`${where}: missing required "preferredLabel"`);
   }
   if (!('lifecycle' in o)) {
     throw new CedarConstructionError(`${where}: missing required "lifecycle"`);
@@ -255,15 +251,17 @@ function readArtifactMetadataBody(
       ? expectArray(o['annotations'], `${where}.annotations`)
       : [];
   const init: {
-    name: ReturnType<typeof parseMultilingualString>;
+    preferredLabel: ReturnType<typeof parseMultilingualString>;
     description?: ReturnType<typeof parseMultilingualString>;
     identifier?: string;
-    preferredLabel?: ReturnType<typeof parseMultilingualString>;
     altLabels: readonly ReturnType<typeof parseMultilingualString>[];
     lifecycle: LifecycleMetadata;
     annotations: readonly Annotation[];
   } = {
-    name: parseMultilingualString(o['name'], `${where}.name`),
+    preferredLabel: parseMultilingualString(
+      o['preferredLabel'],
+      `${where}.preferredLabel`,
+    ),
     altLabels: altRaw.map((e, i) =>
       parseMultilingualString(e, `${where}.altLabels[${i}]`),
     ),
@@ -276,11 +274,6 @@ function readArtifactMetadataBody(
     init.description = parseMultilingualString(o['description'], `${where}.description`);
   if ('identifier' in o)
     init.identifier = expectString(o['identifier'], `${where}.identifier`);
-  if ('preferredLabel' in o)
-    init.preferredLabel = parseMultilingualString(
-      o['preferredLabel'],
-      `${where}.preferredLabel`,
-    );
   return artifactMetadata(init);
 }
 

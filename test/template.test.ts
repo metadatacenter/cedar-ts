@@ -26,7 +26,7 @@ const tp = lifecycleMetadata({
   modifiedBy: 'https://example.org/u',
 });
 const meta = schemaArtifactMetadata({
-  artifact: artifactMetadata({ name: 'Demo Template', lifecycle: tp }),
+  artifact: artifactMetadata({ preferredLabel: 'Demo Template', lifecycle: tp }),
   versioning: schemaArtifactVersioning({
     version: '1.0.0',
     status: 'draft',

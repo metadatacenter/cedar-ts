@@ -93,17 +93,17 @@ const lifecycleTimestamps = {
   modifiedBy: author,
 };
 
-function artifactMeta(name: string, description: string): ArtifactMetadata {
+function artifactMeta(preferredLabel: string, description: string): ArtifactMetadata {
   return artifactMetadata({
-    name,
+    preferredLabel,
     description,
     lifecycle: lifecycleMetadata(lifecycleTimestamps),
   });
 }
 
-function meta(name: string, description: string): SchemaArtifactMetadata {
+function meta(preferredLabel: string, description: string): SchemaArtifactMetadata {
   return schemaArtifactMetadata({
-    artifact: artifactMeta(name, description),
+    artifact: artifactMeta(preferredLabel, description),
     versioning: schemaArtifactVersioning({
       version: '1.0.0',
       status: 'draft',
