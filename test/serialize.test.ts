@@ -182,7 +182,7 @@ const tp = lifecycleMetadata({
   modifiedOn: '2024-01-02T00:00:00Z',
   modifiedBy: 'https://example.org/u',
 });
-const am = artifactMetadata({ name: 'Demo', lifecycle: tp });
+const am = artifactMetadata({ preferredLabel: 'Demo', lifecycle: tp });
 const sam = schemaArtifactMetadata({
   artifact: am,
   versioning: schemaArtifactVersioning({

@@ -27,7 +27,7 @@ const tp = lifecycleMetadata({
 });
 
 const meta = schemaArtifactMetadata({
-  artifact: artifactMetadata({ name: 'Boolean field test', lifecycle: tp }),
+  artifact: artifactMetadata({ preferredLabel: 'Boolean field test', lifecycle: tp }),
   versioning: schemaArtifactVersioning({ version: '1.0.0', status: 'draft' }),
 });
 

@@ -53,7 +53,7 @@ const tp = lifecycleMetadata({
   modifiedBy: 'https://example.org/u',
 });
 const meta = schemaArtifactMetadata({
-  artifact: artifactMetadata({ name: 'X', lifecycle: tp }),
+  artifact: artifactMetadata({ preferredLabel: 'X', lifecycle: tp }),
   versioning: schemaArtifactVersioning({
     version: '1.0.0',
     status: 'draft',
@@ -108,7 +108,7 @@ describe('Inline Field/Template/PresentationComponent reference inputs', () => {
     const pc = richTextComponent({
       id: presentationComponentId('https://example.org/pc/intro'),
       modelVersion: '2.0.0',
-      metadata: artifactMetadata({ name: 'Intro', lifecycle: tp }),
+      metadata: artifactMetadata({ preferredLabel: 'Intro', lifecycle: tp }),
       html: '<p>hi</p>',
     });
     const ep = embeddedPresentationComponent({ key: 'intro', artifactRef: pc });

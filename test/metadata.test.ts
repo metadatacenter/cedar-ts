@@ -119,28 +119,26 @@ describe('ArtifactMetadata and SchemaArtifactMetadata', () => {
     status: 'draft',
   });
 
-  it('requires only a name and defaults altLabels and annotations to empty', () => {
-    const m = artifactMetadata({ name: 'Title', lifecycle: tp });
-    expect(m.name).toEqual([{ value: 'Title', lang: 'und' }]);
+  it('requires only a preferredLabel and defaults altLabels and annotations to empty', () => {
+    const m = artifactMetadata({ preferredLabel: 'Title', lifecycle: tp });
+    expect(m.preferredLabel).toEqual([{ value: 'Title', lang: 'und' }]);
     expect(m.altLabels).toEqual([]);
     expect(m.annotations).toEqual([]);
     expect('description' in m).toBe(false);
     expect('identifier' in m).toBe(false);
-    expect('preferredLabel' in m).toBe(false);
   });
 
   it('passes through optional descriptive fields when provided', () => {
     const m = artifactMetadata({
-      name: 'Title',
+      preferredLabel: 'Study title',
       description: 'The study title',
       identifier: 'study-001',
-      preferredLabel: 'Study title',
       altLabels: ['Title', 'Name of study'],
       lifecycle: tp,
     });
+    expect(m.preferredLabel).toEqual([{ value: 'Study title', lang: 'und' }]);
     expect(m.description).toEqual([{ value: 'The study title', lang: 'und' }]);
     expect(m.identifier).toBe('study-001');
-    expect(m.preferredLabel).toEqual([{ value: 'Study title', lang: 'und' }]);
     expect(m.altLabels).toEqual([
       [{ value: 'Title', lang: 'und' }],
       [{ value: 'Name of study', lang: 'und' }],
@@ -149,7 +147,7 @@ describe('ArtifactMetadata and SchemaArtifactMetadata', () => {
 
   it('carries annotations when provided', () => {
     const m = artifactMetadata({
-      name: 'Test',
+      preferredLabel: 'Test',
       lifecycle: tp,
       annotations: [
         annotation(
@@ -162,11 +160,11 @@ describe('ArtifactMetadata and SchemaArtifactMetadata', () => {
   });
 
   it('SchemaArtifactMetadata adds schema versioning', () => {
-    const m = artifactMetadata({ name: 'Test', lifecycle: tp });
+    const m = artifactMetadata({ preferredLabel: 'Test', lifecycle: tp });
     const sm = schemaArtifactMetadata({ artifact: m, versioning: sv });
     // SchemaArtifactMetadata is flat: it spreads the ArtifactMetadata
     // properties directly alongside `versioning`.
-    expect(sm.name).toBe(m.name);
+    expect(sm.preferredLabel).toBe(m.preferredLabel);
     expect(sm.lifecycle).toBe(m.lifecycle);
     expect(sm.versioning).toBe(sv);
   });
