@@ -143,6 +143,7 @@ export interface DoiField {
   readonly modelVersion: string;
   readonly metadata: SchemaArtifactMetadata;
   readonly fieldSpec: DoiFieldSpec;
+  readonly helpText?: MultilingualString;
 }
 
 export interface DoiFieldInit {
@@ -150,16 +151,20 @@ export interface DoiFieldInit {
   readonly modelVersion: string;
   readonly metadata: SchemaArtifactMetadata;
   readonly fieldSpec: DoiFieldSpec;
+  readonly helpText?: MultilingualString;
 }
 
-export const doiField = (init: DoiFieldInit): DoiField =>
-  ({
+export const doiField = (init: DoiFieldInit): DoiField => {
+  const out: DoiField = {
     kind: 'DoiField',
     id: doiFieldId(init.id),
     modelVersion: parseSemanticVersion(init.modelVersion),
     metadata: init.metadata,
     fieldSpec: init.fieldSpec,
-  });
+    ...(init.helpText !== undefined && { helpText: init.helpText }),
+  };
+  return out;
+};
 
 // =====================================================================
 // 5. EmbeddedField
@@ -173,6 +178,7 @@ export interface EmbeddedDoiField {
   readonly cardinality?: Cardinality;
   readonly visibility?: Visibility;
   readonly labelOverride?: LabelOverride;
+  readonly helpTextOverride?: MultilingualString;
   readonly property?: Property;
   readonly defaultValue?: DoiValue;
 }

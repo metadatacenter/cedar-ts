@@ -5,6 +5,10 @@
 
 import { CedarConstructionError } from '../leaves/index.js';
 import {
+  serializeMultilingualString,
+  parseMultilingualString,
+} from './multilingual.js';
+import {
   type Field,
   type TextField,
   type IntegerNumberField,
@@ -147,9 +151,9 @@ function parseFieldShell<T>(
   x: unknown,
   expectedKind: string,
   where: string,
-): { id: unknown; modelVersion: string; metadata: unknown; fieldSpec: unknown } {
+): { id: unknown; modelVersion: string; metadata: unknown; fieldSpec: unknown; helpText: unknown } {
   const o = expectObject(x, where);
-  expectKnownProperties(o, ['kind', 'id', 'modelVersion', 'metadata', 'fieldSpec']);
+  expectKnownProperties(o, ['kind', 'id', 'modelVersion', 'metadata', 'fieldSpec', 'helpText']);
   if (o['kind'] !== expectedKind) {
     throw new CedarConstructionError(
       `${where}: expected kind ${JSON.stringify(expectedKind)}; got ${JSON.stringify(o['kind'])}`,
@@ -168,18 +172,24 @@ function parseFieldShell<T>(
     modelVersion: expectString(o['modelVersion'], `${where}.modelVersion`),
     metadata: o['metadata'],
     fieldSpec: o['fieldSpec'],
+    helpText: 'helpText' in o ? o['helpText'] : undefined,
   };
 }
 
 // ---- Per-family serializers / parsers --------------------------------
 
-export const serializeTextField = (x: TextField): unknown => ({
-  kind: 'TextField',
-  id: serializeTextFieldId(x.id),
-  modelVersion: x.modelVersion,
-  metadata: serializeSchemaArtifactMetadata(x.metadata),
-  fieldSpec: serializeTextFieldSpec(x.fieldSpec),
-});
+export const serializeTextField = (x: TextField): unknown => {
+  const out: Record<string, unknown> = {
+    kind: 'TextField',
+    id: serializeTextFieldId(x.id),
+    modelVersion: x.modelVersion,
+    metadata: serializeSchemaArtifactMetadata(x.metadata),
+    fieldSpec: serializeTextFieldSpec(x.fieldSpec),
+  };
+  if (x.helpText !== undefined)
+    out['helpText'] = serializeMultilingualString(x.helpText);
+  return out;
+};
 
 export function parseTextField(x: unknown, where = 'TextField'): TextField {
   const s = parseFieldShell<TextField>(x, 'TextField', where);
@@ -188,18 +198,24 @@ export function parseTextField(x: unknown, where = 'TextField'): TextField {
     modelVersion: s.modelVersion,
     metadata: parseSchemaArtifactMetadata(s.metadata, `${where}.metadata`),
     fieldSpec: parseTextFieldSpec(s.fieldSpec, `${where}.fieldSpec`),
+    ...(s.helpText !== undefined && {
+      helpText: parseMultilingualString(s.helpText, `${where}.helpText`),
+    }),
   });
 }
 
-export const serializeIntegerNumberField = (
-  x: IntegerNumberField,
-): unknown => ({
-  kind: 'IntegerNumberField',
-  id: serializeIntegerNumberFieldId(x.id),
-  modelVersion: x.modelVersion,
-  metadata: serializeSchemaArtifactMetadata(x.metadata),
-  fieldSpec: serializeIntegerNumberFieldSpec(x.fieldSpec),
-});
+export const serializeIntegerNumberField = (x: IntegerNumberField): unknown => {
+  const out: Record<string, unknown> = {
+    kind: 'IntegerNumberField',
+    id: serializeIntegerNumberFieldId(x.id),
+    modelVersion: x.modelVersion,
+    metadata: serializeSchemaArtifactMetadata(x.metadata),
+    fieldSpec: serializeIntegerNumberFieldSpec(x.fieldSpec),
+  };
+  if (x.helpText !== undefined)
+    out['helpText'] = serializeMultilingualString(x.helpText);
+  return out;
+};
 
 export function parseIntegerNumberField(
   x: unknown,
@@ -215,16 +231,24 @@ export function parseIntegerNumberField(
     modelVersion: s.modelVersion,
     metadata: parseSchemaArtifactMetadata(s.metadata, `${where}.metadata`),
     fieldSpec: parseIntegerNumberFieldSpec(s.fieldSpec, `${where}.fieldSpec`),
+    ...(s.helpText !== undefined && {
+      helpText: parseMultilingualString(s.helpText, `${where}.helpText`),
+    }),
   });
 }
 
-export const serializeRealNumberField = (x: RealNumberField): unknown => ({
-  kind: 'RealNumberField',
-  id: serializeRealNumberFieldId(x.id),
-  modelVersion: x.modelVersion,
-  metadata: serializeSchemaArtifactMetadata(x.metadata),
-  fieldSpec: serializeRealNumberFieldSpec(x.fieldSpec),
-});
+export const serializeRealNumberField = (x: RealNumberField): unknown => {
+  const out: Record<string, unknown> = {
+    kind: 'RealNumberField',
+    id: serializeRealNumberFieldId(x.id),
+    modelVersion: x.modelVersion,
+    metadata: serializeSchemaArtifactMetadata(x.metadata),
+    fieldSpec: serializeRealNumberFieldSpec(x.fieldSpec),
+  };
+  if (x.helpText !== undefined)
+    out['helpText'] = serializeMultilingualString(x.helpText);
+  return out;
+};
 
 export function parseRealNumberField(
   x: unknown,
@@ -236,16 +260,24 @@ export function parseRealNumberField(
     modelVersion: s.modelVersion,
     metadata: parseSchemaArtifactMetadata(s.metadata, `${where}.metadata`),
     fieldSpec: parseRealNumberFieldSpec(s.fieldSpec, `${where}.fieldSpec`),
+    ...(s.helpText !== undefined && {
+      helpText: parseMultilingualString(s.helpText, `${where}.helpText`),
+    }),
   });
 }
 
-export const serializeBooleanField = (x: BooleanField): unknown => ({
-  kind: 'BooleanField',
-  id: serializeBooleanFieldId(x.id),
-  modelVersion: x.modelVersion,
-  metadata: serializeSchemaArtifactMetadata(x.metadata),
-  fieldSpec: serializeBooleanFieldSpec(x.fieldSpec),
-});
+export const serializeBooleanField = (x: BooleanField): unknown => {
+  const out: Record<string, unknown> = {
+    kind: 'BooleanField',
+    id: serializeBooleanFieldId(x.id),
+    modelVersion: x.modelVersion,
+    metadata: serializeSchemaArtifactMetadata(x.metadata),
+    fieldSpec: serializeBooleanFieldSpec(x.fieldSpec),
+  };
+  if (x.helpText !== undefined)
+    out['helpText'] = serializeMultilingualString(x.helpText);
+  return out;
+};
 
 export function parseBooleanField(
   x: unknown,
@@ -257,16 +289,24 @@ export function parseBooleanField(
     modelVersion: s.modelVersion,
     metadata: parseSchemaArtifactMetadata(s.metadata, `${where}.metadata`),
     fieldSpec: parseBooleanFieldSpec(s.fieldSpec, `${where}.fieldSpec`),
+    ...(s.helpText !== undefined && {
+      helpText: parseMultilingualString(s.helpText, `${where}.helpText`),
+    }),
   });
 }
 
-export const serializeDateField = (x: DateField): unknown => ({
-  kind: 'DateField',
-  id: serializeDateFieldId(x.id),
-  modelVersion: x.modelVersion,
-  metadata: serializeSchemaArtifactMetadata(x.metadata),
-  fieldSpec: serializeDateFieldSpec(x.fieldSpec),
-});
+export const serializeDateField = (x: DateField): unknown => {
+  const out: Record<string, unknown> = {
+    kind: 'DateField',
+    id: serializeDateFieldId(x.id),
+    modelVersion: x.modelVersion,
+    metadata: serializeSchemaArtifactMetadata(x.metadata),
+    fieldSpec: serializeDateFieldSpec(x.fieldSpec),
+  };
+  if (x.helpText !== undefined)
+    out['helpText'] = serializeMultilingualString(x.helpText);
+  return out;
+};
 
 export function parseDateField(x: unknown, where = 'DateField'): DateField {
   const s = parseFieldShell<DateField>(x, 'DateField', where);
@@ -275,16 +315,24 @@ export function parseDateField(x: unknown, where = 'DateField'): DateField {
     modelVersion: s.modelVersion,
     metadata: parseSchemaArtifactMetadata(s.metadata, `${where}.metadata`),
     fieldSpec: parseDateFieldSpec(s.fieldSpec, `${where}.fieldSpec`),
+    ...(s.helpText !== undefined && {
+      helpText: parseMultilingualString(s.helpText, `${where}.helpText`),
+    }),
   });
 }
 
-export const serializeTimeField = (x: TimeField): unknown => ({
-  kind: 'TimeField',
-  id: serializeTimeFieldId(x.id),
-  modelVersion: x.modelVersion,
-  metadata: serializeSchemaArtifactMetadata(x.metadata),
-  fieldSpec: serializeTimeFieldSpec(x.fieldSpec),
-});
+export const serializeTimeField = (x: TimeField): unknown => {
+  const out: Record<string, unknown> = {
+    kind: 'TimeField',
+    id: serializeTimeFieldId(x.id),
+    modelVersion: x.modelVersion,
+    metadata: serializeSchemaArtifactMetadata(x.metadata),
+    fieldSpec: serializeTimeFieldSpec(x.fieldSpec),
+  };
+  if (x.helpText !== undefined)
+    out['helpText'] = serializeMultilingualString(x.helpText);
+  return out;
+};
 
 export function parseTimeField(x: unknown, where = 'TimeField'): TimeField {
   const s = parseFieldShell<TimeField>(x, 'TimeField', where);
@@ -293,16 +341,24 @@ export function parseTimeField(x: unknown, where = 'TimeField'): TimeField {
     modelVersion: s.modelVersion,
     metadata: parseSchemaArtifactMetadata(s.metadata, `${where}.metadata`),
     fieldSpec: parseTimeFieldSpec(s.fieldSpec, `${where}.fieldSpec`),
+    ...(s.helpText !== undefined && {
+      helpText: parseMultilingualString(s.helpText, `${where}.helpText`),
+    }),
   });
 }
 
-export const serializeDateTimeField = (x: DateTimeField): unknown => ({
-  kind: 'DateTimeField',
-  id: serializeDateTimeFieldId(x.id),
-  modelVersion: x.modelVersion,
-  metadata: serializeSchemaArtifactMetadata(x.metadata),
-  fieldSpec: serializeDateTimeFieldSpec(x.fieldSpec),
-});
+export const serializeDateTimeField = (x: DateTimeField): unknown => {
+  const out: Record<string, unknown> = {
+    kind: 'DateTimeField',
+    id: serializeDateTimeFieldId(x.id),
+    modelVersion: x.modelVersion,
+    metadata: serializeSchemaArtifactMetadata(x.metadata),
+    fieldSpec: serializeDateTimeFieldSpec(x.fieldSpec),
+  };
+  if (x.helpText !== undefined)
+    out['helpText'] = serializeMultilingualString(x.helpText);
+  return out;
+};
 
 export function parseDateTimeField(
   x: unknown,
@@ -314,16 +370,24 @@ export function parseDateTimeField(
     modelVersion: s.modelVersion,
     metadata: parseSchemaArtifactMetadata(s.metadata, `${where}.metadata`),
     fieldSpec: parseDateTimeFieldSpec(s.fieldSpec, `${where}.fieldSpec`),
+    ...(s.helpText !== undefined && {
+      helpText: parseMultilingualString(s.helpText, `${where}.helpText`),
+    }),
   });
 }
 
-export const serializeControlledTermField = (x: ControlledTermField): unknown => ({
-  kind: 'ControlledTermField',
-  id: serializeControlledTermFieldId(x.id),
-  modelVersion: x.modelVersion,
-  metadata: serializeSchemaArtifactMetadata(x.metadata),
-  fieldSpec: serializeControlledTermFieldSpec(x.fieldSpec),
-});
+export const serializeControlledTermField = (x: ControlledTermField): unknown => {
+  const out: Record<string, unknown> = {
+    kind: 'ControlledTermField',
+    id: serializeControlledTermFieldId(x.id),
+    modelVersion: x.modelVersion,
+    metadata: serializeSchemaArtifactMetadata(x.metadata),
+    fieldSpec: serializeControlledTermFieldSpec(x.fieldSpec),
+  };
+  if (x.helpText !== undefined)
+    out['helpText'] = serializeMultilingualString(x.helpText);
+  return out;
+};
 
 export function parseControlledTermField(
   x: unknown,
@@ -335,18 +399,24 @@ export function parseControlledTermField(
     modelVersion: s.modelVersion,
     metadata: parseSchemaArtifactMetadata(s.metadata, `${where}.metadata`),
     fieldSpec: parseControlledTermFieldSpec(s.fieldSpec, `${where}.fieldSpec`),
+    ...(s.helpText !== undefined && {
+      helpText: parseMultilingualString(s.helpText, `${where}.helpText`),
+    }),
   });
 }
 
-export const serializeSingleValuedEnumField = (
-  x: SingleValuedEnumField,
-): unknown => ({
-  kind: 'SingleValuedEnumField',
-  id: serializeSingleValuedEnumFieldId(x.id),
-  modelVersion: x.modelVersion,
-  metadata: serializeSchemaArtifactMetadata(x.metadata),
-  fieldSpec: serializeSingleValuedEnumFieldSpec(x.fieldSpec),
-});
+export const serializeSingleValuedEnumField = (x: SingleValuedEnumField): unknown => {
+  const out: Record<string, unknown> = {
+    kind: 'SingleValuedEnumField',
+    id: serializeSingleValuedEnumFieldId(x.id),
+    modelVersion: x.modelVersion,
+    metadata: serializeSchemaArtifactMetadata(x.metadata),
+    fieldSpec: serializeSingleValuedEnumFieldSpec(x.fieldSpec),
+  };
+  if (x.helpText !== undefined)
+    out['helpText'] = serializeMultilingualString(x.helpText);
+  return out;
+};
 
 export function parseSingleValuedEnumField(
   x: unknown,
@@ -362,18 +432,24 @@ export function parseSingleValuedEnumField(
     modelVersion: s.modelVersion,
     metadata: parseSchemaArtifactMetadata(s.metadata, `${where}.metadata`),
     fieldSpec: parseSingleValuedEnumFieldSpec(s.fieldSpec, `${where}.fieldSpec`),
+    ...(s.helpText !== undefined && {
+      helpText: parseMultilingualString(s.helpText, `${where}.helpText`),
+    }),
   });
 }
 
-export const serializeMultiValuedEnumField = (
-  x: MultiValuedEnumField,
-): unknown => ({
-  kind: 'MultiValuedEnumField',
-  id: serializeMultiValuedEnumFieldId(x.id),
-  modelVersion: x.modelVersion,
-  metadata: serializeSchemaArtifactMetadata(x.metadata),
-  fieldSpec: serializeMultiValuedEnumFieldSpec(x.fieldSpec),
-});
+export const serializeMultiValuedEnumField = (x: MultiValuedEnumField): unknown => {
+  const out: Record<string, unknown> = {
+    kind: 'MultiValuedEnumField',
+    id: serializeMultiValuedEnumFieldId(x.id),
+    modelVersion: x.modelVersion,
+    metadata: serializeSchemaArtifactMetadata(x.metadata),
+    fieldSpec: serializeMultiValuedEnumFieldSpec(x.fieldSpec),
+  };
+  if (x.helpText !== undefined)
+    out['helpText'] = serializeMultilingualString(x.helpText);
+  return out;
+};
 
 export function parseMultiValuedEnumField(
   x: unknown,
@@ -389,16 +465,24 @@ export function parseMultiValuedEnumField(
     modelVersion: s.modelVersion,
     metadata: parseSchemaArtifactMetadata(s.metadata, `${where}.metadata`),
     fieldSpec: parseMultiValuedEnumFieldSpec(s.fieldSpec, `${where}.fieldSpec`),
+    ...(s.helpText !== undefined && {
+      helpText: parseMultilingualString(s.helpText, `${where}.helpText`),
+    }),
   });
 }
 
-export const serializeLinkField = (x: LinkField): unknown => ({
-  kind: 'LinkField',
-  id: serializeLinkFieldId(x.id),
-  modelVersion: x.modelVersion,
-  metadata: serializeSchemaArtifactMetadata(x.metadata),
-  fieldSpec: serializeLinkFieldSpec(x.fieldSpec),
-});
+export const serializeLinkField = (x: LinkField): unknown => {
+  const out: Record<string, unknown> = {
+    kind: 'LinkField',
+    id: serializeLinkFieldId(x.id),
+    modelVersion: x.modelVersion,
+    metadata: serializeSchemaArtifactMetadata(x.metadata),
+    fieldSpec: serializeLinkFieldSpec(x.fieldSpec),
+  };
+  if (x.helpText !== undefined)
+    out['helpText'] = serializeMultilingualString(x.helpText);
+  return out;
+};
 
 export function parseLinkField(x: unknown, where = 'LinkField'): LinkField {
   const s = parseFieldShell<LinkField>(x, 'LinkField', where);
@@ -407,16 +491,24 @@ export function parseLinkField(x: unknown, where = 'LinkField'): LinkField {
     modelVersion: s.modelVersion,
     metadata: parseSchemaArtifactMetadata(s.metadata, `${where}.metadata`),
     fieldSpec: parseLinkFieldSpec(s.fieldSpec, `${where}.fieldSpec`),
+    ...(s.helpText !== undefined && {
+      helpText: parseMultilingualString(s.helpText, `${where}.helpText`),
+    }),
   });
 }
 
-export const serializeEmailField = (x: EmailField): unknown => ({
-  kind: 'EmailField',
-  id: serializeEmailFieldId(x.id),
-  modelVersion: x.modelVersion,
-  metadata: serializeSchemaArtifactMetadata(x.metadata),
-  fieldSpec: serializeEmailFieldSpec(x.fieldSpec),
-});
+export const serializeEmailField = (x: EmailField): unknown => {
+  const out: Record<string, unknown> = {
+    kind: 'EmailField',
+    id: serializeEmailFieldId(x.id),
+    modelVersion: x.modelVersion,
+    metadata: serializeSchemaArtifactMetadata(x.metadata),
+    fieldSpec: serializeEmailFieldSpec(x.fieldSpec),
+  };
+  if (x.helpText !== undefined)
+    out['helpText'] = serializeMultilingualString(x.helpText);
+  return out;
+};
 
 export function parseEmailField(x: unknown, where = 'EmailField'): EmailField {
   const s = parseFieldShell<EmailField>(x, 'EmailField', where);
@@ -425,16 +517,24 @@ export function parseEmailField(x: unknown, where = 'EmailField'): EmailField {
     modelVersion: s.modelVersion,
     metadata: parseSchemaArtifactMetadata(s.metadata, `${where}.metadata`),
     fieldSpec: parseEmailFieldSpec(s.fieldSpec, `${where}.fieldSpec`),
+    ...(s.helpText !== undefined && {
+      helpText: parseMultilingualString(s.helpText, `${where}.helpText`),
+    }),
   });
 }
 
-export const serializePhoneNumberField = (x: PhoneNumberField): unknown => ({
-  kind: 'PhoneNumberField',
-  id: serializePhoneNumberFieldId(x.id),
-  modelVersion: x.modelVersion,
-  metadata: serializeSchemaArtifactMetadata(x.metadata),
-  fieldSpec: serializePhoneNumberFieldSpec(x.fieldSpec),
-});
+export const serializePhoneNumberField = (x: PhoneNumberField): unknown => {
+  const out: Record<string, unknown> = {
+    kind: 'PhoneNumberField',
+    id: serializePhoneNumberFieldId(x.id),
+    modelVersion: x.modelVersion,
+    metadata: serializeSchemaArtifactMetadata(x.metadata),
+    fieldSpec: serializePhoneNumberFieldSpec(x.fieldSpec),
+  };
+  if (x.helpText !== undefined)
+    out['helpText'] = serializeMultilingualString(x.helpText);
+  return out;
+};
 
 export function parsePhoneNumberField(
   x: unknown,
@@ -446,16 +546,24 @@ export function parsePhoneNumberField(
     modelVersion: s.modelVersion,
     metadata: parseSchemaArtifactMetadata(s.metadata, `${where}.metadata`),
     fieldSpec: parsePhoneNumberFieldSpec(s.fieldSpec, `${where}.fieldSpec`),
+    ...(s.helpText !== undefined && {
+      helpText: parseMultilingualString(s.helpText, `${where}.helpText`),
+    }),
   });
 }
 
-export const serializeOrcidField = (x: OrcidField): unknown => ({
-  kind: 'OrcidField',
-  id: serializeOrcidFieldId(x.id),
-  modelVersion: x.modelVersion,
-  metadata: serializeSchemaArtifactMetadata(x.metadata),
-  fieldSpec: serializeOrcidFieldSpec(x.fieldSpec),
-});
+export const serializeOrcidField = (x: OrcidField): unknown => {
+  const out: Record<string, unknown> = {
+    kind: 'OrcidField',
+    id: serializeOrcidFieldId(x.id),
+    modelVersion: x.modelVersion,
+    metadata: serializeSchemaArtifactMetadata(x.metadata),
+    fieldSpec: serializeOrcidFieldSpec(x.fieldSpec),
+  };
+  if (x.helpText !== undefined)
+    out['helpText'] = serializeMultilingualString(x.helpText);
+  return out;
+};
 
 export function parseOrcidField(x: unknown, where = 'OrcidField'): OrcidField {
   const s = parseFieldShell<OrcidField>(x, 'OrcidField', where);
@@ -464,16 +572,24 @@ export function parseOrcidField(x: unknown, where = 'OrcidField'): OrcidField {
     modelVersion: s.modelVersion,
     metadata: parseSchemaArtifactMetadata(s.metadata, `${where}.metadata`),
     fieldSpec: parseOrcidFieldSpec(s.fieldSpec, `${where}.fieldSpec`),
+    ...(s.helpText !== undefined && {
+      helpText: parseMultilingualString(s.helpText, `${where}.helpText`),
+    }),
   });
 }
 
-export const serializeRorField = (x: RorField): unknown => ({
-  kind: 'RorField',
-  id: serializeRorFieldId(x.id),
-  modelVersion: x.modelVersion,
-  metadata: serializeSchemaArtifactMetadata(x.metadata),
-  fieldSpec: serializeRorFieldSpec(x.fieldSpec),
-});
+export const serializeRorField = (x: RorField): unknown => {
+  const out: Record<string, unknown> = {
+    kind: 'RorField',
+    id: serializeRorFieldId(x.id),
+    modelVersion: x.modelVersion,
+    metadata: serializeSchemaArtifactMetadata(x.metadata),
+    fieldSpec: serializeRorFieldSpec(x.fieldSpec),
+  };
+  if (x.helpText !== undefined)
+    out['helpText'] = serializeMultilingualString(x.helpText);
+  return out;
+};
 
 export function parseRorField(x: unknown, where = 'RorField'): RorField {
   const s = parseFieldShell<RorField>(x, 'RorField', where);
@@ -482,16 +598,24 @@ export function parseRorField(x: unknown, where = 'RorField'): RorField {
     modelVersion: s.modelVersion,
     metadata: parseSchemaArtifactMetadata(s.metadata, `${where}.metadata`),
     fieldSpec: parseRorFieldSpec(s.fieldSpec, `${where}.fieldSpec`),
+    ...(s.helpText !== undefined && {
+      helpText: parseMultilingualString(s.helpText, `${where}.helpText`),
+    }),
   });
 }
 
-export const serializeDoiField = (x: DoiField): unknown => ({
-  kind: 'DoiField',
-  id: serializeDoiFieldId(x.id),
-  modelVersion: x.modelVersion,
-  metadata: serializeSchemaArtifactMetadata(x.metadata),
-  fieldSpec: serializeDoiFieldSpec(x.fieldSpec),
-});
+export const serializeDoiField = (x: DoiField): unknown => {
+  const out: Record<string, unknown> = {
+    kind: 'DoiField',
+    id: serializeDoiFieldId(x.id),
+    modelVersion: x.modelVersion,
+    metadata: serializeSchemaArtifactMetadata(x.metadata),
+    fieldSpec: serializeDoiFieldSpec(x.fieldSpec),
+  };
+  if (x.helpText !== undefined)
+    out['helpText'] = serializeMultilingualString(x.helpText);
+  return out;
+};
 
 export function parseDoiField(x: unknown, where = 'DoiField'): DoiField {
   const s = parseFieldShell<DoiField>(x, 'DoiField', where);
@@ -500,16 +624,24 @@ export function parseDoiField(x: unknown, where = 'DoiField'): DoiField {
     modelVersion: s.modelVersion,
     metadata: parseSchemaArtifactMetadata(s.metadata, `${where}.metadata`),
     fieldSpec: parseDoiFieldSpec(s.fieldSpec, `${where}.fieldSpec`),
+    ...(s.helpText !== undefined && {
+      helpText: parseMultilingualString(s.helpText, `${where}.helpText`),
+    }),
   });
 }
 
-export const serializePubMedIdField = (x: PubMedIdField): unknown => ({
-  kind: 'PubMedIdField',
-  id: serializePubMedIdFieldId(x.id),
-  modelVersion: x.modelVersion,
-  metadata: serializeSchemaArtifactMetadata(x.metadata),
-  fieldSpec: serializePubMedIdFieldSpec(x.fieldSpec),
-});
+export const serializePubMedIdField = (x: PubMedIdField): unknown => {
+  const out: Record<string, unknown> = {
+    kind: 'PubMedIdField',
+    id: serializePubMedIdFieldId(x.id),
+    modelVersion: x.modelVersion,
+    metadata: serializeSchemaArtifactMetadata(x.metadata),
+    fieldSpec: serializePubMedIdFieldSpec(x.fieldSpec),
+  };
+  if (x.helpText !== undefined)
+    out['helpText'] = serializeMultilingualString(x.helpText);
+  return out;
+};
 
 export function parsePubMedIdField(
   x: unknown,
@@ -521,16 +653,24 @@ export function parsePubMedIdField(
     modelVersion: s.modelVersion,
     metadata: parseSchemaArtifactMetadata(s.metadata, `${where}.metadata`),
     fieldSpec: parsePubMedIdFieldSpec(s.fieldSpec, `${where}.fieldSpec`),
+    ...(s.helpText !== undefined && {
+      helpText: parseMultilingualString(s.helpText, `${where}.helpText`),
+    }),
   });
 }
 
-export const serializeRridField = (x: RridField): unknown => ({
-  kind: 'RridField',
-  id: serializeRridFieldId(x.id),
-  modelVersion: x.modelVersion,
-  metadata: serializeSchemaArtifactMetadata(x.metadata),
-  fieldSpec: serializeRridFieldSpec(x.fieldSpec),
-});
+export const serializeRridField = (x: RridField): unknown => {
+  const out: Record<string, unknown> = {
+    kind: 'RridField',
+    id: serializeRridFieldId(x.id),
+    modelVersion: x.modelVersion,
+    metadata: serializeSchemaArtifactMetadata(x.metadata),
+    fieldSpec: serializeRridFieldSpec(x.fieldSpec),
+  };
+  if (x.helpText !== undefined)
+    out['helpText'] = serializeMultilingualString(x.helpText);
+  return out;
+};
 
 export function parseRridField(x: unknown, where = 'RridField'): RridField {
   const s = parseFieldShell<RridField>(x, 'RridField', where);
@@ -539,16 +679,24 @@ export function parseRridField(x: unknown, where = 'RridField'): RridField {
     modelVersion: s.modelVersion,
     metadata: parseSchemaArtifactMetadata(s.metadata, `${where}.metadata`),
     fieldSpec: parseRridFieldSpec(s.fieldSpec, `${where}.fieldSpec`),
+    ...(s.helpText !== undefined && {
+      helpText: parseMultilingualString(s.helpText, `${where}.helpText`),
+    }),
   });
 }
 
-export const serializeNihGrantIdField = (x: NihGrantIdField): unknown => ({
-  kind: 'NihGrantIdField',
-  id: serializeNihGrantIdFieldId(x.id),
-  modelVersion: x.modelVersion,
-  metadata: serializeSchemaArtifactMetadata(x.metadata),
-  fieldSpec: serializeNihGrantIdFieldSpec(x.fieldSpec),
-});
+export const serializeNihGrantIdField = (x: NihGrantIdField): unknown => {
+  const out: Record<string, unknown> = {
+    kind: 'NihGrantIdField',
+    id: serializeNihGrantIdFieldId(x.id),
+    modelVersion: x.modelVersion,
+    metadata: serializeSchemaArtifactMetadata(x.metadata),
+    fieldSpec: serializeNihGrantIdFieldSpec(x.fieldSpec),
+  };
+  if (x.helpText !== undefined)
+    out['helpText'] = serializeMultilingualString(x.helpText);
+  return out;
+};
 
 export function parseNihGrantIdField(
   x: unknown,
@@ -560,16 +708,24 @@ export function parseNihGrantIdField(
     modelVersion: s.modelVersion,
     metadata: parseSchemaArtifactMetadata(s.metadata, `${where}.metadata`),
     fieldSpec: parseNihGrantIdFieldSpec(s.fieldSpec, `${where}.fieldSpec`),
+    ...(s.helpText !== undefined && {
+      helpText: parseMultilingualString(s.helpText, `${where}.helpText`),
+    }),
   });
 }
 
-export const serializeAttributeValueField = (x: AttributeValueField): unknown => ({
-  kind: 'AttributeValueField',
-  id: serializeAttributeValueFieldId(x.id),
-  modelVersion: x.modelVersion,
-  metadata: serializeSchemaArtifactMetadata(x.metadata),
-  fieldSpec: serializeAttributeValueFieldSpec(x.fieldSpec),
-});
+export const serializeAttributeValueField = (x: AttributeValueField): unknown => {
+  const out: Record<string, unknown> = {
+    kind: 'AttributeValueField',
+    id: serializeAttributeValueFieldId(x.id),
+    modelVersion: x.modelVersion,
+    metadata: serializeSchemaArtifactMetadata(x.metadata),
+    fieldSpec: serializeAttributeValueFieldSpec(x.fieldSpec),
+  };
+  if (x.helpText !== undefined)
+    out['helpText'] = serializeMultilingualString(x.helpText);
+  return out;
+};
 
 export function parseAttributeValueField(
   x: unknown,
@@ -581,6 +737,9 @@ export function parseAttributeValueField(
     modelVersion: s.modelVersion,
     metadata: parseSchemaArtifactMetadata(s.metadata, `${where}.metadata`),
     fieldSpec: parseAttributeValueFieldSpec(s.fieldSpec, `${where}.fieldSpec`),
+    ...(s.helpText !== undefined && {
+      helpText: parseMultilingualString(s.helpText, `${where}.helpText`),
+    }),
   });
 }
 

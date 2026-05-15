@@ -18,11 +18,18 @@
 // EmbeddedArtifact objects (each tagged with its `kind`).
 
 import { CedarConstructionError } from '../leaves/index.js';
-import { type Template, template } from '../template.js';
+import {
+  type Template,
+  type TemplateRenderingHint,
+  type HelpDisplayMode,
+  HELP_DISPLAY_MODES,
+  template,
+} from '../template.js';
 import {
   expectObject,
   expectArray,
   expectString,
+  expectStringEnum,
   expectKnownProperties,
   rejectNullProperty,
 } from './parse-utils.js';
@@ -50,9 +57,34 @@ export function serializeTemplate(x: Template): unknown {
     modelVersion: x.modelVersion,
     metadata: serializeSchemaArtifactMetadata(x.metadata),
   };
+  if (x.renderingHint !== undefined)
+    out['renderingHint'] = serializeTemplateRenderingHint(x.renderingHint);
   if (x.header !== undefined) out['header'] = serializeMultilingualString(x.header);
   if (x.footer !== undefined) out['footer'] = serializeMultilingualString(x.footer);
   out['members'] = x.members.map((e) => serializeEmbeddedArtifact(e));
+  return out;
+}
+
+function serializeTemplateRenderingHint(x: TemplateRenderingHint): unknown {
+  const out: Record<string, unknown> = {};
+  if (x.helpDisplayMode !== undefined) out['helpDisplayMode'] = x.helpDisplayMode;
+  return out;
+}
+
+function parseTemplateRenderingHint(
+  x: unknown,
+  where: string,
+): TemplateRenderingHint {
+  const o = expectObject(x, where);
+  expectKnownProperties(o, ['helpDisplayMode']);
+  rejectNullProperty(o, 'helpDisplayMode');
+  const out: { helpDisplayMode?: HelpDisplayMode } = {};
+  if ('helpDisplayMode' in o)
+    out.helpDisplayMode = expectStringEnum<HelpDisplayMode>(
+      o['helpDisplayMode'],
+      HELP_DISPLAY_MODES,
+      `${where}.helpDisplayMode`,
+    );
   return out;
 }
 
@@ -63,10 +95,12 @@ export function parseTemplate(x: unknown, where = 'Template'): Template {
     'id',
     'modelVersion',
     'metadata',
+    'renderingHint',
     'header',
     'footer',
     'members',
   ]);
+  rejectNullProperty(o, 'renderingHint');
   rejectNullProperty(o, 'header');
   rejectNullProperty(o, 'footer');
   if (o['kind'] !== 'Template') {
@@ -104,10 +138,16 @@ export function parseTemplate(x: unknown, where = 'Template'): Template {
     id: typeof id;
     modelVersion: string;
     metadata: typeof metadata;
+    renderingHint?: TemplateRenderingHint;
     header?: ReturnType<typeof parseMultilingualString>;
     footer?: ReturnType<typeof parseMultilingualString>;
     members: typeof members;
   } = { id, modelVersion, metadata, members };
+  if ('renderingHint' in o)
+    init.renderingHint = parseTemplateRenderingHint(
+      o['renderingHint'],
+      `${where}.renderingHint`,
+    );
   if ('header' in o)
     init.header = parseMultilingualString(o['header'], `${where}.header`);
   if ('footer' in o)

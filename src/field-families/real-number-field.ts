@@ -13,6 +13,7 @@ import {
   iri,
   parseSemanticVersion,
 } from '../leaves/index.js';
+import type { MultilingualString } from '../multilingual.js';
 import type { SchemaArtifactMetadata } from '../metadata/index.js';
 import type { ValueRequirement } from '../embedded/requirement.js';
 import type { Cardinality } from '../embedded/cardinality.js';
@@ -145,6 +146,7 @@ export interface RealNumberField {
   readonly modelVersion: string;
   readonly metadata: SchemaArtifactMetadata;
   readonly fieldSpec: RealNumberFieldSpec;
+  readonly helpText?: MultilingualString;
 }
 
 export interface RealNumberFieldInit {
@@ -152,16 +154,20 @@ export interface RealNumberFieldInit {
   readonly modelVersion: string;
   readonly metadata: SchemaArtifactMetadata;
   readonly fieldSpec: RealNumberFieldSpec;
+  readonly helpText?: MultilingualString;
 }
 
-export const realNumberField = (init: RealNumberFieldInit): RealNumberField =>
-  ({
+export const realNumberField = (init: RealNumberFieldInit): RealNumberField => {
+  const out: RealNumberField = {
     kind: 'RealNumberField',
     id: realNumberFieldId(init.id),
     modelVersion: parseSemanticVersion(init.modelVersion),
     metadata: init.metadata,
     fieldSpec: init.fieldSpec,
-  });
+    ...(init.helpText !== undefined && { helpText: init.helpText }),
+  };
+  return out;
+};
 
 // =====================================================================
 // 5. EmbeddedField
@@ -175,6 +181,7 @@ export interface EmbeddedRealNumberField {
   readonly cardinality?: Cardinality;
   readonly visibility?: Visibility;
   readonly labelOverride?: LabelOverride;
+  readonly helpTextOverride?: MultilingualString;
   readonly property?: Property;
   readonly defaultValue?: RealNumberValue;
 }

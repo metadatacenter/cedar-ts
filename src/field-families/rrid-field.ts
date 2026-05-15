@@ -142,6 +142,7 @@ export interface RridField {
   readonly modelVersion: string;
   readonly metadata: SchemaArtifactMetadata;
   readonly fieldSpec: RridFieldSpec;
+  readonly helpText?: MultilingualString;
 }
 
 export interface RridFieldInit {
@@ -149,16 +150,20 @@ export interface RridFieldInit {
   readonly modelVersion: string;
   readonly metadata: SchemaArtifactMetadata;
   readonly fieldSpec: RridFieldSpec;
+  readonly helpText?: MultilingualString;
 }
 
-export const rridField = (init: RridFieldInit): RridField =>
-  ({
+export const rridField = (init: RridFieldInit): RridField => {
+  const out: RridField = {
     kind: 'RridField',
     id: rridFieldId(init.id),
     modelVersion: parseSemanticVersion(init.modelVersion),
     metadata: init.metadata,
     fieldSpec: init.fieldSpec,
-  });
+    ...(init.helpText !== undefined && { helpText: init.helpText }),
+  };
+  return out;
+};
 
 // =====================================================================
 // 5. EmbeddedField
@@ -172,6 +177,7 @@ export interface EmbeddedRridField {
   readonly cardinality?: Cardinality;
   readonly visibility?: Visibility;
   readonly labelOverride?: LabelOverride;
+  readonly helpTextOverride?: MultilingualString;
   readonly property?: Property;
   readonly defaultValue?: RridValue;
 }

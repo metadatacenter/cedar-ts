@@ -19,6 +19,7 @@
 // Artifacts); the `EmbeddedField` interface omits `defaultValue`.
 
 import { type Iri, iri, parseSemanticVersion } from '../leaves/index.js';
+import type { MultilingualString } from '../multilingual.js';
 import type { SchemaArtifactMetadata } from '../metadata/index.js';
 import type { ValueRequirement } from '../embedded/requirement.js';
 import type { Cardinality } from '../embedded/cardinality.js';
@@ -120,6 +121,7 @@ export interface AttributeValueField {
   readonly modelVersion: string;
   readonly metadata: SchemaArtifactMetadata;
   readonly fieldSpec: AttributeValueFieldSpec;
+  readonly helpText?: MultilingualString;
 }
 
 export interface AttributeValueFieldInit {
@@ -127,18 +129,22 @@ export interface AttributeValueFieldInit {
   readonly modelVersion: string;
   readonly metadata: SchemaArtifactMetadata;
   readonly fieldSpec: AttributeValueFieldSpec;
+  readonly helpText?: MultilingualString;
 }
 
 export const attributeValueField = (
   init: AttributeValueFieldInit,
-): AttributeValueField =>
-  ({
+): AttributeValueField => {
+  const out: AttributeValueField = {
     kind: 'AttributeValueField',
     id: attributeValueFieldId(init.id),
     modelVersion: parseSemanticVersion(init.modelVersion),
     metadata: init.metadata,
     fieldSpec: init.fieldSpec,
-  });
+    ...(init.helpText !== undefined && { helpText: init.helpText }),
+  };
+  return out;
+};
 
 // =====================================================================
 // 5. DefaultValue — N/A: grammar prohibits a default value for
@@ -157,6 +163,7 @@ export interface EmbeddedAttributeValueField {
   readonly cardinality?: Cardinality;
   readonly visibility?: Visibility;
   readonly labelOverride?: LabelOverride;
+  readonly helpTextOverride?: MultilingualString;
   readonly property?: Property;
   // Grammar prohibits a default value here.
 }

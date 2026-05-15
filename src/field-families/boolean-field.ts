@@ -9,6 +9,7 @@
 // inherently single-valued.
 
 import { type Iri, iri, parseSemanticVersion, parseAsciiIdentifier } from '../leaves/index.js';
+import type { MultilingualString } from '../multilingual.js';
 import type { SchemaArtifactMetadata } from '../metadata/index.js';
 import type { ValueRequirement } from '../embedded/requirement.js';
 import type { Visibility } from '../embedded/visibility.js';
@@ -109,6 +110,7 @@ export interface BooleanField {
   readonly modelVersion: string;
   readonly metadata: SchemaArtifactMetadata;
   readonly fieldSpec: BooleanFieldSpec;
+  readonly helpText?: MultilingualString;
 }
 
 export interface BooleanFieldInit {
@@ -116,16 +118,20 @@ export interface BooleanFieldInit {
   readonly modelVersion: string;
   readonly metadata: SchemaArtifactMetadata;
   readonly fieldSpec: BooleanFieldSpec;
+  readonly helpText?: MultilingualString;
 }
 
-export const booleanField = (init: BooleanFieldInit): BooleanField =>
-  ({
+export const booleanField = (init: BooleanFieldInit): BooleanField => {
+  const out: BooleanField = {
     kind: 'BooleanField',
     id: booleanFieldId(init.id),
     modelVersion: parseSemanticVersion(init.modelVersion),
     metadata: init.metadata,
     fieldSpec: init.fieldSpec,
-  });
+    ...(init.helpText !== undefined && { helpText: init.helpText }),
+  };
+  return out;
+};
 
 // =====================================================================
 // 5. EmbeddedField
@@ -138,6 +144,7 @@ export interface EmbeddedBooleanField {
   readonly valueRequirement?: ValueRequirement;
   readonly visibility?: Visibility;
   readonly labelOverride?: LabelOverride;
+  readonly helpTextOverride?: MultilingualString;
   readonly property?: Property;
   readonly defaultValue?: BooleanValue;
 }
@@ -148,6 +155,7 @@ export interface EmbeddedBooleanFieldInit {
   readonly valueRequirement?: ValueRequirement;
   readonly visibility?: Visibility;
   readonly labelOverride?: LabelOverride;
+  readonly helpTextOverride?: MultilingualString;
   readonly property?: PropertyInput;
   readonly defaultValue?: BooleanValueInput;
 }
@@ -162,6 +170,7 @@ export function embeddedBooleanField(
     valueRequirement?: ValueRequirement;
     visibility?: Visibility;
     labelOverride?: LabelOverride;
+    helpTextOverride?: MultilingualString;
     property?: Property;
     defaultValue?: BooleanValue;
   } = {
@@ -172,6 +181,7 @@ export function embeddedBooleanField(
   if (init.valueRequirement !== undefined) out.valueRequirement = init.valueRequirement;
   if (init.visibility !== undefined) out.visibility = init.visibility;
   if (init.labelOverride !== undefined) out.labelOverride = init.labelOverride;
+  if (init.helpTextOverride !== undefined) out.helpTextOverride = init.helpTextOverride;
   if (init.property !== undefined) out.property = property(init.property);
   if (init.defaultValue !== undefined) {
     out.defaultValue =

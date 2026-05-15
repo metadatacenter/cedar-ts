@@ -308,6 +308,9 @@ describe('EmbeddedField constructors', () => {
       visibility: 'visible',
       defaultValue: textValue('Untitled'),
       labelOverride: labelOverride({ label: 'Document Title' }),
+      helpTextOverride: [
+        { value: 'Form-specific note about this title.', lang: 'en' },
+      ],
       property: property({ iri: 'https://schema.org/name' }),
     });
     expect(ef.valueRequirement).toBe('required');
@@ -316,6 +319,9 @@ describe('EmbeddedField constructors', () => {
     expect(ef.defaultValue?.kind).toBe('TextValue');
     expect(ef.defaultValue?.value).toBe('Untitled');
     expect(ef.labelOverride?.label).toEqual([{ value: 'Document Title', lang: 'und' }]);
+    expect(ef.helpTextOverride).toEqual([
+      { value: 'Form-specific note about this title.', lang: 'en' },
+    ]);
     expect(ef.property?.iri.value).toBe('https://schema.org/name');
   });
 

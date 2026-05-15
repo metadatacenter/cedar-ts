@@ -370,6 +370,7 @@ export interface ControlledTermField {
   readonly modelVersion: string;
   readonly metadata: SchemaArtifactMetadata;
   readonly fieldSpec: ControlledTermFieldSpec;
+  readonly helpText?: MultilingualString;
 }
 
 export interface ControlledTermFieldInit {
@@ -377,18 +378,22 @@ export interface ControlledTermFieldInit {
   readonly modelVersion: string;
   readonly metadata: SchemaArtifactMetadata;
   readonly fieldSpec: ControlledTermFieldSpec;
+  readonly helpText?: MultilingualString;
 }
 
 export const controlledTermField = (
   init: ControlledTermFieldInit,
-): ControlledTermField =>
-  ({
+): ControlledTermField => {
+  const out: ControlledTermField = {
     kind: 'ControlledTermField',
     id: controlledTermFieldId(init.id),
     modelVersion: parseSemanticVersion(init.modelVersion),
     metadata: init.metadata,
     fieldSpec: init.fieldSpec,
-  });
+    ...(init.helpText !== undefined && { helpText: init.helpText }),
+  };
+  return out;
+};
 
 // =====================================================================
 // 5. EmbeddedField
@@ -402,6 +407,7 @@ export interface EmbeddedControlledTermField {
   readonly cardinality?: Cardinality;
   readonly visibility?: Visibility;
   readonly labelOverride?: LabelOverride;
+  readonly helpTextOverride?: MultilingualString;
   readonly property?: Property;
   readonly defaultValue?: ControlledTermValue;
 }

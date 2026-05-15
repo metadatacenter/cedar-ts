@@ -59,6 +59,11 @@ import {
   embeddedTemplate,
   embeddedPresentationComponent,
 } from '../embedded/index.js';
+import type { MultilingualString } from '../multilingual.js';
+import {
+  serializeMultilingualString,
+  parseMultilingualString,
+} from './multilingual.js';
 import {
   expectObject,
   expectString,
@@ -170,6 +175,7 @@ interface CommonOut {
   cardinality?: Cardinality;
   visibility?: Visibility;
   labelOverride?: LabelOverride;
+  helpTextOverride?: MultilingualString;
   property?: Property;
 }
 
@@ -179,6 +185,7 @@ function serializeCommonProps(
     readonly cardinality?: Cardinality;
     readonly visibility?: Visibility;
     readonly labelOverride?: LabelOverride;
+    readonly helpTextOverride?: MultilingualString;
     readonly property?: Property;
   },
   out: Record<string, unknown>,
@@ -191,6 +198,8 @@ function serializeCommonProps(
     out['visibility'] = serializeVisibility(x.visibility);
   if (x.labelOverride !== undefined)
     out['labelOverride'] = serializeLabelOverride(x.labelOverride);
+  if (x.helpTextOverride !== undefined)
+    out['helpTextOverride'] = serializeMultilingualString(x.helpTextOverride);
   if (x.property !== undefined) out['property'] = serializeProperty(x.property);
 }
 
@@ -202,6 +211,7 @@ function parseCommonProps(
   rejectNullProperty(o, 'cardinality');
   rejectNullProperty(o, 'visibility');
   rejectNullProperty(o, 'labelOverride');
+  rejectNullProperty(o, 'helpTextOverride');
   rejectNullProperty(o, 'property');
   const out: CommonOut = {};
   if ('valueRequirement' in o)
@@ -218,6 +228,11 @@ function parseCommonProps(
       o['labelOverride'],
       `${where}.labelOverride`,
     );
+  if ('helpTextOverride' in o)
+    out.helpTextOverride = parseMultilingualString(
+      o['helpTextOverride'],
+      `${where}.helpTextOverride`,
+    );
   if ('property' in o)
     out.property = parseProperty(o['property'], `${where}.property`);
   return out;
@@ -231,6 +246,7 @@ const COMMON_FIELD_PROPS = [
   'cardinality',
   'visibility',
   'labelOverride',
+  'helpTextOverride',
   'property',
 ];
 const COMMON_FIELD_PROPS_WITH_DEFAULT = [...COMMON_FIELD_PROPS, 'defaultValue'];
@@ -379,6 +395,7 @@ const BOOLEAN_FIELD_PROPS = [
   'visibility',
   'defaultValue',
   'labelOverride',
+  'helpTextOverride',
   'property',
 ];
 
@@ -396,6 +413,8 @@ export function serializeEmbeddedBooleanField(
     out['visibility'] = serializeVisibility(x.visibility);
   if (x.labelOverride !== undefined)
     out['labelOverride'] = serializeLabelOverride(x.labelOverride);
+  if (x.helpTextOverride !== undefined)
+    out['helpTextOverride'] = serializeMultilingualString(x.helpTextOverride);
   if (x.property !== undefined) out['property'] = serializeProperty(x.property);
   if (x.defaultValue !== undefined)
     out['defaultValue'] = serializeBooleanValue(x.defaultValue);
@@ -411,6 +430,7 @@ export function parseEmbeddedBooleanField(
   rejectNullProperty(o, 'valueRequirement');
   rejectNullProperty(o, 'visibility');
   rejectNullProperty(o, 'labelOverride');
+  rejectNullProperty(o, 'helpTextOverride');
   rejectNullProperty(o, 'property');
   rejectNullProperty(o, 'defaultValue');
   if (o['kind'] !== 'EmbeddedBooleanField') {
@@ -441,6 +461,9 @@ export function parseEmbeddedBooleanField(
       o['labelOverride'],
       `${where}.labelOverride`,
     );
+  if ('helpTextOverride' in o)
+    (init as { helpTextOverride?: MultilingualString }).helpTextOverride =
+      parseMultilingualString(o['helpTextOverride'], `${where}.helpTextOverride`);
   if ('property' in o)
     (init as { property?: Property }).property = parseProperty(
       o['property'],
@@ -581,6 +604,7 @@ const SINGLE_VALUED_ENUM_FIELD_PROPS = [
   'visibility',
   'defaultValue',
   'labelOverride',
+  'helpTextOverride',
   'property',
 ];
 
@@ -598,6 +622,8 @@ export function serializeEmbeddedSingleValuedEnumField(
     out['visibility'] = serializeVisibility(x.visibility);
   if (x.labelOverride !== undefined)
     out['labelOverride'] = serializeLabelOverride(x.labelOverride);
+  if (x.helpTextOverride !== undefined)
+    out['helpTextOverride'] = serializeMultilingualString(x.helpTextOverride);
   if (x.property !== undefined) out['property'] = serializeProperty(x.property);
   if (x.defaultValue !== undefined)
     out['defaultValue'] = serializeEnumValue(x.defaultValue);
@@ -613,6 +639,7 @@ export function parseEmbeddedSingleValuedEnumField(
   rejectNullProperty(o, 'valueRequirement');
   rejectNullProperty(o, 'visibility');
   rejectNullProperty(o, 'labelOverride');
+  rejectNullProperty(o, 'helpTextOverride');
   rejectNullProperty(o, 'property');
   rejectNullProperty(o, 'defaultValue');
   if (o['kind'] !== 'EmbeddedSingleValuedEnumField') {
@@ -646,6 +673,9 @@ export function parseEmbeddedSingleValuedEnumField(
       o['labelOverride'],
       `${where}.labelOverride`,
     );
+  if ('helpTextOverride' in o)
+    (init as { helpTextOverride?: MultilingualString }).helpTextOverride =
+      parseMultilingualString(o['helpTextOverride'], `${where}.helpTextOverride`);
   if ('property' in o)
     (init as { property?: Property }).property = parseProperty(
       o['property'],

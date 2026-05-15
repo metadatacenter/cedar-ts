@@ -120,6 +120,31 @@ describe('Field constructors', () => {
       fieldSpec: textFieldSpec(),
     });
   });
+
+  it('carries an optional helpText on the Field artifact', () => {
+    const f = textField({
+      id: textFieldId('https://example.org/fields/title'),
+      modelVersion: MV,
+      metadata: meta,
+      fieldSpec: textFieldSpec(),
+      helpText: [
+        { value: 'Enter the full title of the publication.', lang: 'en' },
+      ],
+    });
+    expect(f.helpText).toEqual([
+      { value: 'Enter the full title of the publication.', lang: 'en' },
+    ]);
+  });
+
+  it('omits helpText by default', () => {
+    const f = textField({
+      id: textFieldId('https://example.org/fields/title'),
+      modelVersion: MV,
+      metadata: meta,
+      fieldSpec: textFieldSpec(),
+    });
+    expect(f.helpText).toBeUndefined();
+  });
 });
 
 describe('Per-family helpers', () => {
