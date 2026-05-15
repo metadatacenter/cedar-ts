@@ -133,6 +133,27 @@ describe('Template', () => {
     expect(t1.members[0]?.key).toBe('title');
     expect(t2.members[0]?.key).toBe('title');
   });
+
+  it('carries an optional renderingHint with each HelpDisplayMode arm', () => {
+    for (const mode of ['inline', 'tooltip', 'both', 'none'] as const) {
+      const t = template({
+        id: templateId('https://example.org/templates/demo'),
+        modelVersion: '2.0.0',
+        metadata: meta,
+        renderingHint: { helpDisplayMode: mode },
+      });
+      expect(t.renderingHint?.helpDisplayMode).toBe(mode);
+    }
+  });
+
+  it('omits renderingHint by default', () => {
+    const t = template({
+      id: templateId('https://example.org/templates/demo'),
+      modelVersion: '2.0.0',
+      metadata: meta,
+    });
+    expect(t.renderingHint).toBeUndefined();
+  });
 });
 
 describe('SchemaArtifact union', () => {

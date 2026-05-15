@@ -143,6 +143,7 @@ export interface PubMedIdField {
   readonly modelVersion: string;
   readonly metadata: SchemaArtifactMetadata;
   readonly fieldSpec: PubMedIdFieldSpec;
+  readonly helpText?: MultilingualString;
 }
 
 export interface PubMedIdFieldInit {
@@ -150,16 +151,20 @@ export interface PubMedIdFieldInit {
   readonly modelVersion: string;
   readonly metadata: SchemaArtifactMetadata;
   readonly fieldSpec: PubMedIdFieldSpec;
+  readonly helpText?: MultilingualString;
 }
 
-export const pubMedIdField = (init: PubMedIdFieldInit): PubMedIdField =>
-  ({
+export const pubMedIdField = (init: PubMedIdFieldInit): PubMedIdField => {
+  const out: PubMedIdField = {
     kind: 'PubMedIdField',
     id: pubMedIdFieldId(init.id),
     modelVersion: parseSemanticVersion(init.modelVersion),
     metadata: init.metadata,
     fieldSpec: init.fieldSpec,
-  });
+    ...(init.helpText !== undefined && { helpText: init.helpText }),
+  };
+  return out;
+};
 
 // =====================================================================
 // 5. EmbeddedField
@@ -173,6 +178,7 @@ export interface EmbeddedPubMedIdField {
   readonly cardinality?: Cardinality;
   readonly visibility?: Visibility;
   readonly labelOverride?: LabelOverride;
+  readonly helpTextOverride?: MultilingualString;
   readonly property?: Property;
   readonly defaultValue?: PubMedIdValue;
 }

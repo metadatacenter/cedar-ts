@@ -16,6 +16,7 @@
 // `defaultValue` slot is a sequence of EnumValue.
 
 import { type Iri, iri, parseSemanticVersion } from '../leaves/index.js';
+import type { MultilingualString } from '../multilingual.js';
 import type { SchemaArtifactMetadata } from '../metadata/index.js';
 import type { ValueRequirement } from '../embedded/requirement.js';
 import type { Cardinality } from '../embedded/cardinality.js';
@@ -125,6 +126,7 @@ export interface MultiValuedEnumField {
   readonly modelVersion: string;
   readonly metadata: SchemaArtifactMetadata;
   readonly fieldSpec: MultiValuedEnumFieldSpec;
+  readonly helpText?: MultilingualString;
 }
 
 export interface MultiValuedEnumFieldInit {
@@ -132,17 +134,22 @@ export interface MultiValuedEnumFieldInit {
   readonly modelVersion: string;
   readonly metadata: SchemaArtifactMetadata;
   readonly fieldSpec: MultiValuedEnumFieldSpec;
+  readonly helpText?: MultilingualString;
 }
 
 export const multiValuedEnumField = (
   init: MultiValuedEnumFieldInit,
-): MultiValuedEnumField => ({
-  kind: 'MultiValuedEnumField',
-  id: multiValuedEnumFieldId(init.id),
-  modelVersion: parseSemanticVersion(init.modelVersion),
-  metadata: init.metadata,
-  fieldSpec: init.fieldSpec,
-});
+): MultiValuedEnumField => {
+  const out: MultiValuedEnumField = {
+    kind: 'MultiValuedEnumField',
+    id: multiValuedEnumFieldId(init.id),
+    modelVersion: parseSemanticVersion(init.modelVersion),
+    metadata: init.metadata,
+    fieldSpec: init.fieldSpec,
+    ...(init.helpText !== undefined && { helpText: init.helpText }),
+  };
+  return out;
+};
 
 // =====================================================================
 // 5. EmbeddedField
@@ -156,6 +163,7 @@ export interface EmbeddedMultiValuedEnumField {
   readonly cardinality?: Cardinality;
   readonly visibility?: Visibility;
   readonly labelOverride?: LabelOverride;
+  readonly helpTextOverride?: MultilingualString;
   readonly property?: import('../embedded/property.js').Property;
   // Sequence of EnumValue defaults. Empty when absent. The grammar models
   // this as `EnumValue*` rather than an optional single value.

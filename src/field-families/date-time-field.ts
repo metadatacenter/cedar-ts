@@ -7,6 +7,7 @@
 // form). The datatype is fixed at xsd:dateTime and is not carried.
 
 import { type Iri, iri, parseSemanticVersion } from '../leaves/index.js';
+import type { MultilingualString } from '../multilingual.js';
 import type { SchemaArtifactMetadata } from '../metadata/index.js';
 import type { ValueRequirement } from '../embedded/requirement.js';
 import type { Cardinality } from '../embedded/cardinality.js';
@@ -136,6 +137,7 @@ export interface DateTimeField {
   readonly modelVersion: string;
   readonly metadata: SchemaArtifactMetadata;
   readonly fieldSpec: DateTimeFieldSpec;
+  readonly helpText?: MultilingualString;
 }
 
 export interface DateTimeFieldInit {
@@ -143,16 +145,20 @@ export interface DateTimeFieldInit {
   readonly modelVersion: string;
   readonly metadata: SchemaArtifactMetadata;
   readonly fieldSpec: DateTimeFieldSpec;
+  readonly helpText?: MultilingualString;
 }
 
-export const dateTimeField = (init: DateTimeFieldInit): DateTimeField =>
-  ({
+export const dateTimeField = (init: DateTimeFieldInit): DateTimeField => {
+  const out: DateTimeField = {
     kind: 'DateTimeField',
     id: dateTimeFieldId(init.id),
     modelVersion: parseSemanticVersion(init.modelVersion),
     metadata: init.metadata,
     fieldSpec: init.fieldSpec,
-  });
+    ...(init.helpText !== undefined && { helpText: init.helpText }),
+  };
+  return out;
+};
 
 // =====================================================================
 // 5. EmbeddedField
@@ -166,6 +172,7 @@ export interface EmbeddedDateTimeField {
   readonly cardinality?: Cardinality;
   readonly visibility?: Visibility;
   readonly labelOverride?: LabelOverride;
+  readonly helpTextOverride?: MultilingualString;
   readonly property?: Property;
   readonly defaultValue?: DateTimeValue;
 }

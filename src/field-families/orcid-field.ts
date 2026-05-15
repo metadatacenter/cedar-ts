@@ -143,6 +143,7 @@ export interface OrcidField {
   readonly modelVersion: string;
   readonly metadata: SchemaArtifactMetadata;
   readonly fieldSpec: OrcidFieldSpec;
+  readonly helpText?: MultilingualString;
 }
 
 export interface OrcidFieldInit {
@@ -150,16 +151,20 @@ export interface OrcidFieldInit {
   readonly modelVersion: string;
   readonly metadata: SchemaArtifactMetadata;
   readonly fieldSpec: OrcidFieldSpec;
+  readonly helpText?: MultilingualString;
 }
 
-export const orcidField = (init: OrcidFieldInit): OrcidField =>
-  ({
+export const orcidField = (init: OrcidFieldInit): OrcidField => {
+  const out: OrcidField = {
     kind: 'OrcidField',
     id: orcidFieldId(init.id),
     modelVersion: parseSemanticVersion(init.modelVersion),
     metadata: init.metadata,
     fieldSpec: init.fieldSpec,
-  });
+    ...(init.helpText !== undefined && { helpText: init.helpText }),
+  };
+  return out;
+};
 
 // =====================================================================
 // 5. EmbeddedField
@@ -173,6 +178,7 @@ export interface EmbeddedOrcidField {
   readonly cardinality?: Cardinality;
   readonly visibility?: Visibility;
   readonly labelOverride?: LabelOverride;
+  readonly helpTextOverride?: MultilingualString;
   readonly property?: Property;
   readonly defaultValue?: OrcidValue;
 }

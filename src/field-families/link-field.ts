@@ -137,6 +137,7 @@ export interface LinkField {
   readonly modelVersion: string;
   readonly metadata: SchemaArtifactMetadata;
   readonly fieldSpec: LinkFieldSpec;
+  readonly helpText?: MultilingualString;
 }
 
 export interface LinkFieldInit {
@@ -144,16 +145,20 @@ export interface LinkFieldInit {
   readonly modelVersion: string;
   readonly metadata: SchemaArtifactMetadata;
   readonly fieldSpec: LinkFieldSpec;
+  readonly helpText?: MultilingualString;
 }
 
-export const linkField = (init: LinkFieldInit): LinkField =>
-  ({
+export const linkField = (init: LinkFieldInit): LinkField => {
+  const out: LinkField = {
     kind: 'LinkField',
     id: linkFieldId(init.id),
     modelVersion: parseSemanticVersion(init.modelVersion),
     metadata: init.metadata,
     fieldSpec: init.fieldSpec,
-  });
+    ...(init.helpText !== undefined && { helpText: init.helpText }),
+  };
+  return out;
+};
 
 // =====================================================================
 // 5. EmbeddedField
@@ -167,6 +172,7 @@ export interface EmbeddedLinkField {
   readonly cardinality?: Cardinality;
   readonly visibility?: Visibility;
   readonly labelOverride?: LabelOverride;
+  readonly helpTextOverride?: MultilingualString;
   readonly property?: Property;
   readonly defaultValue?: LinkValue;
 }

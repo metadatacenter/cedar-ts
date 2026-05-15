@@ -7,6 +7,7 @@
 // datatype is fixed at xsd:time and is not carried.
 
 import { type Iri, iri, parseSemanticVersion } from '../leaves/index.js';
+import type { MultilingualString } from '../multilingual.js';
 import type { SchemaArtifactMetadata } from '../metadata/index.js';
 import type { ValueRequirement } from '../embedded/requirement.js';
 import type { Cardinality } from '../embedded/cardinality.js';
@@ -137,6 +138,7 @@ export interface TimeField {
   readonly modelVersion: string;
   readonly metadata: SchemaArtifactMetadata;
   readonly fieldSpec: TimeFieldSpec;
+  readonly helpText?: MultilingualString;
 }
 
 export interface TimeFieldInit {
@@ -144,16 +146,20 @@ export interface TimeFieldInit {
   readonly modelVersion: string;
   readonly metadata: SchemaArtifactMetadata;
   readonly fieldSpec: TimeFieldSpec;
+  readonly helpText?: MultilingualString;
 }
 
-export const timeField = (init: TimeFieldInit): TimeField =>
-  ({
+export const timeField = (init: TimeFieldInit): TimeField => {
+  const out: TimeField = {
     kind: 'TimeField',
     id: timeFieldId(init.id),
     modelVersion: parseSemanticVersion(init.modelVersion),
     metadata: init.metadata,
     fieldSpec: init.fieldSpec,
-  });
+    ...(init.helpText !== undefined && { helpText: init.helpText }),
+  };
+  return out;
+};
 
 // =====================================================================
 // 5. EmbeddedField
@@ -167,6 +173,7 @@ export interface EmbeddedTimeField {
   readonly cardinality?: Cardinality;
   readonly visibility?: Visibility;
   readonly labelOverride?: LabelOverride;
+  readonly helpTextOverride?: MultilingualString;
   readonly property?: Property;
   readonly defaultValue?: TimeValue;
 }

@@ -52,11 +52,35 @@ import {
 // `kind: 'Template'` discriminates it at both positions and is therefore
 // retained per the polymorphic-only rule (serialization.md §4.5).
 
+// =====================================================================
+// TemplateRenderingHint — see grammar.md §Template Rendering Hint.
+// =====================================================================
+//
+// Form-level UX configuration. Currently the only slot is
+// `helpDisplayMode`, which selects how field help text is rendered at
+// form-render time. Distinct from per-field-spec rendering hints
+// (TextRenderingHint, DateRenderingHint, etc.), which configure
+// per-field display; TemplateRenderingHint configures the form as a
+// whole.
+
+export type HelpDisplayMode = 'inline' | 'tooltip' | 'both' | 'none';
+export const HELP_DISPLAY_MODES: readonly HelpDisplayMode[] = Object.freeze([
+  'inline',
+  'tooltip',
+  'both',
+  'none',
+]);
+
+export interface TemplateRenderingHint {
+  readonly helpDisplayMode?: HelpDisplayMode;
+}
+
 export interface Template {
   readonly kind: 'Template';
   readonly id: TemplateId;
   readonly modelVersion: string;
   readonly metadata: SchemaArtifactMetadata;
+  readonly renderingHint?: TemplateRenderingHint;
   readonly header?: MultilingualString;
   readonly footer?: MultilingualString;
   readonly members: readonly EmbeddedArtifact[];
@@ -70,6 +94,7 @@ export interface TemplateInit {
   readonly id: TemplateId | string;
   readonly modelVersion: string;
   readonly metadata: SchemaArtifactMetadata;
+  readonly renderingHint?: TemplateRenderingHint;
   readonly header?: MultilingualStringInput;
   readonly footer?: MultilingualStringInput;
   readonly members?: readonly EmbeddedArtifact[];
@@ -102,6 +127,7 @@ export function template(init: TemplateInit): Template {
     id: TemplateId;
     modelVersion: string;
     metadata: SchemaArtifactMetadata;
+    renderingHint?: TemplateRenderingHint;
     header?: MultilingualString;
     footer?: MultilingualString;
     members: readonly EmbeddedArtifact[];
@@ -112,6 +138,7 @@ export function template(init: TemplateInit): Template {
     metadata: init.metadata,
     members,
   };
+  if (init.renderingHint !== undefined) out.renderingHint = init.renderingHint;
   if (init.header !== undefined) out.header = multilingualString(init.header);
   if (init.footer !== undefined) out.footer = multilingualString(init.footer);
   return out;

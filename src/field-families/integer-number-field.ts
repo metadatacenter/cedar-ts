@@ -19,6 +19,7 @@ import {
   iri,
   parseSemanticVersion,
 } from '../leaves/index.js';
+import type { MultilingualString } from '../multilingual.js';
 import type { SchemaArtifactMetadata } from '../metadata/index.js';
 import type { ValueRequirement } from '../embedded/requirement.js';
 import type { Cardinality } from '../embedded/cardinality.js';
@@ -152,6 +153,7 @@ export interface IntegerNumberField {
   readonly modelVersion: string;
   readonly metadata: SchemaArtifactMetadata;
   readonly fieldSpec: IntegerNumberFieldSpec;
+  readonly helpText?: MultilingualString;
 }
 
 export interface IntegerNumberFieldInit {
@@ -159,17 +161,22 @@ export interface IntegerNumberFieldInit {
   readonly modelVersion: string;
   readonly metadata: SchemaArtifactMetadata;
   readonly fieldSpec: IntegerNumberFieldSpec;
+  readonly helpText?: MultilingualString;
 }
 
 export const integerNumberField = (
   init: IntegerNumberFieldInit,
-): IntegerNumberField => ({
-  kind: 'IntegerNumberField',
-  id: integerNumberFieldId(init.id),
-  modelVersion: parseSemanticVersion(init.modelVersion),
-  metadata: init.metadata,
-  fieldSpec: init.fieldSpec,
-});
+): IntegerNumberField => {
+  const out: IntegerNumberField = {
+    kind: 'IntegerNumberField',
+    id: integerNumberFieldId(init.id),
+    modelVersion: parseSemanticVersion(init.modelVersion),
+    metadata: init.metadata,
+    fieldSpec: init.fieldSpec,
+    ...(init.helpText !== undefined && { helpText: init.helpText }),
+  };
+  return out;
+};
 
 // =====================================================================
 // 5. EmbeddedField
@@ -183,6 +190,7 @@ export interface EmbeddedIntegerNumberField {
   readonly cardinality?: Cardinality;
   readonly visibility?: Visibility;
   readonly labelOverride?: LabelOverride;
+  readonly helpTextOverride?: MultilingualString;
   readonly property?: Property;
   readonly defaultValue?: IntegerNumberValue;
 }

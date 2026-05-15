@@ -8,6 +8,7 @@
 // (`value: string`); the datatype is fixed by the variant's `kind`.
 
 import { type Iri, iri, CedarConstructionError, parseSemanticVersion } from '../leaves/index.js';
+import type { MultilingualString } from '../multilingual.js';
 import type { SchemaArtifactMetadata } from '../metadata/index.js';
 import type { ValueRequirement } from '../embedded/requirement.js';
 import type { Cardinality } from '../embedded/cardinality.js';
@@ -198,6 +199,7 @@ export interface DateField {
   readonly modelVersion: string;
   readonly metadata: SchemaArtifactMetadata;
   readonly fieldSpec: DateFieldSpec;
+  readonly helpText?: MultilingualString;
 }
 
 export interface DateFieldInit {
@@ -205,16 +207,20 @@ export interface DateFieldInit {
   readonly modelVersion: string;
   readonly metadata: SchemaArtifactMetadata;
   readonly fieldSpec: DateFieldSpec;
+  readonly helpText?: MultilingualString;
 }
 
-export const dateField = (init: DateFieldInit): DateField =>
-  ({
+export const dateField = (init: DateFieldInit): DateField => {
+  const out: DateField = {
     kind: 'DateField',
     id: dateFieldId(init.id),
     modelVersion: parseSemanticVersion(init.modelVersion),
     metadata: init.metadata,
     fieldSpec: init.fieldSpec,
-  });
+    ...(init.helpText !== undefined && { helpText: init.helpText }),
+  };
+  return out;
+};
 
 // =====================================================================
 // 5. EmbeddedField
@@ -228,6 +234,7 @@ export interface EmbeddedDateField {
   readonly cardinality?: Cardinality;
   readonly visibility?: Visibility;
   readonly labelOverride?: LabelOverride;
+  readonly helpTextOverride?: MultilingualString;
   readonly property?: Property;
   readonly defaultValue?: DateValue;
 }

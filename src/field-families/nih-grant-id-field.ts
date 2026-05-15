@@ -144,6 +144,7 @@ export interface NihGrantIdField {
   readonly modelVersion: string;
   readonly metadata: SchemaArtifactMetadata;
   readonly fieldSpec: NihGrantIdFieldSpec;
+  readonly helpText?: MultilingualString;
 }
 
 export interface NihGrantIdFieldInit {
@@ -151,16 +152,20 @@ export interface NihGrantIdFieldInit {
   readonly modelVersion: string;
   readonly metadata: SchemaArtifactMetadata;
   readonly fieldSpec: NihGrantIdFieldSpec;
+  readonly helpText?: MultilingualString;
 }
 
-export const nihGrantIdField = (init: NihGrantIdFieldInit): NihGrantIdField =>
-  ({
+export const nihGrantIdField = (init: NihGrantIdFieldInit): NihGrantIdField => {
+  const out: NihGrantIdField = {
     kind: 'NihGrantIdField',
     id: nihGrantIdFieldId(init.id),
     modelVersion: parseSemanticVersion(init.modelVersion),
     metadata: init.metadata,
     fieldSpec: init.fieldSpec,
-  });
+    ...(init.helpText !== undefined && { helpText: init.helpText }),
+  };
+  return out;
+};
 
 // =====================================================================
 // 5. EmbeddedField
@@ -174,6 +179,7 @@ export interface EmbeddedNihGrantIdField {
   readonly cardinality?: Cardinality;
   readonly visibility?: Visibility;
   readonly labelOverride?: LabelOverride;
+  readonly helpTextOverride?: MultilingualString;
   readonly property?: Property;
   readonly defaultValue?: NihGrantIdValue;
 }

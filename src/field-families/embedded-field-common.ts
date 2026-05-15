@@ -21,6 +21,11 @@
 // in this folder.
 
 import { parseAsciiIdentifier } from '../leaves/index.js';
+import {
+  type MultilingualString,
+  type MultilingualStringInput,
+  multilingualString,
+} from '../multilingual.js';
 import type { ValueRequirement } from '../embedded/requirement.js';
 import type { Cardinality } from '../embedded/cardinality.js';
 import type { Visibility } from '../embedded/visibility.js';
@@ -38,6 +43,7 @@ export interface EmbeddedFieldInitCommon {
   readonly cardinality?: Cardinality;
   readonly visibility?: Visibility;
   readonly labelOverride?: LabelOverride;
+  readonly helpTextOverride?: MultilingualStringInput;
   readonly property?: PropertyInput;
 }
 
@@ -47,6 +53,7 @@ export interface AssembledCommon {
   cardinality?: Cardinality;
   visibility?: Visibility;
   labelOverride?: LabelOverride;
+  helpTextOverride?: MultilingualString;
   property?: Property;
 }
 
@@ -58,6 +65,8 @@ export function assembleCommon(init: EmbeddedFieldInitCommon): AssembledCommon {
   if (init.cardinality !== undefined) out.cardinality = init.cardinality;
   if (init.visibility !== undefined) out.visibility = init.visibility;
   if (init.labelOverride !== undefined) out.labelOverride = init.labelOverride;
+  if (init.helpTextOverride !== undefined)
+    out.helpTextOverride = multilingualString(init.helpTextOverride);
   if (init.property !== undefined) out.property = property(init.property);
   return out;
 }

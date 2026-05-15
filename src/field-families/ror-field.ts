@@ -143,6 +143,7 @@ export interface RorField {
   readonly modelVersion: string;
   readonly metadata: SchemaArtifactMetadata;
   readonly fieldSpec: RorFieldSpec;
+  readonly helpText?: MultilingualString;
 }
 
 export interface RorFieldInit {
@@ -150,16 +151,20 @@ export interface RorFieldInit {
   readonly modelVersion: string;
   readonly metadata: SchemaArtifactMetadata;
   readonly fieldSpec: RorFieldSpec;
+  readonly helpText?: MultilingualString;
 }
 
-export const rorField = (init: RorFieldInit): RorField =>
-  ({
+export const rorField = (init: RorFieldInit): RorField => {
+  const out: RorField = {
     kind: 'RorField',
     id: rorFieldId(init.id),
     modelVersion: parseSemanticVersion(init.modelVersion),
     metadata: init.metadata,
     fieldSpec: init.fieldSpec,
-  });
+    ...(init.helpText !== undefined && { helpText: init.helpText }),
+  };
+  return out;
+};
 
 // =====================================================================
 // 5. EmbeddedField
@@ -173,6 +178,7 @@ export interface EmbeddedRorField {
   readonly cardinality?: Cardinality;
   readonly visibility?: Visibility;
   readonly labelOverride?: LabelOverride;
+  readonly helpTextOverride?: MultilingualString;
   readonly property?: Property;
   readonly defaultValue?: RorValue;
 }

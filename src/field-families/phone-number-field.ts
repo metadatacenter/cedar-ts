@@ -5,6 +5,7 @@
 // PhoneNumberValue carries `value: string` directly.
 
 import { type Iri, iri, parseSemanticVersion } from '../leaves/index.js';
+import type { MultilingualString } from '../multilingual.js';
 import type { SchemaArtifactMetadata } from '../metadata/index.js';
 import type { ValueRequirement } from '../embedded/requirement.js';
 import type { Cardinality } from '../embedded/cardinality.js';
@@ -105,6 +106,7 @@ export interface PhoneNumberField {
   readonly modelVersion: string;
   readonly metadata: SchemaArtifactMetadata;
   readonly fieldSpec: PhoneNumberFieldSpec;
+  readonly helpText?: MultilingualString;
 }
 
 export interface PhoneNumberFieldInit {
@@ -112,16 +114,20 @@ export interface PhoneNumberFieldInit {
   readonly modelVersion: string;
   readonly metadata: SchemaArtifactMetadata;
   readonly fieldSpec: PhoneNumberFieldSpec;
+  readonly helpText?: MultilingualString;
 }
 
-export const phoneNumberField = (init: PhoneNumberFieldInit): PhoneNumberField =>
-  ({
+export const phoneNumberField = (init: PhoneNumberFieldInit): PhoneNumberField => {
+  const out: PhoneNumberField = {
     kind: 'PhoneNumberField',
     id: phoneNumberFieldId(init.id),
     modelVersion: parseSemanticVersion(init.modelVersion),
     metadata: init.metadata,
     fieldSpec: init.fieldSpec,
-  });
+    ...(init.helpText !== undefined && { helpText: init.helpText }),
+  };
+  return out;
+};
 
 // =====================================================================
 // 5. EmbeddedField
@@ -135,6 +141,7 @@ export interface EmbeddedPhoneNumberField {
   readonly cardinality?: Cardinality;
   readonly visibility?: Visibility;
   readonly labelOverride?: LabelOverride;
+  readonly helpTextOverride?: MultilingualString;
   readonly property?: Property;
   readonly defaultValue?: PhoneNumberValue;
 }

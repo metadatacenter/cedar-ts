@@ -27,6 +27,7 @@ import {
   assertNonNegativeInteger,
   parseSemanticVersion,
 } from '../leaves/index.js';
+import type { MultilingualString } from '../multilingual.js';
 import type { SchemaArtifactMetadata } from '../metadata/index.js';
 import type { ValueRequirement } from '../embedded/requirement.js';
 import type { Cardinality } from '../embedded/cardinality.js';
@@ -169,6 +170,7 @@ export interface TextField {
   readonly modelVersion: string;
   readonly metadata: SchemaArtifactMetadata;
   readonly fieldSpec: TextFieldSpec;
+  readonly helpText?: MultilingualString;
 }
 
 export interface TextFieldInit {
@@ -176,16 +178,20 @@ export interface TextFieldInit {
   readonly modelVersion: string;
   readonly metadata: SchemaArtifactMetadata;
   readonly fieldSpec: TextFieldSpec;
+  readonly helpText?: MultilingualString;
 }
 
-export const textField = (init: TextFieldInit): TextField =>
-  ({
+export const textField = (init: TextFieldInit): TextField => {
+  const out: TextField = {
     kind: 'TextField',
     id: textFieldId(init.id),
     modelVersion: parseSemanticVersion(init.modelVersion),
     metadata: init.metadata,
     fieldSpec: init.fieldSpec,
-  });
+    ...(init.helpText !== undefined && { helpText: init.helpText }),
+  };
+  return out;
+};
 
 // =====================================================================
 // 5. EmbeddedField
@@ -199,6 +205,7 @@ export interface EmbeddedTextField {
   readonly cardinality?: Cardinality;
   readonly visibility?: Visibility;
   readonly labelOverride?: LabelOverride;
+  readonly helpTextOverride?: MultilingualString;
   readonly property?: Property;
   readonly defaultValue?: TextValue;
 }

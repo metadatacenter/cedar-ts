@@ -16,6 +16,7 @@
 // `cardinality` slot (single-valued enum is implicit, parallel to boolean).
 
 import { type Iri, iri, parseSemanticVersion } from '../leaves/index.js';
+import type { MultilingualString } from '../multilingual.js';
 import type { SchemaArtifactMetadata } from '../metadata/index.js';
 import type { ValueRequirement } from '../embedded/requirement.js';
 import type { Visibility } from '../embedded/visibility.js';
@@ -110,6 +111,7 @@ export interface SingleValuedEnumField {
   readonly modelVersion: string;
   readonly metadata: SchemaArtifactMetadata;
   readonly fieldSpec: SingleValuedEnumFieldSpec;
+  readonly helpText?: MultilingualString;
 }
 
 export interface SingleValuedEnumFieldInit {
@@ -117,17 +119,22 @@ export interface SingleValuedEnumFieldInit {
   readonly modelVersion: string;
   readonly metadata: SchemaArtifactMetadata;
   readonly fieldSpec: SingleValuedEnumFieldSpec;
+  readonly helpText?: MultilingualString;
 }
 
 export const singleValuedEnumField = (
   init: SingleValuedEnumFieldInit,
-): SingleValuedEnumField => ({
-  kind: 'SingleValuedEnumField',
-  id: singleValuedEnumFieldId(init.id),
-  modelVersion: parseSemanticVersion(init.modelVersion),
-  metadata: init.metadata,
-  fieldSpec: init.fieldSpec,
-});
+): SingleValuedEnumField => {
+  const out: SingleValuedEnumField = {
+    kind: 'SingleValuedEnumField',
+    id: singleValuedEnumFieldId(init.id),
+    modelVersion: parseSemanticVersion(init.modelVersion),
+    metadata: init.metadata,
+    fieldSpec: init.fieldSpec,
+    ...(init.helpText !== undefined && { helpText: init.helpText }),
+  };
+  return out;
+};
 
 // =====================================================================
 // 5. EmbeddedField — no cardinality (single-valued enum is implicit)
@@ -140,6 +147,7 @@ export interface EmbeddedSingleValuedEnumField {
   readonly valueRequirement?: ValueRequirement;
   readonly visibility?: Visibility;
   readonly labelOverride?: LabelOverride;
+  readonly helpTextOverride?: MultilingualString;
   readonly property?: Property;
   readonly defaultValue?: EnumValue;
 }
@@ -150,6 +158,7 @@ export interface EmbeddedSingleValuedEnumFieldInit {
   readonly valueRequirement?: ValueRequirement;
   readonly visibility?: Visibility;
   readonly labelOverride?: LabelOverride;
+  readonly helpTextOverride?: MultilingualString;
   readonly property?: PropertyInput;
   readonly defaultValue?: EnumValue;
 }
@@ -164,6 +173,7 @@ export function embeddedSingleValuedEnumField(
     valueRequirement?: ValueRequirement;
     visibility?: Visibility;
     labelOverride?: LabelOverride;
+    helpTextOverride?: MultilingualString;
     property?: Property;
     defaultValue?: EnumValue;
   } = {
@@ -174,6 +184,7 @@ export function embeddedSingleValuedEnumField(
   if (init.valueRequirement !== undefined) out.valueRequirement = init.valueRequirement;
   if (init.visibility !== undefined) out.visibility = init.visibility;
   if (init.labelOverride !== undefined) out.labelOverride = init.labelOverride;
+  if (init.helpTextOverride !== undefined) out.helpTextOverride = init.helpTextOverride;
   if (init.property !== undefined) out.property = property(init.property);
   if (init.defaultValue !== undefined) out.defaultValue = init.defaultValue;
   return out;
