@@ -28,6 +28,7 @@ import {
   CedarConstructionError,
   parseSemanticVersion,
 } from '../leaves/index.js';
+import type { ControlledTermRenderingHint } from './rendering-hints.js';
 import {
   type MultilingualString,
   type MultilingualStringInput,
@@ -308,11 +309,13 @@ export interface ControlledTermFieldSpec {
   readonly kind: 'ControlledTermFieldSpec';
   readonly sources: readonly [ControlledTermSource, ...ControlledTermSource[]];
   readonly defaultValue?: ControlledTermValue;
+  readonly renderingHint?: ControlledTermRenderingHint;
 }
 
 export interface ControlledTermFieldSpecInit {
   readonly sources: readonly [ControlledTermSource, ...ControlledTermSource[]];
   readonly defaultValue?: ControlledTermValue;
+  readonly renderingHint?: ControlledTermRenderingHint;
 }
 
 // Two calling conventions, kept for ergonomic parity with prior cedar-ts:
@@ -343,8 +346,10 @@ export function controlledTermFieldSpec(
       kind: 'ControlledTermFieldSpec';
       sources: readonly [ControlledTermSource, ...ControlledTermSource[]];
       defaultValue?: ControlledTermValue;
+      renderingHint?: ControlledTermRenderingHint;
     } = { kind: 'ControlledTermFieldSpec', sources: init.sources };
     if (init.defaultValue !== undefined) out.defaultValue = init.defaultValue;
+    if (init.renderingHint !== undefined) out.renderingHint = init.renderingHint;
     return out;
   }
   return {

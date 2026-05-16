@@ -5,6 +5,7 @@
 // EmailValue carries `value: string` directly.
 
 import { type Iri, iri, parseSemanticVersion } from '../leaves/index.js';
+import type { EmailRenderingHint } from './rendering-hints.js';
 import type { MultilingualString } from '../multilingual.js';
 import type { SchemaArtifactMetadata } from '../metadata/index.js';
 import type { ValueRequirement } from '../embedded/requirement.js';
@@ -72,14 +73,18 @@ export function isEmailValue(x: unknown): x is EmailValue {
 export interface EmailFieldSpec {
   readonly kind: 'EmailFieldSpec';
   readonly defaultValue?: EmailValue;
+  readonly renderingHint?: EmailRenderingHint;
 }
 
 export interface EmailFieldSpecInit {
   readonly defaultValue?: EmailValueInput;
+  readonly renderingHint?: EmailRenderingHint;
 }
 
 export function emailFieldSpec(init?: EmailFieldSpecInit): EmailFieldSpec {
-  const out: { kind: 'EmailFieldSpec'; defaultValue?: EmailValue } = {
+  const out: { kind: 'EmailFieldSpec'; defaultValue?: EmailValue;
+     renderingHint?: EmailRenderingHint;
+  } = {
     kind: 'EmailFieldSpec',
   };
   if (init?.defaultValue !== undefined) {
@@ -88,6 +93,8 @@ export function emailFieldSpec(init?: EmailFieldSpecInit): EmailFieldSpec {
         ? emailValue(init.defaultValue)
         : init.defaultValue;
   }
+  if (init?.renderingHint !== undefined)
+    out.renderingHint = init.renderingHint;
   return out;
 }
 export const isEmailFieldSpec = (x: unknown): x is EmailFieldSpec =>

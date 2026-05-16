@@ -19,6 +19,7 @@
 // pattern (`iri` + optional `label`) via `external-authority-shared.ts`.
 
 import { type Iri, iri, parseSemanticVersion } from '../leaves/index.js';
+import type { DoiRenderingHint } from './rendering-hints.js';
 import type { MultilingualString } from '../multilingual.js';
 import type { SchemaArtifactMetadata } from '../metadata/index.js';
 import type { ValueRequirement } from '../embedded/requirement.js';
@@ -112,14 +113,18 @@ export const isDoiValue = (x: unknown): x is DoiValue =>
 export interface DoiFieldSpec {
   readonly kind: 'DoiFieldSpec';
   readonly defaultValue?: DoiValue;
+  readonly renderingHint?: DoiRenderingHint;
 }
 
 export interface DoiFieldSpecInit {
   readonly defaultValue?: DoiValue | AuthorityValueInput<DoiIri>;
+  readonly renderingHint?: DoiRenderingHint;
 }
 
 export function doiFieldSpec(init?: DoiFieldSpecInit): DoiFieldSpec {
-  const out: { kind: 'DoiFieldSpec'; defaultValue?: DoiValue } = {
+  const out: { kind: 'DoiFieldSpec'; defaultValue?: DoiValue;
+     renderingHint?: DoiRenderingHint;
+  } = {
     kind: 'DoiFieldSpec',
   };
   if (init?.defaultValue !== undefined) {
@@ -127,6 +132,8 @@ export function doiFieldSpec(init?: DoiFieldSpecInit): DoiFieldSpec {
       ? init.defaultValue
       : doiValue(init.defaultValue);
   }
+  if (init?.renderingHint !== undefined)
+    out.renderingHint = init.renderingHint;
   return out;
 }
 

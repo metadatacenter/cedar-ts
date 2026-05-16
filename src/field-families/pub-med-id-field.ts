@@ -19,6 +19,7 @@
 // pattern (`iri` + optional `label`) via `external-authority-shared.ts`.
 
 import { type Iri, iri, parseSemanticVersion } from '../leaves/index.js';
+import type { PubMedIdRenderingHint } from './rendering-hints.js';
 import type { MultilingualString } from '../multilingual.js';
 import type { SchemaArtifactMetadata } from '../metadata/index.js';
 import type { ValueRequirement } from '../embedded/requirement.js';
@@ -112,14 +113,18 @@ export const isPubMedIdValue = (x: unknown): x is PubMedIdValue =>
 export interface PubMedIdFieldSpec {
   readonly kind: 'PubMedIdFieldSpec';
   readonly defaultValue?: PubMedIdValue;
+  readonly renderingHint?: PubMedIdRenderingHint;
 }
 
 export interface PubMedIdFieldSpecInit {
   readonly defaultValue?: PubMedIdValue | AuthorityValueInput<PubMedIri>;
+  readonly renderingHint?: PubMedIdRenderingHint;
 }
 
 export function pubMedIdFieldSpec(init?: PubMedIdFieldSpecInit): PubMedIdFieldSpec {
-  const out: { kind: 'PubMedIdFieldSpec'; defaultValue?: PubMedIdValue } = {
+  const out: { kind: 'PubMedIdFieldSpec'; defaultValue?: PubMedIdValue;
+     renderingHint?: PubMedIdRenderingHint;
+  } = {
     kind: 'PubMedIdFieldSpec',
   };
   if (init?.defaultValue !== undefined) {
@@ -127,6 +132,8 @@ export function pubMedIdFieldSpec(init?: PubMedIdFieldSpecInit): PubMedIdFieldSp
       ? init.defaultValue
       : pubMedIdValue(init.defaultValue);
   }
+  if (init?.renderingHint !== undefined)
+    out.renderingHint = init.renderingHint;
   return out;
 }
 

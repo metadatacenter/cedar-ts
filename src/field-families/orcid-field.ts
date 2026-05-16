@@ -19,6 +19,7 @@
 // pattern (`iri` + optional `label`) via `external-authority-shared.ts`.
 
 import { type Iri, iri, parseSemanticVersion } from '../leaves/index.js';
+import type { OrcidRenderingHint } from './rendering-hints.js';
 import type { MultilingualString } from '../multilingual.js';
 import type { SchemaArtifactMetadata } from '../metadata/index.js';
 import type { ValueRequirement } from '../embedded/requirement.js';
@@ -112,14 +113,18 @@ export const isOrcidValue = (x: unknown): x is OrcidValue =>
 export interface OrcidFieldSpec {
   readonly kind: 'OrcidFieldSpec';
   readonly defaultValue?: OrcidValue;
+  readonly renderingHint?: OrcidRenderingHint;
 }
 
 export interface OrcidFieldSpecInit {
   readonly defaultValue?: OrcidValue | AuthorityValueInput<OrcidIri>;
+  readonly renderingHint?: OrcidRenderingHint;
 }
 
 export function orcidFieldSpec(init?: OrcidFieldSpecInit): OrcidFieldSpec {
-  const out: { kind: 'OrcidFieldSpec'; defaultValue?: OrcidValue } = {
+  const out: { kind: 'OrcidFieldSpec'; defaultValue?: OrcidValue;
+     renderingHint?: OrcidRenderingHint;
+  } = {
     kind: 'OrcidFieldSpec',
   };
   if (init?.defaultValue !== undefined) {
@@ -127,6 +132,8 @@ export function orcidFieldSpec(init?: OrcidFieldSpecInit): OrcidFieldSpec {
       ? init.defaultValue
       : orcidValue(init.defaultValue);
   }
+  if (init?.renderingHint !== undefined)
+    out.renderingHint = init.renderingHint;
   return out;
 }
 

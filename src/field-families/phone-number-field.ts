@@ -5,6 +5,7 @@
 // PhoneNumberValue carries `value: string` directly.
 
 import { type Iri, iri, parseSemanticVersion } from '../leaves/index.js';
+import type { PhoneNumberRenderingHint } from './rendering-hints.js';
 import type { MultilingualString } from '../multilingual.js';
 import type { SchemaArtifactMetadata } from '../metadata/index.js';
 import type { ValueRequirement } from '../embedded/requirement.js';
@@ -72,16 +73,20 @@ export function isPhoneNumberValue(x: unknown): x is PhoneNumberValue {
 export interface PhoneNumberFieldSpec {
   readonly kind: 'PhoneNumberFieldSpec';
   readonly defaultValue?: PhoneNumberValue;
+  readonly renderingHint?: PhoneNumberRenderingHint;
 }
 
 export interface PhoneNumberFieldSpecInit {
   readonly defaultValue?: PhoneNumberValueInput;
+  readonly renderingHint?: PhoneNumberRenderingHint;
 }
 
 export function phoneNumberFieldSpec(
   init?: PhoneNumberFieldSpecInit,
 ): PhoneNumberFieldSpec {
-  const out: { kind: 'PhoneNumberFieldSpec'; defaultValue?: PhoneNumberValue } = {
+  const out: { kind: 'PhoneNumberFieldSpec'; defaultValue?: PhoneNumberValue;
+     renderingHint?: PhoneNumberRenderingHint;
+  } = {
     kind: 'PhoneNumberFieldSpec',
   };
   if (init?.defaultValue !== undefined) {
@@ -90,6 +95,8 @@ export function phoneNumberFieldSpec(
         ? phoneNumberValue(init.defaultValue)
         : init.defaultValue;
   }
+  if (init?.renderingHint !== undefined)
+    out.renderingHint = init.renderingHint;
   return out;
 }
 export const isPhoneNumberFieldSpec = (x: unknown): x is PhoneNumberFieldSpec =>

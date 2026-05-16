@@ -18,6 +18,7 @@
 // pattern (`iri` + optional `label`) via `external-authority-shared.ts`.
 
 import { type Iri, iri, parseSemanticVersion } from '../leaves/index.js';
+import type { RridRenderingHint } from './rendering-hints.js';
 import type { MultilingualString } from '../multilingual.js';
 import type { SchemaArtifactMetadata } from '../metadata/index.js';
 import type { ValueRequirement } from '../embedded/requirement.js';
@@ -111,14 +112,18 @@ export const isRridValue = (x: unknown): x is RridValue =>
 export interface RridFieldSpec {
   readonly kind: 'RridFieldSpec';
   readonly defaultValue?: RridValue;
+  readonly renderingHint?: RridRenderingHint;
 }
 
 export interface RridFieldSpecInit {
   readonly defaultValue?: RridValue | AuthorityValueInput<RridIri>;
+  readonly renderingHint?: RridRenderingHint;
 }
 
 export function rridFieldSpec(init?: RridFieldSpecInit): RridFieldSpec {
-  const out: { kind: 'RridFieldSpec'; defaultValue?: RridValue } = {
+  const out: { kind: 'RridFieldSpec'; defaultValue?: RridValue;
+     renderingHint?: RridRenderingHint;
+  } = {
     kind: 'RridFieldSpec',
   };
   if (init?.defaultValue !== undefined) {
@@ -126,6 +131,8 @@ export function rridFieldSpec(init?: RridFieldSpecInit): RridFieldSpec {
       ? init.defaultValue
       : rridValue(init.defaultValue);
   }
+  if (init?.renderingHint !== undefined)
+    out.renderingHint = init.renderingHint;
   return out;
 }
 

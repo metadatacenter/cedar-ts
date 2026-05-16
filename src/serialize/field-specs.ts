@@ -62,10 +62,21 @@ import {
   type TimeRenderingHint,
   type DateTimeRenderingHint,
   type TextRenderingHint,
+  type TextLineMode,
   type NumericRenderingHint,
   type BooleanRenderingHint,
   type SingleValuedEnumRenderingHint,
   type MultiValuedEnumRenderingHint,
+  type ControlledTermRenderingHint,
+  type EmailRenderingHint,
+  type PhoneNumberRenderingHint,
+  type LinkRenderingHint,
+  type OrcidRenderingHint,
+  type RorRenderingHint,
+  type DoiRenderingHint,
+  type PubMedIdRenderingHint,
+  type RridRenderingHint,
+  type NihGrantIdRenderingHint,
   type DateComponentOrder,
   type TimeFormat,
   textFieldSpec,
@@ -103,7 +114,7 @@ import {
   TIMEZONE_REQUIREMENTS,
   LANG_TAG_REQUIREMENTS,
   DATE_TIME_VALUE_TYPES,
-  TEXT_RENDERING_HINTS,
+  TEXT_LINE_MODES,
   SINGLE_VALUED_ENUM_RENDERING_HINTS,
   MULTI_VALUED_ENUM_RENDERING_HINTS,
   BOOLEAN_RENDERING_HINTS,
@@ -125,6 +136,7 @@ import {
   rejectNullProperty,
 } from './parse-utils.js';
 import { serializeIri } from './collapsed-wrappers.js';
+import type { MultilingualString } from '../multilingual.js';
 import {
   serializeMultilingualString,
   parseMultilingualString,
@@ -198,17 +210,48 @@ function parseRealNumberDatatypeKind(
   return s as RealNumberDatatypeKind;
 }
 
-// ---- Rendering hints (flat string enums + temporal objects) ----------
+// ---- Rendering hints --------------------------------------------------
 
-export const serializeTextRenderingHint = (x: TextRenderingHint): string => x;
-export const parseTextRenderingHint = (
+// TextRenderingHint — structured object carrying optional lineMode and
+// optional placeholder. The bare-string form ("singleLine" | "multiLine")
+// from prior cedar-ts revisions no longer decodes.
+
+export function serializeTextRenderingHint(x: TextRenderingHint): unknown {
+  const out: Record<string, unknown> = {};
+  if (x.lineMode !== undefined) out['lineMode'] = x.lineMode;
+  if (x.placeholder !== undefined)
+    out['placeholder'] = serializeMultilingualString(x.placeholder);
+  return out;
+}
+
+export function parseTextRenderingHint(
   x: unknown,
-  w = 'TextRenderingHint',
-): TextRenderingHint => expectStringEnum(x, TEXT_RENDERING_HINTS, w);
+  where = 'TextRenderingHint',
+): TextRenderingHint {
+  const o = expectObject(x, where);
+  expectKnownProperties(o, ['lineMode', 'placeholder']);
+  rejectNullProperty(o, 'lineMode');
+  rejectNullProperty(o, 'placeholder');
+  const out: { lineMode?: TextLineMode; placeholder?: MultilingualString } = {};
+  if ('lineMode' in o)
+    out.lineMode = expectStringEnum<TextLineMode>(
+      o['lineMode'],
+      TEXT_LINE_MODES,
+      `${where}.lineMode`,
+    );
+  if ('placeholder' in o)
+    out.placeholder = parseMultilingualString(
+      o['placeholder'],
+      `${where}.placeholder`,
+    );
+  return out;
+}
 
 export function serializeNumericRenderingHint(x: NumericRenderingHint): unknown {
   const out: Record<string, unknown> = {};
   if (x.decimalPlaces !== undefined) out['decimalPlaces'] = x.decimalPlaces;
+  if (x.placeholder !== undefined)
+    out['placeholder'] = serializeMultilingualString(x.placeholder);
   return out;
 }
 
@@ -217,11 +260,17 @@ export function parseNumericRenderingHint(
   w = 'NumericRenderingHint',
 ): NumericRenderingHint {
   const o = expectObject(x, w);
-  expectKnownProperties(o, ['decimalPlaces']);
+  expectKnownProperties(o, ['decimalPlaces', 'placeholder']);
   rejectNullProperty(o, 'decimalPlaces');
-  const out: { decimalPlaces?: number } = {};
+  rejectNullProperty(o, 'placeholder');
+  const out: { decimalPlaces?: number; placeholder?: MultilingualString } = {};
   if ('decimalPlaces' in o)
     out.decimalPlaces = expectNumber(o['decimalPlaces'], `${w}.decimalPlaces`);
+  if ('placeholder' in o)
+    out.placeholder = parseMultilingualString(
+      o['placeholder'],
+      `${w}.placeholder`,
+    );
   return out;
 }
 
@@ -252,6 +301,8 @@ export const parseMultiValuedEnumRenderingHint = (
 export function serializeDateRenderingHint(x: DateRenderingHint): unknown {
   const out: Record<string, unknown> = {};
   if (x.componentOrder !== undefined) out['componentOrder'] = x.componentOrder;
+  if (x.placeholder !== undefined)
+    out['placeholder'] = serializeMultilingualString(x.placeholder);
   return out;
 }
 
@@ -260,22 +311,32 @@ export function parseDateRenderingHint(
   where = 'DateRenderingHint',
 ): DateRenderingHint {
   const o = expectObject(x, where);
-  expectKnownProperties(o, ['componentOrder']);
+  expectKnownProperties(o, ['componentOrder', 'placeholder']);
   rejectNullProperty(o, 'componentOrder');
-  if ('componentOrder' in o) {
-    const co = expectStringEnum<DateComponentOrder>(
+  rejectNullProperty(o, 'placeholder');
+  const out: {
+    componentOrder?: DateComponentOrder;
+    placeholder?: MultilingualString;
+  } = {};
+  if ('componentOrder' in o)
+    out.componentOrder = expectStringEnum<DateComponentOrder>(
       o['componentOrder'],
       DATE_COMPONENT_ORDERS,
       `${where}.componentOrder`,
     );
-    return dateRenderingHint(co);
-  }
-  return dateRenderingHint();
+  if ('placeholder' in o)
+    out.placeholder = parseMultilingualString(
+      o['placeholder'],
+      `${where}.placeholder`,
+    );
+  return out;
 }
 
 export function serializeTimeRenderingHint(x: TimeRenderingHint): unknown {
   const out: Record<string, unknown> = {};
   if (x.timeFormat !== undefined) out['timeFormat'] = x.timeFormat;
+  if (x.placeholder !== undefined)
+    out['placeholder'] = serializeMultilingualString(x.placeholder);
   return out;
 }
 
@@ -284,22 +345,29 @@ export function parseTimeRenderingHint(
   where = 'TimeRenderingHint',
 ): TimeRenderingHint {
   const o = expectObject(x, where);
-  expectKnownProperties(o, ['timeFormat']);
+  expectKnownProperties(o, ['timeFormat', 'placeholder']);
   rejectNullProperty(o, 'timeFormat');
-  if ('timeFormat' in o) {
-    const tf = expectStringEnum<TimeFormat>(
+  rejectNullProperty(o, 'placeholder');
+  const out: { timeFormat?: TimeFormat; placeholder?: MultilingualString } = {};
+  if ('timeFormat' in o)
+    out.timeFormat = expectStringEnum<TimeFormat>(
       o['timeFormat'],
       TIME_FORMATS,
       `${where}.timeFormat`,
     );
-    return timeRenderingHint(tf);
-  }
-  return timeRenderingHint();
+  if ('placeholder' in o)
+    out.placeholder = parseMultilingualString(
+      o['placeholder'],
+      `${where}.placeholder`,
+    );
+  return out;
 }
 
 export function serializeDateTimeRenderingHint(x: DateTimeRenderingHint): unknown {
   const out: Record<string, unknown> = {};
   if (x.timeFormat !== undefined) out['timeFormat'] = x.timeFormat;
+  if (x.placeholder !== undefined)
+    out['placeholder'] = serializeMultilingualString(x.placeholder);
   return out;
 }
 
@@ -308,18 +376,127 @@ export function parseDateTimeRenderingHint(
   where = 'DateTimeRenderingHint',
 ): DateTimeRenderingHint {
   const o = expectObject(x, where);
-  expectKnownProperties(o, ['timeFormat']);
+  expectKnownProperties(o, ['timeFormat', 'placeholder']);
   rejectNullProperty(o, 'timeFormat');
-  if ('timeFormat' in o) {
-    const tf = expectStringEnum<TimeFormat>(
+  rejectNullProperty(o, 'placeholder');
+  const out: { timeFormat?: TimeFormat; placeholder?: MultilingualString } = {};
+  if ('timeFormat' in o)
+    out.timeFormat = expectStringEnum<TimeFormat>(
       o['timeFormat'],
       TIME_FORMATS,
       `${where}.timeFormat`,
     );
-    return dateTimeRenderingHint(tf);
-  }
-  return dateTimeRenderingHint();
+  if ('placeholder' in o)
+    out.placeholder = parseMultilingualString(
+      o['placeholder'],
+      `${where}.placeholder`,
+    );
+  return out;
 }
+
+// ---- Single-slot rendering hints (placeholder-only) ------------------
+//
+// One serialize/parse pair per previously-hint-less family. Each
+// emits/accepts a single optional `placeholder` slot.
+
+function serializePlaceholderOnlyHint(
+  x: { readonly placeholder?: MultilingualString },
+): unknown {
+  const out: Record<string, unknown> = {};
+  if (x.placeholder !== undefined)
+    out['placeholder'] = serializeMultilingualString(x.placeholder);
+  return out;
+}
+
+function parsePlaceholderOnlyHint(
+  x: unknown,
+  where: string,
+): { placeholder?: MultilingualString } {
+  const o = expectObject(x, where);
+  expectKnownProperties(o, ['placeholder']);
+  rejectNullProperty(o, 'placeholder');
+  const out: { placeholder?: MultilingualString } = {};
+  if ('placeholder' in o)
+    out.placeholder = parseMultilingualString(
+      o['placeholder'],
+      `${where}.placeholder`,
+    );
+  return out;
+}
+
+export const serializeControlledTermRenderingHint = (
+  x: ControlledTermRenderingHint,
+): unknown => serializePlaceholderOnlyHint(x);
+export const parseControlledTermRenderingHint = (
+  x: unknown,
+  w = 'ControlledTermRenderingHint',
+): ControlledTermRenderingHint => parsePlaceholderOnlyHint(x, w);
+
+export const serializeEmailRenderingHint = (x: EmailRenderingHint): unknown =>
+  serializePlaceholderOnlyHint(x);
+export const parseEmailRenderingHint = (
+  x: unknown,
+  w = 'EmailRenderingHint',
+): EmailRenderingHint => parsePlaceholderOnlyHint(x, w);
+
+export const serializePhoneNumberRenderingHint = (
+  x: PhoneNumberRenderingHint,
+): unknown => serializePlaceholderOnlyHint(x);
+export const parsePhoneNumberRenderingHint = (
+  x: unknown,
+  w = 'PhoneNumberRenderingHint',
+): PhoneNumberRenderingHint => parsePlaceholderOnlyHint(x, w);
+
+export const serializeLinkRenderingHint = (x: LinkRenderingHint): unknown =>
+  serializePlaceholderOnlyHint(x);
+export const parseLinkRenderingHint = (
+  x: unknown,
+  w = 'LinkRenderingHint',
+): LinkRenderingHint => parsePlaceholderOnlyHint(x, w);
+
+export const serializeOrcidRenderingHint = (x: OrcidRenderingHint): unknown =>
+  serializePlaceholderOnlyHint(x);
+export const parseOrcidRenderingHint = (
+  x: unknown,
+  w = 'OrcidRenderingHint',
+): OrcidRenderingHint => parsePlaceholderOnlyHint(x, w);
+
+export const serializeRorRenderingHint = (x: RorRenderingHint): unknown =>
+  serializePlaceholderOnlyHint(x);
+export const parseRorRenderingHint = (
+  x: unknown,
+  w = 'RorRenderingHint',
+): RorRenderingHint => parsePlaceholderOnlyHint(x, w);
+
+export const serializeDoiRenderingHint = (x: DoiRenderingHint): unknown =>
+  serializePlaceholderOnlyHint(x);
+export const parseDoiRenderingHint = (
+  x: unknown,
+  w = 'DoiRenderingHint',
+): DoiRenderingHint => parsePlaceholderOnlyHint(x, w);
+
+export const serializePubMedIdRenderingHint = (
+  x: PubMedIdRenderingHint,
+): unknown => serializePlaceholderOnlyHint(x);
+export const parsePubMedIdRenderingHint = (
+  x: unknown,
+  w = 'PubMedIdRenderingHint',
+): PubMedIdRenderingHint => parsePlaceholderOnlyHint(x, w);
+
+export const serializeRridRenderingHint = (x: RridRenderingHint): unknown =>
+  serializePlaceholderOnlyHint(x);
+export const parseRridRenderingHint = (
+  x: unknown,
+  w = 'RridRenderingHint',
+): RridRenderingHint => parsePlaceholderOnlyHint(x, w);
+
+export const serializeNihGrantIdRenderingHint = (
+  x: NihGrantIdRenderingHint,
+): unknown => serializePlaceholderOnlyHint(x);
+export const parseNihGrantIdRenderingHint = (
+  x: unknown,
+  w = 'NihGrantIdRenderingHint',
+): NihGrantIdRenderingHint => parsePlaceholderOnlyHint(x, w);
 
 // ---- Unit ------------------------------------------------------------
 
@@ -1134,6 +1311,8 @@ export function serializeControlledTermFieldSpec(
   };
   if (x.defaultValue !== undefined)
     out['defaultValue'] = serializeControlledTermValue(x.defaultValue);
+  if (x.renderingHint !== undefined)
+    out['renderingHint'] = serializeControlledTermRenderingHint(x.renderingHint);
   return out;
 }
 
@@ -1142,8 +1321,9 @@ export function parseControlledTermFieldSpec(
   where = 'ControlledTermFieldSpec',
 ): ControlledTermFieldSpec {
   const o = expectObject(x, where);
-  expectKnownProperties(o, ['kind', 'sources', 'defaultValue']);
+  expectKnownProperties(o, ['kind', 'sources', 'defaultValue', 'renderingHint']);
   rejectNullProperty(o, 'defaultValue');
+  rejectNullProperty(o, 'renderingHint');
   if (o['kind'] !== 'ControlledTermFieldSpec') {
     throw new CedarConstructionError(
       `${where}: expected kind "ControlledTermFieldSpec"`,
@@ -1159,6 +1339,7 @@ export function parseControlledTermFieldSpec(
   const init: {
     sources: readonly [ControlledTermSource, ...ControlledTermSource[]];
     defaultValue?: ControlledTermValue;
+    renderingHint?: ControlledTermRenderingHint;
   } = {
     sources: sources as [ControlledTermSource, ...ControlledTermSource[]],
   };
@@ -1166,6 +1347,11 @@ export function parseControlledTermFieldSpec(
     init.defaultValue = parseControlledTermValue(
       o['defaultValue'],
       `${where}.defaultValue`,
+    );
+  if ('renderingHint' in o)
+    init.renderingHint = parseControlledTermRenderingHint(
+      o['renderingHint'],
+      `${where}.renderingHint`,
     );
   return controlledTermFieldSpec(init);
 }
@@ -1299,11 +1485,17 @@ export function parseMultiValuedEnumFieldSpec(
 // families). Each is round-tripped through a small generic helper that
 // captures its Value type and tagged-value (de)serializer pair.
 
-function defaultOnlySpec<T extends { kind: string; defaultValue?: V }, V>(
+function defaultOnlySpec<
+  T extends { kind: string; defaultValue?: V; renderingHint?: H },
+  V,
+  H,
+>(
   expectedKind: T['kind'],
-  ctor: (init?: { defaultValue?: V }) => T,
+  ctor: (init?: { defaultValue?: V; renderingHint?: H }) => T,
   serializeValue: (v: V) => unknown,
   parseValueFn: (x: unknown, where?: string) => V,
+  serializeHint: (h: H) => unknown,
+  parseHintFn: (x: unknown, where?: string) => H,
 ): {
   serialize: (x: T) => unknown;
   parse: (x: unknown, where?: string) => T;
@@ -1313,102 +1505,128 @@ function defaultOnlySpec<T extends { kind: string; defaultValue?: V }, V>(
       const out: Record<string, unknown> = { kind: x.kind };
       if (x.defaultValue !== undefined)
         out['defaultValue'] = serializeValue(x.defaultValue);
+      if (x.renderingHint !== undefined)
+        out['renderingHint'] = serializeHint(x.renderingHint);
       return out;
     },
     parse: (x: unknown, where: string = expectedKind): T => {
       const o = expectObject(x, where);
-      expectKnownProperties(o, ['kind', 'defaultValue']);
+      expectKnownProperties(o, ['kind', 'defaultValue', 'renderingHint']);
       rejectNullProperty(o, 'defaultValue');
+      rejectNullProperty(o, 'renderingHint');
       if (o['kind'] !== expectedKind) {
         throw new CedarConstructionError(
           `${where}: expected kind ${JSON.stringify(expectedKind)}`,
         );
       }
-      const init: { defaultValue?: V } = {};
+      const init: { defaultValue?: V; renderingHint?: H } = {};
       if ('defaultValue' in o)
         init.defaultValue = parseValueFn(o['defaultValue'], `${where}.defaultValue`);
+      if ('renderingHint' in o)
+        init.renderingHint = parseHintFn(
+          o['renderingHint'],
+          `${where}.renderingHint`,
+        );
       return ctor(init);
     },
   };
 }
 
-const linkSpecHelpers = defaultOnlySpec<LinkFieldSpec, LinkValue>(
+const linkSpecHelpers = defaultOnlySpec<LinkFieldSpec, LinkValue, LinkRenderingHint>(
   'LinkFieldSpec',
   linkFieldSpec,
   serializeLinkValue,
   parseLinkValue,
+  serializeLinkRenderingHint,
+  parseLinkRenderingHint,
 );
 export const serializeLinkFieldSpec = linkSpecHelpers.serialize;
 export const parseLinkFieldSpec = linkSpecHelpers.parse;
 
-const emailSpecHelpers = defaultOnlySpec<EmailFieldSpec, EmailValue>(
+const emailSpecHelpers = defaultOnlySpec<EmailFieldSpec, EmailValue, EmailRenderingHint>(
   'EmailFieldSpec',
   emailFieldSpec,
   serializeEmailValue,
   parseEmailValue,
+  serializeEmailRenderingHint,
+  parseEmailRenderingHint,
 );
 export const serializeEmailFieldSpec = emailSpecHelpers.serialize;
 export const parseEmailFieldSpec = emailSpecHelpers.parse;
 
-const phoneSpecHelpers = defaultOnlySpec<PhoneNumberFieldSpec, PhoneNumberValue>(
+const phoneSpecHelpers = defaultOnlySpec<PhoneNumberFieldSpec, PhoneNumberValue, PhoneNumberRenderingHint>(
   'PhoneNumberFieldSpec',
   phoneNumberFieldSpec,
   serializePhoneNumberValue,
   parsePhoneNumberValue,
+  serializePhoneNumberRenderingHint,
+  parsePhoneNumberRenderingHint,
 );
 export const serializePhoneNumberFieldSpec = phoneSpecHelpers.serialize;
 export const parsePhoneNumberFieldSpec = phoneSpecHelpers.parse;
 
-const orcidSpecHelpers = defaultOnlySpec<OrcidFieldSpec, OrcidValue>(
+const orcidSpecHelpers = defaultOnlySpec<OrcidFieldSpec, OrcidValue, OrcidRenderingHint>(
   'OrcidFieldSpec',
   orcidFieldSpec,
   serializeOrcidValue,
   parseOrcidValue,
+  serializeOrcidRenderingHint,
+  parseOrcidRenderingHint,
 );
 export const serializeOrcidFieldSpec = orcidSpecHelpers.serialize;
 export const parseOrcidFieldSpec = orcidSpecHelpers.parse;
 
-const rorSpecHelpers = defaultOnlySpec<RorFieldSpec, RorValue>(
+const rorSpecHelpers = defaultOnlySpec<RorFieldSpec, RorValue, RorRenderingHint>(
   'RorFieldSpec',
   rorFieldSpec,
   serializeRorValue,
   parseRorValue,
+  serializeRorRenderingHint,
+  parseRorRenderingHint,
 );
 export const serializeRorFieldSpec = rorSpecHelpers.serialize;
 export const parseRorFieldSpec = rorSpecHelpers.parse;
 
-const doiSpecHelpers = defaultOnlySpec<DoiFieldSpec, DoiValue>(
+const doiSpecHelpers = defaultOnlySpec<DoiFieldSpec, DoiValue, DoiRenderingHint>(
   'DoiFieldSpec',
   doiFieldSpec,
   serializeDoiValue,
   parseDoiValue,
+  serializeDoiRenderingHint,
+  parseDoiRenderingHint,
 );
 export const serializeDoiFieldSpec = doiSpecHelpers.serialize;
 export const parseDoiFieldSpec = doiSpecHelpers.parse;
 
-const pubMedIdSpecHelpers = defaultOnlySpec<PubMedIdFieldSpec, PubMedIdValue>(
+const pubMedIdSpecHelpers = defaultOnlySpec<PubMedIdFieldSpec, PubMedIdValue, PubMedIdRenderingHint>(
   'PubMedIdFieldSpec',
   pubMedIdFieldSpec,
   serializePubMedIdValue,
   parsePubMedIdValue,
+  serializePubMedIdRenderingHint,
+  parsePubMedIdRenderingHint,
 );
 export const serializePubMedIdFieldSpec = pubMedIdSpecHelpers.serialize;
 export const parsePubMedIdFieldSpec = pubMedIdSpecHelpers.parse;
 
-const rridSpecHelpers = defaultOnlySpec<RridFieldSpec, RridValue>(
+const rridSpecHelpers = defaultOnlySpec<RridFieldSpec, RridValue, RridRenderingHint>(
   'RridFieldSpec',
   rridFieldSpec,
   serializeRridValue,
   parseRridValue,
+  serializeRridRenderingHint,
+  parseRridRenderingHint,
 );
 export const serializeRridFieldSpec = rridSpecHelpers.serialize;
 export const parseRridFieldSpec = rridSpecHelpers.parse;
 
-const nihGrantIdSpecHelpers = defaultOnlySpec<NihGrantIdFieldSpec, NihGrantIdValue>(
+const nihGrantIdSpecHelpers = defaultOnlySpec<NihGrantIdFieldSpec, NihGrantIdValue, NihGrantIdRenderingHint>(
   'NihGrantIdFieldSpec',
   nihGrantIdFieldSpec,
   serializeNihGrantIdValue,
   parseNihGrantIdValue,
+  serializeNihGrantIdRenderingHint,
+  parseNihGrantIdRenderingHint,
 );
 export const serializeNihGrantIdFieldSpec = nihGrantIdSpecHelpers.serialize;
 export const parseNihGrantIdFieldSpec = nihGrantIdSpecHelpers.parse;
