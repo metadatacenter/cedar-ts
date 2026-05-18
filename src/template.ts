@@ -1,6 +1,6 @@
 import { CedarConstructionError, parseSemanticVersion } from './leaves/index.js';
 import { type TemplateId, templateId } from './identifiers.js';
-import type { SchemaArtifactMetadata } from './metadata/index.js';
+import type { CatalogMetadata, SchemaArtifactVersioning } from './metadata/index.js';
 import type { EmbeddedArtifact } from './embedded/index.js';
 import { type Field, isField } from './field-families/index.js';
 import {
@@ -79,7 +79,9 @@ export interface Template {
   readonly kind: 'Template';
   readonly id: TemplateId;
   readonly modelVersion: string;
-  readonly metadata: SchemaArtifactMetadata;
+  readonly metadata: CatalogMetadata;
+  readonly versioning: SchemaArtifactVersioning;
+  readonly title: MultilingualString;
   readonly renderingHint?: TemplateRenderingHint;
   readonly header?: MultilingualString;
   readonly footer?: MultilingualString;
@@ -88,12 +90,15 @@ export interface Template {
 
 // Init type for `template()`. Accepts a bare-string IRI at `id` (widened
 // via `templateId()`); `members` is optional and defaults to an empty
-// sequence. `header` and `footer` accept any MultilingualStringInput
-// (bare string, lang map, etc. — see src/multilingual.ts).
+// sequence. `header`, `footer`, and `title` accept any
+// MultilingualStringInput (bare string, lang map, etc. — see
+// src/multilingual.ts).
 export interface TemplateInit {
   readonly id: TemplateId | string;
   readonly modelVersion: string;
-  readonly metadata: SchemaArtifactMetadata;
+  readonly metadata: CatalogMetadata;
+  readonly versioning: SchemaArtifactVersioning;
+  readonly title: MultilingualStringInput;
   readonly renderingHint?: TemplateRenderingHint;
   readonly header?: MultilingualStringInput;
   readonly footer?: MultilingualStringInput;
@@ -126,7 +131,9 @@ export function template(init: TemplateInit): Template {
     kind: 'Template';
     id: TemplateId;
     modelVersion: string;
-    metadata: SchemaArtifactMetadata;
+    metadata: CatalogMetadata;
+    versioning: SchemaArtifactVersioning;
+    title: MultilingualString;
     renderingHint?: TemplateRenderingHint;
     header?: MultilingualString;
     footer?: MultilingualString;
@@ -136,6 +143,8 @@ export function template(init: TemplateInit): Template {
     id: typeof init.id === 'string' ? templateId(init.id) : init.id,
     modelVersion: parseSemanticVersion(init.modelVersion),
     metadata: init.metadata,
+    versioning: init.versioning,
+    title: multilingualString(init.title),
     members,
   };
   if (init.renderingHint !== undefined) out.renderingHint = init.renderingHint;

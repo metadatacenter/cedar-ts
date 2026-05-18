@@ -40,8 +40,8 @@ import {
   parsePresentationComponentId,
 } from './collapsed-wrappers.js';
 import {
-  serializeArtifactMetadata,
-  parseArtifactMetadata,
+  serializeCatalogMetadata,
+  parseCatalogMetadata,
 } from './metadata.js';
 import {
   serializeMultilingualString,
@@ -56,7 +56,7 @@ export function serializeRichTextComponent(x: RichTextComponent): unknown {
     kind: 'RichTextComponent',
     id: serializePresentationComponentId(x.id),
     modelVersion: x.modelVersion,
-    metadata: serializeArtifactMetadata(x.metadata),
+    metadata: serializeCatalogMetadata(x.metadata),
     html: x.html,
   };
 }
@@ -82,7 +82,7 @@ export function parseRichTextComponent(
   return richTextComponent({
     id: parsePresentationComponentId(o['id'], `${where}.id`),
     modelVersion: expectString(o['modelVersion'], `${where}.modelVersion`),
-    metadata: parseArtifactMetadata(o['metadata'], `${where}.metadata`),
+    metadata: parseCatalogMetadata(o['metadata'], `${where}.metadata`),
     html: expectString(o['html'], `${where}.html`),
   });
 }
@@ -94,7 +94,7 @@ export function serializeImageComponent(x: ImageComponent): unknown {
     kind: 'ImageComponent',
     id: serializePresentationComponentId(x.id),
     modelVersion: x.modelVersion,
-    metadata: serializeArtifactMetadata(x.metadata),
+    metadata: serializeCatalogMetadata(x.metadata),
     image: x.image.value,
   };
   if (x.label !== undefined) out['label'] = serializeMultilingualString(x.label);
@@ -134,7 +134,7 @@ export function parseImageComponent(
   const init: Parameters<typeof imageComponent>[0] = {
     id: parsePresentationComponentId(o['id'], `${where}.id`),
     modelVersion: expectString(o['modelVersion'], `${where}.modelVersion`),
-    metadata: parseArtifactMetadata(o['metadata'], `${where}.metadata`),
+    metadata: parseCatalogMetadata(o['metadata'], `${where}.metadata`),
     image: expectString(o['image'], `${where}.image`),
   };
   if ('label' in o)
@@ -159,7 +159,7 @@ export function serializeYoutubeVideoComponent(
     kind: 'YoutubeVideoComponent',
     id: serializePresentationComponentId(x.id),
     modelVersion: x.modelVersion,
-    metadata: serializeArtifactMetadata(x.metadata),
+    metadata: serializeCatalogMetadata(x.metadata),
     video: x.video.value,
   };
   if (x.label !== undefined) out['label'] = serializeMultilingualString(x.label);
@@ -199,7 +199,7 @@ export function parseYoutubeVideoComponent(
   const init: Parameters<typeof youtubeVideoComponent>[0] = {
     id: parsePresentationComponentId(o['id'], `${where}.id`),
     modelVersion: expectString(o['modelVersion'], `${where}.modelVersion`),
-    metadata: parseArtifactMetadata(o['metadata'], `${where}.metadata`),
+    metadata: parseCatalogMetadata(o['metadata'], `${where}.metadata`),
     video: expectString(o['video'], `${where}.video`),
   };
   if ('label' in o)
@@ -224,7 +224,7 @@ export function serializeSectionBreakComponent(
     kind: 'SectionBreakComponent',
     id: serializePresentationComponentId(x.id),
     modelVersion: x.modelVersion,
-    metadata: serializeArtifactMetadata(x.metadata),
+    metadata: serializeCatalogMetadata(x.metadata),
   };
 }
 
@@ -249,7 +249,7 @@ export function parseSectionBreakComponent(
   return sectionBreakComponent({
     id: parsePresentationComponentId(o['id'], `${where}.id`),
     modelVersion: expectString(o['modelVersion'], `${where}.modelVersion`),
-    metadata: parseArtifactMetadata(o['metadata'], `${where}.metadata`),
+    metadata: parseCatalogMetadata(o['metadata'], `${where}.metadata`),
   });
 }
 
@@ -258,7 +258,7 @@ export function serializePageBreakComponent(x: PageBreakComponent): unknown {
     kind: 'PageBreakComponent',
     id: serializePresentationComponentId(x.id),
     modelVersion: x.modelVersion,
-    metadata: serializeArtifactMetadata(x.metadata),
+    metadata: serializeCatalogMetadata(x.metadata),
   };
 }
 
@@ -283,7 +283,7 @@ export function parsePageBreakComponent(
   return pageBreakComponent({
     id: parsePresentationComponentId(o['id'], `${where}.id`),
     modelVersion: expectString(o['modelVersion'], `${where}.modelVersion`),
-    metadata: parseArtifactMetadata(o['metadata'], `${where}.metadata`),
+    metadata: parseCatalogMetadata(o['metadata'], `${where}.metadata`),
   });
 }
 

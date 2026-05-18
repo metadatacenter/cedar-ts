@@ -16,8 +16,8 @@
 // file only documents what is specific to the inline style.
 
 import {
-  artifactMetadata,
-  type ArtifactMetadata,
+  catalogMetadata,
+  type CatalogMetadata,
   cardinality,
   controlledTermField,
   controlledTermFieldSpec,
@@ -47,8 +47,6 @@ import {
   richTextComponent,
   rorField,
   rorFieldSpec,
-  schemaArtifactMetadata,
-  type SchemaArtifactMetadata,
   schemaArtifactVersioning,
   serialize,
   singleValuedEnumField,
@@ -93,22 +91,42 @@ const lifecycleTimestamps = {
   modifiedBy: author,
 };
 
-function artifactMeta(preferredLabel: string, description: string): ArtifactMetadata {
-  return artifactMetadata({
+function artifactMeta(preferredLabel: string, description: string): CatalogMetadata {
+  return catalogMetadata({
     preferredLabel,
     description,
     lifecycle: lifecycleMetadata(lifecycleTimestamps),
   });
 }
 
-function meta(preferredLabel: string, description: string): SchemaArtifactMetadata {
-  return schemaArtifactMetadata({
-    artifact: artifactMeta(preferredLabel, description),
+function fieldMeta(rendered: string, description: string): {
+  metadata: CatalogMetadata;
+  versioning: ReturnType<typeof schemaArtifactVersioning>;
+  label: string;
+} {
+  return {
+    metadata: artifactMeta(rendered, description),
     versioning: schemaArtifactVersioning({
       version: '1.0.0',
       status: 'draft',
     }),
-  });
+    label: rendered,
+  };
+}
+
+function templateMeta(rendered: string, description: string): {
+  metadata: CatalogMetadata;
+  versioning: ReturnType<typeof schemaArtifactVersioning>;
+  title: string;
+} {
+  return {
+    metadata: artifactMeta(rendered, description),
+    versioning: schemaArtifactVersioning({
+      version: '1.0.0',
+      status: 'draft',
+    }),
+    title: rendered,
+  };
 }
 
 // CEDAR structural-model version, recorded on every concrete artifact.
@@ -131,7 +149,7 @@ const MODEL_VERSION = '0.1.0';
 export const principalInvestigatorTemplate: Template = template({
   id: `${TEMPLATES}principal-investigator`,
   modelVersion: MODEL_VERSION,
-  metadata: meta(
+  ...templateMeta(
     'Principal Investigator Details',
     'Identity, contact information, and institutional affiliation of a study PI.',
   ),
@@ -164,7 +182,7 @@ export const principalInvestigatorTemplate: Template = template({
       artifactRef: textField({
         id: `${FIELDS}full-name`,
         modelVersion: MODEL_VERSION,
-        metadata: meta('Full Name', 'Full legal name of the principal investigator.'),
+        ...fieldMeta('Full Name', 'Full legal name of the principal investigator.'),
         fieldSpec: textFieldSpec({
           minLength: 1,
         }),
@@ -180,7 +198,7 @@ export const principalInvestigatorTemplate: Template = template({
       artifactRef: singleValuedEnumField({
         id: `${FIELDS}academic-title`,
         modelVersion: MODEL_VERSION,
-        metadata: meta('Academic Title', 'Academic rank or position.'),
+        ...fieldMeta('Academic Title', 'Academic rank or position.'),
         fieldSpec: singleValuedEnumFieldSpec({
           permissibleValues: [
             permissibleValue({ value: 'professor', label: 'Professor' }),
@@ -215,7 +233,7 @@ export const principalInvestigatorTemplate: Template = template({
       artifactRef: singleValuedEnumField({
         id: `${FIELDS}academic-rank`,
         modelVersion: MODEL_VERSION,
-        metadata: meta(
+        ...fieldMeta(
           'Academic Rank',
           'Academic rank backed by the OBO Role Ontology (RoleO).',
         ),
@@ -265,7 +283,7 @@ export const principalInvestigatorTemplate: Template = template({
       artifactRef: emailField({
         id: `${FIELDS}email`,
         modelVersion: MODEL_VERSION,
-        metadata: meta('Email Address', 'Primary work email.'),
+        ...fieldMeta('Email Address', 'Primary work email.'),
         fieldSpec: emailFieldSpec(),
       }),
       valueRequirement: 'required',
@@ -277,7 +295,7 @@ export const principalInvestigatorTemplate: Template = template({
       artifactRef: phoneNumberField({
         id: `${FIELDS}phone`,
         modelVersion: MODEL_VERSION,
-        metadata: meta('Phone Number', 'Primary work phone, in international format.'),
+        ...fieldMeta('Phone Number', 'Primary work phone, in international format.'),
         fieldSpec: phoneNumberFieldSpec(),
       }),
       valueRequirement: 'optional',
@@ -289,7 +307,7 @@ export const principalInvestigatorTemplate: Template = template({
       artifactRef: orcidField({
         id: `${FIELDS}orcid`,
         modelVersion: MODEL_VERSION,
-        metadata: meta('ORCID iD', 'ORCID identifier (https://orcid.org/...).'),
+        ...fieldMeta('ORCID iD', 'ORCID identifier (https://orcid.org/...).'),
         fieldSpec: orcidFieldSpec(),
       }),
       valueRequirement: 'recommended',
@@ -311,7 +329,7 @@ export const principalInvestigatorTemplate: Template = template({
       artifactRef: textField({
         id: `${FIELDS}institution-name`,
         modelVersion: MODEL_VERSION,
-        metadata: meta('Institution Name', 'Name of the home institution.'),
+        ...fieldMeta('Institution Name', 'Name of the home institution.'),
         fieldSpec: textFieldSpec(),
       }),
       valueRequirement: 'required',
@@ -324,7 +342,7 @@ export const principalInvestigatorTemplate: Template = template({
       artifactRef: rorField({
         id: `${FIELDS}institution-ror`,
         modelVersion: MODEL_VERSION,
-        metadata: meta(
+        ...fieldMeta(
           'Institution ROR',
           'Research Organization Registry identifier for the home institution.',
         ),
@@ -342,7 +360,7 @@ export const principalInvestigatorTemplate: Template = template({
       artifactRef: textField({
         id: `${FIELDS}department`,
         modelVersion: MODEL_VERSION,
-        metadata: meta('Department', 'Department or division within the institution.'),
+        ...fieldMeta('Department', 'Department or division within the institution.'),
         fieldSpec: textFieldSpec(),
       }),
       valueRequirement: 'optional',
@@ -356,7 +374,7 @@ export const principalInvestigatorTemplate: Template = template({
       artifactRef: dateField({
         id: `${FIELDS}appointment-date`,
         modelVersion: MODEL_VERSION,
-        metadata: meta('Appointment Date', 'Start date of current appointment.'),
+        ...fieldMeta('Appointment Date', 'Start date of current appointment.'),
         fieldSpec: dateFieldSpec({ dateValueType: 'fullDate' }),
       }),
       valueRequirement: 'optional',
@@ -371,7 +389,7 @@ export const principalInvestigatorTemplate: Template = template({
       artifactRef: controlledTermField({
         id: `${FIELDS}primary-research-area`,
         modelVersion: MODEL_VERSION,
-        metadata: meta(
+        ...fieldMeta(
             'Primary Research Area',
             "The PI's primary research area, looked up from MeSH.",
         ),
@@ -398,7 +416,7 @@ export const principalInvestigatorTemplate: Template = template({
       artifactRef: textField({
         id: `${FIELDS}research-interest`,
         modelVersion: MODEL_VERSION,
-        metadata: meta('Research Interest', 'A single research interest or keyword.'),
+        ...fieldMeta('Research Interest', 'A single research interest or keyword.'),
         fieldSpec: textFieldSpec(),
       }),
       valueRequirement: 'optional',

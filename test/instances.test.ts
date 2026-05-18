@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
-  artifactMetadata,
+  catalogMetadata,
   attributeValueField,
   attributeValueFieldId,
   attributeValueFieldSpec,
@@ -15,7 +15,6 @@ import {
   integerNumberValue,
   presentationComponentId,
   richTextComponent,
-  schemaArtifactMetadata,
   schemaArtifactVersioning,
   template,
   templateId,
@@ -34,7 +33,7 @@ const tp = lifecycleMetadata({
   modifiedOn: '2024-01-01T00:00:00Z',
   modifiedBy: 'https://example.org/u',
 });
-const am = artifactMetadata({ preferredLabel: 'Demo Instance', lifecycle: tp });
+const am = catalogMetadata({ preferredLabel: 'Demo Instance', lifecycle: tp });
 
 const tref = templateId('https://example.org/templates/demo');
 const titleKey = 'title';
@@ -202,25 +201,24 @@ describe('TemplateInstance', () => {
 });
 
 describe('Artifact union', () => {
-  const meta = schemaArtifactMetadata({
-    artifact: am,
-    versioning: schemaArtifactVersioning({
-      version: '1.0.0',
-      status: 'draft',
-    }),
-  });
+  const meta = {
+    metadata: am,
+    versioning: schemaArtifactVersioning({ version: '1.0.0', status: 'draft' }),
+    label: 'Demo',
+    title: 'Demo',
+  };
 
   it('isArtifact recognises Field, Template, PresentationComponent, and TemplateInstance', () => {
     const f = attributeValueField({
       id: attributeValueFieldId('https://example.org/fields/x'),
       modelVersion: '2.0.0',
-      metadata: meta,
+      ...meta,
       fieldSpec: attributeValueFieldSpec(),
     });
     const t = template({
       id: templateId('https://example.org/templates/demo'),
       modelVersion: '2.0.0',
-      metadata: meta,
+      ...meta,
     });
     const pc = richTextComponent({
       id: presentationComponentId('https://example.org/pc/r'),

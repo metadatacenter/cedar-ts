@@ -38,9 +38,8 @@ import {
   textFieldSpec,
   template,
   richTextComponent,
-  artifactMetadata,
+  catalogMetadata,
   lifecycleMetadata,
-  schemaArtifactMetadata,
   schemaArtifactVersioning,
 } from '../src/index.js';
 
@@ -52,20 +51,19 @@ const tp = lifecycleMetadata({
   modifiedOn: '2024-01-01T00:00:00Z',
   modifiedBy: 'https://example.org/u',
 });
-const meta = schemaArtifactMetadata({
-  artifact: artifactMetadata({ preferredLabel: 'X', lifecycle: tp }),
-  versioning: schemaArtifactVersioning({
-    version: '1.0.0',
-    status: 'draft',
-  }),
-});
+const meta = {
+  metadata: catalogMetadata({ preferredLabel: 'X', lifecycle: tp }),
+  versioning: schemaArtifactVersioning({ version: '1.0.0', status: 'draft' }),
+  label: 'X',
+  title: 'X',
+};
 
 describe('Inline Field/Template/PresentationComponent reference inputs', () => {
   it('embeddedTextField extracts .id when given a TextField artifact', () => {
     const artifact = textField({
       id: textFieldId('https://example.org/fields/title'),
       modelVersion: '2.0.0',
-      metadata: meta,
+      ...meta,
       fieldSpec: textFieldSpec(),
     });
     const ef = embeddedTextField({ key: 'title', artifactRef: artifact });
@@ -83,7 +81,7 @@ describe('Inline Field/Template/PresentationComponent reference inputs', () => {
     const wrongFamily = textField({
       id: textFieldId('https://example.org/fields/x'),
       modelVersion: '2.0.0',
-      metadata: meta,
+      ...meta,
       fieldSpec: textFieldSpec(),
     });
     embeddedDateField({
@@ -97,7 +95,7 @@ describe('Inline Field/Template/PresentationComponent reference inputs', () => {
     const t = template({
       id: templateId('https://example.org/templates/address'),
       modelVersion: '2.0.0',
-      metadata: meta,
+      ...meta,
     });
     const et = embeddedTemplate({ key: 'address', artifactRef: t });
     expect(et.artifactRef).toBe(t.id);
@@ -108,7 +106,7 @@ describe('Inline Field/Template/PresentationComponent reference inputs', () => {
     const pc = richTextComponent({
       id: presentationComponentId('https://example.org/pc/intro'),
       modelVersion: '2.0.0',
-      metadata: artifactMetadata({ preferredLabel: 'Intro', lifecycle: tp }),
+      metadata: catalogMetadata({ preferredLabel: 'Intro', lifecycle: tp }),
       html: '<p>hi</p>',
     });
     const ep = embeddedPresentationComponent({ key: 'intro', artifactRef: pc });

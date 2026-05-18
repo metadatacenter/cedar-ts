@@ -53,8 +53,8 @@ import {
   parseTemplateId,
 } from './collapsed-wrappers.js';
 import {
-  serializeArtifactMetadata,
-  parseArtifactMetadata,
+  serializeCatalogMetadata,
+  parseCatalogMetadata,
 } from './metadata.js';
 import { serializeValue, parseValue } from './values.js';
 
@@ -149,7 +149,7 @@ export function serializeTemplateInstance(x: TemplateInstance): unknown {
     kind: 'TemplateInstance',
     id: serializeTemplateInstanceId(x.id),
     modelVersion: x.modelVersion,
-    metadata: serializeArtifactMetadata(x.metadata),
+    metadata: serializeCatalogMetadata(x.metadata),
     templateRef: serializeTemplateId(x.templateRef),
     values: x.values.map((v) => serializeInstanceValue(v)),
   };
@@ -187,7 +187,7 @@ export function parseTemplateInstance(
   return templateInstance({
     id: parseTemplateInstanceId(o['id'], `${where}.id`),
     modelVersion: expectString(o['modelVersion'], `${where}.modelVersion`),
-    metadata: parseArtifactMetadata(o['metadata'], `${where}.metadata`),
+    metadata: parseCatalogMetadata(o['metadata'], `${where}.metadata`),
     templateRef: parseTemplateId(o['templateRef'], `${where}.templateRef`),
     values,
   });

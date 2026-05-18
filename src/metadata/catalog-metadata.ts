@@ -4,14 +4,26 @@ import {
   multilingualString,
 } from '../multilingual.js';
 import type { LifecycleMetadata } from './lifecycle-metadata.js';
-import type { SchemaArtifactVersioning } from './schema-artifact-versioning.js';
 import type { Annotation } from './annotations.js';
 
-// ArtifactMetadata bundles the metadata common to all artifacts other than
-// identity (grammar §Aggregate Structure). The descriptive properties
-// (preferredLabel, description, identifier, altLabels) sit directly
-// on ArtifactMetadata; the spec no longer groups them under a separate
-// DescriptiveMetadata production.
+// CatalogMetadata bundles the catalog-oriented metadata common to every
+// artifact (grammar §Aggregate Structure): descriptive properties
+// (preferredLabel, description, identifier, altLabels), lifecycle
+// information, and annotations.
+//
+// CatalogMetadata is distinct from an artifact's *rendered* display
+// name. A Field carries a top-level `label` slot (the rendered question
+// text); a Template carries a top-level `title` slot (the rendered form
+// title); a TemplateInstance MAY carry an optional top-level `label`
+// (a user-supplied instance name); a PresentationComponent carries no
+// rendered display name at all. These rendered slots are defined on
+// the per-artifact types in src/template.ts, the field-family files,
+// src/instance.ts, and src/presentation/ respectively.
+//
+// On schema artifacts (Template, Field), versioning information lives
+// in a separate top-level `versioning` slot of type
+// SchemaArtifactVersioning, not nested inside CatalogMetadata.
+// PresentationComponent and TemplateInstance do not carry versioning.
 //
 // Per the design rule "brand only leaves that get mixed up at call sites",
 // we don't introduce dedicated leaf wrappers per descriptive property; the
@@ -20,8 +32,8 @@ import type { Annotation } from './annotations.js';
 // non-empty sets of language-tagged localizations. `identifier` is a plain
 // string (a technical key, not human-readable display text).
 
-export interface ArtifactMetadata {
-  readonly preferredLabel: MultilingualString;
+export interface CatalogMetadata {
+  readonly preferredLabel?: MultilingualString;
   readonly description?: MultilingualString;
   readonly identifier?: string;
   readonly altLabels: readonly MultilingualString[];
@@ -29,8 +41,8 @@ export interface ArtifactMetadata {
   readonly annotations: readonly Annotation[];
 }
 
-export interface ArtifactMetadataInit {
-  readonly preferredLabel: MultilingualStringInput;
+export interface CatalogMetadataInit {
+  readonly preferredLabel?: MultilingualStringInput;
   readonly description?: MultilingualStringInput;
   readonly identifier?: string;
   readonly altLabels?: readonly MultilingualStringInput[];
@@ -38,45 +50,22 @@ export interface ArtifactMetadataInit {
   readonly annotations?: readonly Annotation[];
 }
 
-export function artifactMetadata(init: ArtifactMetadataInit): ArtifactMetadata {
+export function catalogMetadata(init: CatalogMetadataInit): CatalogMetadata {
   const out: {
-    preferredLabel: MultilingualString;
+    preferredLabel?: MultilingualString;
     description?: MultilingualString;
     identifier?: string;
     altLabels: readonly MultilingualString[];
     lifecycle: LifecycleMetadata;
     annotations: readonly Annotation[];
   } = {
-    preferredLabel: multilingualString(init.preferredLabel),
     altLabels: (init.altLabels ?? []).map(multilingualString),
     lifecycle: init.lifecycle,
     annotations: init.annotations ?? [],
   };
+  if (init.preferredLabel !== undefined)
+    out.preferredLabel = multilingualString(init.preferredLabel);
   if (init.description !== undefined) out.description = multilingualString(init.description);
   if (init.identifier !== undefined) out.identifier = init.identifier;
   return out;
-}
-
-// SchemaArtifactMetadata adds versioning information for reusable schema
-// artifacts (Template, Field). The in-memory shape is fully flat: the
-// `ArtifactMetadata` properties sit directly alongside `versioning`.
-export interface SchemaArtifactMetadata extends ArtifactMetadata {
-  readonly versioning: SchemaArtifactVersioning;
-}
-
-// The init shape composes a pre-built `ArtifactMetadata` with a
-// `versioning` slot — call sites typically build an `ArtifactMetadata`
-// up front and reuse it across artifacts.
-export interface SchemaArtifactMetadataInit {
-  readonly artifact: ArtifactMetadata;
-  readonly versioning: SchemaArtifactVersioning;
-}
-
-export function schemaArtifactMetadata(
-  init: SchemaArtifactMetadataInit,
-): SchemaArtifactMetadata {
-  return {
-    ...init.artifact,
-    versioning: init.versioning,
-  };
 }

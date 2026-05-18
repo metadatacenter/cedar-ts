@@ -1,13 +1,12 @@
 import { describe, expect, it } from 'vitest';
 import {
-  artifactMetadata,
+  catalogMetadata,
   embeddedPresentationComponent,
   embeddedTemplate,
   embeddedTextField,
   isSchemaArtifact,
   isTemplate,
   presentationComponentId,
-  schemaArtifactMetadata,
   schemaArtifactVersioning,
   template,
   templateId,
@@ -25,13 +24,12 @@ const tp = lifecycleMetadata({
   modifiedOn: '2024-01-01T00:00:00Z',
   modifiedBy: 'https://example.org/u',
 });
-const meta = schemaArtifactMetadata({
-  artifact: artifactMetadata({ preferredLabel: 'Demo Template', lifecycle: tp }),
-  versioning: schemaArtifactVersioning({
-    version: '1.0.0',
-    status: 'draft',
-  }),
-});
+const meta = {
+  metadata: catalogMetadata({ preferredLabel: 'Demo Template', lifecycle: tp }),
+  versioning: schemaArtifactVersioning({ version: '1.0.0', status: 'draft' }),
+  label: 'Demo Template',
+  title: 'Demo Template',
+};
 
 const titleEmbedding = embeddedTextField({
   key: 'title',
@@ -55,7 +53,7 @@ describe('Template', () => {
     const t = template({
       id: templateId('https://example.org/templates/demo'),
       modelVersion: '2.0.0',
-      metadata: meta,
+      ...meta,
     });
     expect(t.kind).toBe('Template');
     expect(t.id.kind).toBe('TemplateId');
@@ -69,7 +67,7 @@ describe('Template', () => {
     const t = template({
       id: 'https://example.org/templates/demo',
       modelVersion: '2.0.0',
-      metadata: meta,
+      ...meta,
     });
     expect(t.id.kind).toBe('TemplateId');
     expect(t.id.iri.value).toBe('https://example.org/templates/demo');
@@ -79,7 +77,7 @@ describe('Template', () => {
     const t = template({
       id: templateId('https://example.org/templates/demo'),
       modelVersion: '2.0.0',
-      metadata: meta,
+      ...meta,
       members: [introEmbedding, titleEmbedding, addressEmbedding, subtitleEmbedding],
     });
     expect(t.members.map((e) => e.key)).toEqual([
@@ -94,7 +92,7 @@ describe('Template', () => {
     const t = template({
       id: templateId('https://example.org/templates/demo'),
       modelVersion: '2.0.0',
-      metadata: meta,
+      ...meta,
       header: 'Welcome',
       footer: 'Thanks for participating.',
     });
@@ -111,7 +109,7 @@ describe('Template', () => {
       template({
         id: templateId('https://example.org/templates/demo'),
         modelVersion: '2.0.0',
-        metadata: meta,
+        ...meta,
         members: [titleEmbedding, dup],
       }),
     ).toThrow(/Duplicate EmbeddedArtifactKey/);
@@ -121,13 +119,13 @@ describe('Template', () => {
     const t1 = template({
       id: templateId('https://example.org/templates/a'),
       modelVersion: '2.0.0',
-      metadata: meta,
+      ...meta,
       members: [titleEmbedding],
     });
     const t2 = template({
       id: templateId('https://example.org/templates/b'),
       modelVersion: '2.0.0',
-      metadata: meta,
+      ...meta,
       members: [titleEmbedding],
     });
     expect(t1.members[0]?.key).toBe('title');
@@ -139,7 +137,7 @@ describe('Template', () => {
       const t = template({
         id: templateId('https://example.org/templates/demo'),
         modelVersion: '2.0.0',
-        metadata: meta,
+        ...meta,
         renderingHint: { helpDisplayMode: mode },
       });
       expect(t.renderingHint?.helpDisplayMode).toBe(mode);
@@ -150,7 +148,7 @@ describe('Template', () => {
     const t = template({
       id: templateId('https://example.org/templates/demo'),
       modelVersion: '2.0.0',
-      metadata: meta,
+      ...meta,
     });
     expect(t.renderingHint).toBeUndefined();
   });
@@ -161,13 +159,13 @@ describe('SchemaArtifact union', () => {
     const f = textField({
       id: textFieldId('https://example.org/fields/x'),
       modelVersion: '2.0.0',
-      metadata: meta,
+      ...meta,
       fieldSpec: textFieldSpec(),
     });
     const t: Template = template({
       id: templateId('https://example.org/templates/demo'),
       modelVersion: '2.0.0',
-      metadata: meta,
+      ...meta,
     });
     const all: SchemaArtifact[] = [f, t];
     for (const a of all) expect(isSchemaArtifact(a)).toBe(true);

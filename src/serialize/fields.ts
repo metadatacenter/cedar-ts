@@ -100,8 +100,10 @@ import {
   parseAttributeValueFieldId,
 } from './collapsed-wrappers.js';
 import {
-  serializeSchemaArtifactMetadata,
-  parseSchemaArtifactMetadata,
+  serializeCatalogMetadata,
+  serializeSchemaArtifactVersioning,
+  parseCatalogMetadata,
+  parseSchemaArtifactVersioning,
 } from './metadata.js';
 import {
   serializeTextFieldSpec,
@@ -151,15 +153,26 @@ function parseFieldShell<T>(
   x: unknown,
   expectedKind: string,
   where: string,
-): { id: unknown; modelVersion: string; metadata: unknown; fieldSpec: unknown; helpText: unknown } {
+): {
+  id: unknown;
+  modelVersion: string;
+  metadata: unknown;
+  versioning: unknown;
+  fieldSpec: unknown;
+  label: unknown;
+  helpText: unknown;
+} {
   const o = expectObject(x, where);
-  expectKnownProperties(o, ['kind', 'id', 'modelVersion', 'metadata', 'fieldSpec', 'helpText']);
+  expectKnownProperties(o, [
+    'kind', 'id', 'modelVersion', 'metadata', 'versioning',
+    'fieldSpec', 'label', 'helpText',
+  ]);
   if (o['kind'] !== expectedKind) {
     throw new CedarConstructionError(
       `${where}: expected kind ${JSON.stringify(expectedKind)}; got ${JSON.stringify(o['kind'])}`,
     );
   }
-  for (const k of ['id', 'modelVersion', 'metadata', 'fieldSpec']) {
+  for (const k of ['id', 'modelVersion', 'metadata', 'versioning', 'fieldSpec', 'label']) {
     if (!(k in o)) {
       throw new CedarConstructionError(
         `${where}: missing required ${JSON.stringify(k)}`,
@@ -171,7 +184,9 @@ function parseFieldShell<T>(
     id: o['id'],
     modelVersion: expectString(o['modelVersion'], `${where}.modelVersion`),
     metadata: o['metadata'],
+    versioning: o['versioning'],
     fieldSpec: o['fieldSpec'],
+    label: o['label'],
     helpText: 'helpText' in o ? o['helpText'] : undefined,
   };
 }
@@ -183,8 +198,10 @@ export const serializeTextField = (x: TextField): unknown => {
     kind: 'TextField',
     id: serializeTextFieldId(x.id),
     modelVersion: x.modelVersion,
-    metadata: serializeSchemaArtifactMetadata(x.metadata),
+    metadata: serializeCatalogMetadata(x.metadata),
+    versioning: serializeSchemaArtifactVersioning(x.versioning),
     fieldSpec: serializeTextFieldSpec(x.fieldSpec),
+    label: serializeMultilingualString(x.label),
   };
   if (x.helpText !== undefined)
     out['helpText'] = serializeMultilingualString(x.helpText);
@@ -196,8 +213,10 @@ export function parseTextField(x: unknown, where = 'TextField'): TextField {
   return textField({
     id: parseTextFieldId(s.id, `${where}.id`),
     modelVersion: s.modelVersion,
-    metadata: parseSchemaArtifactMetadata(s.metadata, `${where}.metadata`),
+    metadata: parseCatalogMetadata(s.metadata, `${where}.metadata`),
+    versioning: parseSchemaArtifactVersioning(s.versioning, `${where}.versioning`),
     fieldSpec: parseTextFieldSpec(s.fieldSpec, `${where}.fieldSpec`),
+    label: parseMultilingualString(s.label, `${where}.label`),
     ...(s.helpText !== undefined && {
       helpText: parseMultilingualString(s.helpText, `${where}.helpText`),
     }),
@@ -209,8 +228,10 @@ export const serializeIntegerNumberField = (x: IntegerNumberField): unknown => {
     kind: 'IntegerNumberField',
     id: serializeIntegerNumberFieldId(x.id),
     modelVersion: x.modelVersion,
-    metadata: serializeSchemaArtifactMetadata(x.metadata),
+    metadata: serializeCatalogMetadata(x.metadata),
+    versioning: serializeSchemaArtifactVersioning(x.versioning),
     fieldSpec: serializeIntegerNumberFieldSpec(x.fieldSpec),
+    label: serializeMultilingualString(x.label),
   };
   if (x.helpText !== undefined)
     out['helpText'] = serializeMultilingualString(x.helpText);
@@ -229,8 +250,10 @@ export function parseIntegerNumberField(
   return integerNumberField({
     id: parseIntegerNumberFieldId(s.id, `${where}.id`),
     modelVersion: s.modelVersion,
-    metadata: parseSchemaArtifactMetadata(s.metadata, `${where}.metadata`),
+    metadata: parseCatalogMetadata(s.metadata, `${where}.metadata`),
+    versioning: parseSchemaArtifactVersioning(s.versioning, `${where}.versioning`),
     fieldSpec: parseIntegerNumberFieldSpec(s.fieldSpec, `${where}.fieldSpec`),
+    label: parseMultilingualString(s.label, `${where}.label`),
     ...(s.helpText !== undefined && {
       helpText: parseMultilingualString(s.helpText, `${where}.helpText`),
     }),
@@ -242,8 +265,10 @@ export const serializeRealNumberField = (x: RealNumberField): unknown => {
     kind: 'RealNumberField',
     id: serializeRealNumberFieldId(x.id),
     modelVersion: x.modelVersion,
-    metadata: serializeSchemaArtifactMetadata(x.metadata),
+    metadata: serializeCatalogMetadata(x.metadata),
+    versioning: serializeSchemaArtifactVersioning(x.versioning),
     fieldSpec: serializeRealNumberFieldSpec(x.fieldSpec),
+    label: serializeMultilingualString(x.label),
   };
   if (x.helpText !== undefined)
     out['helpText'] = serializeMultilingualString(x.helpText);
@@ -258,8 +283,10 @@ export function parseRealNumberField(
   return realNumberField({
     id: parseRealNumberFieldId(s.id, `${where}.id`),
     modelVersion: s.modelVersion,
-    metadata: parseSchemaArtifactMetadata(s.metadata, `${where}.metadata`),
+    metadata: parseCatalogMetadata(s.metadata, `${where}.metadata`),
+    versioning: parseSchemaArtifactVersioning(s.versioning, `${where}.versioning`),
     fieldSpec: parseRealNumberFieldSpec(s.fieldSpec, `${where}.fieldSpec`),
+    label: parseMultilingualString(s.label, `${where}.label`),
     ...(s.helpText !== undefined && {
       helpText: parseMultilingualString(s.helpText, `${where}.helpText`),
     }),
@@ -271,8 +298,10 @@ export const serializeBooleanField = (x: BooleanField): unknown => {
     kind: 'BooleanField',
     id: serializeBooleanFieldId(x.id),
     modelVersion: x.modelVersion,
-    metadata: serializeSchemaArtifactMetadata(x.metadata),
+    metadata: serializeCatalogMetadata(x.metadata),
+    versioning: serializeSchemaArtifactVersioning(x.versioning),
     fieldSpec: serializeBooleanFieldSpec(x.fieldSpec),
+    label: serializeMultilingualString(x.label),
   };
   if (x.helpText !== undefined)
     out['helpText'] = serializeMultilingualString(x.helpText);
@@ -287,8 +316,10 @@ export function parseBooleanField(
   return booleanField({
     id: parseBooleanFieldId(s.id, `${where}.id`),
     modelVersion: s.modelVersion,
-    metadata: parseSchemaArtifactMetadata(s.metadata, `${where}.metadata`),
+    metadata: parseCatalogMetadata(s.metadata, `${where}.metadata`),
+    versioning: parseSchemaArtifactVersioning(s.versioning, `${where}.versioning`),
     fieldSpec: parseBooleanFieldSpec(s.fieldSpec, `${where}.fieldSpec`),
+    label: parseMultilingualString(s.label, `${where}.label`),
     ...(s.helpText !== undefined && {
       helpText: parseMultilingualString(s.helpText, `${where}.helpText`),
     }),
@@ -300,8 +331,10 @@ export const serializeDateField = (x: DateField): unknown => {
     kind: 'DateField',
     id: serializeDateFieldId(x.id),
     modelVersion: x.modelVersion,
-    metadata: serializeSchemaArtifactMetadata(x.metadata),
+    metadata: serializeCatalogMetadata(x.metadata),
+    versioning: serializeSchemaArtifactVersioning(x.versioning),
     fieldSpec: serializeDateFieldSpec(x.fieldSpec),
+    label: serializeMultilingualString(x.label),
   };
   if (x.helpText !== undefined)
     out['helpText'] = serializeMultilingualString(x.helpText);
@@ -313,8 +346,10 @@ export function parseDateField(x: unknown, where = 'DateField'): DateField {
   return dateField({
     id: parseDateFieldId(s.id, `${where}.id`),
     modelVersion: s.modelVersion,
-    metadata: parseSchemaArtifactMetadata(s.metadata, `${where}.metadata`),
+    metadata: parseCatalogMetadata(s.metadata, `${where}.metadata`),
+    versioning: parseSchemaArtifactVersioning(s.versioning, `${where}.versioning`),
     fieldSpec: parseDateFieldSpec(s.fieldSpec, `${where}.fieldSpec`),
+    label: parseMultilingualString(s.label, `${where}.label`),
     ...(s.helpText !== undefined && {
       helpText: parseMultilingualString(s.helpText, `${where}.helpText`),
     }),
@@ -326,8 +361,10 @@ export const serializeTimeField = (x: TimeField): unknown => {
     kind: 'TimeField',
     id: serializeTimeFieldId(x.id),
     modelVersion: x.modelVersion,
-    metadata: serializeSchemaArtifactMetadata(x.metadata),
+    metadata: serializeCatalogMetadata(x.metadata),
+    versioning: serializeSchemaArtifactVersioning(x.versioning),
     fieldSpec: serializeTimeFieldSpec(x.fieldSpec),
+    label: serializeMultilingualString(x.label),
   };
   if (x.helpText !== undefined)
     out['helpText'] = serializeMultilingualString(x.helpText);
@@ -339,8 +376,10 @@ export function parseTimeField(x: unknown, where = 'TimeField'): TimeField {
   return timeField({
     id: parseTimeFieldId(s.id, `${where}.id`),
     modelVersion: s.modelVersion,
-    metadata: parseSchemaArtifactMetadata(s.metadata, `${where}.metadata`),
+    metadata: parseCatalogMetadata(s.metadata, `${where}.metadata`),
+    versioning: parseSchemaArtifactVersioning(s.versioning, `${where}.versioning`),
     fieldSpec: parseTimeFieldSpec(s.fieldSpec, `${where}.fieldSpec`),
+    label: parseMultilingualString(s.label, `${where}.label`),
     ...(s.helpText !== undefined && {
       helpText: parseMultilingualString(s.helpText, `${where}.helpText`),
     }),
@@ -352,8 +391,10 @@ export const serializeDateTimeField = (x: DateTimeField): unknown => {
     kind: 'DateTimeField',
     id: serializeDateTimeFieldId(x.id),
     modelVersion: x.modelVersion,
-    metadata: serializeSchemaArtifactMetadata(x.metadata),
+    metadata: serializeCatalogMetadata(x.metadata),
+    versioning: serializeSchemaArtifactVersioning(x.versioning),
     fieldSpec: serializeDateTimeFieldSpec(x.fieldSpec),
+    label: serializeMultilingualString(x.label),
   };
   if (x.helpText !== undefined)
     out['helpText'] = serializeMultilingualString(x.helpText);
@@ -368,8 +409,10 @@ export function parseDateTimeField(
   return dateTimeField({
     id: parseDateTimeFieldId(s.id, `${where}.id`),
     modelVersion: s.modelVersion,
-    metadata: parseSchemaArtifactMetadata(s.metadata, `${where}.metadata`),
+    metadata: parseCatalogMetadata(s.metadata, `${where}.metadata`),
+    versioning: parseSchemaArtifactVersioning(s.versioning, `${where}.versioning`),
     fieldSpec: parseDateTimeFieldSpec(s.fieldSpec, `${where}.fieldSpec`),
+    label: parseMultilingualString(s.label, `${where}.label`),
     ...(s.helpText !== undefined && {
       helpText: parseMultilingualString(s.helpText, `${where}.helpText`),
     }),
@@ -381,8 +424,10 @@ export const serializeControlledTermField = (x: ControlledTermField): unknown =>
     kind: 'ControlledTermField',
     id: serializeControlledTermFieldId(x.id),
     modelVersion: x.modelVersion,
-    metadata: serializeSchemaArtifactMetadata(x.metadata),
+    metadata: serializeCatalogMetadata(x.metadata),
+    versioning: serializeSchemaArtifactVersioning(x.versioning),
     fieldSpec: serializeControlledTermFieldSpec(x.fieldSpec),
+    label: serializeMultilingualString(x.label),
   };
   if (x.helpText !== undefined)
     out['helpText'] = serializeMultilingualString(x.helpText);
@@ -397,8 +442,10 @@ export function parseControlledTermField(
   return controlledTermField({
     id: parseControlledTermFieldId(s.id, `${where}.id`),
     modelVersion: s.modelVersion,
-    metadata: parseSchemaArtifactMetadata(s.metadata, `${where}.metadata`),
+    metadata: parseCatalogMetadata(s.metadata, `${where}.metadata`),
+    versioning: parseSchemaArtifactVersioning(s.versioning, `${where}.versioning`),
     fieldSpec: parseControlledTermFieldSpec(s.fieldSpec, `${where}.fieldSpec`),
+    label: parseMultilingualString(s.label, `${where}.label`),
     ...(s.helpText !== undefined && {
       helpText: parseMultilingualString(s.helpText, `${where}.helpText`),
     }),
@@ -410,8 +457,10 @@ export const serializeSingleValuedEnumField = (x: SingleValuedEnumField): unknow
     kind: 'SingleValuedEnumField',
     id: serializeSingleValuedEnumFieldId(x.id),
     modelVersion: x.modelVersion,
-    metadata: serializeSchemaArtifactMetadata(x.metadata),
+    metadata: serializeCatalogMetadata(x.metadata),
+    versioning: serializeSchemaArtifactVersioning(x.versioning),
     fieldSpec: serializeSingleValuedEnumFieldSpec(x.fieldSpec),
+    label: serializeMultilingualString(x.label),
   };
   if (x.helpText !== undefined)
     out['helpText'] = serializeMultilingualString(x.helpText);
@@ -430,8 +479,10 @@ export function parseSingleValuedEnumField(
   return singleValuedEnumField({
     id: parseSingleValuedEnumFieldId(s.id, `${where}.id`),
     modelVersion: s.modelVersion,
-    metadata: parseSchemaArtifactMetadata(s.metadata, `${where}.metadata`),
+    metadata: parseCatalogMetadata(s.metadata, `${where}.metadata`),
+    versioning: parseSchemaArtifactVersioning(s.versioning, `${where}.versioning`),
     fieldSpec: parseSingleValuedEnumFieldSpec(s.fieldSpec, `${where}.fieldSpec`),
+    label: parseMultilingualString(s.label, `${where}.label`),
     ...(s.helpText !== undefined && {
       helpText: parseMultilingualString(s.helpText, `${where}.helpText`),
     }),
@@ -443,8 +494,10 @@ export const serializeMultiValuedEnumField = (x: MultiValuedEnumField): unknown 
     kind: 'MultiValuedEnumField',
     id: serializeMultiValuedEnumFieldId(x.id),
     modelVersion: x.modelVersion,
-    metadata: serializeSchemaArtifactMetadata(x.metadata),
+    metadata: serializeCatalogMetadata(x.metadata),
+    versioning: serializeSchemaArtifactVersioning(x.versioning),
     fieldSpec: serializeMultiValuedEnumFieldSpec(x.fieldSpec),
+    label: serializeMultilingualString(x.label),
   };
   if (x.helpText !== undefined)
     out['helpText'] = serializeMultilingualString(x.helpText);
@@ -463,8 +516,10 @@ export function parseMultiValuedEnumField(
   return multiValuedEnumField({
     id: parseMultiValuedEnumFieldId(s.id, `${where}.id`),
     modelVersion: s.modelVersion,
-    metadata: parseSchemaArtifactMetadata(s.metadata, `${where}.metadata`),
+    metadata: parseCatalogMetadata(s.metadata, `${where}.metadata`),
+    versioning: parseSchemaArtifactVersioning(s.versioning, `${where}.versioning`),
     fieldSpec: parseMultiValuedEnumFieldSpec(s.fieldSpec, `${where}.fieldSpec`),
+    label: parseMultilingualString(s.label, `${where}.label`),
     ...(s.helpText !== undefined && {
       helpText: parseMultilingualString(s.helpText, `${where}.helpText`),
     }),
@@ -476,8 +531,10 @@ export const serializeLinkField = (x: LinkField): unknown => {
     kind: 'LinkField',
     id: serializeLinkFieldId(x.id),
     modelVersion: x.modelVersion,
-    metadata: serializeSchemaArtifactMetadata(x.metadata),
+    metadata: serializeCatalogMetadata(x.metadata),
+    versioning: serializeSchemaArtifactVersioning(x.versioning),
     fieldSpec: serializeLinkFieldSpec(x.fieldSpec),
+    label: serializeMultilingualString(x.label),
   };
   if (x.helpText !== undefined)
     out['helpText'] = serializeMultilingualString(x.helpText);
@@ -489,8 +546,10 @@ export function parseLinkField(x: unknown, where = 'LinkField'): LinkField {
   return linkField({
     id: parseLinkFieldId(s.id, `${where}.id`),
     modelVersion: s.modelVersion,
-    metadata: parseSchemaArtifactMetadata(s.metadata, `${where}.metadata`),
+    metadata: parseCatalogMetadata(s.metadata, `${where}.metadata`),
+    versioning: parseSchemaArtifactVersioning(s.versioning, `${where}.versioning`),
     fieldSpec: parseLinkFieldSpec(s.fieldSpec, `${where}.fieldSpec`),
+    label: parseMultilingualString(s.label, `${where}.label`),
     ...(s.helpText !== undefined && {
       helpText: parseMultilingualString(s.helpText, `${where}.helpText`),
     }),
@@ -502,8 +561,10 @@ export const serializeEmailField = (x: EmailField): unknown => {
     kind: 'EmailField',
     id: serializeEmailFieldId(x.id),
     modelVersion: x.modelVersion,
-    metadata: serializeSchemaArtifactMetadata(x.metadata),
+    metadata: serializeCatalogMetadata(x.metadata),
+    versioning: serializeSchemaArtifactVersioning(x.versioning),
     fieldSpec: serializeEmailFieldSpec(x.fieldSpec),
+    label: serializeMultilingualString(x.label),
   };
   if (x.helpText !== undefined)
     out['helpText'] = serializeMultilingualString(x.helpText);
@@ -515,8 +576,10 @@ export function parseEmailField(x: unknown, where = 'EmailField'): EmailField {
   return emailField({
     id: parseEmailFieldId(s.id, `${where}.id`),
     modelVersion: s.modelVersion,
-    metadata: parseSchemaArtifactMetadata(s.metadata, `${where}.metadata`),
+    metadata: parseCatalogMetadata(s.metadata, `${where}.metadata`),
+    versioning: parseSchemaArtifactVersioning(s.versioning, `${where}.versioning`),
     fieldSpec: parseEmailFieldSpec(s.fieldSpec, `${where}.fieldSpec`),
+    label: parseMultilingualString(s.label, `${where}.label`),
     ...(s.helpText !== undefined && {
       helpText: parseMultilingualString(s.helpText, `${where}.helpText`),
     }),
@@ -528,8 +591,10 @@ export const serializePhoneNumberField = (x: PhoneNumberField): unknown => {
     kind: 'PhoneNumberField',
     id: serializePhoneNumberFieldId(x.id),
     modelVersion: x.modelVersion,
-    metadata: serializeSchemaArtifactMetadata(x.metadata),
+    metadata: serializeCatalogMetadata(x.metadata),
+    versioning: serializeSchemaArtifactVersioning(x.versioning),
     fieldSpec: serializePhoneNumberFieldSpec(x.fieldSpec),
+    label: serializeMultilingualString(x.label),
   };
   if (x.helpText !== undefined)
     out['helpText'] = serializeMultilingualString(x.helpText);
@@ -544,8 +609,10 @@ export function parsePhoneNumberField(
   return phoneNumberField({
     id: parsePhoneNumberFieldId(s.id, `${where}.id`),
     modelVersion: s.modelVersion,
-    metadata: parseSchemaArtifactMetadata(s.metadata, `${where}.metadata`),
+    metadata: parseCatalogMetadata(s.metadata, `${where}.metadata`),
+    versioning: parseSchemaArtifactVersioning(s.versioning, `${where}.versioning`),
     fieldSpec: parsePhoneNumberFieldSpec(s.fieldSpec, `${where}.fieldSpec`),
+    label: parseMultilingualString(s.label, `${where}.label`),
     ...(s.helpText !== undefined && {
       helpText: parseMultilingualString(s.helpText, `${where}.helpText`),
     }),
@@ -557,8 +624,10 @@ export const serializeOrcidField = (x: OrcidField): unknown => {
     kind: 'OrcidField',
     id: serializeOrcidFieldId(x.id),
     modelVersion: x.modelVersion,
-    metadata: serializeSchemaArtifactMetadata(x.metadata),
+    metadata: serializeCatalogMetadata(x.metadata),
+    versioning: serializeSchemaArtifactVersioning(x.versioning),
     fieldSpec: serializeOrcidFieldSpec(x.fieldSpec),
+    label: serializeMultilingualString(x.label),
   };
   if (x.helpText !== undefined)
     out['helpText'] = serializeMultilingualString(x.helpText);
@@ -570,8 +639,10 @@ export function parseOrcidField(x: unknown, where = 'OrcidField'): OrcidField {
   return orcidField({
     id: parseOrcidFieldId(s.id, `${where}.id`),
     modelVersion: s.modelVersion,
-    metadata: parseSchemaArtifactMetadata(s.metadata, `${where}.metadata`),
+    metadata: parseCatalogMetadata(s.metadata, `${where}.metadata`),
+    versioning: parseSchemaArtifactVersioning(s.versioning, `${where}.versioning`),
     fieldSpec: parseOrcidFieldSpec(s.fieldSpec, `${where}.fieldSpec`),
+    label: parseMultilingualString(s.label, `${where}.label`),
     ...(s.helpText !== undefined && {
       helpText: parseMultilingualString(s.helpText, `${where}.helpText`),
     }),
@@ -583,8 +654,10 @@ export const serializeRorField = (x: RorField): unknown => {
     kind: 'RorField',
     id: serializeRorFieldId(x.id),
     modelVersion: x.modelVersion,
-    metadata: serializeSchemaArtifactMetadata(x.metadata),
+    metadata: serializeCatalogMetadata(x.metadata),
+    versioning: serializeSchemaArtifactVersioning(x.versioning),
     fieldSpec: serializeRorFieldSpec(x.fieldSpec),
+    label: serializeMultilingualString(x.label),
   };
   if (x.helpText !== undefined)
     out['helpText'] = serializeMultilingualString(x.helpText);
@@ -596,8 +669,10 @@ export function parseRorField(x: unknown, where = 'RorField'): RorField {
   return rorField({
     id: parseRorFieldId(s.id, `${where}.id`),
     modelVersion: s.modelVersion,
-    metadata: parseSchemaArtifactMetadata(s.metadata, `${where}.metadata`),
+    metadata: parseCatalogMetadata(s.metadata, `${where}.metadata`),
+    versioning: parseSchemaArtifactVersioning(s.versioning, `${where}.versioning`),
     fieldSpec: parseRorFieldSpec(s.fieldSpec, `${where}.fieldSpec`),
+    label: parseMultilingualString(s.label, `${where}.label`),
     ...(s.helpText !== undefined && {
       helpText: parseMultilingualString(s.helpText, `${where}.helpText`),
     }),
@@ -609,8 +684,10 @@ export const serializeDoiField = (x: DoiField): unknown => {
     kind: 'DoiField',
     id: serializeDoiFieldId(x.id),
     modelVersion: x.modelVersion,
-    metadata: serializeSchemaArtifactMetadata(x.metadata),
+    metadata: serializeCatalogMetadata(x.metadata),
+    versioning: serializeSchemaArtifactVersioning(x.versioning),
     fieldSpec: serializeDoiFieldSpec(x.fieldSpec),
+    label: serializeMultilingualString(x.label),
   };
   if (x.helpText !== undefined)
     out['helpText'] = serializeMultilingualString(x.helpText);
@@ -622,8 +699,10 @@ export function parseDoiField(x: unknown, where = 'DoiField'): DoiField {
   return doiField({
     id: parseDoiFieldId(s.id, `${where}.id`),
     modelVersion: s.modelVersion,
-    metadata: parseSchemaArtifactMetadata(s.metadata, `${where}.metadata`),
+    metadata: parseCatalogMetadata(s.metadata, `${where}.metadata`),
+    versioning: parseSchemaArtifactVersioning(s.versioning, `${where}.versioning`),
     fieldSpec: parseDoiFieldSpec(s.fieldSpec, `${where}.fieldSpec`),
+    label: parseMultilingualString(s.label, `${where}.label`),
     ...(s.helpText !== undefined && {
       helpText: parseMultilingualString(s.helpText, `${where}.helpText`),
     }),
@@ -635,8 +714,10 @@ export const serializePubMedIdField = (x: PubMedIdField): unknown => {
     kind: 'PubMedIdField',
     id: serializePubMedIdFieldId(x.id),
     modelVersion: x.modelVersion,
-    metadata: serializeSchemaArtifactMetadata(x.metadata),
+    metadata: serializeCatalogMetadata(x.metadata),
+    versioning: serializeSchemaArtifactVersioning(x.versioning),
     fieldSpec: serializePubMedIdFieldSpec(x.fieldSpec),
+    label: serializeMultilingualString(x.label),
   };
   if (x.helpText !== undefined)
     out['helpText'] = serializeMultilingualString(x.helpText);
@@ -651,8 +732,10 @@ export function parsePubMedIdField(
   return pubMedIdField({
     id: parsePubMedIdFieldId(s.id, `${where}.id`),
     modelVersion: s.modelVersion,
-    metadata: parseSchemaArtifactMetadata(s.metadata, `${where}.metadata`),
+    metadata: parseCatalogMetadata(s.metadata, `${where}.metadata`),
+    versioning: parseSchemaArtifactVersioning(s.versioning, `${where}.versioning`),
     fieldSpec: parsePubMedIdFieldSpec(s.fieldSpec, `${where}.fieldSpec`),
+    label: parseMultilingualString(s.label, `${where}.label`),
     ...(s.helpText !== undefined && {
       helpText: parseMultilingualString(s.helpText, `${where}.helpText`),
     }),
@@ -664,8 +747,10 @@ export const serializeRridField = (x: RridField): unknown => {
     kind: 'RridField',
     id: serializeRridFieldId(x.id),
     modelVersion: x.modelVersion,
-    metadata: serializeSchemaArtifactMetadata(x.metadata),
+    metadata: serializeCatalogMetadata(x.metadata),
+    versioning: serializeSchemaArtifactVersioning(x.versioning),
     fieldSpec: serializeRridFieldSpec(x.fieldSpec),
+    label: serializeMultilingualString(x.label),
   };
   if (x.helpText !== undefined)
     out['helpText'] = serializeMultilingualString(x.helpText);
@@ -677,8 +762,10 @@ export function parseRridField(x: unknown, where = 'RridField'): RridField {
   return rridField({
     id: parseRridFieldId(s.id, `${where}.id`),
     modelVersion: s.modelVersion,
-    metadata: parseSchemaArtifactMetadata(s.metadata, `${where}.metadata`),
+    metadata: parseCatalogMetadata(s.metadata, `${where}.metadata`),
+    versioning: parseSchemaArtifactVersioning(s.versioning, `${where}.versioning`),
     fieldSpec: parseRridFieldSpec(s.fieldSpec, `${where}.fieldSpec`),
+    label: parseMultilingualString(s.label, `${where}.label`),
     ...(s.helpText !== undefined && {
       helpText: parseMultilingualString(s.helpText, `${where}.helpText`),
     }),
@@ -690,8 +777,10 @@ export const serializeNihGrantIdField = (x: NihGrantIdField): unknown => {
     kind: 'NihGrantIdField',
     id: serializeNihGrantIdFieldId(x.id),
     modelVersion: x.modelVersion,
-    metadata: serializeSchemaArtifactMetadata(x.metadata),
+    metadata: serializeCatalogMetadata(x.metadata),
+    versioning: serializeSchemaArtifactVersioning(x.versioning),
     fieldSpec: serializeNihGrantIdFieldSpec(x.fieldSpec),
+    label: serializeMultilingualString(x.label),
   };
   if (x.helpText !== undefined)
     out['helpText'] = serializeMultilingualString(x.helpText);
@@ -706,8 +795,10 @@ export function parseNihGrantIdField(
   return nihGrantIdField({
     id: parseNihGrantIdFieldId(s.id, `${where}.id`),
     modelVersion: s.modelVersion,
-    metadata: parseSchemaArtifactMetadata(s.metadata, `${where}.metadata`),
+    metadata: parseCatalogMetadata(s.metadata, `${where}.metadata`),
+    versioning: parseSchemaArtifactVersioning(s.versioning, `${where}.versioning`),
     fieldSpec: parseNihGrantIdFieldSpec(s.fieldSpec, `${where}.fieldSpec`),
+    label: parseMultilingualString(s.label, `${where}.label`),
     ...(s.helpText !== undefined && {
       helpText: parseMultilingualString(s.helpText, `${where}.helpText`),
     }),
@@ -719,8 +810,10 @@ export const serializeAttributeValueField = (x: AttributeValueField): unknown =>
     kind: 'AttributeValueField',
     id: serializeAttributeValueFieldId(x.id),
     modelVersion: x.modelVersion,
-    metadata: serializeSchemaArtifactMetadata(x.metadata),
+    metadata: serializeCatalogMetadata(x.metadata),
+    versioning: serializeSchemaArtifactVersioning(x.versioning),
     fieldSpec: serializeAttributeValueFieldSpec(x.fieldSpec),
+    label: serializeMultilingualString(x.label),
   };
   if (x.helpText !== undefined)
     out['helpText'] = serializeMultilingualString(x.helpText);
@@ -735,8 +828,10 @@ export function parseAttributeValueField(
   return attributeValueField({
     id: parseAttributeValueFieldId(s.id, `${where}.id`),
     modelVersion: s.modelVersion,
-    metadata: parseSchemaArtifactMetadata(s.metadata, `${where}.metadata`),
+    metadata: parseCatalogMetadata(s.metadata, `${where}.metadata`),
+    versioning: parseSchemaArtifactVersioning(s.versioning, `${where}.versioning`),
     fieldSpec: parseAttributeValueFieldSpec(s.fieldSpec, `${where}.fieldSpec`),
+    label: parseMultilingualString(s.label, `${where}.label`),
     ...(s.helpText !== undefined && {
       helpText: parseMultilingualString(s.helpText, `${where}.helpText`),
     }),

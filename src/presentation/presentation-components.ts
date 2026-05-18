@@ -4,7 +4,7 @@ import {
   type MultilingualStringInput,
   multilingualString,
 } from '../multilingual.js';
-import type { ArtifactMetadata } from '../metadata/index.js';
+import type { CatalogMetadata } from '../metadata/index.js';
 import { type PresentationComponentId, presentationComponentId } from '../identifiers.js';
 
 // Idempotent: accepts a typed PresentationComponentId, an Iri, or a bare
@@ -25,7 +25,7 @@ export interface RichTextComponent {
   readonly kind: 'RichTextComponent';
   readonly id: PresentationComponentId;
   readonly modelVersion: string;
-  readonly metadata: ArtifactMetadata;
+  readonly metadata: CatalogMetadata;
   // HtmlContent — the permitted feature set and any sanitization requirements
   // are out of scope for the abstract specification.
   readonly html: string;
@@ -34,7 +34,7 @@ export interface RichTextComponent {
 export interface RichTextComponentInit {
   readonly id: PresentationComponentId | Iri | string;
   readonly modelVersion: string;
-  readonly metadata: ArtifactMetadata;
+  readonly metadata: CatalogMetadata;
   readonly html: string;
 }
 
@@ -50,7 +50,7 @@ export interface ImageComponent {
   readonly kind: 'ImageComponent';
   readonly id: PresentationComponentId;
   readonly modelVersion: string;
-  readonly metadata: ArtifactMetadata;
+  readonly metadata: CatalogMetadata;
   readonly image: Iri;
   // Accessibility metadata: short alt-text label and longer description.
   readonly label?: MultilingualString;
@@ -60,7 +60,7 @@ export interface ImageComponent {
 export interface ImageComponentInit {
   readonly id: PresentationComponentId | Iri | string;
   readonly modelVersion: string;
-  readonly metadata: ArtifactMetadata;
+  readonly metadata: CatalogMetadata;
   readonly image: Iri | string;
   readonly label?: MultilingualStringInput;
   readonly description?: MultilingualStringInput;
@@ -71,7 +71,7 @@ export function imageComponent(init: ImageComponentInit): ImageComponent {
     kind: 'ImageComponent';
     id: PresentationComponentId;
     modelVersion: string;
-    metadata: ArtifactMetadata;
+    metadata: CatalogMetadata;
     image: Iri;
     label?: MultilingualString;
     description?: MultilingualString;
@@ -91,7 +91,7 @@ export interface YoutubeVideoComponent {
   readonly kind: 'YoutubeVideoComponent';
   readonly id: PresentationComponentId;
   readonly modelVersion: string;
-  readonly metadata: ArtifactMetadata;
+  readonly metadata: CatalogMetadata;
   readonly video: Iri;
   // Accessibility metadata: short alt-text / caption-title and longer description.
   readonly label?: MultilingualString;
@@ -101,7 +101,7 @@ export interface YoutubeVideoComponent {
 export interface YoutubeVideoComponentInit {
   readonly id: PresentationComponentId | Iri | string;
   readonly modelVersion: string;
-  readonly metadata: ArtifactMetadata;
+  readonly metadata: CatalogMetadata;
   readonly video: Iri | string;
   readonly label?: MultilingualStringInput;
   readonly description?: MultilingualStringInput;
@@ -114,7 +114,7 @@ export function youtubeVideoComponent(
     kind: 'YoutubeVideoComponent';
     id: PresentationComponentId;
     modelVersion: string;
-    metadata: ArtifactMetadata;
+    metadata: CatalogMetadata;
     video: Iri;
     label?: MultilingualString;
     description?: MultilingualString;
@@ -134,13 +134,13 @@ export interface SectionBreakComponent {
   readonly kind: 'SectionBreakComponent';
   readonly id: PresentationComponentId;
   readonly modelVersion: string;
-  readonly metadata: ArtifactMetadata;
+  readonly metadata: CatalogMetadata;
 }
 
 export interface SectionBreakComponentInit {
   readonly id: PresentationComponentId | Iri | string;
   readonly modelVersion: string;
-  readonly metadata: ArtifactMetadata;
+  readonly metadata: CatalogMetadata;
 }
 
 export const sectionBreakComponent = (
@@ -156,13 +156,13 @@ export interface PageBreakComponent {
   readonly kind: 'PageBreakComponent';
   readonly id: PresentationComponentId;
   readonly modelVersion: string;
-  readonly metadata: ArtifactMetadata;
+  readonly metadata: CatalogMetadata;
 }
 
 export interface PageBreakComponentInit {
   readonly id: PresentationComponentId | Iri | string;
   readonly modelVersion: string;
-  readonly metadata: ArtifactMetadata;
+  readonly metadata: CatalogMetadata;
 }
 
 export const pageBreakComponent = (

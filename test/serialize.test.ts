@@ -5,7 +5,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   // construction
-  artifactMetadata,
+  catalogMetadata,
   attributeValue,
   attributeValueField,
   attributeValueFieldSpec,
@@ -88,7 +88,6 @@ import {
   rridField,
   rridFieldSpec,
   rridValue,
-  schemaArtifactMetadata,
   schemaArtifactVersioning,
   sectionBreakComponent,
   template,
@@ -132,10 +131,8 @@ import {
   parseInstanceValue,
   serializeAnnotation,
   parseAnnotation,
-  serializeArtifactMetadata,
-  parseArtifactMetadata,
-  serializeSchemaArtifactMetadata,
-  parseSchemaArtifactMetadata,
+  serializeCatalogMetadata,
+  parseCatalogMetadata,
   serializeCardinality,
   parseCardinality,
   serializeProperty,
@@ -182,14 +179,13 @@ const tp = lifecycleMetadata({
   modifiedOn: '2024-01-02T00:00:00Z',
   modifiedBy: 'https://example.org/u',
 });
-const am = artifactMetadata({ preferredLabel: 'Demo', lifecycle: tp });
-const sam = schemaArtifactMetadata({
-  artifact: am,
-  versioning: schemaArtifactVersioning({
-    version: '1.0.0',
-    status: 'draft',
-  }),
-});
+const am = catalogMetadata({ preferredLabel: 'Demo', lifecycle: tp });
+const sam = {
+  metadata: am,
+  versioning: schemaArtifactVersioning({ version: '1.0.0', status: 'draft' }),
+  label: 'Demo',
+  title: 'Demo',
+};
 
 const MV = '0.1.0';
 
@@ -394,19 +390,13 @@ describe('Annotation round-trip', () => {
   });
 });
 
-// ---- ArtifactMetadata / SchemaArtifactMetadata round-trip ------------
+// ---- CatalogMetadata round-trip --------------------------------------
 
 describe('Metadata round-trip', () => {
-  it('ArtifactMetadata', () => {
-    const wire = serializeArtifactMetadata(am);
-    const back = parseArtifactMetadata(wire);
-    expect(serializeArtifactMetadata(back)).toEqual(wire);
-  });
-
-  it('SchemaArtifactMetadata', () => {
-    const wire = serializeSchemaArtifactMetadata(sam);
-    const back = parseSchemaArtifactMetadata(wire);
-    expect(serializeSchemaArtifactMetadata(back)).toEqual(wire);
+  it('CatalogMetadata', () => {
+    const wire = serializeCatalogMetadata(am);
+    const back = parseCatalogMetadata(wire);
+    expect(serializeCatalogMetadata(back)).toEqual(wire);
   });
 });
 
@@ -637,7 +627,7 @@ const fieldSamples = [
     textField({
       id: 'https://example.org/fields/text',
       modelVersion: MV,
-      metadata: sam,
+      ...sam,
       fieldSpec: textFieldSpec(),
     }),
   ],
@@ -646,7 +636,7 @@ const fieldSamples = [
     integerNumberField({
       id: 'https://example.org/fields/int',
       modelVersion: MV,
-      metadata: sam,
+      ...sam,
       fieldSpec: integerNumberFieldSpec(),
     }),
   ],
@@ -655,7 +645,7 @@ const fieldSamples = [
     realNumberField({
       id: 'https://example.org/fields/real',
       modelVersion: MV,
-      metadata: sam,
+      ...sam,
       fieldSpec: realNumberFieldSpec({ datatype: 'decimal' }),
     }),
   ],
@@ -664,7 +654,7 @@ const fieldSamples = [
     dateField({
       id: 'https://example.org/fields/date',
       modelVersion: MV,
-      metadata: sam,
+      ...sam,
       fieldSpec: dateFieldSpec({ dateValueType: 'fullDate' }),
     }),
   ],
@@ -673,7 +663,7 @@ const fieldSamples = [
     emailField({
       id: 'https://example.org/fields/email',
       modelVersion: MV,
-      metadata: sam,
+      ...sam,
       fieldSpec: emailFieldSpec(),
     }),
   ],
@@ -682,7 +672,7 @@ const fieldSamples = [
     orcidField({
       id: 'https://example.org/fields/orcid',
       modelVersion: MV,
-      metadata: sam,
+      ...sam,
       fieldSpec: orcidFieldSpec(),
     }),
   ],
@@ -691,7 +681,7 @@ const fieldSamples = [
     linkField({
       id: 'https://example.org/fields/link',
       modelVersion: MV,
-      metadata: sam,
+      ...sam,
       fieldSpec: linkFieldSpec(),
     }),
   ],
@@ -700,7 +690,7 @@ const fieldSamples = [
     attributeValueField({
       id: 'https://example.org/fields/attr',
       modelVersion: MV,
-      metadata: sam,
+      ...sam,
       fieldSpec: attributeValueFieldSpec(),
     }),
   ],
@@ -709,7 +699,7 @@ const fieldSamples = [
     phoneNumberField({
       id: 'https://example.org/fields/phone',
       modelVersion: MV,
-      metadata: sam,
+      ...sam,
       fieldSpec: phoneNumberFieldSpec(),
     }),
   ],
@@ -718,7 +708,7 @@ const fieldSamples = [
     rorField({
       id: 'https://example.org/fields/ror',
       modelVersion: MV,
-      metadata: sam,
+      ...sam,
       fieldSpec: rorFieldSpec(),
     }),
   ],
@@ -727,7 +717,7 @@ const fieldSamples = [
     doiField({
       id: 'https://example.org/fields/doi',
       modelVersion: MV,
-      metadata: sam,
+      ...sam,
       fieldSpec: doiFieldSpec(),
     }),
   ],
@@ -736,7 +726,7 @@ const fieldSamples = [
     pubMedIdField({
       id: 'https://example.org/fields/pmid',
       modelVersion: MV,
-      metadata: sam,
+      ...sam,
       fieldSpec: pubMedIdFieldSpec(),
     }),
   ],
@@ -745,7 +735,7 @@ const fieldSamples = [
     rridField({
       id: 'https://example.org/fields/rrid',
       modelVersion: MV,
-      metadata: sam,
+      ...sam,
       fieldSpec: rridFieldSpec(),
     }),
   ],
@@ -754,7 +744,7 @@ const fieldSamples = [
     nihGrantIdField({
       id: 'https://example.org/fields/grant',
       modelVersion: MV,
-      metadata: sam,
+      ...sam,
       fieldSpec: nihGrantIdFieldSpec(),
     }),
   ],
@@ -763,7 +753,7 @@ const fieldSamples = [
     controlledTermField({
       id: 'https://example.org/fields/ct',
       modelVersion: MV,
-      metadata: sam,
+      ...sam,
       fieldSpec: controlledTermFieldSpec(
         ontologySource(
           ontologyReference({
@@ -779,7 +769,7 @@ const fieldSamples = [
     singleValuedEnumField({
       id: 'https://example.org/fields/single-enum',
       modelVersion: MV,
-      metadata: sam,
+      ...sam,
       fieldSpec: singleValuedEnumFieldSpec({
         permissibleValues: [permissibleValue({ value: 'a', label: 'A' })],
       }),
@@ -790,7 +780,7 @@ const fieldSamples = [
     multiValuedEnumField({
       id: 'https://example.org/fields/multi-enum',
       modelVersion: MV,
-      metadata: sam,
+      ...sam,
       fieldSpec: multiValuedEnumFieldSpec({
         permissibleValues: [
           permissibleValue({ value: 'a', label: 'A' }),
@@ -814,7 +804,7 @@ describe('Field round-trip', () => {
     const f = textField({
       id: 'https://example.org/fields/text',
       modelVersion: MV,
-      metadata: sam,
+      ...sam,
       fieldSpec: textFieldSpec(),
     });
     const wire = serializeField(f) as { id: unknown };
@@ -826,7 +816,7 @@ describe('Field round-trip', () => {
       textField({
         id: 'https://example.org/fields/text',
         modelVersion: MV,
-        metadata: sam,
+        ...sam,
         fieldSpec: textFieldSpec(),
       }),
     ) as Record<string, unknown>;
@@ -839,7 +829,7 @@ describe('Field round-trip', () => {
       textField({
         id: 'https://example.org/fields/text',
         modelVersion: MV,
-        metadata: sam,
+        ...sam,
         fieldSpec: textFieldSpec(),
       }),
     ) as Record<string, unknown>;
@@ -852,7 +842,7 @@ describe('Field round-trip', () => {
       textField({
         id: 'https://example.org/fields/text',
         modelVersion: MV,
-        metadata: sam,
+        ...sam,
         fieldSpec: textFieldSpec(),
       }),
     ) as Record<string, unknown>;
@@ -1106,7 +1096,7 @@ describe('PresentationComponent round-trip', () => {
 const sampleTemplate = template({
   id: 'https://example.org/templates/demo',
   modelVersion: MV,
-  metadata: sam,
+  ...sam,
   header: 'Hello',
   footer: 'Bye',
   members: [
@@ -1229,7 +1219,7 @@ describe('Generic serialize() / parse() dispatcher', () => {
     const f = textField({
       id: 'https://example.org/fields/x',
       modelVersion: MV,
-      metadata: sam,
+      ...sam,
       fieldSpec: textFieldSpec(),
     });
     const wire = serialize(f);

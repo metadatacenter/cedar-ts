@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
-  artifactMetadata,
+  catalogMetadata,
   booleanField,
   booleanFieldId,
   booleanFieldSpec,
@@ -11,7 +11,6 @@ import {
   isField,
   isEmbeddedField,
   lifecycleMetadata,
-  schemaArtifactMetadata,
   schemaArtifactVersioning,
   serialize,
   parseTemplate,
@@ -26,10 +25,12 @@ const tp = lifecycleMetadata({
   modifiedBy: 'https://example.org/u',
 });
 
-const meta = schemaArtifactMetadata({
-  artifact: artifactMetadata({ preferredLabel: 'Boolean field test', lifecycle: tp }),
+const meta = {
+  metadata: catalogMetadata({ preferredLabel: 'Boolean field test', lifecycle: tp }),
   versioning: schemaArtifactVersioning({ version: '1.0.0', status: 'draft' }),
-});
+  label: 'Boolean field test',
+  title: 'Boolean field test',
+};
 
 const MV = '0.1.0';
 
@@ -80,7 +81,7 @@ describe('BooleanField', () => {
     const f = booleanField({
       id: 'https://example.org/fields/active',
       modelVersion: MV,
-      metadata: meta,
+      ...meta,
       fieldSpec: booleanFieldSpec({ renderingHint: 'toggle' }),
     });
     expect(f.kind).toBe('BooleanField');
@@ -139,7 +140,7 @@ describe('EmbeddedBooleanField', () => {
     const f = booleanField({
       id: 'https://example.org/fields/active',
       modelVersion: MV,
-      metadata: meta,
+      ...meta,
       fieldSpec: booleanFieldSpec(),
     });
     const ef = embeddedBooleanField({ key: 'active', artifactRef: f });
@@ -152,7 +153,7 @@ describe('Boolean wire form', () => {
   const fld = booleanField({
     id: 'https://example.org/fields/active',
     modelVersion: MV,
-    metadata: meta,
+    ...meta,
     fieldSpec: booleanFieldSpec({ renderingHint: 'checkbox' }),
   });
 
@@ -172,7 +173,7 @@ describe('Boolean wire form', () => {
     const tpl = template({
       id: templateId('https://example.org/templates/t'),
       modelVersion: MV,
-      metadata: meta,
+      ...meta,
       members: [
         embeddedBooleanField({
           key: 'is_active',

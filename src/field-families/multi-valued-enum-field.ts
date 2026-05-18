@@ -16,8 +16,8 @@
 // `defaultValue` slot is a sequence of EnumValue.
 
 import { type Iri, iri, parseSemanticVersion } from '../leaves/index.js';
-import type { MultilingualString } from '../multilingual.js';
-import type { SchemaArtifactMetadata } from '../metadata/index.js';
+import { type MultilingualString, type MultilingualStringInput, multilingualString } from '../multilingual.js';
+import type { CatalogMetadata, SchemaArtifactVersioning } from '../metadata/index.js';
 import type { ValueRequirement } from '../embedded/requirement.js';
 import type { Cardinality } from '../embedded/cardinality.js';
 import type { Visibility } from '../embedded/visibility.js';
@@ -124,16 +124,20 @@ export interface MultiValuedEnumField {
   readonly kind: 'MultiValuedEnumField';
   readonly id: MultiValuedEnumFieldId;
   readonly modelVersion: string;
-  readonly metadata: SchemaArtifactMetadata;
+  readonly metadata: CatalogMetadata;
+  readonly versioning: SchemaArtifactVersioning;
   readonly fieldSpec: MultiValuedEnumFieldSpec;
+  readonly label: MultilingualString;
   readonly helpText?: MultilingualString;
 }
 
 export interface MultiValuedEnumFieldInit {
   readonly id: MultiValuedEnumFieldId | Iri | string;
   readonly modelVersion: string;
-  readonly metadata: SchemaArtifactMetadata;
+  readonly metadata: CatalogMetadata;
+  readonly versioning: SchemaArtifactVersioning;
   readonly fieldSpec: MultiValuedEnumFieldSpec;
+  readonly label: MultilingualStringInput;
   readonly helpText?: MultilingualString;
 }
 
@@ -146,6 +150,8 @@ export const multiValuedEnumField = (
     modelVersion: parseSemanticVersion(init.modelVersion),
     metadata: init.metadata,
     fieldSpec: init.fieldSpec,
+    versioning: init.versioning,
+    label: multilingualString(init.label),
     ...(init.helpText !== undefined && { helpText: init.helpText }),
   };
   return out;

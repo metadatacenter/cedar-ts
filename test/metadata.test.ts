@@ -7,8 +7,7 @@ import {
   isStatus,
   annotation,
   isAnnotationValue,
-  artifactMetadata,
-  schemaArtifactMetadata,
+  catalogMetadata,
   iri,
   annotationStringValue,
 } from '../src/index.js';
@@ -120,7 +119,7 @@ describe('ArtifactMetadata and SchemaArtifactMetadata', () => {
   });
 
   it('requires only a preferredLabel and defaults altLabels and annotations to empty', () => {
-    const m = artifactMetadata({ preferredLabel: 'Title', lifecycle: tp });
+    const m = catalogMetadata({ preferredLabel: 'Title', lifecycle: tp });
     expect(m.preferredLabel).toEqual([{ value: 'Title', lang: 'und' }]);
     expect(m.altLabels).toEqual([]);
     expect(m.annotations).toEqual([]);
@@ -129,7 +128,7 @@ describe('ArtifactMetadata and SchemaArtifactMetadata', () => {
   });
 
   it('passes through optional descriptive fields when provided', () => {
-    const m = artifactMetadata({
+    const m = catalogMetadata({
       preferredLabel: 'Study title',
       description: 'The study title',
       identifier: 'study-001',
@@ -146,7 +145,7 @@ describe('ArtifactMetadata and SchemaArtifactMetadata', () => {
   });
 
   it('carries annotations when provided', () => {
-    const m = artifactMetadata({
+    const m = catalogMetadata({
       preferredLabel: 'Test',
       lifecycle: tp,
       annotations: [
@@ -159,13 +158,4 @@ describe('ArtifactMetadata and SchemaArtifactMetadata', () => {
     expect(m.annotations.length).toBe(1);
   });
 
-  it('SchemaArtifactMetadata adds schema versioning', () => {
-    const m = artifactMetadata({ preferredLabel: 'Test', lifecycle: tp });
-    const sm = schemaArtifactMetadata({ artifact: m, versioning: sv });
-    // SchemaArtifactMetadata is flat: it spreads the ArtifactMetadata
-    // properties directly alongside `versioning`.
-    expect(sm.preferredLabel).toBe(m.preferredLabel);
-    expect(sm.lifecycle).toBe(m.lifecycle);
-    expect(sm.versioning).toBe(sv);
-  });
 });

@@ -7,15 +7,13 @@
 //   - LifecycleMetadata             (lifecycle-metadata.ts):
 //       creation and modification timestamps and agents
 //   - SchemaArtifactVersioning + Status     (schema-artifact-versioning.ts):
-//       artifact version, lifecycle status, model version
+//       artifact version, lifecycle status, model version. Schema artifacts
+//       carry this as a top-level slot alongside CatalogMetadata.
 //   - Annotation + AnnotationValue  (annotations.ts):
 //       arbitrary RDF-flavored annotations on an artifact
-//   - ArtifactMetadata              (artifact-metadata.ts):
-//       the bundle (descriptive properties + lifecycle + annotations)
-//       carried by every Artifact except those that need versioning too
-//   - SchemaArtifactMetadata        (artifact-metadata.ts):
-//       ArtifactMetadata + SchemaArtifactVersioning, carried by reusable
-//       schema artifacts (Field and Template)
+//   - CatalogMetadata               (catalog-metadata.ts):
+//       the bundle of catalog-oriented descriptive properties +
+//       lifecycle + annotations carried by every Artifact
 
 export {
   type LifecycleMetadata,
@@ -46,10 +44,7 @@ export {
 } from './annotations.js';
 
 export {
-  type ArtifactMetadata,
-  type ArtifactMetadataInit,
-  artifactMetadata,
-  type SchemaArtifactMetadata,
-  type SchemaArtifactMetadataInit,
-  schemaArtifactMetadata,
-} from './artifact-metadata.js';
+  type CatalogMetadata,
+  type CatalogMetadataInit,
+  catalogMetadata,
+} from './catalog-metadata.js';

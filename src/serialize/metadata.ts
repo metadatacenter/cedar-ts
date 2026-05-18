@@ -10,13 +10,11 @@ import {
   type Status,
   type Annotation,
   type AnnotationValue,
-  type ArtifactMetadata,
-  type SchemaArtifactMetadata,
+  type CatalogMetadata,
   lifecycleMetadata,
   schemaArtifactVersioning,
   annotation,
-  artifactMetadata,
-  schemaArtifactMetadata,
+  catalogMetadata,
 } from '../metadata/index.js';
 import {
   expectObject,
@@ -201,14 +199,18 @@ export function parseAnnotation(x: unknown, where = 'Annotation'): Annotation {
   return annotation(propertyIri, body);
 }
 
-// ---- ArtifactMetadata ------------------------------------------------
+// ---- CatalogMetadata ------------------------------------------------
 //
-// Wire form is flat: the descriptive properties (name, description,
-// identifier, preferredLabel, altLabels) sit directly alongside
+// Wire form is flat: the descriptive properties (preferredLabel,
+// description, identifier, altLabels) sit directly alongside
 // `lifecycle` and `annotations`. Empty `altLabels` and `annotations`
-// are elided.
+// are elided. `preferredLabel` is optional.
+//
+// Versioning (SchemaArtifactVersioning) is NOT part of CatalogMetadata;
+// on schema artifacts it lives as a separate top-level slot on the
+// artifact itself.
 
-const ARTIFACT_METADATA_KEYS = [
+const CATALOG_METADATA_KEYS = [
   'preferredLabel',
   'description',
   'identifier',
@@ -217,11 +219,10 @@ const ARTIFACT_METADATA_KEYS = [
   'annotations',
 ] as const;
 
-function writeArtifactMetadataBody(
-  x: ArtifactMetadata,
-  out: Record<string, unknown>,
-): void {
-  out['preferredLabel'] = serializeMultilingualString(x.preferredLabel);
+export function serializeCatalogMetadata(x: CatalogMetadata): unknown {
+  const out: Record<string, unknown> = {};
+  if (x.preferredLabel !== undefined)
+    out['preferredLabel'] = serializeMultilingualString(x.preferredLabel);
   if (x.description !== undefined)
     out['description'] = serializeMultilingualString(x.description);
   if (x.identifier !== undefined) out['identifier'] = x.identifier;
@@ -230,17 +231,18 @@ function writeArtifactMetadataBody(
   out['lifecycle'] = serializeLifecycleMetadata(x.lifecycle);
   if (x.annotations.length > 0)
     out['annotations'] = x.annotations.map(serializeAnnotation);
+  return out;
 }
 
-function readArtifactMetadataBody(
-  o: Record<string, unknown>,
-  where: string,
-): ArtifactMetadata {
+export function parseCatalogMetadata(
+  x: unknown,
+  where = 'CatalogMetadata',
+): CatalogMetadata {
+  const o = expectObject(x, where);
+  expectKnownProperties(o, [...CATALOG_METADATA_KEYS]);
+  rejectNullProperty(o, 'preferredLabel');
   rejectNullProperty(o, 'description');
   rejectNullProperty(o, 'identifier');
-  if (!('preferredLabel' in o)) {
-    throw new CedarConstructionError(`${where}: missing required "preferredLabel"`);
-  }
   if (!('lifecycle' in o)) {
     throw new CedarConstructionError(`${where}: missing required "lifecycle"`);
   }
@@ -251,17 +253,13 @@ function readArtifactMetadataBody(
       ? expectArray(o['annotations'], `${where}.annotations`)
       : [];
   const init: {
-    preferredLabel: ReturnType<typeof parseMultilingualString>;
+    preferredLabel?: ReturnType<typeof parseMultilingualString>;
     description?: ReturnType<typeof parseMultilingualString>;
     identifier?: string;
     altLabels: readonly ReturnType<typeof parseMultilingualString>[];
     lifecycle: LifecycleMetadata;
     annotations: readonly Annotation[];
   } = {
-    preferredLabel: parseMultilingualString(
-      o['preferredLabel'],
-      `${where}.preferredLabel`,
-    ),
     altLabels: altRaw.map((e, i) =>
       parseMultilingualString(e, `${where}.altLabels[${i}]`),
     ),
@@ -270,57 +268,14 @@ function readArtifactMetadataBody(
       parseAnnotation(e, `${where}.annotations[${i}]`),
     ),
   };
+  if ('preferredLabel' in o)
+    init.preferredLabel = parseMultilingualString(
+      o['preferredLabel'],
+      `${where}.preferredLabel`,
+    );
   if ('description' in o)
     init.description = parseMultilingualString(o['description'], `${where}.description`);
   if ('identifier' in o)
     init.identifier = expectString(o['identifier'], `${where}.identifier`);
-  return artifactMetadata(init);
-}
-
-export function serializeArtifactMetadata(x: ArtifactMetadata): unknown {
-  const out: Record<string, unknown> = {};
-  writeArtifactMetadataBody(x, out);
-  return out;
-}
-
-export function parseArtifactMetadata(
-  x: unknown,
-  where = 'ArtifactMetadata',
-): ArtifactMetadata {
-  const o = expectObject(x, where);
-  expectKnownProperties(o, [...ARTIFACT_METADATA_KEYS]);
-  return readArtifactMetadataBody(o, where);
-}
-
-// ---- SchemaArtifactMetadata ------------------------------------------
-//
-// In-memory and wire forms are both fully flat: the `ArtifactMetadata`
-// properties sit directly alongside `versioning`. There is no
-// `artifact` wrapper.
-
-const SCHEMA_ARTIFACT_METADATA_KEYS = [
-  ...ARTIFACT_METADATA_KEYS,
-  'versioning',
-] as const;
-
-export function serializeSchemaArtifactMetadata(x: SchemaArtifactMetadata): unknown {
-  const out: Record<string, unknown> = {};
-  writeArtifactMetadataBody(x, out);
-  out['versioning'] = serializeSchemaArtifactVersioning(x.versioning);
-  return out;
-}
-
-export function parseSchemaArtifactMetadata(
-  x: unknown,
-  where = 'SchemaArtifactMetadata',
-): SchemaArtifactMetadata {
-  const o = expectObject(x, where);
-  expectKnownProperties(o, [...SCHEMA_ARTIFACT_METADATA_KEYS]);
-  if (!('versioning' in o)) {
-    throw new CedarConstructionError(`${where}: missing required "versioning"`);
-  }
-  return schemaArtifactMetadata({
-    artifact: readArtifactMetadataBody(o, where),
-    versioning: parseSchemaArtifactVersioning(o['versioning'], `${where}.versioning`),
-  });
+  return catalogMetadata(init);
 }

@@ -5,7 +5,7 @@ import {
   templateInstanceId,
   templateId,
 } from '../identifiers.js';
-import type { ArtifactMetadata } from '../metadata/index.js';
+import type { CatalogMetadata } from '../metadata/index.js';
 import { isFieldValue } from './field-value.js';
 import {
   isNestedTemplateInstance,
@@ -14,15 +14,15 @@ import {
 
 // TemplateInstance — see grammar.md §Instances.
 // An Artifact recording data conforming to a specific Template. Carries
-// ArtifactMetadata (descriptive + lifecycle + annotations), NOT
-// SchemaArtifactMetadata: instances are independently identifiable artifacts
+// CatalogMetadata (descriptive + lifecycle + annotations), NOT
+// SchemaCatalogMetadata: instances are independently identifiable artifacts
 // but do not carry schema versioning.
 
 export interface TemplateInstance {
   readonly kind: 'TemplateInstance';
   readonly id: TemplateInstanceId;
   readonly modelVersion: string;
-  readonly metadata: ArtifactMetadata;
+  readonly metadata: CatalogMetadata;
   readonly templateRef: TemplateId;
   readonly values: readonly InstanceValue[];
 }
@@ -30,7 +30,7 @@ export interface TemplateInstance {
 export interface TemplateInstanceInit {
   readonly id: TemplateInstanceId | string;
   readonly modelVersion: string;
-  readonly metadata: ArtifactMetadata;
+  readonly metadata: CatalogMetadata;
   readonly templateRef: TemplateId | string;
   readonly values?: readonly InstanceValue[];
 }

@@ -42,8 +42,10 @@ import {
   parseMultilingualString,
 } from './multilingual.js';
 import {
-  serializeSchemaArtifactMetadata,
-  parseSchemaArtifactMetadata,
+  serializeCatalogMetadata,
+  parseCatalogMetadata,
+  serializeSchemaArtifactVersioning,
+  parseSchemaArtifactVersioning,
 } from './metadata.js';
 import {
   serializeEmbeddedArtifact,
@@ -55,7 +57,9 @@ export function serializeTemplate(x: Template): unknown {
     kind: 'Template',
     id: serializeTemplateId(x.id),
     modelVersion: x.modelVersion,
-    metadata: serializeSchemaArtifactMetadata(x.metadata),
+    metadata: serializeCatalogMetadata(x.metadata),
+    versioning: serializeSchemaArtifactVersioning(x.versioning),
+    title: serializeMultilingualString(x.title),
   };
   if (x.renderingHint !== undefined)
     out['renderingHint'] = serializeTemplateRenderingHint(x.renderingHint);
@@ -95,6 +99,8 @@ export function parseTemplate(x: unknown, where = 'Template'): Template {
     'id',
     'modelVersion',
     'metadata',
+    'versioning',
+    'title',
     'renderingHint',
     'header',
     'footer',
@@ -108,27 +114,24 @@ export function parseTemplate(x: unknown, where = 'Template'): Template {
       `${where}: expected kind "Template"; got ${JSON.stringify(o['kind'])}`,
     );
   }
-  if (!('id' in o)) {
-    throw new CedarConstructionError(`${where}: missing required "id"`);
-  }
-  if (!('modelVersion' in o)) {
-    throw new CedarConstructionError(`${where}: missing required "modelVersion"`);
-  }
-  if (!('metadata' in o)) {
-    throw new CedarConstructionError(`${where}: missing required "metadata"`);
-  }
-  if (!('members' in o)) {
-    throw new CedarConstructionError(`${where}: missing required "members"`);
+  for (const k of ['id', 'modelVersion', 'metadata', 'versioning', 'title', 'members']) {
+    if (!(k in o)) {
+      throw new CedarConstructionError(
+        `${where}: missing required ${JSON.stringify(k)}`,
+      );
+    }
   }
   const id = parseTemplateId(
     expectString(o['id'], `${where}.id`),
     `${where}.id`,
   );
   const modelVersion = expectString(o['modelVersion'], `${where}.modelVersion`);
-  const metadata = parseSchemaArtifactMetadata(
-    o['metadata'],
-    `${where}.metadata`,
+  const metadata = parseCatalogMetadata(o['metadata'], `${where}.metadata`);
+  const versioning = parseSchemaArtifactVersioning(
+    o['versioning'],
+    `${where}.versioning`,
   );
+  const title = parseMultilingualString(o['title'], `${where}.title`);
   const membersArr = expectArray(o['members'], `${where}.members`);
   const members = membersArr.map((e, i) =>
     parseEmbeddedArtifact(e, `${where}.members[${i}]`),
@@ -138,11 +141,13 @@ export function parseTemplate(x: unknown, where = 'Template'): Template {
     id: typeof id;
     modelVersion: string;
     metadata: typeof metadata;
+    versioning: typeof versioning;
+    title: typeof title;
     renderingHint?: TemplateRenderingHint;
     header?: ReturnType<typeof parseMultilingualString>;
     footer?: ReturnType<typeof parseMultilingualString>;
     members: typeof members;
-  } = { id, modelVersion, metadata, members };
+  } = { id, modelVersion, metadata, versioning, title, members };
   if ('renderingHint' in o)
     init.renderingHint = parseTemplateRenderingHint(
       o['renderingHint'],

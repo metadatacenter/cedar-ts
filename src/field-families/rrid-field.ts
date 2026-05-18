@@ -19,8 +19,8 @@
 
 import { type Iri, iri, parseSemanticVersion } from '../leaves/index.js';
 import type { RridRenderingHint } from './rendering-hints.js';
-import type { MultilingualString } from '../multilingual.js';
-import type { SchemaArtifactMetadata } from '../metadata/index.js';
+import { type MultilingualString, type MultilingualStringInput, multilingualString } from '../multilingual.js';
+import type { CatalogMetadata, SchemaArtifactVersioning } from '../metadata/index.js';
 import type { ValueRequirement } from '../embedded/requirement.js';
 import type { Cardinality } from '../embedded/cardinality.js';
 import type { Visibility } from '../embedded/visibility.js';
@@ -147,16 +147,20 @@ export interface RridField {
   readonly kind: 'RridField';
   readonly id: RridFieldId;
   readonly modelVersion: string;
-  readonly metadata: SchemaArtifactMetadata;
+  readonly metadata: CatalogMetadata;
+  readonly versioning: SchemaArtifactVersioning;
   readonly fieldSpec: RridFieldSpec;
+  readonly label: MultilingualString;
   readonly helpText?: MultilingualString;
 }
 
 export interface RridFieldInit {
   readonly id: RridFieldId | Iri | string;
   readonly modelVersion: string;
-  readonly metadata: SchemaArtifactMetadata;
+  readonly metadata: CatalogMetadata;
+  readonly versioning: SchemaArtifactVersioning;
   readonly fieldSpec: RridFieldSpec;
+  readonly label: MultilingualStringInput;
   readonly helpText?: MultilingualString;
 }
 
@@ -167,6 +171,8 @@ export const rridField = (init: RridFieldInit): RridField => {
     modelVersion: parseSemanticVersion(init.modelVersion),
     metadata: init.metadata,
     fieldSpec: init.fieldSpec,
+    versioning: init.versioning,
+    label: multilingualString(init.label),
     ...(init.helpText !== undefined && { helpText: init.helpText }),
   };
   return out;

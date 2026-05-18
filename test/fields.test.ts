@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
-  artifactMetadata,
+  catalogMetadata,
   attributeValueField,
   attributeValueFieldId,
   attributeValueFieldSpec,
@@ -56,7 +56,6 @@ import {
   rridField,
   rridFieldId,
   rridFieldSpec,
-  schemaArtifactMetadata,
   schemaArtifactVersioning,
   lifecycleMetadata,
   textField,
@@ -77,13 +76,12 @@ const tp = lifecycleMetadata({
   modifiedOn: '2024-01-01T00:00:00Z',
   modifiedBy: 'https://example.org/u',
 });
-const meta = schemaArtifactMetadata({
-  artifact: artifactMetadata({ preferredLabel: 'X', lifecycle: tp }),
-  versioning: schemaArtifactVersioning({
-    version: '1.0.0',
-    status: 'draft',
-  }),
-});
+const meta = {
+  metadata: catalogMetadata({ preferredLabel: 'X', lifecycle: tp }),
+  versioning: schemaArtifactVersioning({ version: '1.0.0', status: 'draft' }),
+  label: 'X',
+  title: 'X',
+};
 
 const MV = '2.0.0';
 
@@ -92,7 +90,7 @@ describe('Field constructors', () => {
     const f = textField({
       id: textFieldId('https://example.org/fields/title'),
       modelVersion: MV,
-      metadata: meta,
+      ...meta,
       fieldSpec: textFieldSpec(),
     });
     expect(f.kind).toBe('TextField');
@@ -106,7 +104,7 @@ describe('Field constructors', () => {
       // @ts-expect-error TextFieldId is not a DateFieldId
       id: textFieldId('https://example.org/fields/x'),
       modelVersion: MV,
-      metadata: meta,
+      ...meta,
       fieldSpec: dateFieldSpec({ dateValueType: 'fullDate' }),
     });
   });
@@ -115,7 +113,7 @@ describe('Field constructors', () => {
     integerNumberField({
       id: integerNumberFieldId('https://example.org/fields/x'),
       modelVersion: MV,
-      metadata: meta,
+      ...meta,
       // @ts-expect-error TextFieldSpec is not an IntegerNumberFieldSpec
       fieldSpec: textFieldSpec(),
     });
@@ -125,7 +123,7 @@ describe('Field constructors', () => {
     const f = textField({
       id: textFieldId('https://example.org/fields/title'),
       modelVersion: MV,
-      metadata: meta,
+      ...meta,
       fieldSpec: textFieldSpec(),
       helpText: [
         { value: 'Enter the full title of the publication.', lang: 'en' },
@@ -140,7 +138,7 @@ describe('Field constructors', () => {
     const f = textField({
       id: textFieldId('https://example.org/fields/title'),
       modelVersion: MV,
-      metadata: meta,
+      ...meta,
       fieldSpec: textFieldSpec(),
     });
     expect(f.helpText).toBeUndefined();
@@ -152,7 +150,7 @@ describe('Per-family helpers', () => {
     const f: TextField = textField({
       id: textFieldId('https://example.org/f/1'),
       modelVersion: MV,
-      metadata: meta,
+      ...meta,
       fieldSpec: textFieldSpec(),
     });
     expect(f.kind).toBe('TextField');
@@ -164,41 +162,41 @@ describe('Per-family helpers', () => {
 
   it('builds one of each concrete family', () => {
     const all: Field[] = [
-      textField({ id: textFieldId('https://example.org/t'), modelVersion: MV, metadata: meta, fieldSpec: textFieldSpec() }),
+      textField({ id: textFieldId('https://example.org/t'), modelVersion: MV, ...meta, fieldSpec: textFieldSpec() }),
       integerNumberField({
         id: integerNumberFieldId('https://example.org/n'),
         modelVersion: MV,
-        metadata: meta,
+        ...meta,
         fieldSpec: integerNumberFieldSpec(),
       }),
       realNumberField({
         id: realNumberFieldId('https://example.org/r'),
         modelVersion: MV,
-        metadata: meta,
+        ...meta,
         fieldSpec: realNumberFieldSpec({ datatype: 'decimal' }),
       }),
       dateField({
         id: dateFieldId('https://example.org/d'),
         modelVersion: MV,
-        metadata: meta,
+        ...meta,
         fieldSpec: dateFieldSpec({ dateValueType: 'fullDate' }),
       }),
       timeField({
         id: timeFieldId('https://example.org/ti'),
         modelVersion: MV,
-        metadata: meta,
+        ...meta,
         fieldSpec: timeFieldSpec(),
       }),
       dateTimeField({
         id: dateTimeFieldId('https://example.org/dt'),
         modelVersion: MV,
-        metadata: meta,
+        ...meta,
         fieldSpec: dateTimeFieldSpec({ dateTimeValueType: 'dateHourMinute' }),
       }),
       controlledTermField({
         id: controlledTermFieldId('https://example.org/ct'),
         modelVersion: MV,
-        metadata: meta,
+        ...meta,
         fieldSpec: controlledTermFieldSpec(
           ontologySource(ontologyReference({ ontologyIri: 'https://example.org/o' })),
         ),
@@ -206,7 +204,7 @@ describe('Per-family helpers', () => {
       singleValuedEnumField({
         id: singleValuedEnumFieldId('https://example.org/sc'),
         modelVersion: MV,
-        metadata: meta,
+        ...meta,
         fieldSpec: singleValuedEnumFieldSpec({
           permissibleValues: [permissibleValue({ value: 'a' })],
         }),
@@ -214,39 +212,39 @@ describe('Per-family helpers', () => {
       multiValuedEnumField({
         id: multiValuedEnumFieldId('https://example.org/mc'),
         modelVersion: MV,
-        metadata: meta,
+        ...meta,
         fieldSpec: multiValuedEnumFieldSpec({
           permissibleValues: [permissibleValue({ value: 'a' })],
         }),
       }),
-      linkField({ id: linkFieldId('https://example.org/lk'), modelVersion: MV, metadata: meta, fieldSpec: linkFieldSpec() }),
-      emailField({ id: emailFieldId('https://example.org/em'), modelVersion: MV, metadata: meta, fieldSpec: emailFieldSpec() }),
+      linkField({ id: linkFieldId('https://example.org/lk'), modelVersion: MV, ...meta, fieldSpec: linkFieldSpec() }),
+      emailField({ id: emailFieldId('https://example.org/em'), modelVersion: MV, ...meta, fieldSpec: emailFieldSpec() }),
       phoneNumberField({
         id: phoneNumberFieldId('https://example.org/ph'),
         modelVersion: MV,
-        metadata: meta,
+        ...meta,
         fieldSpec: phoneNumberFieldSpec(),
       }),
-      orcidField({ id: orcidFieldId('https://example.org/o'), modelVersion: MV, metadata: meta, fieldSpec: orcidFieldSpec() }),
-      rorField({ id: rorFieldId('https://example.org/r'), modelVersion: MV, metadata: meta, fieldSpec: rorFieldSpec() }),
-      doiField({ id: doiFieldId('https://example.org/d'), modelVersion: MV, metadata: meta, fieldSpec: doiFieldSpec() }),
+      orcidField({ id: orcidFieldId('https://example.org/o'), modelVersion: MV, ...meta, fieldSpec: orcidFieldSpec() }),
+      rorField({ id: rorFieldId('https://example.org/r'), modelVersion: MV, ...meta, fieldSpec: rorFieldSpec() }),
+      doiField({ id: doiFieldId('https://example.org/d'), modelVersion: MV, ...meta, fieldSpec: doiFieldSpec() }),
       pubMedIdField({
         id: pubMedIdFieldId('https://example.org/pm'),
         modelVersion: MV,
-        metadata: meta,
+        ...meta,
         fieldSpec: pubMedIdFieldSpec(),
       }),
-      rridField({ id: rridFieldId('https://example.org/rr'), modelVersion: MV, metadata: meta, fieldSpec: rridFieldSpec() }),
+      rridField({ id: rridFieldId('https://example.org/rr'), modelVersion: MV, ...meta, fieldSpec: rridFieldSpec() }),
       nihGrantIdField({
         id: nihGrantIdFieldId('https://example.org/ng'),
         modelVersion: MV,
-        metadata: meta,
+        ...meta,
         fieldSpec: nihGrantIdFieldSpec(),
       }),
       attributeValueField({
         id: attributeValueFieldId('https://example.org/av'),
         modelVersion: MV,
-        metadata: meta,
+        ...meta,
         fieldSpec: attributeValueFieldSpec(),
       }),
     ];
@@ -258,7 +256,7 @@ describe('Per-family helpers', () => {
     const f = singleValuedEnumField({
       id: singleValuedEnumFieldId('https://example.org/sc'),
       modelVersion: MV,
-      metadata: meta,
+      ...meta,
       fieldSpec: singleValuedEnumFieldSpec({
         permissibleValues: [
           permissibleValue({ value: 'one', label: 'One' }),
@@ -275,7 +273,7 @@ describe('Field kind narrowing', () => {
     const f: Field = integerNumberField({
       id: integerNumberFieldId('https://example.org/n'),
       modelVersion: MV,
-      metadata: meta,
+      ...meta,
       fieldSpec: integerNumberFieldSpec(),
     });
     if (f.kind === 'IntegerNumberField') {

@@ -23,7 +23,7 @@
 // IRI base, partitioned per artifact kind, to keep the example self-contained.
 
 import {
-  artifactMetadata,
+  catalogMetadata,
   booleanField,
   booleanFieldSpec,
   booleanValue,
@@ -66,7 +66,6 @@ import {
   rorField,
   rorFieldSpec,
   rorValue,
-  schemaArtifactMetadata,
   schemaArtifactVersioning,
   serialize,
   singleValuedEnumField,
@@ -78,8 +77,7 @@ import {
   textField,
   textFieldSpec,
   textValue,
-  type ArtifactMetadata,
-  type SchemaArtifactMetadata,
+  type CatalogMetadata,
   type Template,
   type TemplateInstance,
   type ValueRequirement,
@@ -135,24 +133,51 @@ const lifecycleTimestamps = {
   modifiedBy: author,
 };
 
-// Returns plain ArtifactMetadata (no version / status / model-version).
-function artifactMeta(preferredLabel: string, description: string): ArtifactMetadata {
-  return artifactMetadata({
+// Returns plain CatalogMetadata (no version / status / model-version).
+function artifactMeta(preferredLabel: string, description: string): CatalogMetadata {
+  return catalogMetadata({
     preferredLabel,
     description,
     lifecycle: lifecycleMetadata(lifecycleTimestamps),
   });
 }
 
-// Returns SchemaArtifactMetadata. Required by every Field and Template.
-function meta(preferredLabel: string, description: string): SchemaArtifactMetadata {
-  return schemaArtifactMetadata({
-    artifact: artifactMeta(preferredLabel, description),
+// Returns the three slots required by every Field artifact:
+// CatalogMetadata, SchemaArtifactVersioning, and the rendered `label`.
+// The same string is passed as both the catalog `preferredLabel` and
+// the rendered `label` — typical for examples where the registry name
+// and the rendered question text agree.
+function fieldMeta(rendered: string, description: string): {
+  metadata: CatalogMetadata;
+  versioning: ReturnType<typeof schemaArtifactVersioning>;
+  label: string;
+} {
+  return {
+    metadata: artifactMeta(rendered, description),
     versioning: schemaArtifactVersioning({
       version: '1.0.0',
       status: 'draft',
     }),
-  });
+    label: rendered,
+  };
+}
+
+// Returns the three slots required by Template: CatalogMetadata,
+// SchemaArtifactVersioning, and the rendered `title`. Same pattern
+// as fieldMeta, just renamed for clarity.
+function templateMeta(rendered: string, description: string): {
+  metadata: CatalogMetadata;
+  versioning: ReturnType<typeof schemaArtifactVersioning>;
+  title: string;
+} {
+  return {
+    metadata: artifactMeta(rendered, description),
+    versioning: schemaArtifactVersioning({
+      version: '1.0.0',
+      status: 'draft',
+    }),
+    title: rendered,
+  };
 }
 
 // Every concrete artifact (Field, Template, TemplateInstance,
@@ -172,7 +197,7 @@ const MODEL_VERSION = '0.1.0';
 const fullName = textField({
   id: `${FIELDS}full-name`,
   modelVersion: MODEL_VERSION,
-  metadata: meta('Full Name', 'Full legal name of the principal investigator.'),
+  ...fieldMeta('Full Name', 'Full legal name of the principal investigator.'),
   fieldSpec: textFieldSpec({
     minLength: 1,
   }),
@@ -186,7 +211,7 @@ const fullName = textField({
 const academicTitle = singleValuedEnumField({
   id: `${FIELDS}academic-title`,
   modelVersion: MODEL_VERSION,
-  metadata: meta('Academic Title', 'Academic rank or position.'),
+  ...fieldMeta('Academic Title', 'Academic rank or position.'),
   fieldSpec: singleValuedEnumFieldSpec({
     permissibleValues: [
       permissibleValue({ value: 'professor', label: 'Professor' }),
@@ -215,7 +240,7 @@ const academicTitle = singleValuedEnumField({
 const academicRank = singleValuedEnumField({
   id: `${FIELDS}academic-rank`,
   modelVersion: MODEL_VERSION,
-  metadata: meta(
+  ...fieldMeta(
     'Academic Rank',
     'Academic rank backed by the OBO Role Ontology (RoleO).',
   ),
@@ -252,21 +277,21 @@ const academicRank = singleValuedEnumField({
 const email = emailField({
   id: `${FIELDS}email`,
   modelVersion: MODEL_VERSION,
-  metadata: meta('Email Address', 'Primary work email.'),
+  ...fieldMeta('Email Address', 'Primary work email.'),
   fieldSpec: emailFieldSpec(),
 });
 
 const phone = phoneNumberField({
   id: `${FIELDS}phone`,
   modelVersion: MODEL_VERSION,
-  metadata: meta('Phone Number', 'Primary work phone, in international format.'),
+  ...fieldMeta('Phone Number', 'Primary work phone, in international format.'),
   fieldSpec: phoneNumberFieldSpec(),
 });
 
 const orcid = orcidField({
   id: `${FIELDS}orcid`,
   modelVersion: MODEL_VERSION,
-  metadata: meta('ORCID iD', 'ORCID identifier (https://orcid.org/...).'),
+  ...fieldMeta('ORCID iD', 'ORCID identifier (https://orcid.org/...).'),
   fieldSpec: orcidFieldSpec(),
 });
 
@@ -275,14 +300,14 @@ const orcid = orcidField({
 const institutionName = textField({
   id: `${FIELDS}institution-name`,
   modelVersion: MODEL_VERSION,
-  metadata: meta('Institution Name', 'Name of the home institution.'),
+  ...fieldMeta('Institution Name', 'Name of the home institution.'),
   fieldSpec: textFieldSpec(),
 });
 
 const institutionRor = rorField({
   id: `${FIELDS}institution-ror`,
   modelVersion: MODEL_VERSION,
-  metadata: meta(
+  ...fieldMeta(
     'Institution ROR',
     'Research Organization Registry identifier for the home institution.',
   ),
@@ -292,7 +317,7 @@ const institutionRor = rorField({
 const department = textField({
   id: `${FIELDS}department`,
   modelVersion: MODEL_VERSION,
-  metadata: meta('Department', 'Department or division within the institution.'),
+  ...fieldMeta('Department', 'Department or division within the institution.'),
   fieldSpec: textFieldSpec(),
 });
 
@@ -301,7 +326,7 @@ const department = textField({
 const appointmentDate = dateField({
   id: `${FIELDS}appointment-date`,
   modelVersion: MODEL_VERSION,
-  metadata: meta('Appointment Date', 'Start date of current appointment.'),
+  ...fieldMeta('Appointment Date', 'Start date of current appointment.'),
   fieldSpec: dateFieldSpec({ dateValueType: 'fullDate' }),
 });
 
@@ -313,7 +338,7 @@ const appointmentDate = dateField({
 const acceptingNewStudents = booleanField({
   id: `${FIELDS}accepting-new-students`,
   modelVersion: MODEL_VERSION,
-  metadata: meta(
+  ...fieldMeta(
     'Accepting New Students',
     'Whether the PI is accepting new graduate students this cycle.',
   ),
@@ -325,7 +350,7 @@ const acceptingNewStudents = booleanField({
 const researchInterest = textField({
   id: `${FIELDS}research-interest`,
   modelVersion: MODEL_VERSION,
-  metadata: meta('Research Interest', 'A single research interest or keyword.'),
+  ...fieldMeta('Research Interest', 'A single research interest or keyword.'),
   fieldSpec: textFieldSpec(),
 });
 
@@ -343,7 +368,7 @@ const researchInterest = textField({
 const primaryResearchArea = controlledTermField({
   id: `${FIELDS}primary-research-area`,
   modelVersion: MODEL_VERSION,
-  metadata: meta(
+  ...fieldMeta(
     'Primary Research Area',
     "The PI's primary research area, looked up from MeSH.",
   ),
@@ -416,7 +441,7 @@ const intro = richTextComponent({
 export const principalInvestigatorTemplate: Template = template({
   id: `${TEMPLATES}principal-investigator`,
   modelVersion: MODEL_VERSION,
-  metadata: meta(
+  ...templateMeta(
     'Principal Investigator Details',
     'Identity, contact information, and institutional affiliation of a study PI.',
   ),

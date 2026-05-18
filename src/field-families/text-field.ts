@@ -27,8 +27,8 @@ import {
   assertNonNegativeInteger,
   parseSemanticVersion,
 } from '../leaves/index.js';
-import type { MultilingualString } from '../multilingual.js';
-import type { SchemaArtifactMetadata } from '../metadata/index.js';
+import { type MultilingualString, type MultilingualStringInput, multilingualString } from '../multilingual.js';
+import type { CatalogMetadata, SchemaArtifactVersioning } from '../metadata/index.js';
 import type { ValueRequirement } from '../embedded/requirement.js';
 import type { Cardinality } from '../embedded/cardinality.js';
 import type { Visibility } from '../embedded/visibility.js';
@@ -168,16 +168,20 @@ export interface TextField {
   readonly kind: 'TextField';
   readonly id: TextFieldId;
   readonly modelVersion: string;
-  readonly metadata: SchemaArtifactMetadata;
+  readonly metadata: CatalogMetadata;
+  readonly versioning: SchemaArtifactVersioning;
   readonly fieldSpec: TextFieldSpec;
+  readonly label: MultilingualString;
   readonly helpText?: MultilingualString;
 }
 
 export interface TextFieldInit {
   readonly id: TextFieldId | Iri | string;
   readonly modelVersion: string;
-  readonly metadata: SchemaArtifactMetadata;
+  readonly metadata: CatalogMetadata;
+  readonly versioning: SchemaArtifactVersioning;
   readonly fieldSpec: TextFieldSpec;
+  readonly label: MultilingualStringInput;
   readonly helpText?: MultilingualString;
 }
 
@@ -188,6 +192,8 @@ export const textField = (init: TextFieldInit): TextField => {
     modelVersion: parseSemanticVersion(init.modelVersion),
     metadata: init.metadata,
     fieldSpec: init.fieldSpec,
+    versioning: init.versioning,
+    label: multilingualString(init.label),
     ...(init.helpText !== undefined && { helpText: init.helpText }),
   };
   return out;
