@@ -19,6 +19,7 @@
 // pattern (`iri` + optional `label`) via `external-authority-shared.ts`.
 
 import { type Iri, iri, parseSemanticVersion } from '../leaves/index.js';
+import type { RorRenderingHint } from './rendering-hints.js';
 import type { MultilingualString } from '../multilingual.js';
 import type { SchemaArtifactMetadata } from '../metadata/index.js';
 import type { ValueRequirement } from '../embedded/requirement.js';
@@ -112,14 +113,18 @@ export const isRorValue = (x: unknown): x is RorValue =>
 export interface RorFieldSpec {
   readonly kind: 'RorFieldSpec';
   readonly defaultValue?: RorValue;
+  readonly renderingHint?: RorRenderingHint;
 }
 
 export interface RorFieldSpecInit {
   readonly defaultValue?: RorValue | AuthorityValueInput<RorIri>;
+  readonly renderingHint?: RorRenderingHint;
 }
 
 export function rorFieldSpec(init?: RorFieldSpecInit): RorFieldSpec {
-  const out: { kind: 'RorFieldSpec'; defaultValue?: RorValue } = {
+  const out: { kind: 'RorFieldSpec'; defaultValue?: RorValue;
+     renderingHint?: RorRenderingHint;
+  } = {
     kind: 'RorFieldSpec',
   };
   if (init?.defaultValue !== undefined) {
@@ -127,6 +132,8 @@ export function rorFieldSpec(init?: RorFieldSpecInit): RorFieldSpec {
       ? init.defaultValue
       : rorValue(init.defaultValue);
   }
+  if (init?.renderingHint !== undefined)
+    out.renderingHint = init.renderingHint;
   return out;
 }
 

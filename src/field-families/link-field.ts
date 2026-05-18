@@ -16,6 +16,7 @@
 // (embedding).
 
 import { type Iri, iri, parseSemanticVersion } from '../leaves/index.js';
+import type { LinkRenderingHint } from './rendering-hints.js';
 import {
   type MultilingualString,
   type MultilingualStringInput,
@@ -109,17 +110,23 @@ export function isLinkValue(x: unknown): x is LinkValue {
 export interface LinkFieldSpec {
   readonly kind: 'LinkFieldSpec';
   readonly defaultValue?: LinkValue;
+  readonly renderingHint?: LinkRenderingHint;
 }
 
 export interface LinkFieldSpecInit {
   readonly defaultValue?: LinkValue;
+  readonly renderingHint?: LinkRenderingHint;
 }
 
 export function linkFieldSpec(init?: LinkFieldSpecInit): LinkFieldSpec {
-  const out: { kind: 'LinkFieldSpec'; defaultValue?: LinkValue } = {
+  const out: { kind: 'LinkFieldSpec'; defaultValue?: LinkValue;
+     renderingHint?: LinkRenderingHint;
+  } = {
     kind: 'LinkFieldSpec',
   };
   if (init?.defaultValue !== undefined) out.defaultValue = init.defaultValue;
+  if (init?.renderingHint !== undefined)
+    out.renderingHint = init.renderingHint;
   return out;
 }
 

@@ -6,25 +6,56 @@
 // configuration object carried by a specific FieldSpec family to
 // influence how the field is rendered.
 //
-// Holds:
-//
-//   - the union RenderingHint
-//   - per-family hint types: TextRenderingHint, NumericRenderingHint,
-//     SingleValuedEnumRenderingHint, MultiValuedEnumRenderingHint,
-//     BooleanRenderingHint, DateRenderingHint, TimeRenderingHint,
-//     DateTimeRenderingHint
-//   - related enums: DateComponentOrder, TimeFormat
-//
 // Rendering hints are typed to a specific FieldSpec family so that
-// only compatible combinations are expressible. Where the spec admits
-// only flat string-literal alternatives (e.g. "singleLine" |
-// "multiLine"), the hint is a string-literal union.
+// only compatible combinations are expressible.
+//
+// Where a hint configures a text-entry widget, it carries an optional
+// `placeholder` — a MultilingualString shown inside an empty input as
+// format-demonstration sample text. `placeholder` is presentational
+// only; it is NOT validated against the field spec's value
+// constraints. See grammar.md §"Placeholder" for the normative
+// description.
 
-export type TextRenderingHint = 'singleLine' | 'multiLine';
-export const TEXT_RENDERING_HINTS: readonly TextRenderingHint[] = Object.freeze([
+import type { MultilingualString } from '../multilingual.js';
+
+// =====================================================================
+// TextRenderingHint
+// =====================================================================
+//
+// In prior revisions this was a bare string enum (`"singleLine" |
+// "multiLine"`). It is now a structured object carrying the former
+// enum content as an optional `lineMode` slot plus an optional
+// `placeholder`. Templates that carry the bare-string form no longer
+// decode; producers MUST migrate to the object form.
+
+export type TextLineMode = 'singleLine' | 'multiLine';
+export const TEXT_LINE_MODES: readonly TextLineMode[] = Object.freeze([
   'singleLine',
   'multiLine',
 ]);
+
+export interface TextRenderingHint {
+  readonly lineMode?: TextLineMode;
+  readonly placeholder?: MultilingualString;
+}
+
+export function textRenderingHint(init: {
+  readonly lineMode?: TextLineMode;
+  readonly placeholder?: MultilingualString;
+} = {}): TextRenderingHint {
+  const out: { lineMode?: TextLineMode; placeholder?: MultilingualString } = {};
+  if (init.lineMode !== undefined) out.lineMode = init.lineMode;
+  if (init.placeholder !== undefined) out.placeholder = init.placeholder;
+  return out;
+}
+
+// =====================================================================
+// Enum and Boolean rendering hints (string-literal enums)
+// =====================================================================
+//
+// Enum and Boolean rendering hints remain bare string enums — their
+// widgets are not text-entry surfaces, so they do not gain a
+// placeholder slot.
 
 export type SingleValuedEnumRenderingHint = 'radio' | 'dropdown';
 export const SINGLE_VALUED_ENUM_RENDERING_HINTS: readonly SingleValuedEnumRenderingHint[] =
@@ -34,26 +65,6 @@ export type MultiValuedEnumRenderingHint = 'checkbox' | 'multiSelect';
 export const MULTI_VALUED_ENUM_RENDERING_HINTS: readonly MultiValuedEnumRenderingHint[] =
   Object.freeze(['checkbox', 'multiSelect']);
 
-// NumericRenderingHint is shared by IntegerNumberFieldSpec and
-// RealNumberFieldSpec. It carries an optional `decimalPlaces` value that
-// tells a rendering implementation how many digits to display after the
-// decimal point. `decimalPlaces` is a presentation concern only — it does
-// NOT constrain the lexical form of submitted values; encoders and
-// decoders MUST NOT enforce a precision cap based on this slot.
-export interface NumericRenderingHint {
-  readonly decimalPlaces?: number;
-}
-
-export function numericRenderingHint(decimalPlaces?: number): NumericRenderingHint {
-  const out: { decimalPlaces?: number } = {};
-  if (decimalPlaces !== undefined) out.decimalPlaces = decimalPlaces;
-  return out;
-}
-
-// BooleanRenderingHint admits four widget choices distinguished by how
-// they handle the *unset* state of a boolean field. `radio` and
-// `dropdown` faithfully represent the unset state; `checkbox` and
-// `toggle` cannot distinguish *false* from *unset*.
 export type BooleanRenderingHint = 'checkbox' | 'toggle' | 'radio' | 'dropdown';
 export const BOOLEAN_RENDERING_HINTS: readonly BooleanRenderingHint[] = Object.freeze([
   'checkbox',
@@ -62,6 +73,36 @@ export const BOOLEAN_RENDERING_HINTS: readonly BooleanRenderingHint[] = Object.f
   'dropdown',
 ]);
 
+// =====================================================================
+// NumericRenderingHint
+// =====================================================================
+//
+// Shared by IntegerNumberFieldSpec and RealNumberFieldSpec. Carries an
+// optional `decimalPlaces` (a presentation concern only) plus an
+// optional `placeholder` for the numeric text-entry input.
+
+export interface NumericRenderingHint {
+  readonly decimalPlaces?: number;
+  readonly placeholder?: MultilingualString;
+}
+
+export function numericRenderingHint(
+  init: number | {
+    readonly decimalPlaces?: number;
+    readonly placeholder?: MultilingualString;
+  } = {},
+): NumericRenderingHint {
+  const norm = typeof init === 'number' ? { decimalPlaces: init } : init;
+  const out: { decimalPlaces?: number; placeholder?: MultilingualString } = {};
+  if (norm.decimalPlaces !== undefined) out.decimalPlaces = norm.decimalPlaces;
+  if (norm.placeholder !== undefined) out.placeholder = norm.placeholder;
+  return out;
+}
+
+// =====================================================================
+// Temporal rendering hints
+// =====================================================================
+//
 // DateComponentOrder is the ordering used by DateRenderingHint to display
 // or acquire date components.
 export type DateComponentOrder = 'dayMonthYear' | 'monthDayYear' | 'yearMonthDay';
@@ -79,37 +120,163 @@ export const TIME_FORMATS: readonly TimeFormat[] = Object.freeze([
   'twentyFourHour',
 ]);
 
-// Temporal rendering hints carry only their configuration component.
-
 export interface DateRenderingHint {
   readonly componentOrder?: DateComponentOrder;
+  readonly placeholder?: MultilingualString;
 }
 
-export function dateRenderingHint(componentOrder?: DateComponentOrder): DateRenderingHint {
-  const out: { componentOrder?: DateComponentOrder } = {};
-  if (componentOrder !== undefined) out.componentOrder = componentOrder;
+export function dateRenderingHint(
+  init: DateComponentOrder | {
+    readonly componentOrder?: DateComponentOrder;
+    readonly placeholder?: MultilingualString;
+  } = {},
+): DateRenderingHint {
+  const norm = typeof init === 'string' ? { componentOrder: init } : init;
+  const out: { componentOrder?: DateComponentOrder; placeholder?: MultilingualString } = {};
+  if (norm.componentOrder !== undefined) out.componentOrder = norm.componentOrder;
+  if (norm.placeholder !== undefined) out.placeholder = norm.placeholder;
   return out;
 }
 
 export interface TimeRenderingHint {
   readonly timeFormat?: TimeFormat;
+  readonly placeholder?: MultilingualString;
 }
 
-export function timeRenderingHint(timeFormat?: TimeFormat): TimeRenderingHint {
-  const out: { timeFormat?: TimeFormat } = {};
-  if (timeFormat !== undefined) out.timeFormat = timeFormat;
+export function timeRenderingHint(
+  init: TimeFormat | {
+    readonly timeFormat?: TimeFormat;
+    readonly placeholder?: MultilingualString;
+  } = {},
+): TimeRenderingHint {
+  const norm = typeof init === 'string' ? { timeFormat: init } : init;
+  const out: { timeFormat?: TimeFormat; placeholder?: MultilingualString } = {};
+  if (norm.timeFormat !== undefined) out.timeFormat = norm.timeFormat;
+  if (norm.placeholder !== undefined) out.placeholder = norm.placeholder;
   return out;
 }
 
 export interface DateTimeRenderingHint {
   readonly timeFormat?: TimeFormat;
+  readonly placeholder?: MultilingualString;
 }
 
-export function dateTimeRenderingHint(timeFormat?: TimeFormat): DateTimeRenderingHint {
-  const out: { timeFormat?: TimeFormat } = {};
-  if (timeFormat !== undefined) out.timeFormat = timeFormat;
+export function dateTimeRenderingHint(
+  init: TimeFormat | {
+    readonly timeFormat?: TimeFormat;
+    readonly placeholder?: MultilingualString;
+  } = {},
+): DateTimeRenderingHint {
+  const norm = typeof init === 'string' ? { timeFormat: init } : init;
+  const out: { timeFormat?: TimeFormat; placeholder?: MultilingualString } = {};
+  if (norm.timeFormat !== undefined) out.timeFormat = norm.timeFormat;
+  if (norm.placeholder !== undefined) out.placeholder = norm.placeholder;
   return out;
 }
+
+// =====================================================================
+// Single-slot rendering hints for previously hint-less families
+// =====================================================================
+//
+// Each carries only an optional `placeholder` today. Each is its own
+// nominal type to preserve the structural constraint that only the
+// matching FieldSpec accepts each hint kind (per grammar.md's
+// "typed rendering hints make incompatible combinations structurally
+// invalid" principle).
+
+export interface ControlledTermRenderingHint {
+  readonly placeholder?: MultilingualString;
+}
+export function controlledTermRenderingHint(
+  placeholder?: MultilingualString,
+): ControlledTermRenderingHint {
+  return placeholder !== undefined ? { placeholder } : {};
+}
+
+export interface EmailRenderingHint {
+  readonly placeholder?: MultilingualString;
+}
+export function emailRenderingHint(
+  placeholder?: MultilingualString,
+): EmailRenderingHint {
+  return placeholder !== undefined ? { placeholder } : {};
+}
+
+export interface PhoneNumberRenderingHint {
+  readonly placeholder?: MultilingualString;
+}
+export function phoneNumberRenderingHint(
+  placeholder?: MultilingualString,
+): PhoneNumberRenderingHint {
+  return placeholder !== undefined ? { placeholder } : {};
+}
+
+export interface LinkRenderingHint {
+  readonly placeholder?: MultilingualString;
+}
+export function linkRenderingHint(
+  placeholder?: MultilingualString,
+): LinkRenderingHint {
+  return placeholder !== undefined ? { placeholder } : {};
+}
+
+export interface OrcidRenderingHint {
+  readonly placeholder?: MultilingualString;
+}
+export function orcidRenderingHint(
+  placeholder?: MultilingualString,
+): OrcidRenderingHint {
+  return placeholder !== undefined ? { placeholder } : {};
+}
+
+export interface RorRenderingHint {
+  readonly placeholder?: MultilingualString;
+}
+export function rorRenderingHint(
+  placeholder?: MultilingualString,
+): RorRenderingHint {
+  return placeholder !== undefined ? { placeholder } : {};
+}
+
+export interface DoiRenderingHint {
+  readonly placeholder?: MultilingualString;
+}
+export function doiRenderingHint(
+  placeholder?: MultilingualString,
+): DoiRenderingHint {
+  return placeholder !== undefined ? { placeholder } : {};
+}
+
+export interface PubMedIdRenderingHint {
+  readonly placeholder?: MultilingualString;
+}
+export function pubMedIdRenderingHint(
+  placeholder?: MultilingualString,
+): PubMedIdRenderingHint {
+  return placeholder !== undefined ? { placeholder } : {};
+}
+
+export interface RridRenderingHint {
+  readonly placeholder?: MultilingualString;
+}
+export function rridRenderingHint(
+  placeholder?: MultilingualString,
+): RridRenderingHint {
+  return placeholder !== undefined ? { placeholder } : {};
+}
+
+export interface NihGrantIdRenderingHint {
+  readonly placeholder?: MultilingualString;
+}
+export function nihGrantIdRenderingHint(
+  placeholder?: MultilingualString,
+): NihGrantIdRenderingHint {
+  return placeholder !== undefined ? { placeholder } : {};
+}
+
+// =====================================================================
+// RenderingHint union
+// =====================================================================
 
 export type RenderingHint =
   | TextRenderingHint
@@ -119,4 +286,14 @@ export type RenderingHint =
   | BooleanRenderingHint
   | DateRenderingHint
   | TimeRenderingHint
-  | DateTimeRenderingHint;
+  | DateTimeRenderingHint
+  | ControlledTermRenderingHint
+  | EmailRenderingHint
+  | PhoneNumberRenderingHint
+  | LinkRenderingHint
+  | OrcidRenderingHint
+  | RorRenderingHint
+  | DoiRenderingHint
+  | PubMedIdRenderingHint
+  | RridRenderingHint
+  | NihGrantIdRenderingHint;

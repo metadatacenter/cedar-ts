@@ -69,13 +69,26 @@ describe('TextFieldSpec', () => {
       minLength: 1,
       maxLength: 255,
       validationRegex: '^[A-Z].*$',
-      renderingHint: 'multiLine',
+      renderingHint: { lineMode: 'multiLine' },
     });
     expect(fs.minLength).toBe(1);
     expect(fs.maxLength).toBe(255);
     expect(fs.validationRegex).toBe('^[A-Z].*$');
-    expect(fs.renderingHint).toBe('multiLine');
+    expect(fs.renderingHint?.lineMode).toBe('multiLine');
     expect(isTextFieldSpec(fs)).toBe(true);
+  });
+
+  it('TextRenderingHint accepts both lineMode and placeholder', () => {
+    const fs = textFieldSpec({
+      renderingHint: {
+        lineMode: 'singleLine',
+        placeholder: [{ value: 'e.g. Jane Doe', lang: 'en' }],
+      },
+    });
+    expect(fs.renderingHint?.lineMode).toBe('singleLine');
+    expect(fs.renderingHint?.placeholder).toEqual([
+      { value: 'e.g. Jane Doe', lang: 'en' },
+    ]);
   });
 
   it('carries an optional langTagRequirement', () => {
@@ -309,6 +322,16 @@ describe('Body-less field specs', () => {
 
     expect(attributeValueFieldSpec().kind).toBe('AttributeValueFieldSpec');
     expect(isAttributeValueFieldSpec(attributeValueFieldSpec())).toBe(true);
+  });
+
+  it('carry an optional placeholder via their new rendering hints', () => {
+    const placeholder = [{ value: 'name@example.com', lang: 'en' }];
+    const fs = emailFieldSpec({ renderingHint: { placeholder } });
+    expect(fs.renderingHint?.placeholder).toEqual(placeholder);
+
+    const orcidPh = [{ value: 'https://orcid.org/0000-0000-0000-0000', lang: 'en' }];
+    const orcid = orcidFieldSpec({ renderingHint: { placeholder: orcidPh } });
+    expect(orcid.renderingHint?.placeholder).toEqual(orcidPh);
   });
 });
 

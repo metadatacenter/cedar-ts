@@ -18,6 +18,7 @@
 // pattern (`iri` + optional `label`) via `external-authority-shared.ts`.
 
 import { type Iri, iri, parseSemanticVersion } from '../leaves/index.js';
+import type { NihGrantIdRenderingHint } from './rendering-hints.js';
 import type { MultilingualString } from '../multilingual.js';
 import type { SchemaArtifactMetadata } from '../metadata/index.js';
 import type { ValueRequirement } from '../embedded/requirement.js';
@@ -111,16 +112,20 @@ export const isNihGrantIdValue = (x: unknown): x is NihGrantIdValue =>
 export interface NihGrantIdFieldSpec {
   readonly kind: 'NihGrantIdFieldSpec';
   readonly defaultValue?: NihGrantIdValue;
+  readonly renderingHint?: NihGrantIdRenderingHint;
 }
 
 export interface NihGrantIdFieldSpecInit {
   readonly defaultValue?: NihGrantIdValue | AuthorityValueInput<NihGrantIri>;
+  readonly renderingHint?: NihGrantIdRenderingHint;
 }
 
 export function nihGrantIdFieldSpec(
   init?: NihGrantIdFieldSpecInit,
 ): NihGrantIdFieldSpec {
-  const out: { kind: 'NihGrantIdFieldSpec'; defaultValue?: NihGrantIdValue } = {
+  const out: { kind: 'NihGrantIdFieldSpec'; defaultValue?: NihGrantIdValue;
+     renderingHint?: NihGrantIdRenderingHint;
+  } = {
     kind: 'NihGrantIdFieldSpec',
   };
   if (init?.defaultValue !== undefined) {
@@ -128,6 +133,8 @@ export function nihGrantIdFieldSpec(
       ? init.defaultValue
       : nihGrantIdValue(init.defaultValue);
   }
+  if (init?.renderingHint !== undefined)
+    out.renderingHint = init.renderingHint;
   return out;
 }
 
