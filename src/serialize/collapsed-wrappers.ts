@@ -43,6 +43,7 @@ import {
   type PubMedIdFieldId,
   type RridFieldId,
   type NihGrantIdFieldId,
+  type LanguageFieldId,
   type AttributeValueFieldId,
   textFieldId,
   integerNumberFieldId,
@@ -63,6 +64,7 @@ import {
   pubMedIdFieldId,
   rridFieldId,
   nihGrantIdFieldId,
+  languageFieldId,
   attributeValueFieldId,
 } from '../field-families/index.js';
 import { expectString } from './parse-utils.js';
@@ -119,6 +121,7 @@ export const serializeDoiFieldId = (x: DoiFieldId): string => x.iri.value;
 export const serializePubMedIdFieldId = (x: PubMedIdFieldId): string => x.iri.value;
 export const serializeRridFieldId = (x: RridFieldId): string => x.iri.value;
 export const serializeNihGrantIdFieldId = (x: NihGrantIdFieldId): string => x.iri.value;
+export const serializeLanguageFieldId = (x: LanguageFieldId): string => x.iri.value;
 export const serializeAttributeValueFieldId = (x: AttributeValueFieldId): string => x.iri.value;
 
 export const parseTextFieldId = (x: unknown, w = 'TextFieldId'): TextFieldId =>
@@ -159,6 +162,8 @@ export const parseRridFieldId = (x: unknown, w = 'RridFieldId'): RridFieldId =>
   rridFieldId(expectString(x, w));
 export const parseNihGrantIdFieldId = (x: unknown, w = 'NihGrantIdFieldId'): NihGrantIdFieldId =>
   nihGrantIdFieldId(expectString(x, w));
+export const parseLanguageFieldId = (x: unknown, w = 'LanguageFieldId'): LanguageFieldId =>
+  languageFieldId(expectString(x, w));
 export const parseAttributeValueFieldId = (x: unknown, w = 'AttributeValueFieldId'): AttributeValueFieldId =>
   attributeValueFieldId(expectString(x, w));
 

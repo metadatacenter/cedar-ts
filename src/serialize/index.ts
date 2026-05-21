@@ -104,6 +104,7 @@ export function serialize(x: SerializableArtifact): unknown {
     case 'PubMedIdField':
     case 'RridField':
     case 'NihGrantIdField':
+    case 'LanguageField':
     case 'AttributeValueField':
       return serializeField(x);
     default: {
@@ -203,6 +204,7 @@ export function parseArtifact(
     case 'PubMedIdField':
     case 'RridField':
     case 'NihGrantIdField':
+    case 'LanguageField':
     case 'AttributeValueField':
       return parseField(x, where);
     default:

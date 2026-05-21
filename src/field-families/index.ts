@@ -1,5 +1,5 @@
 // =====================================================================
-// Field families — public surface for the 20 per-family vertical
+// Field families — public surface for the 21 per-family vertical
 // slices plus the cross-family unions and predicates
 // =====================================================================
 //
@@ -9,8 +9,8 @@
 //
 // Re-exports:
 //
-//   - all 20 per-family slices (text-field.ts, integer-number-field.ts,
-//     real-number-field.ts, boolean-field.ts, …,
+//   - all 21 per-family slices (text-field.ts, integer-number-field.ts,
+//     real-number-field.ts, boolean-field.ts, …, language-field.ts,
 //     attribute-value-field.ts) — each contributes a FieldId, Value,
 //     FieldSpec, Field, and EmbeddedField type
 //   - rendering hints                 (rendering-hints.ts)
@@ -55,6 +55,7 @@ export * from './doi-field.js';
 export * from './pub-med-id-field.js';
 export * from './rrid-field.js';
 export * from './nih-grant-id-field.js';
+export * from './language-field.js';
 export * from './attribute-value-field.js';
 
 import type { TextField, TextFieldSpec, TextValue, EmbeddedTextField } from './text-field.js';
@@ -100,6 +101,7 @@ import type { DoiField, DoiFieldSpec, DoiValue, EmbeddedDoiField } from './doi-f
 import type { PubMedIdField, PubMedIdFieldSpec, PubMedIdValue, EmbeddedPubMedIdField } from './pub-med-id-field.js';
 import type { RridField, RridFieldSpec, RridValue, EmbeddedRridField } from './rrid-field.js';
 import type { NihGrantIdField, NihGrantIdFieldSpec, NihGrantIdValue, EmbeddedNihGrantIdField } from './nih-grant-id-field.js';
+import type { LanguageField, LanguageFieldSpec, LanguageValue, EmbeddedLanguageField } from './language-field.js';
 import type {
   AttributeValueField,
   AttributeValueFieldSpec,
@@ -134,6 +136,7 @@ export type Field =
   | PubMedIdField
   | RridField
   | NihGrantIdField
+  | LanguageField
   | AttributeValueField;
 
 const FIELD_KINDS: ReadonlySet<string> = new Set([
@@ -156,6 +159,7 @@ const FIELD_KINDS: ReadonlySet<string> = new Set([
   'PubMedIdField',
   'RridField',
   'NihGrantIdField',
+  'LanguageField',
   'AttributeValueField',
 ]);
 
@@ -190,6 +194,7 @@ export type EmbeddedField =
   | EmbeddedPubMedIdField
   | EmbeddedRridField
   | EmbeddedNihGrantIdField
+  | EmbeddedLanguageField
   | EmbeddedAttributeValueField;
 
 const EMBEDDED_FIELD_KINDS: ReadonlySet<string> = new Set([
@@ -212,6 +217,7 @@ const EMBEDDED_FIELD_KINDS: ReadonlySet<string> = new Set([
   'EmbeddedPubMedIdField',
   'EmbeddedRridField',
   'EmbeddedNihGrantIdField',
+  'EmbeddedLanguageField',
   'EmbeddedAttributeValueField',
 ]);
 
@@ -248,6 +254,7 @@ export type FieldSpec =
   | PubMedIdFieldSpec
   | RridFieldSpec
   | NihGrantIdFieldSpec
+  | LanguageFieldSpec
   | AttributeValueFieldSpec;
 
 const FIELD_SPEC_KINDS: ReadonlySet<string> = new Set([
@@ -270,6 +277,7 @@ const FIELD_SPEC_KINDS: ReadonlySet<string> = new Set([
   'PubMedIdFieldSpec',
   'RridFieldSpec',
   'NihGrantIdFieldSpec',
+  'LanguageFieldSpec',
   'AttributeValueFieldSpec',
 ]);
 
@@ -347,6 +355,7 @@ export type Value =
   | EmailValue
   | PhoneNumberValue
   | ExternalAuthorityValue
+  | LanguageValue
   | AttributeValue;
 
 const VALUE_KINDS: ReadonlySet<string> = new Set([
@@ -370,6 +379,7 @@ const VALUE_KINDS: ReadonlySet<string> = new Set([
   'PubMedIdValue',
   'RridValue',
   'NihGrantIdValue',
+  'LanguageValue',
   'AttributeValue',
 ]);
 
@@ -402,6 +412,7 @@ import type { DoiFieldId } from './doi-field.js';
 import type { PubMedIdFieldId } from './pub-med-id-field.js';
 import type { RridFieldId } from './rrid-field.js';
 import type { NihGrantIdFieldId } from './nih-grant-id-field.js';
+import type { LanguageFieldId } from './language-field.js';
 import type { AttributeValueFieldId } from './attribute-value-field.js';
 
 export type FieldId =
@@ -424,6 +435,7 @@ export type FieldId =
   | PubMedIdFieldId
   | RridFieldId
   | NihGrantIdFieldId
+  | LanguageFieldId
   | AttributeValueFieldId;
 
 const FIELD_ID_KINDS: ReadonlySet<string> = new Set([
@@ -446,6 +458,7 @@ const FIELD_ID_KINDS: ReadonlySet<string> = new Set([
   'PubMedIdFieldId',
   'RridFieldId',
   'NihGrantIdFieldId',
+  'LanguageFieldId',
   'AttributeValueFieldId',
 ]);
 

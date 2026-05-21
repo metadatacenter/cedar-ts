@@ -31,6 +31,7 @@ import {
   type PubMedIdValue,
   type RridValue,
   type NihGrantIdValue,
+  type LanguageValue,
   type AttributeValue,
   type EnumValue,
   type Value,
@@ -53,6 +54,7 @@ import {
   pubMedIdValue,
   rridValue,
   nihGrantIdValue,
+  languageValue,
   attributeValue,
   enumValue,
 } from '../field-families/index.js';
@@ -788,6 +790,40 @@ export function parseAttributeValue(
   );
 }
 
+// ---- LanguageValue ---------------------------------------------------
+
+export function serializeLanguageValue(x: LanguageValue): unknown {
+  return { kind: 'LanguageValue', value: x.value };
+}
+
+export function serializeLanguageValueUntagged(x: LanguageValue): unknown {
+  return { value: x.value };
+}
+
+export function parseLanguageValue(x: unknown, where = 'LanguageValue'): LanguageValue {
+  const o = expectObject(x, where);
+  expectKnownProperties(o, ['kind', 'value']);
+  if (o['kind'] !== 'LanguageValue') {
+    throw new CedarConstructionError(`${where}: expected kind "LanguageValue"`);
+  }
+  if (!('value' in o)) {
+    throw new CedarConstructionError(`${where}: missing required "value"`);
+  }
+  return languageValue(expectString(o['value'], `${where}.value`));
+}
+
+export function parseLanguageValueUntagged(
+  x: unknown,
+  where = 'LanguageValue',
+): LanguageValue {
+  const o = expectObject(x, where);
+  expectKnownProperties(o, ['value']);
+  if (!('value' in o)) {
+    throw new CedarConstructionError(`${where}: missing required "value"`);
+  }
+  return languageValue(expectString(o['value'], `${where}.value`));
+}
+
 // ---- Value union -----------------------------------------------------
 
 const VALUE_KINDS = [
@@ -811,6 +847,7 @@ const VALUE_KINDS = [
   'PubMedIdValue',
   'RridValue',
   'NihGrantIdValue',
+  'LanguageValue',
   'AttributeValue',
 ] as const;
 
@@ -856,6 +893,8 @@ export function serializeValue(x: Value): unknown {
       return serializeRridValue(x);
     case 'NihGrantIdValue':
       return serializeNihGrantIdValue(x);
+    case 'LanguageValue':
+      return serializeLanguageValue(x);
     case 'AttributeValue':
       return serializeAttributeValue(x);
   }
@@ -905,6 +944,8 @@ export function parseValue(x: unknown, where = 'Value'): Value {
       return parseRridValue(x, where);
     case 'NihGrantIdValue':
       return parseNihGrantIdValue(x, where);
+    case 'LanguageValue':
+      return parseLanguageValue(x, where);
     case 'AttributeValue':
       return parseAttributeValue(x, where);
   }

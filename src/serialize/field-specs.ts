@@ -39,6 +39,9 @@ import {
   type PubMedIdFieldSpec,
   type RridFieldSpec,
   type NihGrantIdFieldSpec,
+  type LanguageFieldSpec,
+  type LanguageValue,
+  type LanguageRenderingHint,
   type AttributeValueFieldSpec,
   type FieldSpec,
   type Unit,
@@ -77,6 +80,7 @@ import {
   type PubMedIdRenderingHint,
   type RridRenderingHint,
   type NihGrantIdRenderingHint,
+  LANGUAGE_RENDERING_HINTS,
   type DateComponentOrder,
   type TimeFormat,
   textFieldSpec,
@@ -98,6 +102,7 @@ import {
   pubMedIdFieldSpec,
   rridFieldSpec,
   nihGrantIdFieldSpec,
+  languageFieldSpec,
   attributeValueFieldSpec,
   unit,
   ontologyReference,
@@ -178,6 +183,8 @@ import {
   parseRridValue,
   serializeNihGrantIdValue,
   parseNihGrantIdValue,
+  serializeLanguageValue,
+  parseLanguageValue,
 } from './values.js';
 import { REAL_NUMBER_DATATYPE_KINDS, type RealNumberDatatypeKind } from '../leaves/index.js';
 import type {
@@ -279,6 +286,12 @@ export const parseBooleanRenderingHint = (
   x: unknown,
   w = 'BooleanRenderingHint',
 ): BooleanRenderingHint => expectStringEnum(x, BOOLEAN_RENDERING_HINTS, w);
+
+export const serializeLanguageRenderingHint = (x: LanguageRenderingHint): string => x;
+export const parseLanguageRenderingHint = (
+  x: unknown,
+  w = 'LanguageRenderingHint',
+): LanguageRenderingHint => expectStringEnum(x, LANGUAGE_RENDERING_HINTS, w);
 
 export const serializeSingleValuedEnumRenderingHint = (
   x: SingleValuedEnumRenderingHint,
@@ -1631,6 +1644,57 @@ const nihGrantIdSpecHelpers = defaultOnlySpec<NihGrantIdFieldSpec, NihGrantIdVal
 export const serializeNihGrantIdFieldSpec = nihGrantIdSpecHelpers.serialize;
 export const parseNihGrantIdFieldSpec = nihGrantIdSpecHelpers.parse;
 
+// LanguageFieldSpec carries an additional `permittedLanguages` slot
+// not covered by the default-only helper, so it's hand-written.
+export function serializeLanguageFieldSpec(x: LanguageFieldSpec): unknown {
+  const out: Record<string, unknown> = { kind: 'LanguageFieldSpec' };
+  if (x.defaultValue !== undefined)
+    out['defaultValue'] = serializeLanguageValue(x.defaultValue);
+  if (x.permittedLanguages !== undefined)
+    out['permittedLanguages'] = x.permittedLanguages.slice();
+  if (x.renderingHint !== undefined)
+    out['renderingHint'] = serializeLanguageRenderingHint(x.renderingHint);
+  return out;
+}
+
+export function parseLanguageFieldSpec(
+  x: unknown,
+  where = 'LanguageFieldSpec',
+): LanguageFieldSpec {
+  const o = expectObject(x, where);
+  expectKnownProperties(o, ['kind', 'defaultValue', 'permittedLanguages', 'renderingHint']);
+  rejectNullProperty(o, 'defaultValue');
+  rejectNullProperty(o, 'permittedLanguages');
+  rejectNullProperty(o, 'renderingHint');
+  if (o['kind'] !== 'LanguageFieldSpec') {
+    throw new CedarConstructionError(`${where}: expected kind "LanguageFieldSpec"`);
+  }
+  const init: {
+    defaultValue?: LanguageValue;
+    permittedLanguages?: readonly string[];
+    renderingHint?: LanguageRenderingHint;
+  } = {};
+  if ('defaultValue' in o)
+    init.defaultValue = parseLanguageValue(o['defaultValue'], `${where}.defaultValue`);
+  if ('permittedLanguages' in o) {
+    const arr = o['permittedLanguages'];
+    if (!Array.isArray(arr)) {
+      throw new CedarConstructionError(
+        `${where}.permittedLanguages: expected array of strings`,
+      );
+    }
+    init.permittedLanguages = arr.map((t, i) =>
+      expectString(t, `${where}.permittedLanguages[${i}]`),
+    );
+  }
+  if ('renderingHint' in o)
+    init.renderingHint = parseLanguageRenderingHint(
+      o['renderingHint'],
+      `${where}.renderingHint`,
+    );
+  return languageFieldSpec(init);
+}
+
 // AttributeValueFieldSpec has no defaultValue slot — serialize as
 // { kind } only.
 export function serializeAttributeValueFieldSpec(
@@ -1675,6 +1739,7 @@ const FIELD_SPEC_KINDS = [
   'PubMedIdFieldSpec',
   'RridFieldSpec',
   'NihGrantIdFieldSpec',
+  'LanguageFieldSpec',
   'AttributeValueFieldSpec',
 ] as const;
 
@@ -1718,6 +1783,8 @@ export function serializeFieldSpec(x: FieldSpec): unknown {
       return serializeRridFieldSpec(x);
     case 'NihGrantIdFieldSpec':
       return serializeNihGrantIdFieldSpec(x);
+    case 'LanguageFieldSpec':
+      return serializeLanguageFieldSpec(x);
     case 'AttributeValueFieldSpec':
       return serializeAttributeValueFieldSpec(x);
   }
@@ -1765,6 +1832,8 @@ export function parseFieldSpec(x: unknown, where = 'FieldSpec'): FieldSpec {
       return parseRridFieldSpec(x, where);
     case 'NihGrantIdFieldSpec':
       return parseNihGrantIdFieldSpec(x, where);
+    case 'LanguageFieldSpec':
+      return parseLanguageFieldSpec(x, where);
     case 'AttributeValueFieldSpec':
       return parseAttributeValueFieldSpec(x, where);
   }

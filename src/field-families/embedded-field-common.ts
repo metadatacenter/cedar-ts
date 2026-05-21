@@ -1,5 +1,5 @@
 // =====================================================================
-// Embedded-field common helpers — internal-only support for the 20
+// Embedded-field common helpers — internal-only support for the 21
 // EmbeddedXxxField constructors
 // =====================================================================
 //
@@ -95,6 +95,7 @@ const FIELD_VARIANT_KINDS: ReadonlySet<string> = new Set([
   'PubMedIdField',
   'RridField',
   'NihGrantIdField',
+  'LanguageField',
   'AttributeValueField',
 ]);
 

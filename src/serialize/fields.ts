@@ -29,6 +29,7 @@ import {
   type PubMedIdField,
   type RridField,
   type NihGrantIdField,
+  type LanguageField,
   type AttributeValueField,
   textField,
   integerNumberField,
@@ -49,6 +50,7 @@ import {
   pubMedIdField,
   rridField,
   nihGrantIdField,
+  languageField,
   attributeValueField,
 } from '../field-families/index.js';
 import {
@@ -77,6 +79,7 @@ import {
   serializePubMedIdFieldId,
   serializeRridFieldId,
   serializeNihGrantIdFieldId,
+  serializeLanguageFieldId,
   serializeAttributeValueFieldId,
   parseTextFieldId,
   parseIntegerNumberFieldId,
@@ -97,6 +100,7 @@ import {
   parsePubMedIdFieldId,
   parseRridFieldId,
   parseNihGrantIdFieldId,
+  parseLanguageFieldId,
   parseAttributeValueFieldId,
 } from './collapsed-wrappers.js';
 import {
@@ -125,6 +129,7 @@ import {
   serializePubMedIdFieldSpec,
   serializeRridFieldSpec,
   serializeNihGrantIdFieldSpec,
+  serializeLanguageFieldSpec,
   serializeAttributeValueFieldSpec,
   parseTextFieldSpec,
   parseIntegerNumberFieldSpec,
@@ -145,6 +150,7 @@ import {
   parsePubMedIdFieldSpec,
   parseRridFieldSpec,
   parseNihGrantIdFieldSpec,
+  parseLanguageFieldSpec,
   parseAttributeValueFieldSpec,
 } from './field-specs.js';
 
@@ -805,6 +811,39 @@ export function parseNihGrantIdField(
   });
 }
 
+export const serializeLanguageField = (x: LanguageField): unknown => {
+  const out: Record<string, unknown> = {
+    kind: 'LanguageField',
+    id: serializeLanguageFieldId(x.id),
+    modelVersion: x.modelVersion,
+    metadata: serializeCatalogMetadata(x.metadata),
+    versioning: serializeSchemaArtifactVersioning(x.versioning),
+    fieldSpec: serializeLanguageFieldSpec(x.fieldSpec),
+    label: serializeMultilingualString(x.label),
+  };
+  if (x.helpText !== undefined)
+    out['helpText'] = serializeMultilingualString(x.helpText);
+  return out;
+};
+
+export function parseLanguageField(
+  x: unknown,
+  where = 'LanguageField',
+): LanguageField {
+  const s = parseFieldShell<LanguageField>(x, 'LanguageField', where);
+  return languageField({
+    id: parseLanguageFieldId(s.id, `${where}.id`),
+    modelVersion: s.modelVersion,
+    metadata: parseCatalogMetadata(s.metadata, `${where}.metadata`),
+    versioning: parseSchemaArtifactVersioning(s.versioning, `${where}.versioning`),
+    fieldSpec: parseLanguageFieldSpec(s.fieldSpec, `${where}.fieldSpec`),
+    label: parseMultilingualString(s.label, `${where}.label`),
+    ...(s.helpText !== undefined && {
+      helpText: parseMultilingualString(s.helpText, `${where}.helpText`),
+    }),
+  });
+}
+
 export const serializeAttributeValueField = (x: AttributeValueField): unknown => {
   const out: Record<string, unknown> = {
     kind: 'AttributeValueField',
@@ -860,6 +899,7 @@ const FIELD_KINDS = [
   'PubMedIdField',
   'RridField',
   'NihGrantIdField',
+  'LanguageField',
   'AttributeValueField',
 ] as const;
 
@@ -903,6 +943,8 @@ export function serializeField(x: Field): unknown {
       return serializeRridField(x);
     case 'NihGrantIdField':
       return serializeNihGrantIdField(x);
+    case 'LanguageField':
+      return serializeLanguageField(x);
     case 'AttributeValueField':
       return serializeAttributeValueField(x);
   }
@@ -950,6 +992,8 @@ export function parseField(x: unknown, where = 'Field'): Field {
       return parseRridField(x, where);
     case 'NihGrantIdField':
       return parseNihGrantIdField(x, where);
+    case 'LanguageField':
+      return parseLanguageField(x, where);
     case 'AttributeValueField':
       return parseAttributeValueField(x, where);
   }

@@ -73,6 +73,13 @@ export const BOOLEAN_RENDERING_HINTS: readonly BooleanRenderingHint[] = Object.f
   'dropdown',
 ]);
 
+export type LanguageRenderingHint = 'autocomplete' | 'dropdown' | 'radio';
+export const LANGUAGE_RENDERING_HINTS: readonly LanguageRenderingHint[] = Object.freeze([
+  'autocomplete',
+  'dropdown',
+  'radio',
+]);
+
 // =====================================================================
 // NumericRenderingHint
 // =====================================================================
@@ -296,4 +303,5 @@ export type RenderingHint =
   | DoiRenderingHint
   | PubMedIdRenderingHint
   | RridRenderingHint
-  | NihGrantIdRenderingHint;
+  | NihGrantIdRenderingHint
+  | LanguageRenderingHint;

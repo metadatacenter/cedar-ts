@@ -26,6 +26,7 @@ import {
   type EmbeddedPubMedIdField,
   type EmbeddedRridField,
   type EmbeddedNihGrantIdField,
+  type EmbeddedLanguageField,
   type EmbeddedAttributeValueField,
   embeddedTextField,
   embeddedIntegerNumberField,
@@ -46,6 +47,7 @@ import {
   embeddedPubMedIdField,
   embeddedRridField,
   embeddedNihGrantIdField,
+  embeddedLanguageField,
   embeddedAttributeValueField,
 } from '../field-families/index.js';
 import {
@@ -91,6 +93,7 @@ import {
   serializePubMedIdFieldId,
   serializeRridFieldId,
   serializeNihGrantIdFieldId,
+  serializeLanguageFieldId,
   serializeAttributeValueFieldId,
   serializeTemplateId,
   serializePresentationComponentId,
@@ -113,6 +116,7 @@ import {
   parsePubMedIdFieldId,
   parseRridFieldId,
   parseNihGrantIdFieldId,
+  parseLanguageFieldId,
   parseAttributeValueFieldId,
   parseTemplateId,
   parsePresentationComponentId,
@@ -160,12 +164,14 @@ import {
   serializePubMedIdValue,
   serializeRridValue,
   serializeNihGrantIdValue,
+  serializeLanguageValue,
   parseOrcidValue,
   parseRorValue,
   parseDoiValue,
   parsePubMedIdValue,
   parseRridValue,
   parseNihGrantIdValue,
+  parseLanguageValue,
 } from './values.js';
 
 // ---- Common per-embedding properties ---------------------------------
@@ -985,6 +991,35 @@ export function parseEmbeddedNihGrantIdField(
   });
 }
 
+export function serializeEmbeddedLanguageField(
+  x: EmbeddedLanguageField,
+): unknown {
+  const out: Record<string, unknown> = {
+    kind: 'EmbeddedLanguageField',
+    key: x.key,
+    artifactRef: serializeLanguageFieldId(x.artifactRef),
+  };
+  serializeCommonProps(x, out);
+  if (x.defaultValue !== undefined)
+    out['defaultValue'] = serializeLanguageValue(x.defaultValue);
+  return out;
+}
+
+export function parseEmbeddedLanguageField(
+  x: unknown,
+  where = 'EmbeddedLanguageField',
+): EmbeddedLanguageField {
+  const s = readShell(x, 'EmbeddedLanguageField', where, true);
+  return embeddedLanguageField({
+    key: s.key,
+    artifactRef: parseLanguageFieldId(s.artifactRef, `${where}.artifactRef`),
+    ...s.common,
+    ...(s.defaultRaw !== undefined && {
+      defaultValue: parseLanguageValue(s.defaultRaw, `${where}.defaultValue`),
+    }),
+  });
+}
+
 export function serializeEmbeddedAttributeValueField(
   x: EmbeddedAttributeValueField,
 ): unknown {
@@ -1107,6 +1142,7 @@ const EMBEDDED_FIELD_KINDS = [
   'EmbeddedPubMedIdField',
   'EmbeddedRridField',
   'EmbeddedNihGrantIdField',
+  'EmbeddedLanguageField',
   'EmbeddedAttributeValueField',
 ] as const;
 
@@ -1150,6 +1186,8 @@ export function serializeEmbeddedField(x: EmbeddedField): unknown {
       return serializeEmbeddedRridField(x);
     case 'EmbeddedNihGrantIdField':
       return serializeEmbeddedNihGrantIdField(x);
+    case 'EmbeddedLanguageField':
+      return serializeEmbeddedLanguageField(x);
     case 'EmbeddedAttributeValueField':
       return serializeEmbeddedAttributeValueField(x);
   }
@@ -1200,6 +1238,8 @@ export function parseEmbeddedField(
       return parseEmbeddedRridField(x, where);
     case 'EmbeddedNihGrantIdField':
       return parseEmbeddedNihGrantIdField(x, where);
+    case 'EmbeddedLanguageField':
+      return parseEmbeddedLanguageField(x, where);
     case 'EmbeddedAttributeValueField':
       return parseEmbeddedAttributeValueField(x, where);
   }
