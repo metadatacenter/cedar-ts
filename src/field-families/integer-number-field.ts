@@ -103,6 +103,7 @@ export interface IntegerNumberFieldSpec {
   readonly minValue?: IntegerNumberValue;
   readonly maxValue?: IntegerNumberValue;
   readonly renderingHint?: NumericRenderingHint;
+  readonly examples?: readonly IntegerNumberValue[];
 }
 
 export interface IntegerNumberFieldSpecInit {
@@ -111,6 +112,7 @@ export interface IntegerNumberFieldSpecInit {
   readonly minValue?: IntegerNumberValue;
   readonly maxValue?: IntegerNumberValue;
   readonly renderingHint?: NumericRenderingHint;
+  readonly examples?: readonly (IntegerNumberValueInput | IntegerNumberValue)[];
 }
 
 export function integerNumberFieldSpec(
@@ -134,6 +136,9 @@ export function integerNumberFieldSpec(
   if (init?.minValue !== undefined) out.minValue = init.minValue;
   if (init?.maxValue !== undefined) out.maxValue = init.maxValue;
   if (init?.renderingHint !== undefined) out.renderingHint = init.renderingHint;
+  if (init?.examples !== undefined) {
+    (out as { examples?: readonly IntegerNumberValue[] }).examples = init.examples.map((e) => integerNumberValue(e as never));
+  }
   return out;
 }
 

@@ -91,6 +91,7 @@ export interface DateTimeFieldSpec {
   readonly defaultValue?: DateTimeValue;
   readonly timezoneRequirement?: TimezoneRequirement;
   readonly renderingHint?: DateTimeRenderingHint;
+  readonly examples?: readonly DateTimeValue[];
 }
 
 export interface DateTimeFieldSpecInit {
@@ -98,6 +99,7 @@ export interface DateTimeFieldSpecInit {
   readonly defaultValue?: DateTimeValueInput;
   readonly timezoneRequirement?: TimezoneRequirement;
   readonly renderingHint?: DateTimeRenderingHint;
+  readonly examples?: readonly (DateTimeValueInput | DateTimeValue)[];
 }
 
 export function dateTimeFieldSpec(init: DateTimeFieldSpecInit): DateTimeFieldSpec {
@@ -117,6 +119,9 @@ export function dateTimeFieldSpec(init: DateTimeFieldSpecInit): DateTimeFieldSpe
   if (init.timezoneRequirement !== undefined)
     out.timezoneRequirement = init.timezoneRequirement;
   if (init.renderingHint !== undefined) out.renderingHint = init.renderingHint;
+  if (init?.examples !== undefined) {
+    (out as { examples?: readonly DateTimeValue[] }).examples = init.examples.map((e) => dateTimeValue(e as never));
+  }
   return out;
 }
 

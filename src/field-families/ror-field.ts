@@ -114,11 +114,13 @@ export interface RorFieldSpec {
   readonly kind: 'RorFieldSpec';
   readonly defaultValue?: RorValue;
   readonly renderingHint?: RorRenderingHint;
+  readonly examples?: readonly RorValue[];
 }
 
 export interface RorFieldSpecInit {
   readonly defaultValue?: RorValue | AuthorityValueInput<RorIri>;
   readonly renderingHint?: RorRenderingHint;
+  readonly examples?: readonly (RorValue | AuthorityValueInput<RorIri> | RorValue)[];
 }
 
 export function rorFieldSpec(init?: RorFieldSpecInit): RorFieldSpec {
@@ -134,6 +136,9 @@ export function rorFieldSpec(init?: RorFieldSpecInit): RorFieldSpec {
   }
   if (init?.renderingHint !== undefined)
     out.renderingHint = init.renderingHint;
+  if (init?.examples !== undefined) {
+    (out as { examples?: readonly RorValue[] }).examples = init.examples.slice() as readonly RorValue[];
+  }
   return out;
 }
 

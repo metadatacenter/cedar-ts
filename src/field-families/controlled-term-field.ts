@@ -310,12 +310,14 @@ export interface ControlledTermFieldSpec {
   readonly sources: readonly [ControlledTermSource, ...ControlledTermSource[]];
   readonly defaultValue?: ControlledTermValue;
   readonly renderingHint?: ControlledTermRenderingHint;
+  readonly examples?: readonly ControlledTermValue[];
 }
 
 export interface ControlledTermFieldSpecInit {
   readonly sources: readonly [ControlledTermSource, ...ControlledTermSource[]];
   readonly defaultValue?: ControlledTermValue;
   readonly renderingHint?: ControlledTermRenderingHint;
+  readonly examples?: readonly ControlledTermValue[];
 }
 
 // Two calling conventions, kept for ergonomic parity with prior cedar-ts:
@@ -350,6 +352,10 @@ export function controlledTermFieldSpec(
     } = { kind: 'ControlledTermFieldSpec', sources: init.sources };
     if (init.defaultValue !== undefined) out.defaultValue = init.defaultValue;
     if (init.renderingHint !== undefined) out.renderingHint = init.renderingHint;
+    if (init.examples !== undefined) {
+      (out as { examples?: readonly ControlledTermValue[] }).examples =
+        init.examples.slice() as readonly ControlledTermValue[];
+    }
     return out;
   }
   return {

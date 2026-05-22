@@ -120,6 +120,7 @@ export interface TextFieldSpec {
   readonly validationRegex?: string;
   readonly langTagRequirement?: LangTagRequirement;
   readonly renderingHint?: TextRenderingHint;
+  readonly examples?: readonly TextValue[];
 }
 
 export interface TextFieldSpecInit {
@@ -129,6 +130,7 @@ export interface TextFieldSpecInit {
   readonly validationRegex?: string;
   readonly langTagRequirement?: LangTagRequirement;
   readonly renderingHint?: TextRenderingHint;
+  readonly examples?: readonly (TextValueInput | TextValue)[];
 }
 
 export function textFieldSpec(init: TextFieldSpecInit = {}): TextFieldSpec {
@@ -153,6 +155,9 @@ export function textFieldSpec(init: TextFieldSpecInit = {}): TextFieldSpec {
   if (init.langTagRequirement !== undefined)
     out.langTagRequirement = init.langTagRequirement;
   if (init.renderingHint !== undefined) out.renderingHint = init.renderingHint;
+  if (init?.examples !== undefined) {
+    (out as { examples?: readonly TextValue[] }).examples = init.examples.map((e) => textValue(e as never));
+  }
   return out;
 }
 

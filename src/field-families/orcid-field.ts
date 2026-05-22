@@ -114,11 +114,13 @@ export interface OrcidFieldSpec {
   readonly kind: 'OrcidFieldSpec';
   readonly defaultValue?: OrcidValue;
   readonly renderingHint?: OrcidRenderingHint;
+  readonly examples?: readonly OrcidValue[];
 }
 
 export interface OrcidFieldSpecInit {
   readonly defaultValue?: OrcidValue | AuthorityValueInput<OrcidIri>;
   readonly renderingHint?: OrcidRenderingHint;
+  readonly examples?: readonly (OrcidValue | AuthorityValueInput<OrcidIri> | OrcidValue)[];
 }
 
 export function orcidFieldSpec(init?: OrcidFieldSpecInit): OrcidFieldSpec {
@@ -134,6 +136,9 @@ export function orcidFieldSpec(init?: OrcidFieldSpecInit): OrcidFieldSpec {
   }
   if (init?.renderingHint !== undefined)
     out.renderingHint = init.renderingHint;
+  if (init?.examples !== undefined) {
+    (out as { examples?: readonly OrcidValue[] }).examples = init.examples.slice() as readonly OrcidValue[];
+  }
   return out;
 }
 

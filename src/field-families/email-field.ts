@@ -74,11 +74,13 @@ export interface EmailFieldSpec {
   readonly kind: 'EmailFieldSpec';
   readonly defaultValue?: EmailValue;
   readonly renderingHint?: EmailRenderingHint;
+  readonly examples?: readonly EmailValue[];
 }
 
 export interface EmailFieldSpecInit {
   readonly defaultValue?: EmailValueInput;
   readonly renderingHint?: EmailRenderingHint;
+  readonly examples?: readonly (EmailValueInput | EmailValue)[];
 }
 
 export function emailFieldSpec(init?: EmailFieldSpecInit): EmailFieldSpec {
@@ -95,6 +97,9 @@ export function emailFieldSpec(init?: EmailFieldSpecInit): EmailFieldSpec {
   }
   if (init?.renderingHint !== undefined)
     out.renderingHint = init.renderingHint;
+  if (init?.examples !== undefined) {
+    (out as { examples?: readonly EmailValue[] }).examples = init.examples.map((e) => emailValue(e as never));
+  }
   return out;
 }
 export const isEmailFieldSpec = (x: unknown): x is EmailFieldSpec =>

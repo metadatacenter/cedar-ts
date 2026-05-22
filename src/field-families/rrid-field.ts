@@ -113,11 +113,13 @@ export interface RridFieldSpec {
   readonly kind: 'RridFieldSpec';
   readonly defaultValue?: RridValue;
   readonly renderingHint?: RridRenderingHint;
+  readonly examples?: readonly RridValue[];
 }
 
 export interface RridFieldSpecInit {
   readonly defaultValue?: RridValue | AuthorityValueInput<RridIri>;
   readonly renderingHint?: RridRenderingHint;
+  readonly examples?: readonly (RridValue | AuthorityValueInput<RridIri> | RridValue)[];
 }
 
 export function rridFieldSpec(init?: RridFieldSpecInit): RridFieldSpec {
@@ -133,6 +135,9 @@ export function rridFieldSpec(init?: RridFieldSpecInit): RridFieldSpec {
   }
   if (init?.renderingHint !== undefined)
     out.renderingHint = init.renderingHint;
+  if (init?.examples !== undefined) {
+    (out as { examples?: readonly RridValue[] }).examples = init.examples.slice() as readonly RridValue[];
+  }
   return out;
 }
 

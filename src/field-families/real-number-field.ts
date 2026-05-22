@@ -101,6 +101,7 @@ export interface RealNumberFieldSpec {
   readonly minValue?: RealNumberValue;
   readonly maxValue?: RealNumberValue;
   readonly renderingHint?: NumericRenderingHint;
+  readonly examples?: readonly RealNumberValue[];
 }
 
 export interface RealNumberFieldSpecInit {
@@ -110,6 +111,7 @@ export interface RealNumberFieldSpecInit {
   readonly minValue?: RealNumberValue;
   readonly maxValue?: RealNumberValue;
   readonly renderingHint?: NumericRenderingHint;
+  readonly examples?: readonly RealNumberValue[];
 }
 
 export function realNumberFieldSpec(
@@ -129,6 +131,8 @@ export function realNumberFieldSpec(
   if (init.minValue !== undefined) out.minValue = init.minValue;
   if (init.maxValue !== undefined) out.maxValue = init.maxValue;
   if (init.renderingHint !== undefined) out.renderingHint = init.renderingHint;
+  if (init?.examples !== undefined)
+    (out as { examples?: readonly RealNumberValue[] }).examples = init.examples.slice();
   return out;
 }
 

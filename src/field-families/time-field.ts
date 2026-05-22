@@ -94,6 +94,7 @@ export interface TimeFieldSpec {
   readonly timePrecision?: TimePrecision;
   readonly timezoneRequirement?: TimezoneRequirement;
   readonly renderingHint?: TimeRenderingHint;
+  readonly examples?: readonly TimeValue[];
 }
 
 export interface TimeFieldSpecInit {
@@ -101,6 +102,7 @@ export interface TimeFieldSpecInit {
   readonly timePrecision?: TimePrecision;
   readonly timezoneRequirement?: TimezoneRequirement;
   readonly renderingHint?: TimeRenderingHint;
+  readonly examples?: readonly (TimeValueInput | TimeValue)[];
 }
 
 export function timeFieldSpec(init: TimeFieldSpecInit = {}): TimeFieldSpec {
@@ -121,6 +123,9 @@ export function timeFieldSpec(init: TimeFieldSpecInit = {}): TimeFieldSpec {
   if (init.timezoneRequirement !== undefined)
     out.timezoneRequirement = init.timezoneRequirement;
   if (init.renderingHint !== undefined) out.renderingHint = init.renderingHint;
+  if (init?.examples !== undefined) {
+    (out as { examples?: readonly TimeValue[] }).examples = init.examples.map((e) => timeValue(e as never));
+  }
   return out;
 }
 

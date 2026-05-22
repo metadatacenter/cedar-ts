@@ -142,12 +142,14 @@ export interface DateFieldSpec {
   //   fullDate  → FullDateValue
   readonly defaultValue?: DateValue;
   readonly renderingHint?: DateRenderingHint;
+  readonly examples?: readonly DateValue[];
 }
 
 export interface DateFieldSpecInit {
   readonly dateValueType: DateValueType;
   readonly defaultValue?: DateValue | string;
   readonly renderingHint?: DateRenderingHint;
+  readonly examples?: readonly (DateValue | string)[];
 }
 
 export function dateFieldSpec(init: DateFieldSpecInit): DateFieldSpec {
@@ -165,6 +167,9 @@ export function dateFieldSpec(init: DateFieldSpecInit): DateFieldSpec {
     out.defaultValue = dv;
   }
   if (init.renderingHint !== undefined) out.renderingHint = init.renderingHint;
+  if (init?.examples !== undefined) {
+    (out as { examples?: readonly DateValue[] }).examples = init.examples.map((e) => dateValue(e as never));
+  }
   return out;
 }
 

@@ -111,11 +111,13 @@ export interface LinkFieldSpec {
   readonly kind: 'LinkFieldSpec';
   readonly defaultValue?: LinkValue;
   readonly renderingHint?: LinkRenderingHint;
+  readonly examples?: readonly LinkValue[];
 }
 
 export interface LinkFieldSpecInit {
   readonly defaultValue?: LinkValue;
   readonly renderingHint?: LinkRenderingHint;
+  readonly examples?: readonly (LinkValue | LinkValue)[];
 }
 
 export function linkFieldSpec(init?: LinkFieldSpecInit): LinkFieldSpec {
@@ -127,6 +129,9 @@ export function linkFieldSpec(init?: LinkFieldSpecInit): LinkFieldSpec {
   if (init?.defaultValue !== undefined) out.defaultValue = init.defaultValue;
   if (init?.renderingHint !== undefined)
     out.renderingHint = init.renderingHint;
+  if (init?.examples !== undefined) {
+    (out as { examples?: readonly LinkValue[] }).examples = init.examples.map((e) => linkValue(e as never));
+  }
   return out;
 }
 

@@ -73,11 +73,13 @@ export interface BooleanFieldSpec {
   readonly kind: 'BooleanFieldSpec';
   readonly defaultValue?: BooleanValue;
   readonly renderingHint?: BooleanRenderingHint;
+  readonly examples?: readonly BooleanValue[];
 }
 
 export interface BooleanFieldSpecInit {
   readonly defaultValue?: BooleanValueInput;
   readonly renderingHint?: BooleanRenderingHint;
+  readonly examples?: readonly (BooleanValueInput | BooleanValue)[];
 }
 
 export function booleanFieldSpec(init?: BooleanFieldSpecInit): BooleanFieldSpec {
@@ -93,6 +95,9 @@ export function booleanFieldSpec(init?: BooleanFieldSpecInit): BooleanFieldSpec 
         : init.defaultValue;
   }
   if (init?.renderingHint !== undefined) out.renderingHint = init.renderingHint;
+  if (init?.examples !== undefined) {
+    (out as { examples?: readonly BooleanValue[] }).examples = init.examples.map((e) => booleanValue(e as never));
+  }
   return out;
 }
 

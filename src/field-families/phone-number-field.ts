@@ -74,11 +74,13 @@ export interface PhoneNumberFieldSpec {
   readonly kind: 'PhoneNumberFieldSpec';
   readonly defaultValue?: PhoneNumberValue;
   readonly renderingHint?: PhoneNumberRenderingHint;
+  readonly examples?: readonly PhoneNumberValue[];
 }
 
 export interface PhoneNumberFieldSpecInit {
   readonly defaultValue?: PhoneNumberValueInput;
   readonly renderingHint?: PhoneNumberRenderingHint;
+  readonly examples?: readonly (PhoneNumberValueInput | PhoneNumberValue)[];
 }
 
 export function phoneNumberFieldSpec(
@@ -97,6 +99,9 @@ export function phoneNumberFieldSpec(
   }
   if (init?.renderingHint !== undefined)
     out.renderingHint = init.renderingHint;
+  if (init?.examples !== undefined) {
+    (out as { examples?: readonly PhoneNumberValue[] }).examples = init.examples.map((e) => phoneNumberValue(e as never));
+  }
   return out;
 }
 export const isPhoneNumberFieldSpec = (x: unknown): x is PhoneNumberFieldSpec =>

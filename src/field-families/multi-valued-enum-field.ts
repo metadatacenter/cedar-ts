@@ -69,12 +69,17 @@ export interface MultiValuedEnumFieldSpec {
   // of permissibleValues' value tokens.
   readonly defaultValues: readonly EnumValue[];
   readonly renderingHint?: MultiValuedEnumRenderingHint;
+  // Illustrative examples — each entry is a *single* EnumValue (one
+  // permitted token at a time), not a sequence. See spec/grammar.md §Field
+  // Specs for the rationale.
+  readonly examples?: readonly EnumValue[];
 }
 
 export interface MultiValuedEnumFieldSpecInit {
   readonly permissibleValues: readonly [PermissibleValue, ...PermissibleValue[]];
   readonly defaultValues?: readonly (EnumValue | string)[];
   readonly renderingHint?: MultiValuedEnumRenderingHint;
+  readonly examples?: readonly (EnumValue | string)[];
 }
 
 export function multiValuedEnumFieldSpec(
@@ -96,6 +101,10 @@ export function multiValuedEnumFieldSpec(
           ),
   };
   if (init.renderingHint !== undefined) out.renderingHint = init.renderingHint;
+  if (init?.examples !== undefined)
+    (out as { examples?: readonly EnumValue[] }).examples = init.examples.map(
+      (e) => (typeof e === 'string' ? enumValue(e) : e),
+    );
   return out;
 }
 

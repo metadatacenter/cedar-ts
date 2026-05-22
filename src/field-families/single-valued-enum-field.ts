@@ -65,12 +65,14 @@ export interface SingleValuedEnumFieldSpec {
   // permissibleValues' value tokens.
   readonly defaultValue?: EnumValue;
   readonly renderingHint?: SingleValuedEnumRenderingHint;
+  readonly examples?: readonly EnumValue[];
 }
 
 export interface SingleValuedEnumFieldSpecInit {
   readonly permissibleValues: readonly [PermissibleValue, ...PermissibleValue[]];
   readonly defaultValue?: EnumValue | string;
   readonly renderingHint?: SingleValuedEnumRenderingHint;
+  readonly examples?: readonly (EnumValue | string)[];
 }
 
 export function singleValuedEnumFieldSpec(
@@ -91,6 +93,11 @@ export function singleValuedEnumFieldSpec(
         ? enumValue(init.defaultValue)
         : init.defaultValue;
   if (init.renderingHint !== undefined) out.renderingHint = init.renderingHint;
+  if (init?.examples !== undefined) {
+    (out as { examples?: readonly EnumValue[] }).examples = init.examples.map(
+      (e) => (typeof e === 'string' ? enumValue(e) : e),
+    );
+  }
   return out;
 }
 

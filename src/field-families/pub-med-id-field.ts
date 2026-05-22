@@ -114,11 +114,13 @@ export interface PubMedIdFieldSpec {
   readonly kind: 'PubMedIdFieldSpec';
   readonly defaultValue?: PubMedIdValue;
   readonly renderingHint?: PubMedIdRenderingHint;
+  readonly examples?: readonly PubMedIdValue[];
 }
 
 export interface PubMedIdFieldSpecInit {
   readonly defaultValue?: PubMedIdValue | AuthorityValueInput<PubMedIri>;
   readonly renderingHint?: PubMedIdRenderingHint;
+  readonly examples?: readonly (PubMedIdValue | AuthorityValueInput<PubMedIri> | PubMedIdValue)[];
 }
 
 export function pubMedIdFieldSpec(init?: PubMedIdFieldSpecInit): PubMedIdFieldSpec {
@@ -134,6 +136,9 @@ export function pubMedIdFieldSpec(init?: PubMedIdFieldSpecInit): PubMedIdFieldSp
   }
   if (init?.renderingHint !== undefined)
     out.renderingHint = init.renderingHint;
+  if (init?.examples !== undefined) {
+    (out as { examples?: readonly PubMedIdValue[] }).examples = init.examples.slice() as readonly PubMedIdValue[];
+  }
   return out;
 }
 

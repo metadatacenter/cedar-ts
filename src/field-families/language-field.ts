@@ -85,12 +85,14 @@ export interface LanguageFieldSpec {
   readonly defaultValue?: LanguageValue;
   readonly permittedLanguages?: readonly string[];
   readonly renderingHint?: LanguageRenderingHint;
+  readonly examples?: readonly LanguageValue[];
 }
 
 export interface LanguageFieldSpecInit {
   readonly defaultValue?: LanguageValueInput;
   readonly permittedLanguages?: readonly string[];
   readonly renderingHint?: LanguageRenderingHint;
+  readonly examples?: readonly (LanguageValueInput | LanguageValue)[];
 }
 
 export function languageFieldSpec(init?: LanguageFieldSpecInit): LanguageFieldSpec {
@@ -127,6 +129,9 @@ export function languageFieldSpec(init?: LanguageFieldSpecInit): LanguageFieldSp
   }
   if (init?.renderingHint !== undefined)
     out.renderingHint = init.renderingHint;
+  if (init?.examples !== undefined) {
+    (out as { examples?: readonly LanguageValue[] }).examples = init.examples.map((e) => languageValue(e as never));
+  }
   return out;
 }
 

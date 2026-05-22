@@ -114,11 +114,13 @@ export interface DoiFieldSpec {
   readonly kind: 'DoiFieldSpec';
   readonly defaultValue?: DoiValue;
   readonly renderingHint?: DoiRenderingHint;
+  readonly examples?: readonly DoiValue[];
 }
 
 export interface DoiFieldSpecInit {
   readonly defaultValue?: DoiValue | AuthorityValueInput<DoiIri>;
   readonly renderingHint?: DoiRenderingHint;
+  readonly examples?: readonly (DoiValue | AuthorityValueInput<DoiIri> | DoiValue)[];
 }
 
 export function doiFieldSpec(init?: DoiFieldSpecInit): DoiFieldSpec {
@@ -134,6 +136,9 @@ export function doiFieldSpec(init?: DoiFieldSpecInit): DoiFieldSpec {
   }
   if (init?.renderingHint !== undefined)
     out.renderingHint = init.renderingHint;
+  if (init?.examples !== undefined) {
+    (out as { examples?: readonly DoiValue[] }).examples = init.examples.slice() as readonly DoiValue[];
+  }
   return out;
 }
 

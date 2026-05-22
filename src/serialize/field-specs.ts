@@ -883,7 +883,9 @@ export function serializeTextFieldSpec(x: TextFieldSpec): unknown {
   if (x.langTagRequirement !== undefined)
     out['langTagRequirement'] = x.langTagRequirement;
   if (x.renderingHint !== undefined)
-    out['renderingHint'] = serializeTextRenderingHint(x.renderingHint);
+    out['renderingHint'] = serializeTextRenderingHint(x.renderingHint);  if (x.examples !== undefined && x.examples.length > 0)
+    out['examples'] = x.examples.map((e) => serializeTextValue(e));
+
   return out;
 }
 
@@ -900,6 +902,7 @@ export function parseTextFieldSpec(
     'validationRegex',
     'langTagRequirement',
     'renderingHint',
+  'examples',
   ]);
   for (const k of [
     'defaultValue',
@@ -947,6 +950,15 @@ export function parseTextFieldSpec(
       o['renderingHint'],
       `${where}.renderingHint`,
     );
+  if ('examples' in o) {
+    const arr = o['examples'];
+    if (!Array.isArray(arr)) {
+      throw new CedarConstructionError(`${where}.examples: expected array`);
+    }
+    (init as { examples?: readonly TextValue[] }).examples = arr.map(
+      (entry, i) => parseTextValue(entry, `${where}.examples[${i}]`),
+    );
+  }
   return textFieldSpec(init);
 }
 
@@ -966,7 +978,9 @@ export function serializeIntegerNumberFieldSpec(
   if (x.maxValue !== undefined)
     out['maxValue'] = serializeIntegerNumberValue(x.maxValue);
   if (x.renderingHint !== undefined)
-    out['renderingHint'] = serializeNumericRenderingHint(x.renderingHint);
+    out['renderingHint'] = serializeNumericRenderingHint(x.renderingHint);  if (x.examples !== undefined && x.examples.length > 0)
+    out['examples'] = x.examples.map((e) => serializeIntegerNumberValue(e));
+
   return out;
 }
 
@@ -982,6 +996,7 @@ export function parseIntegerNumberFieldSpec(
     'minValue',
     'maxValue',
     'renderingHint',
+  'examples',
   ]);
   for (const k of ['defaultValue', 'unit', 'minValue', 'maxValue', 'renderingHint']) {
     rejectNullProperty(o, k);
@@ -1013,6 +1028,15 @@ export function parseIntegerNumberFieldSpec(
       o['renderingHint'],
       `${where}.renderingHint`,
     );
+  if ('examples' in o) {
+    const arr = o['examples'];
+    if (!Array.isArray(arr)) {
+      throw new CedarConstructionError(`${where}.examples: expected array`);
+    }
+    (init as { examples?: readonly IntegerNumberValue[] }).examples = arr.map(
+      (entry, i) => parseIntegerNumberValue(entry, `${where}.examples[${i}]`),
+    );
+  }
   return integerNumberFieldSpec(init);
 }
 
@@ -1033,7 +1057,9 @@ export function serializeRealNumberFieldSpec(
   if (x.maxValue !== undefined)
     out['maxValue'] = serializeRealNumberValue(x.maxValue);
   if (x.renderingHint !== undefined)
-    out['renderingHint'] = serializeNumericRenderingHint(x.renderingHint);
+    out['renderingHint'] = serializeNumericRenderingHint(x.renderingHint);  if (x.examples !== undefined && x.examples.length > 0)
+    out['examples'] = x.examples.map((e) => serializeRealNumberValue(e));
+
   return out;
 }
 
@@ -1050,6 +1076,7 @@ export function parseRealNumberFieldSpec(
     'minValue',
     'maxValue',
     'renderingHint',
+  'examples',
   ]);
   for (const k of ['defaultValue', 'unit', 'minValue', 'maxValue', 'renderingHint']) {
     rejectNullProperty(o, k);
@@ -1087,6 +1114,15 @@ export function parseRealNumberFieldSpec(
       o['renderingHint'],
       `${where}.renderingHint`,
     );
+  if ('examples' in o) {
+    const arr = o['examples'];
+    if (!Array.isArray(arr)) {
+      throw new CedarConstructionError(`${where}.examples: expected array`);
+    }
+    (init as { examples?: readonly RealNumberValue[] }).examples = arr.map(
+      (entry, i) => parseRealNumberValue(entry, `${where}.examples[${i}]`),
+    );
+  }
   return realNumberFieldSpec(init);
 }
 
@@ -1099,7 +1135,9 @@ export function serializeBooleanFieldSpec(x: BooleanFieldSpec): unknown {
   if (x.defaultValue !== undefined)
     out['defaultValue'] = serializeBooleanValue(x.defaultValue);
   if (x.renderingHint !== undefined)
-    out['renderingHint'] = serializeBooleanRenderingHint(x.renderingHint);
+    out['renderingHint'] = serializeBooleanRenderingHint(x.renderingHint);  if (x.examples !== undefined && x.examples.length > 0)
+    out['examples'] = x.examples.map((e) => serializeBooleanValue(e));
+
   return out;
 }
 
@@ -1108,9 +1146,10 @@ export function parseBooleanFieldSpec(
   where = 'BooleanFieldSpec',
 ): BooleanFieldSpec {
   const o = expectObject(x, where);
-  expectKnownProperties(o, ['kind', 'defaultValue', 'renderingHint']);
+  expectKnownProperties(o, ['kind', 'defaultValue', 'renderingHint', 'examples']);
   rejectNullProperty(o, 'defaultValue');
   rejectNullProperty(o, 'renderingHint');
+  rejectNullProperty(o, 'examples');
   if (o['kind'] !== 'BooleanFieldSpec') {
     throw new CedarConstructionError(`${where}: expected kind "BooleanFieldSpec"`);
   }
@@ -1125,6 +1164,15 @@ export function parseBooleanFieldSpec(
       o['renderingHint'],
       `${where}.renderingHint`,
     );
+  if ('examples' in o) {
+    const arr = o['examples'];
+    if (!Array.isArray(arr)) {
+      throw new CedarConstructionError(`${where}.examples: expected array`);
+    }
+    (init as { examples?: readonly BooleanValue[] }).examples = arr.map(
+      (entry, i) => parseBooleanValue(entry, `${where}.examples[${i}]`),
+    );
+  }
   return booleanFieldSpec(init);
 }
 
@@ -1138,7 +1186,9 @@ export function serializeDateFieldSpec(x: DateFieldSpec): unknown {
   if (x.defaultValue !== undefined)
     out['defaultValue'] = serializeDateValue(x.defaultValue);
   if (x.renderingHint !== undefined)
-    out['renderingHint'] = serializeDateRenderingHint(x.renderingHint);
+    out['renderingHint'] = serializeDateRenderingHint(x.renderingHint);  if (x.examples !== undefined && x.examples.length > 0)
+    out['examples'] = x.examples.map((e) => serializeDateValue(e));
+
   return out;
 }
 
@@ -1152,9 +1202,11 @@ export function parseDateFieldSpec(
     'dateValueType',
     'defaultValue',
     'renderingHint',
+  'examples',
   ]);
   rejectNullProperty(o, 'defaultValue');
   rejectNullProperty(o, 'renderingHint');
+  rejectNullProperty(o, 'examples');
   if (o['kind'] !== 'DateFieldSpec') {
     throw new CedarConstructionError(`${where}: expected kind "DateFieldSpec"`);
   }
@@ -1179,6 +1231,15 @@ export function parseDateFieldSpec(
       o['renderingHint'],
       `${where}.renderingHint`,
     );
+  if ('examples' in o) {
+    const arr = o['examples'];
+    if (!Array.isArray(arr)) {
+      throw new CedarConstructionError(`${where}.examples: expected array`);
+    }
+    (init as { examples?: readonly DateValue[] }).examples = arr.map(
+      (entry, i) => parseDateValue(entry, `${where}.examples[${i}]`),
+    );
+  }
   return dateFieldSpec(init);
 }
 
@@ -1190,7 +1251,9 @@ export function serializeTimeFieldSpec(x: TimeFieldSpec): unknown {
   if (x.timezoneRequirement !== undefined)
     out['timezoneRequirement'] = x.timezoneRequirement;
   if (x.renderingHint !== undefined)
-    out['renderingHint'] = serializeTimeRenderingHint(x.renderingHint);
+    out['renderingHint'] = serializeTimeRenderingHint(x.renderingHint);  if (x.examples !== undefined && x.examples.length > 0)
+    out['examples'] = x.examples.map((e) => serializeTimeValue(e));
+
   return out;
 }
 
@@ -1205,6 +1268,7 @@ export function parseTimeFieldSpec(
     'timePrecision',
     'timezoneRequirement',
     'renderingHint',
+  'examples',
   ]);
   for (const k of [
     'defaultValue',
@@ -1242,6 +1306,15 @@ export function parseTimeFieldSpec(
       o['renderingHint'],
       `${where}.renderingHint`,
     );
+  if ('examples' in o) {
+    const arr = o['examples'];
+    if (!Array.isArray(arr)) {
+      throw new CedarConstructionError(`${where}.examples: expected array`);
+    }
+    (init as { examples?: readonly TimeValue[] }).examples = arr.map(
+      (entry, i) => parseTimeValue(entry, `${where}.examples[${i}]`),
+    );
+  }
   return timeFieldSpec(init);
 }
 
@@ -1255,7 +1328,9 @@ export function serializeDateTimeFieldSpec(x: DateTimeFieldSpec): unknown {
   if (x.timezoneRequirement !== undefined)
     out['timezoneRequirement'] = x.timezoneRequirement;
   if (x.renderingHint !== undefined)
-    out['renderingHint'] = serializeDateTimeRenderingHint(x.renderingHint);
+    out['renderingHint'] = serializeDateTimeRenderingHint(x.renderingHint);  if (x.examples !== undefined && x.examples.length > 0)
+    out['examples'] = x.examples.map((e) => serializeDateTimeValue(e));
+
   return out;
 }
 
@@ -1270,6 +1345,7 @@ export function parseDateTimeFieldSpec(
     'defaultValue',
     'timezoneRequirement',
     'renderingHint',
+  'examples',
   ]);
   for (const k of ['defaultValue', 'timezoneRequirement', 'renderingHint']) {
     rejectNullProperty(o, k);
@@ -1310,6 +1386,15 @@ export function parseDateTimeFieldSpec(
       o['renderingHint'],
       `${where}.renderingHint`,
     );
+  if ('examples' in o) {
+    const arr = o['examples'];
+    if (!Array.isArray(arr)) {
+      throw new CedarConstructionError(`${where}.examples: expected array`);
+    }
+    (init as { examples?: readonly DateTimeValue[] }).examples = arr.map(
+      (entry, i) => parseDateTimeValue(entry, `${where}.examples[${i}]`),
+    );
+  }
   return dateTimeFieldSpec(init);
 }
 
@@ -1325,7 +1410,9 @@ export function serializeControlledTermFieldSpec(
   if (x.defaultValue !== undefined)
     out['defaultValue'] = serializeControlledTermValue(x.defaultValue);
   if (x.renderingHint !== undefined)
-    out['renderingHint'] = serializeControlledTermRenderingHint(x.renderingHint);
+    out['renderingHint'] = serializeControlledTermRenderingHint(x.renderingHint);  if (x.examples !== undefined && x.examples.length > 0)
+    out['examples'] = x.examples.map((e) => serializeControlledTermValue(e));
+
   return out;
 }
 
@@ -1334,9 +1421,10 @@ export function parseControlledTermFieldSpec(
   where = 'ControlledTermFieldSpec',
 ): ControlledTermFieldSpec {
   const o = expectObject(x, where);
-  expectKnownProperties(o, ['kind', 'sources', 'defaultValue', 'renderingHint']);
+  expectKnownProperties(o, ['kind', 'sources', 'defaultValue', 'renderingHint', 'examples']);
   rejectNullProperty(o, 'defaultValue');
   rejectNullProperty(o, 'renderingHint');
+  rejectNullProperty(o, 'examples');
   if (o['kind'] !== 'ControlledTermFieldSpec') {
     throw new CedarConstructionError(
       `${where}: expected kind "ControlledTermFieldSpec"`,
@@ -1366,6 +1454,15 @@ export function parseControlledTermFieldSpec(
       o['renderingHint'],
       `${where}.renderingHint`,
     );
+  if ('examples' in o) {
+    const arr = o['examples'];
+    if (!Array.isArray(arr)) {
+      throw new CedarConstructionError(`${where}.examples: expected array`);
+    }
+    (init as { examples?: readonly ControlledTermValue[] }).examples = arr.map(
+      (entry, i) => parseControlledTermValue(entry, `${where}.examples[${i}]`),
+    );
+  }
   return controlledTermFieldSpec(init);
 }
 
@@ -1381,7 +1478,9 @@ export function serializeSingleValuedEnumFieldSpec(
   if (x.defaultValue !== undefined)
     out['defaultValue'] = serializeEnumValue(x.defaultValue);
   if (x.renderingHint !== undefined)
-    out['renderingHint'] = serializeSingleValuedEnumRenderingHint(x.renderingHint);
+    out['renderingHint'] = serializeSingleValuedEnumRenderingHint(x.renderingHint);  if (x.examples !== undefined && x.examples.length > 0)
+    out['examples'] = x.examples.map((e) => serializeEnumValue(e));
+
   return out;
 }
 
@@ -1395,9 +1494,11 @@ export function parseSingleValuedEnumFieldSpec(
     'permissibleValues',
     'defaultValue',
     'renderingHint',
+  'examples',
   ]);
   rejectNullProperty(o, 'defaultValue');
   rejectNullProperty(o, 'renderingHint');
+  rejectNullProperty(o, 'examples');
   if (o['kind'] !== 'SingleValuedEnumFieldSpec') {
     throw new CedarConstructionError(
       `${where}: expected kind "SingleValuedEnumFieldSpec"`,
@@ -1426,6 +1527,15 @@ export function parseSingleValuedEnumFieldSpec(
       o['renderingHint'],
       `${where}.renderingHint`,
     );
+  if ('examples' in o) {
+    const arr = o['examples'];
+    if (!Array.isArray(arr)) {
+      throw new CedarConstructionError(`${where}.examples: expected array`);
+    }
+    (init as { examples?: readonly EnumValue[] }).examples = arr.map(
+      (entry, i) => parseEnumValue(entry, `${where}.examples[${i}]`),
+    );
+  }
   return singleValuedEnumFieldSpec(init);
 }
 
@@ -1439,7 +1549,9 @@ export function serializeMultiValuedEnumFieldSpec(
   if (x.defaultValues.length > 0)
     out['defaultValues'] = x.defaultValues.map(serializeEnumValue);
   if (x.renderingHint !== undefined)
-    out['renderingHint'] = serializeMultiValuedEnumRenderingHint(x.renderingHint);
+    out['renderingHint'] = serializeMultiValuedEnumRenderingHint(x.renderingHint);  if (x.examples !== undefined && x.examples.length > 0)
+    out['examples'] = x.examples.map((e) => serializeEnumValue(e));
+
   return out;
 }
 
@@ -1453,9 +1565,11 @@ export function parseMultiValuedEnumFieldSpec(
     'permissibleValues',
     'defaultValues',
     'renderingHint',
+  'examples',
   ]);
   rejectNullProperty(o, 'defaultValues');
   rejectNullProperty(o, 'renderingHint');
+  rejectNullProperty(o, 'examples');
   if (o['kind'] !== 'MultiValuedEnumFieldSpec') {
     throw new CedarConstructionError(
       `${where}: expected kind "MultiValuedEnumFieldSpec"`,
@@ -1488,6 +1602,15 @@ export function parseMultiValuedEnumFieldSpec(
       o['renderingHint'],
       `${where}.renderingHint`,
     );
+  if ('examples' in o) {
+    const arr = o['examples'];
+    if (!Array.isArray(arr)) {
+      throw new CedarConstructionError(`${where}.examples: expected array`);
+    }
+    (init as { examples?: readonly EnumValue[] }).examples = arr.map(
+      (entry, i) => parseEnumValue(entry, `${where}.examples[${i}]`),
+    );
+  }
   return multiValuedEnumFieldSpec(init);
 }
 
@@ -1499,12 +1622,12 @@ export function parseMultiValuedEnumFieldSpec(
 // captures its Value type and tagged-value (de)serializer pair.
 
 function defaultOnlySpec<
-  T extends { kind: string; defaultValue?: V; renderingHint?: H },
+  T extends { kind: string; defaultValue?: V; renderingHint?: H; examples?: readonly V[] },
   V,
   H,
 >(
   expectedKind: T['kind'],
-  ctor: (init?: { defaultValue?: V; renderingHint?: H }) => T,
+  ctor: (init?: { defaultValue?: V; renderingHint?: H; examples?: readonly V[] }) => T,
   serializeValue: (v: V) => unknown,
   parseValueFn: (x: unknown, where?: string) => V,
   serializeHint: (h: H) => unknown,
@@ -1520,19 +1643,22 @@ function defaultOnlySpec<
         out['defaultValue'] = serializeValue(x.defaultValue);
       if (x.renderingHint !== undefined)
         out['renderingHint'] = serializeHint(x.renderingHint);
+      if (x.examples !== undefined && x.examples.length > 0)
+        out['examples'] = x.examples.map((e) => serializeValue(e));
       return out;
     },
     parse: (x: unknown, where: string = expectedKind): T => {
       const o = expectObject(x, where);
-      expectKnownProperties(o, ['kind', 'defaultValue', 'renderingHint']);
+      expectKnownProperties(o, ['kind', 'defaultValue', 'renderingHint', 'examples']);
       rejectNullProperty(o, 'defaultValue');
       rejectNullProperty(o, 'renderingHint');
+      rejectNullProperty(o, 'examples');
       if (o['kind'] !== expectedKind) {
         throw new CedarConstructionError(
           `${where}: expected kind ${JSON.stringify(expectedKind)}`,
         );
       }
-      const init: { defaultValue?: V; renderingHint?: H } = {};
+      const init: { defaultValue?: V; renderingHint?: H; examples?: readonly V[] } = {};
       if ('defaultValue' in o)
         init.defaultValue = parseValueFn(o['defaultValue'], `${where}.defaultValue`);
       if ('renderingHint' in o)
@@ -1540,6 +1666,17 @@ function defaultOnlySpec<
           o['renderingHint'],
           `${where}.renderingHint`,
         );
+      if ('examples' in o) {
+        const arr = o['examples'];
+        if (!Array.isArray(arr)) {
+          throw new CedarConstructionError(
+            `${where}.examples: expected array`,
+          );
+        }
+        init.examples = arr.map((entry, i) =>
+          parseValueFn(entry, `${where}.examples[${i}]`),
+        );
+      }
       return ctor(init);
     },
   };
@@ -1653,7 +1790,9 @@ export function serializeLanguageFieldSpec(x: LanguageFieldSpec): unknown {
   if (x.permittedLanguages !== undefined)
     out['permittedLanguages'] = x.permittedLanguages.slice();
   if (x.renderingHint !== undefined)
-    out['renderingHint'] = serializeLanguageRenderingHint(x.renderingHint);
+    out['renderingHint'] = serializeLanguageRenderingHint(x.renderingHint);  if (x.examples !== undefined && x.examples.length > 0)
+    out['examples'] = x.examples.map((e) => serializeLanguageValue(e));
+
   return out;
 }
 
@@ -1662,10 +1801,11 @@ export function parseLanguageFieldSpec(
   where = 'LanguageFieldSpec',
 ): LanguageFieldSpec {
   const o = expectObject(x, where);
-  expectKnownProperties(o, ['kind', 'defaultValue', 'permittedLanguages', 'renderingHint']);
+  expectKnownProperties(o, ['kind', 'defaultValue', 'permittedLanguages', 'renderingHint', 'examples']);
   rejectNullProperty(o, 'defaultValue');
   rejectNullProperty(o, 'permittedLanguages');
   rejectNullProperty(o, 'renderingHint');
+  rejectNullProperty(o, 'examples');
   if (o['kind'] !== 'LanguageFieldSpec') {
     throw new CedarConstructionError(`${where}: expected kind "LanguageFieldSpec"`);
   }
@@ -1692,6 +1832,15 @@ export function parseLanguageFieldSpec(
       o['renderingHint'],
       `${where}.renderingHint`,
     );
+  if ('examples' in o) {
+    const arr = o['examples'];
+    if (!Array.isArray(arr)) {
+      throw new CedarConstructionError(`${where}.examples: expected array`);
+    }
+    (init as { examples?: readonly LanguageValue[] }).examples = arr.map(
+      (entry, i) => parseLanguageValue(entry, `${where}.examples[${i}]`),
+    );
+  }
   return languageFieldSpec(init);
 }
 

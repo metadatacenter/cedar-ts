@@ -113,11 +113,13 @@ export interface NihGrantIdFieldSpec {
   readonly kind: 'NihGrantIdFieldSpec';
   readonly defaultValue?: NihGrantIdValue;
   readonly renderingHint?: NihGrantIdRenderingHint;
+  readonly examples?: readonly NihGrantIdValue[];
 }
 
 export interface NihGrantIdFieldSpecInit {
   readonly defaultValue?: NihGrantIdValue | AuthorityValueInput<NihGrantIri>;
   readonly renderingHint?: NihGrantIdRenderingHint;
+  readonly examples?: readonly (NihGrantIdValue | AuthorityValueInput<NihGrantIri> | NihGrantIdValue)[];
 }
 
 export function nihGrantIdFieldSpec(
@@ -135,6 +137,9 @@ export function nihGrantIdFieldSpec(
   }
   if (init?.renderingHint !== undefined)
     out.renderingHint = init.renderingHint;
+  if (init?.examples !== undefined) {
+    (out as { examples?: readonly NihGrantIdValue[] }).examples = init.examples.slice() as readonly NihGrantIdValue[];
+  }
   return out;
 }
 
