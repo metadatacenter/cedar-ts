@@ -18,7 +18,7 @@
 // One of six external-authority families; shares the value-shape
 // pattern (`iri` + optional `label`) via `external-authority-shared.ts`.
 
-import { type Iri, iri, parseSemanticVersion } from '../leaves/index.js';
+import { type Iri, iri, parseSemanticVersion, parseAsciiIdentifier } from '../leaves/index.js';
 import type { DoiRenderingHint } from './rendering-hints.js';
 import { type MultilingualString, type MultilingualStringInput, multilingualString } from '../multilingual.js';
 import type { CatalogMetadata, SchemaArtifactVersioning } from '../metadata/index.js';
@@ -153,6 +153,7 @@ export interface DoiField {
   readonly fieldSpec: DoiFieldSpec;
   readonly label: MultilingualString;
   readonly helpText?: MultilingualString;
+  readonly recommendedKey?: string;
 }
 
 export interface DoiFieldInit {
@@ -163,6 +164,7 @@ export interface DoiFieldInit {
   readonly fieldSpec: DoiFieldSpec;
   readonly label: MultilingualStringInput;
   readonly helpText?: MultilingualString;
+  readonly recommendedKey?: string;
 }
 
 export const doiField = (init: DoiFieldInit): DoiField => {
@@ -175,6 +177,9 @@ export const doiField = (init: DoiFieldInit): DoiField => {
     versioning: init.versioning,
     label: multilingualString(init.label),
     ...(init.helpText !== undefined && { helpText: init.helpText }),
+    ...(init.recommendedKey !== undefined && {
+      recommendedKey: parseAsciiIdentifier(init.recommendedKey),
+    }),
   };
   return out;
 };

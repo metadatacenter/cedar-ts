@@ -14,7 +14,7 @@ import {
   CedarConstructionError,
   iri,
   parseBcp47Tag,
-  parseSemanticVersion,
+  parseSemanticVersion, parseAsciiIdentifier
 } from '../leaves/index.js';
 import type { LanguageRenderingHint } from './rendering-hints.js';
 import { type MultilingualString, type MultilingualStringInput, multilingualString } from '../multilingual.js';
@@ -147,6 +147,7 @@ export interface LanguageField {
   readonly fieldSpec: LanguageFieldSpec;
   readonly label: MultilingualString;
   readonly helpText?: MultilingualString;
+  readonly recommendedKey?: string;
 }
 
 export interface LanguageFieldInit {
@@ -157,6 +158,7 @@ export interface LanguageFieldInit {
   readonly fieldSpec: LanguageFieldSpec;
   readonly label: MultilingualStringInput;
   readonly helpText?: MultilingualString;
+  readonly recommendedKey?: string;
 }
 
 export const languageField = (init: LanguageFieldInit): LanguageField => {
@@ -169,6 +171,9 @@ export const languageField = (init: LanguageFieldInit): LanguageField => {
     versioning: init.versioning,
     label: multilingualString(init.label),
     ...(init.helpText !== undefined && { helpText: init.helpText }),
+    ...(init.recommendedKey !== undefined && {
+      recommendedKey: parseAsciiIdentifier(init.recommendedKey),
+    }),
   };
   return out;
 };

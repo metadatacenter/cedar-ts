@@ -6,7 +6,7 @@
 // DateTimeValue carries `value: string` (an xsd:dateTime lexical
 // form). The datatype is fixed at xsd:dateTime and is not carried.
 
-import { type Iri, iri, parseSemanticVersion } from '../leaves/index.js';
+import { type Iri, iri, parseSemanticVersion, parseAsciiIdentifier } from '../leaves/index.js';
 import { type MultilingualString, type MultilingualStringInput, multilingualString } from '../multilingual.js';
 import type { CatalogMetadata, SchemaArtifactVersioning } from '../metadata/index.js';
 import type { ValueRequirement } from '../embedded/requirement.js';
@@ -140,6 +140,7 @@ export interface DateTimeField {
   readonly fieldSpec: DateTimeFieldSpec;
   readonly label: MultilingualString;
   readonly helpText?: MultilingualString;
+  readonly recommendedKey?: string;
 }
 
 export interface DateTimeFieldInit {
@@ -150,6 +151,7 @@ export interface DateTimeFieldInit {
   readonly fieldSpec: DateTimeFieldSpec;
   readonly label: MultilingualStringInput;
   readonly helpText?: MultilingualString;
+  readonly recommendedKey?: string;
 }
 
 export const dateTimeField = (init: DateTimeFieldInit): DateTimeField => {
@@ -162,6 +164,9 @@ export const dateTimeField = (init: DateTimeFieldInit): DateTimeField => {
     versioning: init.versioning,
     label: multilingualString(init.label),
     ...(init.helpText !== undefined && { helpText: init.helpText }),
+    ...(init.recommendedKey !== undefined && {
+      recommendedKey: parseAsciiIdentifier(init.recommendedKey),
+    }),
   };
   return out;
 };

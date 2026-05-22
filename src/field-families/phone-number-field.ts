@@ -4,7 +4,7 @@
 //
 // PhoneNumberValue carries `value: string` directly.
 
-import { type Iri, iri, parseSemanticVersion } from '../leaves/index.js';
+import { type Iri, iri, parseSemanticVersion, parseAsciiIdentifier } from '../leaves/index.js';
 import type { PhoneNumberRenderingHint } from './rendering-hints.js';
 import { type MultilingualString, type MultilingualStringInput, multilingualString } from '../multilingual.js';
 import type { CatalogMetadata, SchemaArtifactVersioning } from '../metadata/index.js';
@@ -116,6 +116,7 @@ export interface PhoneNumberField {
   readonly fieldSpec: PhoneNumberFieldSpec;
   readonly label: MultilingualString;
   readonly helpText?: MultilingualString;
+  readonly recommendedKey?: string;
 }
 
 export interface PhoneNumberFieldInit {
@@ -126,6 +127,7 @@ export interface PhoneNumberFieldInit {
   readonly fieldSpec: PhoneNumberFieldSpec;
   readonly label: MultilingualStringInput;
   readonly helpText?: MultilingualString;
+  readonly recommendedKey?: string;
 }
 
 export const phoneNumberField = (init: PhoneNumberFieldInit): PhoneNumberField => {
@@ -138,6 +140,9 @@ export const phoneNumberField = (init: PhoneNumberFieldInit): PhoneNumberField =
     versioning: init.versioning,
     label: multilingualString(init.label),
     ...(init.helpText !== undefined && { helpText: init.helpText }),
+    ...(init.recommendedKey !== undefined && {
+      recommendedKey: parseAsciiIdentifier(init.recommendedKey),
+    }),
   };
   return out;
 };

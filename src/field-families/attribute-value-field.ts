@@ -18,7 +18,7 @@
 // This family does NOT carry a default value (per grammar §Embedded
 // Artifacts); the `EmbeddedField` interface omits `defaultValue`.
 
-import { type Iri, iri, parseSemanticVersion } from '../leaves/index.js';
+import { type Iri, iri, parseSemanticVersion, parseAsciiIdentifier } from '../leaves/index.js';
 import { type MultilingualString, type MultilingualStringInput, multilingualString } from '../multilingual.js';
 import type { CatalogMetadata, SchemaArtifactVersioning } from '../metadata/index.js';
 import type { ValueRequirement } from '../embedded/requirement.js';
@@ -124,6 +124,7 @@ export interface AttributeValueField {
   readonly fieldSpec: AttributeValueFieldSpec;
   readonly label: MultilingualString;
   readonly helpText?: MultilingualString;
+  readonly recommendedKey?: string;
 }
 
 export interface AttributeValueFieldInit {
@@ -134,6 +135,7 @@ export interface AttributeValueFieldInit {
   readonly fieldSpec: AttributeValueFieldSpec;
   readonly label: MultilingualStringInput;
   readonly helpText?: MultilingualString;
+  readonly recommendedKey?: string;
 }
 
 export const attributeValueField = (
@@ -148,6 +150,9 @@ export const attributeValueField = (
     versioning: init.versioning,
     label: multilingualString(init.label),
     ...(init.helpText !== undefined && { helpText: init.helpText }),
+    ...(init.recommendedKey !== undefined && {
+      recommendedKey: parseAsciiIdentifier(init.recommendedKey),
+    }),
   };
   return out;
 };

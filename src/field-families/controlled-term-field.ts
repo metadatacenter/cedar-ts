@@ -26,7 +26,7 @@ import {
   iri,
   assertNonNegativeInteger,
   CedarConstructionError,
-  parseSemanticVersion,
+  parseSemanticVersion, parseAsciiIdentifier
 } from '../leaves/index.js';
 import type { ControlledTermRenderingHint } from './rendering-hints.js';
 import {
@@ -378,6 +378,7 @@ export interface ControlledTermField {
   readonly fieldSpec: ControlledTermFieldSpec;
   readonly label: MultilingualString;
   readonly helpText?: MultilingualString;
+  readonly recommendedKey?: string;
 }
 
 export interface ControlledTermFieldInit {
@@ -388,6 +389,7 @@ export interface ControlledTermFieldInit {
   readonly fieldSpec: ControlledTermFieldSpec;
   readonly label: MultilingualStringInput;
   readonly helpText?: MultilingualString;
+  readonly recommendedKey?: string;
 }
 
 export const controlledTermField = (
@@ -402,6 +404,9 @@ export const controlledTermField = (
     versioning: init.versioning,
     label: multilingualString(init.label),
     ...(init.helpText !== undefined && { helpText: init.helpText }),
+    ...(init.recommendedKey !== undefined && {
+      recommendedKey: parseAsciiIdentifier(init.recommendedKey),
+    }),
   };
   return out;
 };

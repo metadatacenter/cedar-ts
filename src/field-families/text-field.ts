@@ -25,7 +25,7 @@ import {
   iri,
   languageTag,
   assertNonNegativeInteger,
-  parseSemanticVersion,
+  parseSemanticVersion, parseAsciiIdentifier
 } from '../leaves/index.js';
 import { type MultilingualString, type MultilingualStringInput, multilingualString } from '../multilingual.js';
 import type { CatalogMetadata, SchemaArtifactVersioning } from '../metadata/index.js';
@@ -173,6 +173,7 @@ export interface TextField {
   readonly fieldSpec: TextFieldSpec;
   readonly label: MultilingualString;
   readonly helpText?: MultilingualString;
+  readonly recommendedKey?: string;
 }
 
 export interface TextFieldInit {
@@ -183,6 +184,7 @@ export interface TextFieldInit {
   readonly fieldSpec: TextFieldSpec;
   readonly label: MultilingualStringInput;
   readonly helpText?: MultilingualString;
+  readonly recommendedKey?: string;
 }
 
 export const textField = (init: TextFieldInit): TextField => {
@@ -195,6 +197,9 @@ export const textField = (init: TextFieldInit): TextField => {
     versioning: init.versioning,
     label: multilingualString(init.label),
     ...(init.helpText !== undefined && { helpText: init.helpText }),
+    ...(init.recommendedKey !== undefined && {
+      recommendedKey: parseAsciiIdentifier(init.recommendedKey),
+    }),
   };
   return out;
 };

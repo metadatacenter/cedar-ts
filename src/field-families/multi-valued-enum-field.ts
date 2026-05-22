@@ -15,7 +15,7 @@
 // "EmbeddedMultiValuedEnumField" (embedding). The embedding's
 // `defaultValue` slot is a sequence of EnumValue.
 
-import { type Iri, iri, parseSemanticVersion } from '../leaves/index.js';
+import { type Iri, iri, parseSemanticVersion, parseAsciiIdentifier } from '../leaves/index.js';
 import { type MultilingualString, type MultilingualStringInput, multilingualString } from '../multilingual.js';
 import type { CatalogMetadata, SchemaArtifactVersioning } from '../metadata/index.js';
 import type { ValueRequirement } from '../embedded/requirement.js';
@@ -129,6 +129,7 @@ export interface MultiValuedEnumField {
   readonly fieldSpec: MultiValuedEnumFieldSpec;
   readonly label: MultilingualString;
   readonly helpText?: MultilingualString;
+  readonly recommendedKey?: string;
 }
 
 export interface MultiValuedEnumFieldInit {
@@ -139,6 +140,7 @@ export interface MultiValuedEnumFieldInit {
   readonly fieldSpec: MultiValuedEnumFieldSpec;
   readonly label: MultilingualStringInput;
   readonly helpText?: MultilingualString;
+  readonly recommendedKey?: string;
 }
 
 export const multiValuedEnumField = (
@@ -153,6 +155,9 @@ export const multiValuedEnumField = (
     versioning: init.versioning,
     label: multilingualString(init.label),
     ...(init.helpText !== undefined && { helpText: init.helpText }),
+    ...(init.recommendedKey !== undefined && {
+      recommendedKey: parseAsciiIdentifier(init.recommendedKey),
+    }),
   };
   return out;
 };

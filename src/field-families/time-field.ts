@@ -6,7 +6,7 @@
 // TimeValue carries `value: string` (an xsd:time lexical form). The
 // datatype is fixed at xsd:time and is not carried.
 
-import { type Iri, iri, parseSemanticVersion } from '../leaves/index.js';
+import { type Iri, iri, parseSemanticVersion, parseAsciiIdentifier } from '../leaves/index.js';
 import { type MultilingualString, type MultilingualStringInput, multilingualString } from '../multilingual.js';
 import type { CatalogMetadata, SchemaArtifactVersioning } from '../metadata/index.js';
 import type { ValueRequirement } from '../embedded/requirement.js';
@@ -141,6 +141,7 @@ export interface TimeField {
   readonly fieldSpec: TimeFieldSpec;
   readonly label: MultilingualString;
   readonly helpText?: MultilingualString;
+  readonly recommendedKey?: string;
 }
 
 export interface TimeFieldInit {
@@ -151,6 +152,7 @@ export interface TimeFieldInit {
   readonly fieldSpec: TimeFieldSpec;
   readonly label: MultilingualStringInput;
   readonly helpText?: MultilingualString;
+  readonly recommendedKey?: string;
 }
 
 export const timeField = (init: TimeFieldInit): TimeField => {
@@ -163,6 +165,9 @@ export const timeField = (init: TimeFieldInit): TimeField => {
     versioning: init.versioning,
     label: multilingualString(init.label),
     ...(init.helpText !== undefined && { helpText: init.helpText }),
+    ...(init.recommendedKey !== undefined && {
+      recommendedKey: parseAsciiIdentifier(init.recommendedKey),
+    }),
   };
   return out;
 };

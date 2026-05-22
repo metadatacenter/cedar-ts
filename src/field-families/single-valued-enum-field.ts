@@ -15,14 +15,13 @@
 // "EmbeddedSingleValuedEnumField" (embedding). The embedding carries no
 // `cardinality` slot (single-valued enum is implicit, parallel to boolean).
 
-import { type Iri, iri, parseSemanticVersion } from '../leaves/index.js';
+import { type Iri, iri, parseSemanticVersion, parseAsciiIdentifier } from '../leaves/index.js';
 import { type MultilingualString, type MultilingualStringInput, multilingualString } from '../multilingual.js';
 import type { CatalogMetadata, SchemaArtifactVersioning } from '../metadata/index.js';
 import type { ValueRequirement } from '../embedded/requirement.js';
 import type { Visibility } from '../embedded/visibility.js';
 import type { LabelOverride } from '../embedded/label-override.js';
 import { type Property, type PropertyInput, property } from '../embedded/property.js';
-import { parseAsciiIdentifier } from '../leaves/index.js';
 import type { SingleValuedEnumRenderingHint } from './rendering-hints.js';
 import { type PermissibleValue, type EnumValue, enumValue } from './enum-shared.js';
 import { fieldRef } from './embedded-field-common.js';
@@ -114,6 +113,7 @@ export interface SingleValuedEnumField {
   readonly fieldSpec: SingleValuedEnumFieldSpec;
   readonly label: MultilingualString;
   readonly helpText?: MultilingualString;
+  readonly recommendedKey?: string;
 }
 
 export interface SingleValuedEnumFieldInit {
@@ -124,6 +124,7 @@ export interface SingleValuedEnumFieldInit {
   readonly fieldSpec: SingleValuedEnumFieldSpec;
   readonly label: MultilingualStringInput;
   readonly helpText?: MultilingualString;
+  readonly recommendedKey?: string;
 }
 
 export const singleValuedEnumField = (
@@ -138,6 +139,9 @@ export const singleValuedEnumField = (
     versioning: init.versioning,
     label: multilingualString(init.label),
     ...(init.helpText !== undefined && { helpText: init.helpText }),
+    ...(init.recommendedKey !== undefined && {
+      recommendedKey: parseAsciiIdentifier(init.recommendedKey),
+    }),
   };
   return out;
 };

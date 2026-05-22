@@ -7,7 +7,7 @@
 // FullDateValue. All three variants carry their lexical form directly
 // (`value: string`); the datatype is fixed by the variant's `kind`.
 
-import { type Iri, iri, CedarConstructionError, parseSemanticVersion } from '../leaves/index.js';
+import { type Iri, iri, CedarConstructionError, parseSemanticVersion, parseAsciiIdentifier } from '../leaves/index.js';
 import { type MultilingualString, type MultilingualStringInput, multilingualString } from '../multilingual.js';
 import type { CatalogMetadata, SchemaArtifactVersioning } from '../metadata/index.js';
 import type { ValueRequirement } from '../embedded/requirement.js';
@@ -202,6 +202,7 @@ export interface DateField {
   readonly fieldSpec: DateFieldSpec;
   readonly label: MultilingualString;
   readonly helpText?: MultilingualString;
+  readonly recommendedKey?: string;
 }
 
 export interface DateFieldInit {
@@ -212,6 +213,7 @@ export interface DateFieldInit {
   readonly fieldSpec: DateFieldSpec;
   readonly label: MultilingualStringInput;
   readonly helpText?: MultilingualString;
+  readonly recommendedKey?: string;
 }
 
 export const dateField = (init: DateFieldInit): DateField => {
@@ -224,6 +226,9 @@ export const dateField = (init: DateFieldInit): DateField => {
     versioning: init.versioning,
     label: multilingualString(init.label),
     ...(init.helpText !== undefined && { helpText: init.helpText }),
+    ...(init.recommendedKey !== undefined && {
+      recommendedKey: parseAsciiIdentifier(init.recommendedKey),
+    }),
   };
   return out;
 };

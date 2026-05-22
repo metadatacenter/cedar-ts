@@ -113,6 +113,7 @@ export interface BooleanField {
   readonly fieldSpec: BooleanFieldSpec;
   readonly label: MultilingualString;
   readonly helpText?: MultilingualString;
+  readonly recommendedKey?: string;
 }
 
 export interface BooleanFieldInit {
@@ -123,6 +124,7 @@ export interface BooleanFieldInit {
   readonly fieldSpec: BooleanFieldSpec;
   readonly label: MultilingualStringInput;
   readonly helpText?: MultilingualString;
+  readonly recommendedKey?: string;
 }
 
 export const booleanField = (init: BooleanFieldInit): BooleanField => {
@@ -135,6 +137,9 @@ export const booleanField = (init: BooleanFieldInit): BooleanField => {
     versioning: init.versioning,
     label: multilingualString(init.label),
     ...(init.helpText !== undefined && { helpText: init.helpText }),
+    ...(init.recommendedKey !== undefined && {
+      recommendedKey: parseAsciiIdentifier(init.recommendedKey),
+    }),
   };
   return out;
 };

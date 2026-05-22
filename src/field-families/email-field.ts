@@ -4,7 +4,7 @@
 //
 // EmailValue carries `value: string` directly.
 
-import { type Iri, iri, parseSemanticVersion } from '../leaves/index.js';
+import { type Iri, iri, parseSemanticVersion, parseAsciiIdentifier } from '../leaves/index.js';
 import type { EmailRenderingHint } from './rendering-hints.js';
 import { type MultilingualString, type MultilingualStringInput, multilingualString } from '../multilingual.js';
 import type { CatalogMetadata, SchemaArtifactVersioning } from '../metadata/index.js';
@@ -114,6 +114,7 @@ export interface EmailField {
   readonly fieldSpec: EmailFieldSpec;
   readonly label: MultilingualString;
   readonly helpText?: MultilingualString;
+  readonly recommendedKey?: string;
 }
 
 export interface EmailFieldInit {
@@ -124,6 +125,7 @@ export interface EmailFieldInit {
   readonly fieldSpec: EmailFieldSpec;
   readonly label: MultilingualStringInput;
   readonly helpText?: MultilingualString;
+  readonly recommendedKey?: string;
 }
 
 export const emailField = (init: EmailFieldInit): EmailField => {
@@ -136,6 +138,9 @@ export const emailField = (init: EmailFieldInit): EmailField => {
     versioning: init.versioning,
     label: multilingualString(init.label),
     ...(init.helpText !== undefined && { helpText: init.helpText }),
+    ...(init.recommendedKey !== undefined && {
+      recommendedKey: parseAsciiIdentifier(init.recommendedKey),
+    }),
   };
   return out;
 };

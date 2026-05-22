@@ -15,7 +15,7 @@
 // Wire `kind` values: "LinkField" (artifact), "EmbeddedLinkField"
 // (embedding).
 
-import { type Iri, iri, parseSemanticVersion } from '../leaves/index.js';
+import { type Iri, iri, parseSemanticVersion, parseAsciiIdentifier } from '../leaves/index.js';
 import type { LinkRenderingHint } from './rendering-hints.js';
 import {
   type MultilingualString,
@@ -147,6 +147,7 @@ export interface LinkField {
   readonly fieldSpec: LinkFieldSpec;
   readonly label: MultilingualString;
   readonly helpText?: MultilingualString;
+  readonly recommendedKey?: string;
 }
 
 export interface LinkFieldInit {
@@ -157,6 +158,7 @@ export interface LinkFieldInit {
   readonly fieldSpec: LinkFieldSpec;
   readonly label: MultilingualStringInput;
   readonly helpText?: MultilingualString;
+  readonly recommendedKey?: string;
 }
 
 export const linkField = (init: LinkFieldInit): LinkField => {
@@ -169,6 +171,9 @@ export const linkField = (init: LinkFieldInit): LinkField => {
     versioning: init.versioning,
     label: multilingualString(init.label),
     ...(init.helpText !== undefined && { helpText: init.helpText }),
+    ...(init.recommendedKey !== undefined && {
+      recommendedKey: parseAsciiIdentifier(init.recommendedKey),
+    }),
   };
   return out;
 };
