@@ -29,7 +29,7 @@ const tp = lifecycleMetadata({
 const meta = {
   metadata: catalogMetadata({ preferredLabel: 'Language field test', lifecycle: tp }),
   versioning: schemaArtifactVersioning({ version: '1.0.0', status: 'draft' }),
-  label: 'Language field test',
+  prompt: 'Language field test',
   title: 'Language field test',
 };
 

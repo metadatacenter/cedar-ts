@@ -51,8 +51,8 @@ import {
   fieldValue,
   fullDateValue,
   isEmbeddedField,
-  labelOverride,
   meaning,
+  multilingualString,
   ontologyDisplayHint,
   ontologyReference,
   ontologySource,
@@ -150,7 +150,7 @@ function artifactMeta(preferredLabel: string, description: string): CatalogMetad
 function fieldMeta(rendered: string, description: string): {
   metadata: CatalogMetadata;
   versioning: ReturnType<typeof schemaArtifactVersioning>;
-  label: string;
+  prompt: string;
 } {
   return {
     metadata: artifactMeta(rendered, description),
@@ -158,7 +158,7 @@ function fieldMeta(rendered: string, description: string): {
       version: '1.0.0',
       status: 'draft',
     }),
-    label: rendered,
+    prompt: rendered,
   };
 }
 
@@ -485,7 +485,7 @@ export const principalInvestigatorTemplate: Template = template({
       artifactRef: academicRank,
       valueRequirement: 'recommended',
       property: 'https://schema.org/Role',
-      labelOverride: labelOverride({ label: 'Academic Rank' }),
+      promptOverride: multilingualString('Academic Rank'),
     }),
 
     embeddedEmailField({
@@ -505,14 +505,10 @@ export const principalInvestigatorTemplate: Template = template({
       artifactRef: orcid,
       valueRequirement: 'recommended',
       property: 'https://schema.org/identifier',
-      // labelOverride supplies template-local labels that override the
-      // reusable Field's metadata.preferredLabel in this embedding context only.
-      // Each label position accepts any MultilingualString input shape;
-      // here we use the map form for the primary label.
-      labelOverride: labelOverride({
-        label: { en: 'ORCID iD', fr: 'iD ORCID' },
-        altLabels: [{ en: 'Open Researcher and Contributor iD' }],
-      }),
+      // promptOverride supplies a template-local prompt that overrides
+      // the reusable Field's Prompt in this embedding context only.
+      // Accepts any MultilingualString input shape; here we use the map form.
+      promptOverride: multilingualString({ en: 'ORCID iD', fr: 'iD ORCID' }),
     }),
 
     // `defaultValue` is only allowed where the grammar permits (e.g., not
@@ -576,7 +572,7 @@ export const principalInvestigatorTemplate: Template = template({
       artifactRef: researchInterest,
       valueRequirement: 'optional',
       cardinality: cardinality({ min: 0 }),
-      labelOverride: labelOverride({ label: 'Research Interests' }),
+      promptOverride: 'Research Interests',
       property: 'https://schema.org/knowsAbout',
     }),
   ],

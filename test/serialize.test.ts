@@ -47,7 +47,7 @@ import {
   fieldValue,
   fullDateValue,
   imageComponent,
-  labelOverride,
+  multilingualString,
   linkField,
   linkFieldSpec,
   linkValue,
@@ -137,8 +137,6 @@ import {
   parseCardinality,
   serializeProperty,
   parseProperty,
-  serializeLabelOverride,
-  parseLabelOverride,
   serializeAnnotationValue,
   parseAnnotationValue,
   parseLinkFieldSpec,
@@ -183,7 +181,7 @@ const am = catalogMetadata({ preferredLabel: 'Demo', lifecycle: tp });
 const sam = {
   metadata: am,
   versioning: schemaArtifactVersioning({ version: '1.0.0', status: 'draft' }),
-  label: 'Demo',
+  prompt: 'Demo',
   title: 'Demo',
 };
 
@@ -270,7 +268,7 @@ describe('Value round-trip', () => {
 
 });
 
-// ---- Cardinality / Property / LabelOverride --------------------------
+// ---- Cardinality / Property / PromptOverride -------------------------
 
 describe('Cardinality round-trip', () => {
   it('with min/max', () => {
@@ -306,11 +304,11 @@ describe('Property round-trip', () => {
   });
 });
 
-describe('LabelOverride round-trip', () => {
-  it('with label only', () => {
-    const lo = labelOverride({ label: 'Name' });
-    const wire = serializeLabelOverride(lo);
-    expect(parseLabelOverride(wire)).toEqual(lo);
+describe('PromptOverride round-trip', () => {
+  it('serializes as a collapsed MultilingualString array', () => {
+    const ms = multilingualString('Name');
+    const wire = serializeMultilingualString(ms);
+    expect(parseMultilingualString(wire)).toEqual(ms);
   });
 });
 
@@ -861,7 +859,7 @@ describe('EmbeddedField round-trip', () => {
       artifactRef: textFieldId('https://example.org/fields/text'),
       valueRequirement: 'required',
       cardinality: cardinality({ min: 0, max: 3 }),
-      labelOverride: labelOverride({ label: 'Name' }),
+      promptOverride: multilingualString('Name'),
       property: 'https://schema.org/name',
       defaultValue: 'Anonymous',
     });

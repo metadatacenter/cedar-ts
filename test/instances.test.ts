@@ -204,7 +204,7 @@ describe('Artifact union', () => {
   const meta = {
     metadata: am,
     versioning: schemaArtifactVersioning({ version: '1.0.0', status: 'draft' }),
-    label: 'Demo',
+    prompt: 'Demo',
     title: 'Demo',
   };
 

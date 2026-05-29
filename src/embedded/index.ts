@@ -6,7 +6,7 @@
 // "Embedding" = the act of placing a reusable artifact (Field, Template,
 // PresentationComponent) into a specific Template's `embedded` list.
 // Each embedding pins per-context properties (requirement, cardinality,
-// label override, semantic property IRI, default value, visibility) at
+// prompt override, semantic property IRI, default value, visibility) at
 // the embedding site rather than on the reusable artifact itself.
 //
 // Re-exports:
@@ -17,8 +17,9 @@
 //       'visible' | 'hidden'
 //   - Cardinality                             (cardinality.ts):
 //       per-embedding count bounds
-//   - LabelOverride                           (label-override.ts):
-//       template-local label override for an embedding
+//   - PromptOverride is a MultilingualString — see grammar.md §Prompt Override.
+//       Carried directly as `promptOverride?: MultilingualString` on
+//       EmbeddedField / EmbeddedTemplate variants; no dedicated module.
 //   - Property                                (property.ts):
 //       semantic property IRI association for an embedding
 //   - EmbeddedTemplate                        (embedded-template.ts):
@@ -50,12 +51,6 @@ export {
   type CardinalityInit,
   cardinality,
 } from './cardinality.js';
-
-export {
-  type LabelOverride,
-  type LabelOverrideInit,
-  labelOverride,
-} from './label-override.js';
 
 export {
   type Property,

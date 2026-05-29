@@ -34,8 +34,8 @@ import {
   embeddedRorField,
   embeddedSingleValuedEnumField,
   embeddedTextField,
-  labelOverride,
   meaning,
+  multilingualString,
   ontologyDisplayHint,
   ontologyReference,
   ontologySource,
@@ -102,7 +102,7 @@ function artifactMeta(preferredLabel: string, description: string): CatalogMetad
 function fieldMeta(rendered: string, description: string): {
   metadata: CatalogMetadata;
   versioning: ReturnType<typeof schemaArtifactVersioning>;
-  label: string;
+  prompt: string;
 } {
   return {
     metadata: artifactMeta(rendered, description),
@@ -110,7 +110,7 @@ function fieldMeta(rendered: string, description: string): {
       version: '1.0.0',
       status: 'draft',
     }),
-    label: rendered,
+    prompt: rendered,
   };
 }
 
@@ -272,7 +272,7 @@ export const principalInvestigatorTemplate: Template = template({
       }),
       valueRequirement: 'recommended',
       property: 'https://schema.org/Role',
-      labelOverride: labelOverride({ label: 'Academic Rank' }),
+      promptOverride: multilingualString('Academic Rank'),
     }),
 
     // Authority-style fields — their FieldSpec constructors are nullary
@@ -312,13 +312,9 @@ export const principalInvestigatorTemplate: Template = template({
       }),
       valueRequirement: 'recommended',
       property: 'https://schema.org/identifier',
-      // Template-local label override; applies to this embedding only.
-      // Each label position accepts any MultilingualString input shape;
-      // here we use the map form for the primary label.
-      labelOverride: labelOverride({
-        label: { en: 'ORCID iD', fr: 'iD ORCID' },
-        altLabels: [{ en: 'Open Researcher and Contributor iD' }],
-      }),
+      // Template-local prompt override; applies to this embedding only.
+      // Accepts any MultilingualString input shape; here we use the map form.
+      promptOverride: { en: 'ORCID iD', fr: 'iD ORCID' },
     }),
 
     // `defaultValue` accepts a bare string here; the constructor widens
@@ -421,7 +417,7 @@ export const principalInvestigatorTemplate: Template = template({
       }),
       valueRequirement: 'optional',
       cardinality: cardinality({ min: 0 }),
-      labelOverride: labelOverride({ label: 'Research Interests' }),
+      promptOverride: 'Research Interests',
       property: 'https://schema.org/knowsAbout',
     }),
   ],

@@ -1,10 +1,10 @@
 import { parseAsciiIdentifier } from '../leaves/index.js';
+import { type MultilingualString, type MultilingualStringInput, multilingualString } from '../multilingual.js';
 import type { TemplateId } from '../identifiers.js';
 import type { Template } from '../template.js';
 import type { ValueRequirement } from './requirement.js';
 import type { Cardinality } from './cardinality.js';
 import type { Visibility } from './visibility.js';
-import type { LabelOverride } from './label-override.js';
 import { type Property, type PropertyInput, property } from './property.js';
 
 // EmbeddedTemplate — see grammar.md §Embedded Artifacts.
@@ -19,7 +19,7 @@ export interface EmbeddedTemplate {
   readonly valueRequirement?: ValueRequirement;
   readonly cardinality?: Cardinality;
   readonly visibility?: Visibility;
-  readonly labelOverride?: LabelOverride;
+  readonly promptOverride?: MultilingualString;
   readonly property?: Property;
 }
 
@@ -31,7 +31,7 @@ export interface EmbeddedTemplateInit {
   readonly valueRequirement?: ValueRequirement;
   readonly cardinality?: Cardinality;
   readonly visibility?: Visibility;
-  readonly labelOverride?: LabelOverride;
+  readonly promptOverride?: MultilingualStringInput;
   readonly property?: PropertyInput;
 }
 
@@ -43,7 +43,7 @@ export function embeddedTemplate(init: EmbeddedTemplateInit): EmbeddedTemplate {
     valueRequirement?: ValueRequirement;
     cardinality?: Cardinality;
     visibility?: Visibility;
-    labelOverride?: LabelOverride;
+    promptOverride?: MultilingualString;
     property?: Property;
   } = {
     kind: 'EmbeddedTemplate',
@@ -53,7 +53,7 @@ export function embeddedTemplate(init: EmbeddedTemplateInit): EmbeddedTemplate {
   if (init.valueRequirement !== undefined) out.valueRequirement = init.valueRequirement;
   if (init.cardinality !== undefined) out.cardinality = init.cardinality;
   if (init.visibility !== undefined) out.visibility = init.visibility;
-  if (init.labelOverride !== undefined) out.labelOverride = init.labelOverride;
+  if (init.promptOverride !== undefined) out.promptOverride = multilingualString(init.promptOverride);
   if (init.property !== undefined) out.property = property(init.property);
   return out;
 }

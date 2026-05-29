@@ -13,7 +13,6 @@ import { type MultilingualString, type MultilingualStringInput, multilingualStri
 import type { CatalogMetadata, SchemaArtifactVersioning } from '../metadata/index.js';
 import type { ValueRequirement } from '../embedded/requirement.js';
 import type { Visibility } from '../embedded/visibility.js';
-import type { LabelOverride } from '../embedded/label-override.js';
 import { type Property, type PropertyInput, property } from '../embedded/property.js';
 import type { BooleanRenderingHint } from './rendering-hints.js';
 import { fieldRef } from './embedded-field-common.js';
@@ -116,7 +115,7 @@ export interface BooleanField {
   readonly metadata: CatalogMetadata;
   readonly versioning: SchemaArtifactVersioning;
   readonly fieldSpec: BooleanFieldSpec;
-  readonly label: MultilingualString;
+  readonly prompt: MultilingualString;
   readonly helpText?: MultilingualString;
   readonly recommendedKey?: string;
 }
@@ -127,7 +126,7 @@ export interface BooleanFieldInit {
   readonly metadata: CatalogMetadata;
   readonly versioning: SchemaArtifactVersioning;
   readonly fieldSpec: BooleanFieldSpec;
-  readonly label: MultilingualStringInput;
+  readonly prompt: MultilingualStringInput;
   readonly helpText?: MultilingualString;
   readonly recommendedKey?: string;
 }
@@ -140,7 +139,7 @@ export const booleanField = (init: BooleanFieldInit): BooleanField => {
     metadata: init.metadata,
     fieldSpec: init.fieldSpec,
     versioning: init.versioning,
-    label: multilingualString(init.label),
+    prompt: multilingualString(init.prompt),
     ...(init.helpText !== undefined && { helpText: init.helpText }),
     ...(init.recommendedKey !== undefined && {
       recommendedKey: parseAsciiIdentifier(init.recommendedKey),
@@ -159,7 +158,7 @@ export interface EmbeddedBooleanField {
   readonly artifactRef: BooleanFieldId;
   readonly valueRequirement?: ValueRequirement;
   readonly visibility?: Visibility;
-  readonly labelOverride?: LabelOverride;
+  readonly promptOverride?: MultilingualString;
   readonly helpTextOverride?: MultilingualString;
   readonly property?: Property;
   readonly defaultValue?: BooleanValue;
@@ -170,7 +169,7 @@ export interface EmbeddedBooleanFieldInit {
   readonly artifactRef: BooleanFieldId | BooleanField;
   readonly valueRequirement?: ValueRequirement;
   readonly visibility?: Visibility;
-  readonly labelOverride?: LabelOverride;
+  readonly promptOverride?: MultilingualString;
   readonly helpTextOverride?: MultilingualString;
   readonly property?: PropertyInput;
   readonly defaultValue?: BooleanValueInput;
@@ -185,7 +184,7 @@ export function embeddedBooleanField(
     artifactRef: BooleanFieldId;
     valueRequirement?: ValueRequirement;
     visibility?: Visibility;
-    labelOverride?: LabelOverride;
+    promptOverride?: MultilingualString;
     helpTextOverride?: MultilingualString;
     property?: Property;
     defaultValue?: BooleanValue;
@@ -196,7 +195,7 @@ export function embeddedBooleanField(
   };
   if (init.valueRequirement !== undefined) out.valueRequirement = init.valueRequirement;
   if (init.visibility !== undefined) out.visibility = init.visibility;
-  if (init.labelOverride !== undefined) out.labelOverride = init.labelOverride;
+  if (init.promptOverride !== undefined) out.promptOverride = multilingualString(init.promptOverride);
   if (init.helpTextOverride !== undefined) out.helpTextOverride = init.helpTextOverride;
   if (init.property !== undefined) out.property = property(init.property);
   if (init.defaultValue !== undefined) {

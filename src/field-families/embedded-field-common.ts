@@ -10,7 +10,7 @@
 //     EmbeddedBooleanField is the one exception: it omits cardinality
 //     and uses a slimmer init-common defined locally in boolean-field.ts.
 //   - assembleCommon() — assembles the per-embedding properties (key,
-//     valueRequirement, cardinality, visibility, labelOverride,
+//     valueRequirement, cardinality, visibility, promptOverride,
 //     property) shared by the 19 cardinality-carrying EmbeddedField
 //     variants. Called by their `embeddedXxxField` constructors.
 //   - fieldRef() — extracts the FieldId from a Field artifact, or
@@ -29,7 +29,6 @@ import {
 import type { ValueRequirement } from '../embedded/requirement.js';
 import type { Cardinality } from '../embedded/cardinality.js';
 import type { Visibility } from '../embedded/visibility.js';
-import type { LabelOverride } from '../embedded/label-override.js';
 import { type Property, type PropertyInput, property } from '../embedded/property.js';
 
 // Internal helper module for the 18 EmbeddedField family constructors.
@@ -42,7 +41,7 @@ export interface EmbeddedFieldInitCommon {
   readonly valueRequirement?: ValueRequirement;
   readonly cardinality?: Cardinality;
   readonly visibility?: Visibility;
-  readonly labelOverride?: LabelOverride;
+  readonly promptOverride?: MultilingualStringInput;
   readonly helpTextOverride?: MultilingualStringInput;
   readonly property?: PropertyInput;
 }
@@ -52,7 +51,7 @@ export interface AssembledCommon {
   valueRequirement?: ValueRequirement;
   cardinality?: Cardinality;
   visibility?: Visibility;
-  labelOverride?: LabelOverride;
+  promptOverride?: MultilingualString;
   helpTextOverride?: MultilingualString;
   property?: Property;
 }
@@ -64,7 +63,8 @@ export function assembleCommon(init: EmbeddedFieldInitCommon): AssembledCommon {
   if (init.valueRequirement !== undefined) out.valueRequirement = init.valueRequirement;
   if (init.cardinality !== undefined) out.cardinality = init.cardinality;
   if (init.visibility !== undefined) out.visibility = init.visibility;
-  if (init.labelOverride !== undefined) out.labelOverride = init.labelOverride;
+  if (init.promptOverride !== undefined)
+    out.promptOverride = multilingualString(init.promptOverride);
   if (init.helpTextOverride !== undefined)
     out.helpTextOverride = multilingualString(init.helpTextOverride);
   if (init.property !== undefined) out.property = property(init.property);

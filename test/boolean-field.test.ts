@@ -28,7 +28,7 @@ const tp = lifecycleMetadata({
 const meta = {
   metadata: catalogMetadata({ preferredLabel: 'Boolean field test', lifecycle: tp }),
   versioning: schemaArtifactVersioning({ version: '1.0.0', status: 'draft' }),
-  label: 'Boolean field test',
+  prompt: 'Boolean field test',
   title: 'Boolean field test',
 };
 

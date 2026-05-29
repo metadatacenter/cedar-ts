@@ -217,12 +217,12 @@ describe('Controlled-term field spec and sources', () => {
     const ref = ontologyReference({ iri: 'http://example.org/onto' });
     const c1 = controlledTermClass({
       term: 'http://example.org/term/1',
-      label: 'One',
+      prompt: 'One',
       ontology: ref,
     });
     const c2 = controlledTermClass({
       term: 'http://example.org/term/2',
-      label: 'Two',
+      prompt: 'Two',
       ontology: ref,
     });
     const cs = classSource(c1, c2);

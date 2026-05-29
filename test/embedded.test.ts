@@ -9,7 +9,7 @@ import {
   DEFAULT_VISIBILITY,
   isVisibility,
   cardinality,
-  labelOverride,
+  multilingualString,
   property,
   isEmbeddedField,
   embeddedTextField,
@@ -54,7 +54,7 @@ const tp = lifecycleMetadata({
 const meta = {
   metadata: catalogMetadata({ preferredLabel: 'X', lifecycle: tp }),
   versioning: schemaArtifactVersioning({ version: '1.0.0', status: 'draft' }),
-  label: 'X',
+  prompt: 'X',
   title: 'X',
 };
 
@@ -179,11 +179,14 @@ describe('Cardinality', () => {
   });
 });
 
-describe('LabelOverride and Property', () => {
-  it('labelOverride defaults altLabels to an empty array', () => {
-    const lo = labelOverride({ label: 'Participant' });
-    expect(lo.label).toEqual([{ value: 'Participant', lang: 'und' }]);
-    expect(lo.altLabels).toEqual([]);
+describe('PromptOverride and Property', () => {
+  it('promptOverride is a MultilingualString and collapses on the wire', () => {
+    const ef = embeddedTextField({
+      key: 'title',
+      artifactRef: txtRef,
+      promptOverride: multilingualString('Participant'),
+    });
+    expect(ef.promptOverride).toEqual([{ value: 'Participant', lang: 'und' }]);
   });
 
   it('property accepts an init object with iri and optional label', () => {
@@ -305,7 +308,7 @@ describe('EmbeddedField constructors', () => {
       cardinality: cardinality({ min: 1 }),
       visibility: 'visible',
       defaultValue: textValue('Untitled'),
-      labelOverride: labelOverride({ label: 'Document Title' }),
+      promptOverride: multilingualString('Document Title'),
       helpTextOverride: [
         { value: 'Form-specific note about this title.', lang: 'en' },
       ],
@@ -316,7 +319,7 @@ describe('EmbeddedField constructors', () => {
     expect(ef.visibility).toBe('visible');
     expect(ef.defaultValue?.kind).toBe('TextValue');
     expect(ef.defaultValue?.value).toBe('Untitled');
-    expect(ef.labelOverride?.label).toEqual([{ value: 'Document Title', lang: 'und' }]);
+    expect(ef.promptOverride).toEqual([{ value: 'Document Title', lang: 'und' }]);
     expect(ef.helpTextOverride).toEqual([
       { value: 'Form-specific note about this title.', lang: 'en' },
     ]);

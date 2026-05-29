@@ -1,25 +1,25 @@
 // =====================================================================
 // embedded-config — wire-form serialize/parse for the per-embedding
-// configuration types (Cardinality, Property, LabelOverride,
-// ValueRequirement, Visibility).
+// configuration types (Cardinality, Property, ValueRequirement,
+// Visibility). PromptOverride collapses to MultilingualString on the
+// wire (see grammar.md §Prompt Override) so it has no dedicated
+// serializer here; callers use serializeMultilingualString /
+// parseMultilingualString directly.
 // =====================================================================
 
 import { CedarConstructionError } from '../leaves/index.js';
 import {
   type Cardinality,
   type Property,
-  type LabelOverride,
   type ValueRequirement,
   type Visibility,
   cardinality,
   property,
-  labelOverride,
   VALUE_REQUIREMENTS,
   VISIBILITIES,
 } from '../embedded/index.js';
 import {
   expectObject,
-  expectArray,
   expectString,
   expectNumber,
   expectKnownProperties,
@@ -91,32 +91,3 @@ export function parseProperty(x: unknown, where = 'Property'): Property {
   return property(init);
 }
 
-// ---- LabelOverride ---------------------------------------------------
-
-export function serializeLabelOverride(x: LabelOverride): unknown {
-  return {
-    label: serializeMultilingualString(x.label),
-    altLabels: x.altLabels.map(serializeMultilingualString),
-  };
-}
-
-export function parseLabelOverride(
-  x: unknown,
-  where = 'LabelOverride',
-): LabelOverride {
-  const o = expectObject(x, where);
-  expectKnownProperties(o, ['label', 'altLabels']);
-  if (!('label' in o)) {
-    throw new CedarConstructionError(`${where}: missing required "label"`);
-  }
-  if (!('altLabels' in o)) {
-    throw new CedarConstructionError(`${where}: missing required "altLabels"`);
-  }
-  const altRaw = expectArray(o['altLabels'], `${where}.altLabels`);
-  return labelOverride({
-    label: parseMultilingualString(o['label'], `${where}.label`),
-    altLabels: altRaw.map((e, i) =>
-      parseMultilingualString(e, `${where}.altLabels[${i}]`),
-    ),
-  });
-}

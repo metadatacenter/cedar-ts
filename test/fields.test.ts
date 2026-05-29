@@ -79,7 +79,7 @@ const tp = lifecycleMetadata({
 const meta = {
   metadata: catalogMetadata({ preferredLabel: 'X', lifecycle: tp }),
   versioning: schemaArtifactVersioning({ version: '1.0.0', status: 'draft' }),
-  label: 'X',
+  prompt: 'X',
   title: 'X',
 };
 

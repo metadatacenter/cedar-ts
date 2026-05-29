@@ -13,7 +13,6 @@ import type { CatalogMetadata, SchemaArtifactVersioning } from '../metadata/inde
 import type { ValueRequirement } from '../embedded/requirement.js';
 import type { Cardinality } from '../embedded/cardinality.js';
 import type { Visibility } from '../embedded/visibility.js';
-import type { LabelOverride } from '../embedded/label-override.js';
 import type { Property } from '../embedded/property.js';
 import type { DateRenderingHint } from './rendering-hints.js';
 import {
@@ -205,7 +204,7 @@ export interface DateField {
   readonly metadata: CatalogMetadata;
   readonly versioning: SchemaArtifactVersioning;
   readonly fieldSpec: DateFieldSpec;
-  readonly label: MultilingualString;
+  readonly prompt: MultilingualString;
   readonly helpText?: MultilingualString;
   readonly recommendedKey?: string;
 }
@@ -216,7 +215,7 @@ export interface DateFieldInit {
   readonly metadata: CatalogMetadata;
   readonly versioning: SchemaArtifactVersioning;
   readonly fieldSpec: DateFieldSpec;
-  readonly label: MultilingualStringInput;
+  readonly prompt: MultilingualStringInput;
   readonly helpText?: MultilingualString;
   readonly recommendedKey?: string;
 }
@@ -229,7 +228,7 @@ export const dateField = (init: DateFieldInit): DateField => {
     metadata: init.metadata,
     fieldSpec: init.fieldSpec,
     versioning: init.versioning,
-    label: multilingualString(init.label),
+    prompt: multilingualString(init.prompt),
     ...(init.helpText !== undefined && { helpText: init.helpText }),
     ...(init.recommendedKey !== undefined && {
       recommendedKey: parseAsciiIdentifier(init.recommendedKey),
@@ -249,7 +248,7 @@ export interface EmbeddedDateField {
   readonly valueRequirement?: ValueRequirement;
   readonly cardinality?: Cardinality;
   readonly visibility?: Visibility;
-  readonly labelOverride?: LabelOverride;
+  readonly promptOverride?: MultilingualString;
   readonly helpTextOverride?: MultilingualString;
   readonly property?: Property;
   readonly defaultValue?: DateValue;

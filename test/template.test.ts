@@ -27,7 +27,7 @@ const tp = lifecycleMetadata({
 const meta = {
   metadata: catalogMetadata({ preferredLabel: 'Demo Template', lifecycle: tp }),
   versioning: schemaArtifactVersioning({ version: '1.0.0', status: 'draft' }),
-  label: 'Demo Template',
+  prompt: 'Demo Template',
   title: 'Demo Template',
 };
 

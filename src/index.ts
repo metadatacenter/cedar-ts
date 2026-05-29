@@ -25,9 +25,9 @@
 //   - presentation/  : presentation components (RichText / Image /
 //                      YoutubeVideo / SectionBreak / PageBreak)
 //   - embedded/      : per-embedding configuration (Cardinality,
-//                      Property, LabelOverride, ValueRequirement,
-//                      Visibility) and the non-field embedded types
-//                      (EmbeddedTemplate, EmbeddedPresentationComponent)
+//                      Property, ValueRequirement, Visibility) and the
+//                      non-field embedded types (EmbeddedTemplate,
+//                      EmbeddedPresentationComponent)
 //   - template.ts    : Template artifact and the SchemaArtifact union
 //   - instances/     : TemplateInstance, FieldValue, NestedTemplateInstance
 

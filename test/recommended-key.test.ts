@@ -22,7 +22,7 @@ const tp = lifecycleMetadata({
 const baseMeta = {
   metadata: catalogMetadata({ preferredLabel: 'RecommendedKey test', lifecycle: tp }),
   versioning: schemaArtifactVersioning({ version: '1.0.0', status: 'draft' as const }),
-  label: 'Patient date of birth',
+  prompt: 'Patient date of birth',
 };
 
 const MV = '2.0.0';
@@ -138,7 +138,7 @@ describe('RecommendedKey wire form', () => {
       },
       versioning: { version: '1.0.0', status: 'draft' },
       fieldSpec: { kind: 'TextFieldSpec' },
-      label: [{ value: 'X', lang: 'en' }],
+      prompt: [{ value: 'X', lang: 'en' }],
       recommendedKey: 'patient dob with spaces',
     };
     expect(() => parseArtifact(wire)).toThrow(CedarConstructionError);

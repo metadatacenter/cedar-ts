@@ -48,7 +48,7 @@ const tp = lifecycleMetadata({
 const baseFieldMeta = {
   metadata: catalogMetadata({ preferredLabel: 'Examples test', lifecycle: tp }),
   versioning: schemaArtifactVersioning({ version: '1.0.0', status: 'draft' as const }),
-  label: 'Examples test',
+  prompt: 'Examples test',
 };
 
 const MV = '2.0.0';
@@ -326,7 +326,7 @@ describe('Example* slot — wire-form serialisation', () => {
       metadata: serialize(f as { kind: 'TextField' }) as Record<string, unknown> && (serialize(f) as Record<string, unknown>)['metadata'],
       versioning: (serialize(f) as Record<string, unknown>)['versioning'],
       fieldSpec: { kind: 'DateFieldSpec', dateValueType: 'fullDate', examples: [{ kind: 'FullDateValue', value: '1985-04-12' }] },
-      label: (serialize(f) as Record<string, unknown>)['label'],
+      prompt: (serialize(f) as Record<string, unknown>)['prompt'],
     }));
     const back = parseArtifact(json);
     expect((back as { fieldSpec: { examples?: { value: string }[] } }).fieldSpec.examples?.[0]?.value).toBe('1985-04-12');
@@ -356,7 +356,7 @@ describe('Example* slot — parsing', () => {
           { kind: 'TextValue', value: 'beta' },
         ],
       },
-      label: [{ value: 'X', lang: 'en' }],
+      prompt: [{ value: 'X', lang: 'en' }],
     };
     const back = parseArtifact(wire);
     const fs = (back as { fieldSpec: { examples?: { kind: string; value: string }[] } }).fieldSpec;
@@ -383,7 +383,7 @@ describe('Example* slot — parsing', () => {
         kind: 'TextFieldSpec',
         examples: 'not-an-array',
       },
-      label: [{ value: 'X', lang: 'en' }],
+      prompt: [{ value: 'X', lang: 'en' }],
     };
     expect(() => parseArtifact(wire)).toThrow(CedarConstructionError);
   });
@@ -406,7 +406,7 @@ describe('Example* slot — parsing', () => {
         kind: 'TextFieldSpec',
         examples: [{ wrongShape: true }],
       },
-      label: [{ value: 'X', lang: 'en' }],
+      prompt: [{ value: 'X', lang: 'en' }],
     };
     expect(() => parseArtifact(wire)).toThrow(CedarConstructionError);
   });
