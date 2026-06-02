@@ -24,7 +24,7 @@ import type { CatalogMetadata, SchemaArtifactVersioning } from '../metadata/inde
 import type { ValueRequirement } from '../embedded/requirement.js';
 import type { Cardinality } from '../embedded/cardinality.js';
 import type { Visibility } from '../embedded/visibility.js';
-import type { Property } from '../embedded/property.js';
+import { type Property, type PropertyInput, property } from '../embedded/property.js';
 import type { NumericRenderingHint } from './rendering-hints.js';
 import type { Unit } from './unit.js';
 import {
@@ -161,6 +161,7 @@ export interface IntegerNumberField {
   readonly prompt: MultilingualString;
   readonly helpText?: MultilingualString;
   readonly recommendedKey?: string;
+  readonly recommendedProperty?: Property;
 }
 
 export interface IntegerNumberFieldInit {
@@ -172,6 +173,7 @@ export interface IntegerNumberFieldInit {
   readonly prompt: MultilingualStringInput;
   readonly helpText?: MultilingualString;
   readonly recommendedKey?: string;
+  readonly recommendedProperty?: PropertyInput;
 }
 
 export const integerNumberField = (
@@ -188,6 +190,9 @@ export const integerNumberField = (
     ...(init.helpText !== undefined && { helpText: init.helpText }),
     ...(init.recommendedKey !== undefined && {
       recommendedKey: parseAsciiIdentifier(init.recommendedKey),
+    }),
+    ...(init.recommendedProperty !== undefined && {
+      recommendedProperty: property(init.recommendedProperty),
     }),
   };
   return out;

@@ -37,10 +37,7 @@ function readFixtures(): { name: string; path: string }[] {
   // Fixtures that exercise spec slots cedar-ts has not yet implemented.
   // Each entry should be removed when its blocking issue is implemented
   // here.
-  const SKIP: ReadonlySet<string> = new Set([
-    // issue #13 — RecommendedProperty slot on Field (cedar-ts pending).
-    '100-text-field-with-recommended-property.json',
-  ]);
+  const SKIP: ReadonlySet<string> = new Set([]);
   return entries
     .filter((e) => e.endsWith('.json'))
     .filter((e) => !SKIP.has(e))

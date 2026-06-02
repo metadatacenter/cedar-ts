@@ -24,7 +24,7 @@ import type { CatalogMetadata, SchemaArtifactVersioning } from '../metadata/inde
 import type { ValueRequirement } from '../embedded/requirement.js';
 import type { Cardinality } from '../embedded/cardinality.js';
 import type { Visibility } from '../embedded/visibility.js';
-import type { Property } from '../embedded/property.js';
+import { type Property, type PropertyInput, property } from '../embedded/property.js';
 import {
   type AuthorityValueInput,
   authorityValueFromInput,
@@ -159,6 +159,7 @@ export interface NihGrantIdField {
   readonly prompt: MultilingualString;
   readonly helpText?: MultilingualString;
   readonly recommendedKey?: string;
+  readonly recommendedProperty?: Property;
 }
 
 export interface NihGrantIdFieldInit {
@@ -170,6 +171,7 @@ export interface NihGrantIdFieldInit {
   readonly prompt: MultilingualStringInput;
   readonly helpText?: MultilingualString;
   readonly recommendedKey?: string;
+  readonly recommendedProperty?: PropertyInput;
 }
 
 export const nihGrantIdField = (init: NihGrantIdFieldInit): NihGrantIdField => {
@@ -184,6 +186,9 @@ export const nihGrantIdField = (init: NihGrantIdFieldInit): NihGrantIdField => {
     ...(init.helpText !== undefined && { helpText: init.helpText }),
     ...(init.recommendedKey !== undefined && {
       recommendedKey: parseAsciiIdentifier(init.recommendedKey),
+    }),
+    ...(init.recommendedProperty !== undefined && {
+      recommendedProperty: property(init.recommendedProperty),
     }),
   };
   return out;

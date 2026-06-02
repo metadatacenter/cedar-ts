@@ -120,6 +120,7 @@ export interface SingleValuedEnumField {
   readonly prompt: MultilingualString;
   readonly helpText?: MultilingualString;
   readonly recommendedKey?: string;
+  readonly recommendedProperty?: Property;
 }
 
 export interface SingleValuedEnumFieldInit {
@@ -131,6 +132,7 @@ export interface SingleValuedEnumFieldInit {
   readonly prompt: MultilingualStringInput;
   readonly helpText?: MultilingualString;
   readonly recommendedKey?: string;
+  readonly recommendedProperty?: PropertyInput;
 }
 
 export const singleValuedEnumField = (
@@ -147,6 +149,9 @@ export const singleValuedEnumField = (
     ...(init.helpText !== undefined && { helpText: init.helpText }),
     ...(init.recommendedKey !== undefined && {
       recommendedKey: parseAsciiIdentifier(init.recommendedKey),
+    }),
+    ...(init.recommendedProperty !== undefined && {
+      recommendedProperty: property(init.recommendedProperty),
     }),
   };
   return out;

@@ -12,7 +12,7 @@ import type { CatalogMetadata, SchemaArtifactVersioning } from '../metadata/inde
 import type { ValueRequirement } from '../embedded/requirement.js';
 import type { Cardinality } from '../embedded/cardinality.js';
 import type { Visibility } from '../embedded/visibility.js';
-import type { Property } from '../embedded/property.js';
+import { type Property, type PropertyInput, property } from '../embedded/property.js';
 import type { DateTimeRenderingHint } from './rendering-hints.js';
 import type { TimezoneRequirement } from './time-field.js';
 import type { DateFieldSpec } from './date-field.js';
@@ -145,6 +145,7 @@ export interface DateTimeField {
   readonly prompt: MultilingualString;
   readonly helpText?: MultilingualString;
   readonly recommendedKey?: string;
+  readonly recommendedProperty?: Property;
 }
 
 export interface DateTimeFieldInit {
@@ -156,6 +157,7 @@ export interface DateTimeFieldInit {
   readonly prompt: MultilingualStringInput;
   readonly helpText?: MultilingualString;
   readonly recommendedKey?: string;
+  readonly recommendedProperty?: PropertyInput;
 }
 
 export const dateTimeField = (init: DateTimeFieldInit): DateTimeField => {
@@ -170,6 +172,9 @@ export const dateTimeField = (init: DateTimeFieldInit): DateTimeField => {
     ...(init.helpText !== undefined && { helpText: init.helpText }),
     ...(init.recommendedKey !== undefined && {
       recommendedKey: parseAsciiIdentifier(init.recommendedKey),
+    }),
+    ...(init.recommendedProperty !== undefined && {
+      recommendedProperty: property(init.recommendedProperty),
     }),
   };
   return out;

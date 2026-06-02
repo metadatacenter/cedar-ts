@@ -118,6 +118,7 @@ export interface BooleanField {
   readonly prompt: MultilingualString;
   readonly helpText?: MultilingualString;
   readonly recommendedKey?: string;
+  readonly recommendedProperty?: Property;
 }
 
 export interface BooleanFieldInit {
@@ -129,6 +130,7 @@ export interface BooleanFieldInit {
   readonly prompt: MultilingualStringInput;
   readonly helpText?: MultilingualString;
   readonly recommendedKey?: string;
+  readonly recommendedProperty?: PropertyInput;
 }
 
 export const booleanField = (init: BooleanFieldInit): BooleanField => {
@@ -143,6 +145,9 @@ export const booleanField = (init: BooleanFieldInit): BooleanField => {
     ...(init.helpText !== undefined && { helpText: init.helpText }),
     ...(init.recommendedKey !== undefined && {
       recommendedKey: parseAsciiIdentifier(init.recommendedKey),
+    }),
+    ...(init.recommendedProperty !== undefined && {
+      recommendedProperty: property(init.recommendedProperty),
     }),
   };
   return out;

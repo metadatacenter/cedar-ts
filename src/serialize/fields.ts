@@ -59,6 +59,7 @@ import {
   expectKnownProperties,
   expectKindOneOf,
 } from './parse-utils.js';
+import { serializeProperty, parseProperty } from './embedded-config.js';
 import {
   serializeTextFieldId,
   serializeIntegerNumberFieldId,
@@ -168,11 +169,12 @@ function parseFieldShell<T>(
   prompt: unknown;
   helpText: unknown;
   recommendedKey: unknown;
+  recommendedProperty: unknown;
 } {
   const o = expectObject(x, where);
   expectKnownProperties(o, [
     'kind', 'id', 'modelVersion', 'metadata', 'versioning',
-    'fieldSpec', 'prompt', 'helpText', 'recommendedKey',
+    'fieldSpec', 'prompt', 'helpText', 'recommendedKey', 'recommendedProperty',
   ]);
   if (o['kind'] !== expectedKind) {
     throw new CedarConstructionError(
@@ -196,6 +198,8 @@ function parseFieldShell<T>(
     prompt: o['prompt'],
     helpText: 'helpText' in o ? o['helpText'] : undefined,
     recommendedKey: 'recommendedKey' in o ? o['recommendedKey'] : undefined,
+    recommendedProperty:
+      'recommendedProperty' in o ? o['recommendedProperty'] : undefined,
   };
 }
 
@@ -215,6 +219,8 @@ export const serializeTextField = (x: TextField): unknown => {
     out['helpText'] = serializeMultilingualString(x.helpText);
   if (x.recommendedKey !== undefined)
     out['recommendedKey'] = x.recommendedKey;
+  if (x.recommendedProperty !== undefined)
+    out['recommendedProperty'] = serializeProperty(x.recommendedProperty);
   return out;
 };
 
@@ -233,6 +239,9 @@ export function parseTextField(x: unknown, where = 'TextField'): TextField {
     ...(s.recommendedKey !== undefined && {
       recommendedKey: expectString(s.recommendedKey, `${where}.recommendedKey`),
     }),
+    ...(s.recommendedProperty !== undefined && {
+      recommendedProperty: parseProperty(s.recommendedProperty, `${where}.recommendedProperty`),
+    }),
   });
 }
 
@@ -250,6 +259,8 @@ export const serializeIntegerNumberField = (x: IntegerNumberField): unknown => {
     out['helpText'] = serializeMultilingualString(x.helpText);
   if (x.recommendedKey !== undefined)
     out['recommendedKey'] = x.recommendedKey;
+  if (x.recommendedProperty !== undefined)
+    out['recommendedProperty'] = serializeProperty(x.recommendedProperty);
   return out;
 };
 
@@ -275,6 +286,9 @@ export function parseIntegerNumberField(
     ...(s.recommendedKey !== undefined && {
       recommendedKey: expectString(s.recommendedKey, `${where}.recommendedKey`),
     }),
+    ...(s.recommendedProperty !== undefined && {
+      recommendedProperty: parseProperty(s.recommendedProperty, `${where}.recommendedProperty`),
+    }),
   });
 }
 
@@ -292,6 +306,8 @@ export const serializeRealNumberField = (x: RealNumberField): unknown => {
     out['helpText'] = serializeMultilingualString(x.helpText);
   if (x.recommendedKey !== undefined)
     out['recommendedKey'] = x.recommendedKey;
+  if (x.recommendedProperty !== undefined)
+    out['recommendedProperty'] = serializeProperty(x.recommendedProperty);
   return out;
 };
 
@@ -313,6 +329,9 @@ export function parseRealNumberField(
     ...(s.recommendedKey !== undefined && {
       recommendedKey: expectString(s.recommendedKey, `${where}.recommendedKey`),
     }),
+    ...(s.recommendedProperty !== undefined && {
+      recommendedProperty: parseProperty(s.recommendedProperty, `${where}.recommendedProperty`),
+    }),
   });
 }
 
@@ -330,6 +349,8 @@ export const serializeBooleanField = (x: BooleanField): unknown => {
     out['helpText'] = serializeMultilingualString(x.helpText);
   if (x.recommendedKey !== undefined)
     out['recommendedKey'] = x.recommendedKey;
+  if (x.recommendedProperty !== undefined)
+    out['recommendedProperty'] = serializeProperty(x.recommendedProperty);
   return out;
 };
 
@@ -351,6 +372,9 @@ export function parseBooleanField(
     ...(s.recommendedKey !== undefined && {
       recommendedKey: expectString(s.recommendedKey, `${where}.recommendedKey`),
     }),
+    ...(s.recommendedProperty !== undefined && {
+      recommendedProperty: parseProperty(s.recommendedProperty, `${where}.recommendedProperty`),
+    }),
   });
 }
 
@@ -368,6 +392,8 @@ export const serializeDateField = (x: DateField): unknown => {
     out['helpText'] = serializeMultilingualString(x.helpText);
   if (x.recommendedKey !== undefined)
     out['recommendedKey'] = x.recommendedKey;
+  if (x.recommendedProperty !== undefined)
+    out['recommendedProperty'] = serializeProperty(x.recommendedProperty);
   return out;
 };
 
@@ -386,6 +412,9 @@ export function parseDateField(x: unknown, where = 'DateField'): DateField {
     ...(s.recommendedKey !== undefined && {
       recommendedKey: expectString(s.recommendedKey, `${where}.recommendedKey`),
     }),
+    ...(s.recommendedProperty !== undefined && {
+      recommendedProperty: parseProperty(s.recommendedProperty, `${where}.recommendedProperty`),
+    }),
   });
 }
 
@@ -403,6 +432,8 @@ export const serializeTimeField = (x: TimeField): unknown => {
     out['helpText'] = serializeMultilingualString(x.helpText);
   if (x.recommendedKey !== undefined)
     out['recommendedKey'] = x.recommendedKey;
+  if (x.recommendedProperty !== undefined)
+    out['recommendedProperty'] = serializeProperty(x.recommendedProperty);
   return out;
 };
 
@@ -421,6 +452,9 @@ export function parseTimeField(x: unknown, where = 'TimeField'): TimeField {
     ...(s.recommendedKey !== undefined && {
       recommendedKey: expectString(s.recommendedKey, `${where}.recommendedKey`),
     }),
+    ...(s.recommendedProperty !== undefined && {
+      recommendedProperty: parseProperty(s.recommendedProperty, `${where}.recommendedProperty`),
+    }),
   });
 }
 
@@ -438,6 +472,8 @@ export const serializeDateTimeField = (x: DateTimeField): unknown => {
     out['helpText'] = serializeMultilingualString(x.helpText);
   if (x.recommendedKey !== undefined)
     out['recommendedKey'] = x.recommendedKey;
+  if (x.recommendedProperty !== undefined)
+    out['recommendedProperty'] = serializeProperty(x.recommendedProperty);
   return out;
 };
 
@@ -459,6 +495,9 @@ export function parseDateTimeField(
     ...(s.recommendedKey !== undefined && {
       recommendedKey: expectString(s.recommendedKey, `${where}.recommendedKey`),
     }),
+    ...(s.recommendedProperty !== undefined && {
+      recommendedProperty: parseProperty(s.recommendedProperty, `${where}.recommendedProperty`),
+    }),
   });
 }
 
@@ -476,6 +515,8 @@ export const serializeControlledTermField = (x: ControlledTermField): unknown =>
     out['helpText'] = serializeMultilingualString(x.helpText);
   if (x.recommendedKey !== undefined)
     out['recommendedKey'] = x.recommendedKey;
+  if (x.recommendedProperty !== undefined)
+    out['recommendedProperty'] = serializeProperty(x.recommendedProperty);
   return out;
 };
 
@@ -497,6 +538,9 @@ export function parseControlledTermField(
     ...(s.recommendedKey !== undefined && {
       recommendedKey: expectString(s.recommendedKey, `${where}.recommendedKey`),
     }),
+    ...(s.recommendedProperty !== undefined && {
+      recommendedProperty: parseProperty(s.recommendedProperty, `${where}.recommendedProperty`),
+    }),
   });
 }
 
@@ -514,6 +558,8 @@ export const serializeSingleValuedEnumField = (x: SingleValuedEnumField): unknow
     out['helpText'] = serializeMultilingualString(x.helpText);
   if (x.recommendedKey !== undefined)
     out['recommendedKey'] = x.recommendedKey;
+  if (x.recommendedProperty !== undefined)
+    out['recommendedProperty'] = serializeProperty(x.recommendedProperty);
   return out;
 };
 
@@ -539,6 +585,9 @@ export function parseSingleValuedEnumField(
     ...(s.recommendedKey !== undefined && {
       recommendedKey: expectString(s.recommendedKey, `${where}.recommendedKey`),
     }),
+    ...(s.recommendedProperty !== undefined && {
+      recommendedProperty: parseProperty(s.recommendedProperty, `${where}.recommendedProperty`),
+    }),
   });
 }
 
@@ -556,6 +605,8 @@ export const serializeMultiValuedEnumField = (x: MultiValuedEnumField): unknown 
     out['helpText'] = serializeMultilingualString(x.helpText);
   if (x.recommendedKey !== undefined)
     out['recommendedKey'] = x.recommendedKey;
+  if (x.recommendedProperty !== undefined)
+    out['recommendedProperty'] = serializeProperty(x.recommendedProperty);
   return out;
 };
 
@@ -581,6 +632,9 @@ export function parseMultiValuedEnumField(
     ...(s.recommendedKey !== undefined && {
       recommendedKey: expectString(s.recommendedKey, `${where}.recommendedKey`),
     }),
+    ...(s.recommendedProperty !== undefined && {
+      recommendedProperty: parseProperty(s.recommendedProperty, `${where}.recommendedProperty`),
+    }),
   });
 }
 
@@ -598,6 +652,8 @@ export const serializeLinkField = (x: LinkField): unknown => {
     out['helpText'] = serializeMultilingualString(x.helpText);
   if (x.recommendedKey !== undefined)
     out['recommendedKey'] = x.recommendedKey;
+  if (x.recommendedProperty !== undefined)
+    out['recommendedProperty'] = serializeProperty(x.recommendedProperty);
   return out;
 };
 
@@ -616,6 +672,9 @@ export function parseLinkField(x: unknown, where = 'LinkField'): LinkField {
     ...(s.recommendedKey !== undefined && {
       recommendedKey: expectString(s.recommendedKey, `${where}.recommendedKey`),
     }),
+    ...(s.recommendedProperty !== undefined && {
+      recommendedProperty: parseProperty(s.recommendedProperty, `${where}.recommendedProperty`),
+    }),
   });
 }
 
@@ -633,6 +692,8 @@ export const serializeEmailField = (x: EmailField): unknown => {
     out['helpText'] = serializeMultilingualString(x.helpText);
   if (x.recommendedKey !== undefined)
     out['recommendedKey'] = x.recommendedKey;
+  if (x.recommendedProperty !== undefined)
+    out['recommendedProperty'] = serializeProperty(x.recommendedProperty);
   return out;
 };
 
@@ -651,6 +712,9 @@ export function parseEmailField(x: unknown, where = 'EmailField'): EmailField {
     ...(s.recommendedKey !== undefined && {
       recommendedKey: expectString(s.recommendedKey, `${where}.recommendedKey`),
     }),
+    ...(s.recommendedProperty !== undefined && {
+      recommendedProperty: parseProperty(s.recommendedProperty, `${where}.recommendedProperty`),
+    }),
   });
 }
 
@@ -668,6 +732,8 @@ export const serializePhoneNumberField = (x: PhoneNumberField): unknown => {
     out['helpText'] = serializeMultilingualString(x.helpText);
   if (x.recommendedKey !== undefined)
     out['recommendedKey'] = x.recommendedKey;
+  if (x.recommendedProperty !== undefined)
+    out['recommendedProperty'] = serializeProperty(x.recommendedProperty);
   return out;
 };
 
@@ -689,6 +755,9 @@ export function parsePhoneNumberField(
     ...(s.recommendedKey !== undefined && {
       recommendedKey: expectString(s.recommendedKey, `${where}.recommendedKey`),
     }),
+    ...(s.recommendedProperty !== undefined && {
+      recommendedProperty: parseProperty(s.recommendedProperty, `${where}.recommendedProperty`),
+    }),
   });
 }
 
@@ -706,6 +775,8 @@ export const serializeOrcidField = (x: OrcidField): unknown => {
     out['helpText'] = serializeMultilingualString(x.helpText);
   if (x.recommendedKey !== undefined)
     out['recommendedKey'] = x.recommendedKey;
+  if (x.recommendedProperty !== undefined)
+    out['recommendedProperty'] = serializeProperty(x.recommendedProperty);
   return out;
 };
 
@@ -724,6 +795,9 @@ export function parseOrcidField(x: unknown, where = 'OrcidField'): OrcidField {
     ...(s.recommendedKey !== undefined && {
       recommendedKey: expectString(s.recommendedKey, `${where}.recommendedKey`),
     }),
+    ...(s.recommendedProperty !== undefined && {
+      recommendedProperty: parseProperty(s.recommendedProperty, `${where}.recommendedProperty`),
+    }),
   });
 }
 
@@ -741,6 +815,8 @@ export const serializeRorField = (x: RorField): unknown => {
     out['helpText'] = serializeMultilingualString(x.helpText);
   if (x.recommendedKey !== undefined)
     out['recommendedKey'] = x.recommendedKey;
+  if (x.recommendedProperty !== undefined)
+    out['recommendedProperty'] = serializeProperty(x.recommendedProperty);
   return out;
 };
 
@@ -759,6 +835,9 @@ export function parseRorField(x: unknown, where = 'RorField'): RorField {
     ...(s.recommendedKey !== undefined && {
       recommendedKey: expectString(s.recommendedKey, `${where}.recommendedKey`),
     }),
+    ...(s.recommendedProperty !== undefined && {
+      recommendedProperty: parseProperty(s.recommendedProperty, `${where}.recommendedProperty`),
+    }),
   });
 }
 
@@ -776,6 +855,8 @@ export const serializeDoiField = (x: DoiField): unknown => {
     out['helpText'] = serializeMultilingualString(x.helpText);
   if (x.recommendedKey !== undefined)
     out['recommendedKey'] = x.recommendedKey;
+  if (x.recommendedProperty !== undefined)
+    out['recommendedProperty'] = serializeProperty(x.recommendedProperty);
   return out;
 };
 
@@ -794,6 +875,9 @@ export function parseDoiField(x: unknown, where = 'DoiField'): DoiField {
     ...(s.recommendedKey !== undefined && {
       recommendedKey: expectString(s.recommendedKey, `${where}.recommendedKey`),
     }),
+    ...(s.recommendedProperty !== undefined && {
+      recommendedProperty: parseProperty(s.recommendedProperty, `${where}.recommendedProperty`),
+    }),
   });
 }
 
@@ -811,6 +895,8 @@ export const serializePubMedIdField = (x: PubMedIdField): unknown => {
     out['helpText'] = serializeMultilingualString(x.helpText);
   if (x.recommendedKey !== undefined)
     out['recommendedKey'] = x.recommendedKey;
+  if (x.recommendedProperty !== undefined)
+    out['recommendedProperty'] = serializeProperty(x.recommendedProperty);
   return out;
 };
 
@@ -832,6 +918,9 @@ export function parsePubMedIdField(
     ...(s.recommendedKey !== undefined && {
       recommendedKey: expectString(s.recommendedKey, `${where}.recommendedKey`),
     }),
+    ...(s.recommendedProperty !== undefined && {
+      recommendedProperty: parseProperty(s.recommendedProperty, `${where}.recommendedProperty`),
+    }),
   });
 }
 
@@ -849,6 +938,8 @@ export const serializeRridField = (x: RridField): unknown => {
     out['helpText'] = serializeMultilingualString(x.helpText);
   if (x.recommendedKey !== undefined)
     out['recommendedKey'] = x.recommendedKey;
+  if (x.recommendedProperty !== undefined)
+    out['recommendedProperty'] = serializeProperty(x.recommendedProperty);
   return out;
 };
 
@@ -867,6 +958,9 @@ export function parseRridField(x: unknown, where = 'RridField'): RridField {
     ...(s.recommendedKey !== undefined && {
       recommendedKey: expectString(s.recommendedKey, `${where}.recommendedKey`),
     }),
+    ...(s.recommendedProperty !== undefined && {
+      recommendedProperty: parseProperty(s.recommendedProperty, `${where}.recommendedProperty`),
+    }),
   });
 }
 
@@ -884,6 +978,8 @@ export const serializeNihGrantIdField = (x: NihGrantIdField): unknown => {
     out['helpText'] = serializeMultilingualString(x.helpText);
   if (x.recommendedKey !== undefined)
     out['recommendedKey'] = x.recommendedKey;
+  if (x.recommendedProperty !== undefined)
+    out['recommendedProperty'] = serializeProperty(x.recommendedProperty);
   return out;
 };
 
@@ -905,6 +1001,9 @@ export function parseNihGrantIdField(
     ...(s.recommendedKey !== undefined && {
       recommendedKey: expectString(s.recommendedKey, `${where}.recommendedKey`),
     }),
+    ...(s.recommendedProperty !== undefined && {
+      recommendedProperty: parseProperty(s.recommendedProperty, `${where}.recommendedProperty`),
+    }),
   });
 }
 
@@ -922,6 +1021,8 @@ export const serializeLanguageField = (x: LanguageField): unknown => {
     out['helpText'] = serializeMultilingualString(x.helpText);
   if (x.recommendedKey !== undefined)
     out['recommendedKey'] = x.recommendedKey;
+  if (x.recommendedProperty !== undefined)
+    out['recommendedProperty'] = serializeProperty(x.recommendedProperty);
   return out;
 };
 
@@ -943,6 +1044,9 @@ export function parseLanguageField(
     ...(s.recommendedKey !== undefined && {
       recommendedKey: expectString(s.recommendedKey, `${where}.recommendedKey`),
     }),
+    ...(s.recommendedProperty !== undefined && {
+      recommendedProperty: parseProperty(s.recommendedProperty, `${where}.recommendedProperty`),
+    }),
   });
 }
 
@@ -960,6 +1064,8 @@ export const serializeAttributeValueField = (x: AttributeValueField): unknown =>
     out['helpText'] = serializeMultilingualString(x.helpText);
   if (x.recommendedKey !== undefined)
     out['recommendedKey'] = x.recommendedKey;
+  if (x.recommendedProperty !== undefined)
+    out['recommendedProperty'] = serializeProperty(x.recommendedProperty);
   return out;
 };
 
@@ -980,6 +1086,9 @@ export function parseAttributeValueField(
     }),
     ...(s.recommendedKey !== undefined && {
       recommendedKey: expectString(s.recommendedKey, `${where}.recommendedKey`),
+    }),
+    ...(s.recommendedProperty !== undefined && {
+      recommendedProperty: parseProperty(s.recommendedProperty, `${where}.recommendedProperty`),
     }),
   });
 }
