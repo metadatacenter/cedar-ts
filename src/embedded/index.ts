@@ -47,6 +47,13 @@ export {
 } from './visibility.js';
 
 export {
+  type Editability,
+  EDITABILITIES,
+  DEFAULT_EDITABILITY,
+  isEditability,
+} from './editability.js';
+
+export {
   type Cardinality,
   type CardinalityInit,
   cardinality,

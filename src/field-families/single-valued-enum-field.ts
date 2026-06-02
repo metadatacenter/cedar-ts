@@ -22,9 +22,14 @@ import type { ValueRequirement } from '../embedded/requirement.js';
 import type { Visibility } from '../embedded/visibility.js';
 import { type Property, type PropertyInput, property } from '../embedded/property.js';
 import { type AlternativePrompt, type AlternativePromptInput, assembleAltPrompts } from '../embedded/alternative-prompt.js';
+import type { Editability } from '../embedded/editability.js';
 import type { SingleValuedEnumRenderingHint } from './rendering-hints.js';
 import { type PermissibleValue, type EnumValue, enumValue } from './enum-shared.js';
-import { fieldRef, assertPromptSlotsExclusive } from './embedded-field-common.js';
+import {
+  fieldRef,
+  assertPromptSlotsExclusive,
+  assertReadOnlyRequiredHasDefault,
+} from './embedded-field-common.js';
 
 // =====================================================================
 // 1. Identifier
@@ -177,6 +182,7 @@ export interface EmbeddedSingleValuedEnumField {
   readonly helpTextOverride?: MultilingualString;
   readonly property?: Property;
   readonly promptKey?: string;
+  readonly editability?: Editability;
   readonly defaultValue?: EnumValue;
 }
 
@@ -189,6 +195,7 @@ export interface EmbeddedSingleValuedEnumFieldInit {
   readonly helpTextOverride?: MultilingualString;
   readonly property?: PropertyInput;
   readonly promptKey?: string;
+  readonly editability?: Editability;
   readonly defaultValue?: EnumValue;
 }
 
@@ -205,6 +212,7 @@ export function embeddedSingleValuedEnumField(
     helpTextOverride?: MultilingualString;
     property?: Property;
     promptKey?: string;
+    editability?: Editability;
     defaultValue?: EnumValue;
   } = {
     kind: 'EmbeddedSingleValuedEnumField',
@@ -212,6 +220,8 @@ export function embeddedSingleValuedEnumField(
     artifactRef: fieldRef(init.artifactRef),
   };
   assertPromptSlotsExclusive(init);
+  assertReadOnlyRequiredHasDefault(init, init.defaultValue !== undefined);
+  if (init.editability !== undefined) out.editability = init.editability;
   if (init.valueRequirement !== undefined) out.valueRequirement = init.valueRequirement;
   if (init.visibility !== undefined) out.visibility = init.visibility;
   if (init.promptOverride !== undefined) out.promptOverride = multilingualString(init.promptOverride);

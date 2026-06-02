@@ -27,6 +27,7 @@ import type { Cardinality } from '../embedded/cardinality.js';
 import type { Visibility } from '../embedded/visibility.js';
 import { type Property, type PropertyInput, property } from '../embedded/property.js';
 import { type AlternativePrompt, type AlternativePromptInput, assembleAltPrompts } from '../embedded/alternative-prompt.js';
+import type { Editability } from '../embedded/editability.js';
 import {
   type AuthorityValueInput,
   authorityValueFromInput,
@@ -214,6 +215,7 @@ export interface EmbeddedRorField {
   readonly helpTextOverride?: MultilingualString;
   readonly property?: Property;
   readonly promptKey?: string;
+  readonly editability?: Editability;
   readonly defaultValue?: RorValue;
 }
 

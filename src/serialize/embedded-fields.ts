@@ -57,6 +57,7 @@ import {
   type Cardinality,
   type Visibility,
   type Property,
+  type Editability,
   embeddedTemplate,
   embeddedPresentationComponent,
 } from '../embedded/index.js';
@@ -125,6 +126,8 @@ import {
   serializeProperty,
   serializeValueRequirement,
   serializeVisibility,
+  serializeEditability,
+  parseEditability,
   parseCardinality,
   parseProperty,
   parseValueRequirement,
@@ -181,6 +184,7 @@ interface CommonOut {
   helpTextOverride?: MultilingualString;
   property?: Property;
   promptKey?: string;
+  editability?: Editability;
 }
 
 function serializeCommonProps(
@@ -192,6 +196,7 @@ function serializeCommonProps(
     readonly helpTextOverride?: MultilingualString;
     readonly property?: Property;
     readonly promptKey?: string;
+    readonly editability?: Editability;
   },
   out: Record<string, unknown>,
 ): void {
@@ -207,6 +212,8 @@ function serializeCommonProps(
     out['helpTextOverride'] = serializeMultilingualString(x.helpTextOverride);
   if (x.property !== undefined) out['property'] = serializeProperty(x.property);
   if (x.promptKey !== undefined) out['promptKey'] = x.promptKey;
+  if (x.editability !== undefined)
+    out['editability'] = serializeEditability(x.editability);
 }
 
 function parseCommonProps(
@@ -220,6 +227,7 @@ function parseCommonProps(
   rejectNullProperty(o, 'helpTextOverride');
   rejectNullProperty(o, 'property');
   rejectNullProperty(o, 'promptKey');
+  rejectNullProperty(o, 'editability');
   const out: CommonOut = {};
   if ('valueRequirement' in o)
     out.valueRequirement = parseValueRequirement(
@@ -244,6 +252,8 @@ function parseCommonProps(
     out.property = parseProperty(o['property'], `${where}.property`);
   if ('promptKey' in o)
     out.promptKey = expectString(o['promptKey'], `${where}.promptKey`);
+  if ('editability' in o)
+    out.editability = parseEditability(o['editability'], `${where}.editability`);
   return out;
 }
 
@@ -258,6 +268,7 @@ const COMMON_FIELD_PROPS = [
   'helpTextOverride',
   'property',
   'promptKey',
+  'editability',
 ];
 const COMMON_FIELD_PROPS_WITH_DEFAULT = [...COMMON_FIELD_PROPS, 'defaultValue'];
 

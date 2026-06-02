@@ -29,6 +29,7 @@ import {
 import type { ValueRequirement } from '../embedded/requirement.js';
 import type { Cardinality } from '../embedded/cardinality.js';
 import type { Visibility } from '../embedded/visibility.js';
+import type { Editability } from '../embedded/editability.js';
 import { type Property, type PropertyInput, property } from '../embedded/property.js';
 
 // Internal helper module for the 18 EmbeddedField family constructors.
@@ -45,6 +46,7 @@ export interface EmbeddedFieldInitCommon {
   readonly helpTextOverride?: MultilingualStringInput;
   readonly property?: PropertyInput;
   readonly promptKey?: string;
+  readonly editability?: Editability;
 }
 
 export interface AssembledCommon {
@@ -56,6 +58,7 @@ export interface AssembledCommon {
   helpTextOverride?: MultilingualString;
   property?: Property;
   promptKey?: string;
+  editability?: Editability;
 }
 
 // Enforces the spec rule (grammar.md §Alternative Prompts, validation.md):
@@ -73,8 +76,37 @@ export function assertPromptSlotsExclusive(init: {
   }
 }
 
+// Enforces the spec rule (grammar.md §Editability, validation.md): a readOnly
+// embedding that is also `required` MUST carry a defaultValue, since the user
+// cannot supply the value and there is no default to stand in. Only the
+// embedding-level default is observable at construction (the referenced
+// Field's field-level default would require resolving artifactRef); the spec
+// rule covers the field-level default too, so this is the constructor-checkable
+// subset. `hasDefault` is the presence of the embedding's defaultValue.
+export function assertReadOnlyRequiredHasDefault(
+  init: { editability?: unknown; valueRequirement?: unknown },
+  hasDefault: boolean,
+): void {
+  if (
+    init.editability === 'readOnly' &&
+    init.valueRequirement === 'required' &&
+    !hasDefault
+  ) {
+    throw new CedarConstructionError(
+      'a readOnly required embedding MUST carry a defaultValue',
+    );
+  }
+}
+
 export function assembleCommon(init: EmbeddedFieldInitCommon): AssembledCommon {
   assertPromptSlotsExclusive(init);
+  // `defaultValue` is family-specific (not on EmbeddedFieldInitCommon) but is
+  // present on the init objects of the 19 families that route through here;
+  // its mere presence is what the readOnly-required rule needs.
+  assertReadOnlyRequiredHasDefault(
+    init,
+    (init as { defaultValue?: unknown }).defaultValue !== undefined,
+  );
   const out: AssembledCommon = {
     key: parseAsciiIdentifier(init.key),
   };
@@ -87,6 +119,7 @@ export function assembleCommon(init: EmbeddedFieldInitCommon): AssembledCommon {
     out.helpTextOverride = multilingualString(init.helpTextOverride);
   if (init.property !== undefined) out.property = property(init.property);
   if (init.promptKey !== undefined) out.promptKey = parseAsciiIdentifier(init.promptKey);
+  if (init.editability !== undefined) out.editability = init.editability;
   return out;
 }
 

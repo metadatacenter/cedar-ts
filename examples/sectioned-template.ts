@@ -54,6 +54,17 @@ export const sectionedTemplate: Template = template({
       label: 'Demographics',
       description: 'Basic information about the patient.',
       members: [
+        // A system-populated identifier: shown but not editable. Because it is
+        // readOnly AND required, it MUST carry a defaultValue (the value the
+        // user sees and cannot change) — otherwise the embedding would be
+        // unsatisfiable (grammar §Editability).
+        embeddedTextField({
+          key: 'record_id',
+          artifactRef: ref('record-id'),
+          valueRequirement: 'required',
+          editability: 'readOnly',
+          defaultValue: 'REC-000000',
+        }),
         embeddedTextField({ key: 'given_name', artifactRef: ref('given-name'), valueRequirement: 'required' }),
         embeddedTextField({ key: 'family_name', artifactRef: ref('family-name'), valueRequirement: 'required' }),
         embeddedDateField({ key: 'date_of_birth', artifactRef: dateFieldId(`${FIELDS}date-of-birth`), valueRequirement: 'required' }),

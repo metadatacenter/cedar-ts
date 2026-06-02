@@ -19,6 +19,7 @@ import { type Iri, iri, parseSemanticVersion, parseAsciiIdentifier } from '../le
 import { type MultilingualString, type MultilingualStringInput, multilingualString } from '../multilingual.js';
 import { type Property, type PropertyInput, property } from '../embedded/property.js';
 import { type AlternativePrompt, type AlternativePromptInput, assembleAltPrompts } from '../embedded/alternative-prompt.js';
+import type { Editability } from '../embedded/editability.js';
 import type { CatalogMetadata, SchemaArtifactVersioning } from '../metadata/index.js';
 import type { ValueRequirement } from '../embedded/requirement.js';
 import type { Cardinality } from '../embedded/cardinality.js';
@@ -197,6 +198,7 @@ export interface EmbeddedMultiValuedEnumField {
   readonly helpTextOverride?: MultilingualString;
   readonly property?: import('../embedded/property.js').Property;
   readonly promptKey?: string;
+  readonly editability?: Editability;
   // Sequence of EnumValue defaults. Empty when absent. The grammar models
   // this as `EnumValue*` rather than an optional single value.
   readonly defaultValue?: readonly EnumValue[];

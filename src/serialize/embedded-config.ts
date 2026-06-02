@@ -14,11 +14,13 @@ import {
   type AlternativePrompt,
   type ValueRequirement,
   type Visibility,
+  type Editability,
   cardinality,
   property,
   alternativePrompt,
   VALUE_REQUIREMENTS,
   VISIBILITIES,
+  EDITABILITIES,
 } from '../embedded/index.js';
 import {
   expectObject,
@@ -47,6 +49,11 @@ export const serializeVisibility = (x: Visibility): string => x;
 
 export const parseVisibility = (x: unknown, where = 'Visibility'): Visibility =>
   expectStringEnum(x, VISIBILITIES, where);
+
+export const serializeEditability = (x: Editability): string => x;
+
+export const parseEditability = (x: unknown, where = 'Editability'): Editability =>
+  expectStringEnum(x, EDITABILITIES, where);
 
 // ---- Cardinality -----------------------------------------------------
 
