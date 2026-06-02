@@ -186,6 +186,11 @@ export const principalInvestigatorTemplate: Template = template({
         fieldSpec: textFieldSpec({
           minLength: 1,
         }),
+        // Advisory hint from the Field's owner: the semantic property a
+        // Template SHOULD bind this field to. Non-binding — the authoritative
+        // carrier is `property` on the embedding below, which here adopts
+        // exactly this recommendation. An embedding may override or omit it.
+        recommendedProperty: 'https://schema.org/name',
       }),
       valueRequirement: 'required',
       property: 'https://schema.org/name',
@@ -285,6 +290,8 @@ export const principalInvestigatorTemplate: Template = template({
         modelVersion: MODEL_VERSION,
         ...fieldMeta('Email Address', 'Primary work email.'),
         fieldSpec: emailFieldSpec(),
+        // Advisory: recommends schema.org/email; the embedding adopts it.
+        recommendedProperty: { iri: 'https://schema.org/email', label: 'email' },
       }),
       valueRequirement: 'required',
       property: 'https://schema.org/email',
@@ -309,6 +316,8 @@ export const principalInvestigatorTemplate: Template = template({
         modelVersion: MODEL_VERSION,
         ...fieldMeta('ORCID iD', 'ORCID identifier (https://orcid.org/...).'),
         fieldSpec: orcidFieldSpec(),
+        // Advisory: recommends schema.org/identifier, matching the embedding.
+        recommendedProperty: 'https://schema.org/identifier',
       }),
       valueRequirement: 'recommended',
       property: 'https://schema.org/identifier',

@@ -201,6 +201,13 @@ const fullName = textField({
   fieldSpec: textFieldSpec({
     minLength: 1,
   }),
+  // `recommendedProperty` is an advisory hint from the Field's owner: the
+  // semantic property a Template SHOULD bind this field to when embedding it.
+  // It does not constrain anything — the authoritative carrier is
+  // `EmbeddedField.property` at the embedding site below, which here adopts
+  // exactly this recommendation (schema.org/name). An embedding is free to
+  // override or omit it; the validator ignores `recommendedProperty`.
+  recommendedProperty: 'https://schema.org/name',
 });
 
 // Single-valued enum field. PermissibleValue is the option type — each
@@ -279,6 +286,8 @@ const email = emailField({
   modelVersion: MODEL_VERSION,
   ...fieldMeta('Email Address', 'Primary work email.'),
   fieldSpec: emailFieldSpec(),
+  // Advisory: this field recommends schema.org/email; the embedding adopts it.
+  recommendedProperty: { iri: 'https://schema.org/email', label: 'email' },
 });
 
 const phone = phoneNumberField({
@@ -293,6 +302,8 @@ const orcid = orcidField({
   modelVersion: MODEL_VERSION,
   ...fieldMeta('ORCID iD', 'ORCID identifier (https://orcid.org/...).'),
   fieldSpec: orcidFieldSpec(),
+  // Advisory: recommends schema.org/identifier, matching the embedding below.
+  recommendedProperty: 'https://schema.org/identifier',
 });
 
 // Plain text again — no length constraint here, because the institution
