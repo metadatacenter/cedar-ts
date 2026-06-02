@@ -201,12 +201,16 @@ const fullName = textField({
   fieldSpec: textFieldSpec({
     minLength: 1,
   }),
-  // `recommendedProperty` is an advisory hint from the Field's owner: the
-  // semantic property a Template SHOULD bind this field to when embedding it.
-  // It does not constrain anything — the authoritative carrier is
-  // `EmbeddedField.property` at the embedding site below, which here adopts
-  // exactly this recommendation (schema.org/name). An embedding is free to
-  // override or omit it; the validator ignores `recommendedProperty`.
+  // `recommendedKey` and `recommendedProperty` are advisory hints from the
+  // Field's owner: the embedding key and semantic property a Template SHOULD
+  // use when embedding this field. Neither constrains anything — the
+  // authoritative carriers are `EmbeddedField.key` and `EmbeddedField.property`
+  // at the embedding site below, which here adopt exactly these recommendations
+  // (key `full_name`, property schema.org/name). An embedding is free to
+  // override or omit them; the validator ignores both advisory slots.
+  // `recommendedKey` must be a valid ASCII identifier (it would be invalid as
+  // an embedding key otherwise).
+  recommendedKey: 'full_name',
   recommendedProperty: 'https://schema.org/name',
 });
 
@@ -286,7 +290,9 @@ const email = emailField({
   modelVersion: MODEL_VERSION,
   ...fieldMeta('Email Address', 'Primary work email.'),
   fieldSpec: emailFieldSpec(),
-  // Advisory: this field recommends schema.org/email; the embedding adopts it.
+  // Advisory: recommends key `email` and property schema.org/email; the
+  // embedding adopts both.
+  recommendedKey: 'email',
   recommendedProperty: { iri: 'https://schema.org/email', label: 'email' },
 });
 
@@ -302,7 +308,9 @@ const orcid = orcidField({
   modelVersion: MODEL_VERSION,
   ...fieldMeta('ORCID iD', 'ORCID identifier (https://orcid.org/...).'),
   fieldSpec: orcidFieldSpec(),
-  // Advisory: recommends schema.org/identifier, matching the embedding below.
+  // Advisory: recommends key `orcid` and property schema.org/identifier,
+  // matching the embedding below.
+  recommendedKey: 'orcid',
   recommendedProperty: 'https://schema.org/identifier',
 });
 

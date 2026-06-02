@@ -186,10 +186,13 @@ export const principalInvestigatorTemplate: Template = template({
         fieldSpec: textFieldSpec({
           minLength: 1,
         }),
-        // Advisory hint from the Field's owner: the semantic property a
-        // Template SHOULD bind this field to. Non-binding — the authoritative
-        // carrier is `property` on the embedding below, which here adopts
-        // exactly this recommendation. An embedding may override or omit it.
+        // Advisory hints from the Field's owner: the embedding key and
+        // semantic property a Template SHOULD use. Non-binding — the
+        // authoritative carriers are `key` and `property` on the embedding
+        // below, which here adopt exactly these recommendations. An embedding
+        // may override or omit them. `recommendedKey` must be a valid ASCII
+        // identifier (it would be invalid as an embedding key otherwise).
+        recommendedKey: 'full_name',
         recommendedProperty: 'https://schema.org/name',
       }),
       valueRequirement: 'required',
@@ -290,7 +293,9 @@ export const principalInvestigatorTemplate: Template = template({
         modelVersion: MODEL_VERSION,
         ...fieldMeta('Email Address', 'Primary work email.'),
         fieldSpec: emailFieldSpec(),
-        // Advisory: recommends schema.org/email; the embedding adopts it.
+        // Advisory: recommends key `email` and property schema.org/email; the
+        // embedding adopts both.
+        recommendedKey: 'email',
         recommendedProperty: { iri: 'https://schema.org/email', label: 'email' },
       }),
       valueRequirement: 'required',
@@ -316,7 +321,9 @@ export const principalInvestigatorTemplate: Template = template({
         modelVersion: MODEL_VERSION,
         ...fieldMeta('ORCID iD', 'ORCID identifier (https://orcid.org/...).'),
         fieldSpec: orcidFieldSpec(),
-        // Advisory: recommends schema.org/identifier, matching the embedding.
+        // Advisory: recommends key `orcid` and property schema.org/identifier,
+        // matching the embedding.
+        recommendedKey: 'orcid',
         recommendedProperty: 'https://schema.org/identifier',
       }),
       valueRequirement: 'recommended',
