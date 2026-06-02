@@ -12,6 +12,7 @@ import type { ValueRequirement } from '../embedded/requirement.js';
 import type { Cardinality } from '../embedded/cardinality.js';
 import type { Visibility } from '../embedded/visibility.js';
 import { type Property, type PropertyInput, property } from '../embedded/property.js';
+import { type AlternativePrompt, type AlternativePromptInput, assembleAltPrompts } from '../embedded/alternative-prompt.js';
 import {
   type EmbeddedFieldInitCommon,
   assembleCommon,
@@ -120,6 +121,7 @@ export interface PhoneNumberField {
   readonly fieldSpec: PhoneNumberFieldSpec;
   readonly prompt: MultilingualString;
   readonly helpText?: MultilingualString;
+  readonly altPrompts?: readonly AlternativePrompt[];
   readonly recommendedKey?: string;
   readonly recommendedProperty?: Property;
 }
@@ -132,6 +134,7 @@ export interface PhoneNumberFieldInit {
   readonly fieldSpec: PhoneNumberFieldSpec;
   readonly prompt: MultilingualStringInput;
   readonly helpText?: MultilingualString;
+  readonly altPrompts?: readonly AlternativePromptInput[];
   readonly recommendedKey?: string;
   readonly recommendedProperty?: PropertyInput;
 }
@@ -146,6 +149,9 @@ export const phoneNumberField = (init: PhoneNumberFieldInit): PhoneNumberField =
     versioning: init.versioning,
     prompt: multilingualString(init.prompt),
     ...(init.helpText !== undefined && { helpText: init.helpText }),
+    ...(init.altPrompts !== undefined && {
+      altPrompts: assembleAltPrompts(init.altPrompts),
+    }),
     ...(init.recommendedKey !== undefined && {
       recommendedKey: parseAsciiIdentifier(init.recommendedKey),
     }),
@@ -170,6 +176,7 @@ export interface EmbeddedPhoneNumberField {
   readonly promptOverride?: MultilingualString;
   readonly helpTextOverride?: MultilingualString;
   readonly property?: Property;
+  readonly promptKey?: string;
   readonly defaultValue?: PhoneNumberValue;
 }
 

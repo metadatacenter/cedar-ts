@@ -15,7 +15,9 @@ import {
   fieldSummary,
   fullName,
   orcid,
+  principalInvestigatorTemplate,
 } from '../examples/principal-investigator.js';
+import { isEmbeddedField } from '../src/index.js';
 
 describe('example principal-investigator — recommendedKey on Field artifacts', () => {
   it('fullName recommends the key its embedding uses', () => {
@@ -91,5 +93,30 @@ describe('example principal-investigator — recommended slots round-trip', () =
     expect(rp['label']).toEqual([{ value: 'email', lang: 'en' }]);
     const back = parseArtifact(wire);
     expect(serialize(back)).toEqual(wire);
+  });
+});
+
+describe('example principal-investigator — altPrompts / promptKey', () => {
+  it('fullName curates a closed set of alternative wordings', () => {
+    const keys = (fullName.altPrompts ?? []).map((a) => a.key);
+    expect(keys).toEqual(['short', 'formal']);
+  });
+
+  it("the full_name embedding selects a curated wording the field offers", () => {
+    const embedding = principalInvestigatorTemplate.members
+      .filter(isEmbeddedField)
+      .find((e) => e.key === 'full_name');
+    expect(embedding?.promptKey).toBe('short');
+    // The selected key MUST be one the referenced field actually curates.
+    const offered = (fullName.altPrompts ?? []).map((a) => a.key);
+    expect(offered).toContain(embedding?.promptKey);
+  });
+
+  it('the selecting template round-trips with the promptKey intact', () => {
+    const wire = serialize(principalInvestigatorTemplate) as Record<string, unknown>;
+    const members = wire['members'] as Record<string, unknown>[];
+    const fn = members.find((m) => m['key'] === 'full_name');
+    expect(fn?.['promptKey']).toBe('short');
+    expect(serialize(parseArtifact(wire))).toEqual(wire);
   });
 });

@@ -60,6 +60,14 @@ export {
 } from './property.js';
 
 export {
+  type AlternativePrompt,
+  type AlternativePromptInit,
+  type AlternativePromptInput,
+  alternativePrompt,
+  assembleAltPrompts,
+} from './alternative-prompt.js';
+
+export {
   type EmbeddedTemplate,
   type EmbeddedTemplateInit,
   embeddedTemplate,

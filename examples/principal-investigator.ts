@@ -212,6 +212,17 @@ export const fullName = textField({
   // an embedding key otherwise).
   recommendedKey: 'full_name',
   recommendedProperty: 'https://schema.org/name',
+  // `altPrompts` is the field owner's curated, closed set of alternative
+  // question wordings, each addressable by a stable PromptKey. A Template
+  // embedding selects one of these by key (see `promptKey` on the embedding
+  // below) instead of inventing its own wording via the free-form
+  // `promptOverride` escape hatch — the two are mutually exclusive. The
+  // field's preferred wording (`prompt`, above) is selected by omitting
+  // `promptKey` on the embedding.
+  altPrompts: [
+    { key: 'short', prompt: { value: 'Name', lang: 'en' } },
+    { key: 'formal', prompt: { value: 'Full legal name', lang: 'en' } },
+  ],
 });
 
 // Single-valued enum field. PermissibleValue is the option type — each
@@ -485,6 +496,10 @@ export const principalInvestigatorTemplate: Template = template({
       artifactRef: fullName,
       valueRequirement: 'required',
       property: 'https://schema.org/name',
+      // Select the field owner's curated "short" wording by key, rather than
+      // the preferred prompt (which would be selected by omitting promptKey)
+      // or a free-form promptOverride.
+      promptKey: 'short',
     }),
 
     // Single-valued enum — instance values are EnumValues carrying a Token

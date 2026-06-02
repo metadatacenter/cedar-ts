@@ -11,10 +11,12 @@ import { CedarConstructionError } from '../leaves/index.js';
 import {
   type Cardinality,
   type Property,
+  type AlternativePrompt,
   type ValueRequirement,
   type Visibility,
   cardinality,
   property,
+  alternativePrompt,
   VALUE_REQUIREMENTS,
   VISIBILITIES,
 } from '../embedded/index.js';
@@ -89,5 +91,34 @@ export function parseProperty(x: unknown, where = 'Property'): Property {
   if ('label' in o)
     init.label = parseMultilingualString(o['label'], `${where}.label`);
   return property(init);
+}
+
+// ---- AlternativePrompt ----------------------------------------------
+// Two-component object { key, prompt } — does NOT collapse on the wire
+// (contrast PromptOverride). See grammar.md §Alternative Prompts.
+
+export function serializeAlternativePrompt(x: AlternativePrompt): unknown {
+  return {
+    key: x.key,
+    prompt: serializeMultilingualString(x.prompt),
+  };
+}
+
+export function parseAlternativePrompt(
+  x: unknown,
+  where = 'AlternativePrompt',
+): AlternativePrompt {
+  const o = expectObject(x, where);
+  expectKnownProperties(o, ['key', 'prompt']);
+  if (!('key' in o)) {
+    throw new CedarConstructionError(`${where}: missing required "key"`);
+  }
+  if (!('prompt' in o)) {
+    throw new CedarConstructionError(`${where}: missing required "prompt"`);
+  }
+  return alternativePrompt({
+    key: expectString(o['key'], `${where}.key`),
+    prompt: parseMultilingualString(o['prompt'], `${where}.prompt`),
+  });
 }
 

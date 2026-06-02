@@ -59,7 +59,14 @@ import {
   expectKnownProperties,
   expectKindOneOf,
 } from './parse-utils.js';
-import { serializeProperty, parseProperty } from './embedded-config.js';
+import {
+  serializeProperty,
+  parseProperty,
+  serializeAlternativePrompt,
+  parseAlternativePrompt,
+} from './embedded-config.js';
+import { assembleAltPrompts } from '../embedded/index.js';
+import { expectArray } from './parse-utils.js';
 import {
   serializeTextFieldId,
   serializeIntegerNumberFieldId,
@@ -170,11 +177,12 @@ function parseFieldShell<T>(
   helpText: unknown;
   recommendedKey: unknown;
   recommendedProperty: unknown;
+  altPrompts: unknown;
 } {
   const o = expectObject(x, where);
   expectKnownProperties(o, [
     'kind', 'id', 'modelVersion', 'metadata', 'versioning',
-    'fieldSpec', 'prompt', 'helpText', 'recommendedKey', 'recommendedProperty',
+    'fieldSpec', 'prompt', 'helpText', 'altPrompts', 'recommendedKey', 'recommendedProperty',
   ]);
   if (o['kind'] !== expectedKind) {
     throw new CedarConstructionError(
@@ -200,6 +208,7 @@ function parseFieldShell<T>(
     recommendedKey: 'recommendedKey' in o ? o['recommendedKey'] : undefined,
     recommendedProperty:
       'recommendedProperty' in o ? o['recommendedProperty'] : undefined,
+    altPrompts: 'altPrompts' in o ? o['altPrompts'] : undefined,
   };
 }
 
@@ -217,6 +226,8 @@ export const serializeTextField = (x: TextField): unknown => {
   };
   if (x.helpText !== undefined)
     out['helpText'] = serializeMultilingualString(x.helpText);
+  if (x.altPrompts !== undefined)
+    out['altPrompts'] = x.altPrompts.map(serializeAlternativePrompt);
   if (x.recommendedKey !== undefined)
     out['recommendedKey'] = x.recommendedKey;
   if (x.recommendedProperty !== undefined)
@@ -235,6 +246,13 @@ export function parseTextField(x: unknown, where = 'TextField'): TextField {
     prompt: parseMultilingualString(s.prompt, `${where}.prompt`),
     ...(s.helpText !== undefined && {
       helpText: parseMultilingualString(s.helpText, `${where}.helpText`),
+    }),
+    ...(s.altPrompts !== undefined && {
+      altPrompts: assembleAltPrompts(
+        expectArray(s.altPrompts, `${where}.altPrompts`).map((e, i) =>
+          parseAlternativePrompt(e, `${where}.altPrompts[${i}]`),
+        ),
+      ),
     }),
     ...(s.recommendedKey !== undefined && {
       recommendedKey: expectString(s.recommendedKey, `${where}.recommendedKey`),
@@ -257,6 +275,8 @@ export const serializeIntegerNumberField = (x: IntegerNumberField): unknown => {
   };
   if (x.helpText !== undefined)
     out['helpText'] = serializeMultilingualString(x.helpText);
+  if (x.altPrompts !== undefined)
+    out['altPrompts'] = x.altPrompts.map(serializeAlternativePrompt);
   if (x.recommendedKey !== undefined)
     out['recommendedKey'] = x.recommendedKey;
   if (x.recommendedProperty !== undefined)
@@ -283,6 +303,13 @@ export function parseIntegerNumberField(
     ...(s.helpText !== undefined && {
       helpText: parseMultilingualString(s.helpText, `${where}.helpText`),
     }),
+    ...(s.altPrompts !== undefined && {
+      altPrompts: assembleAltPrompts(
+        expectArray(s.altPrompts, `${where}.altPrompts`).map((e, i) =>
+          parseAlternativePrompt(e, `${where}.altPrompts[${i}]`),
+        ),
+      ),
+    }),
     ...(s.recommendedKey !== undefined && {
       recommendedKey: expectString(s.recommendedKey, `${where}.recommendedKey`),
     }),
@@ -304,6 +331,8 @@ export const serializeRealNumberField = (x: RealNumberField): unknown => {
   };
   if (x.helpText !== undefined)
     out['helpText'] = serializeMultilingualString(x.helpText);
+  if (x.altPrompts !== undefined)
+    out['altPrompts'] = x.altPrompts.map(serializeAlternativePrompt);
   if (x.recommendedKey !== undefined)
     out['recommendedKey'] = x.recommendedKey;
   if (x.recommendedProperty !== undefined)
@@ -326,6 +355,13 @@ export function parseRealNumberField(
     ...(s.helpText !== undefined && {
       helpText: parseMultilingualString(s.helpText, `${where}.helpText`),
     }),
+    ...(s.altPrompts !== undefined && {
+      altPrompts: assembleAltPrompts(
+        expectArray(s.altPrompts, `${where}.altPrompts`).map((e, i) =>
+          parseAlternativePrompt(e, `${where}.altPrompts[${i}]`),
+        ),
+      ),
+    }),
     ...(s.recommendedKey !== undefined && {
       recommendedKey: expectString(s.recommendedKey, `${where}.recommendedKey`),
     }),
@@ -347,6 +383,8 @@ export const serializeBooleanField = (x: BooleanField): unknown => {
   };
   if (x.helpText !== undefined)
     out['helpText'] = serializeMultilingualString(x.helpText);
+  if (x.altPrompts !== undefined)
+    out['altPrompts'] = x.altPrompts.map(serializeAlternativePrompt);
   if (x.recommendedKey !== undefined)
     out['recommendedKey'] = x.recommendedKey;
   if (x.recommendedProperty !== undefined)
@@ -369,6 +407,13 @@ export function parseBooleanField(
     ...(s.helpText !== undefined && {
       helpText: parseMultilingualString(s.helpText, `${where}.helpText`),
     }),
+    ...(s.altPrompts !== undefined && {
+      altPrompts: assembleAltPrompts(
+        expectArray(s.altPrompts, `${where}.altPrompts`).map((e, i) =>
+          parseAlternativePrompt(e, `${where}.altPrompts[${i}]`),
+        ),
+      ),
+    }),
     ...(s.recommendedKey !== undefined && {
       recommendedKey: expectString(s.recommendedKey, `${where}.recommendedKey`),
     }),
@@ -390,6 +435,8 @@ export const serializeDateField = (x: DateField): unknown => {
   };
   if (x.helpText !== undefined)
     out['helpText'] = serializeMultilingualString(x.helpText);
+  if (x.altPrompts !== undefined)
+    out['altPrompts'] = x.altPrompts.map(serializeAlternativePrompt);
   if (x.recommendedKey !== undefined)
     out['recommendedKey'] = x.recommendedKey;
   if (x.recommendedProperty !== undefined)
@@ -408,6 +455,13 @@ export function parseDateField(x: unknown, where = 'DateField'): DateField {
     prompt: parseMultilingualString(s.prompt, `${where}.prompt`),
     ...(s.helpText !== undefined && {
       helpText: parseMultilingualString(s.helpText, `${where}.helpText`),
+    }),
+    ...(s.altPrompts !== undefined && {
+      altPrompts: assembleAltPrompts(
+        expectArray(s.altPrompts, `${where}.altPrompts`).map((e, i) =>
+          parseAlternativePrompt(e, `${where}.altPrompts[${i}]`),
+        ),
+      ),
     }),
     ...(s.recommendedKey !== undefined && {
       recommendedKey: expectString(s.recommendedKey, `${where}.recommendedKey`),
@@ -430,6 +484,8 @@ export const serializeTimeField = (x: TimeField): unknown => {
   };
   if (x.helpText !== undefined)
     out['helpText'] = serializeMultilingualString(x.helpText);
+  if (x.altPrompts !== undefined)
+    out['altPrompts'] = x.altPrompts.map(serializeAlternativePrompt);
   if (x.recommendedKey !== undefined)
     out['recommendedKey'] = x.recommendedKey;
   if (x.recommendedProperty !== undefined)
@@ -448,6 +504,13 @@ export function parseTimeField(x: unknown, where = 'TimeField'): TimeField {
     prompt: parseMultilingualString(s.prompt, `${where}.prompt`),
     ...(s.helpText !== undefined && {
       helpText: parseMultilingualString(s.helpText, `${where}.helpText`),
+    }),
+    ...(s.altPrompts !== undefined && {
+      altPrompts: assembleAltPrompts(
+        expectArray(s.altPrompts, `${where}.altPrompts`).map((e, i) =>
+          parseAlternativePrompt(e, `${where}.altPrompts[${i}]`),
+        ),
+      ),
     }),
     ...(s.recommendedKey !== undefined && {
       recommendedKey: expectString(s.recommendedKey, `${where}.recommendedKey`),
@@ -470,6 +533,8 @@ export const serializeDateTimeField = (x: DateTimeField): unknown => {
   };
   if (x.helpText !== undefined)
     out['helpText'] = serializeMultilingualString(x.helpText);
+  if (x.altPrompts !== undefined)
+    out['altPrompts'] = x.altPrompts.map(serializeAlternativePrompt);
   if (x.recommendedKey !== undefined)
     out['recommendedKey'] = x.recommendedKey;
   if (x.recommendedProperty !== undefined)
@@ -492,6 +557,13 @@ export function parseDateTimeField(
     ...(s.helpText !== undefined && {
       helpText: parseMultilingualString(s.helpText, `${where}.helpText`),
     }),
+    ...(s.altPrompts !== undefined && {
+      altPrompts: assembleAltPrompts(
+        expectArray(s.altPrompts, `${where}.altPrompts`).map((e, i) =>
+          parseAlternativePrompt(e, `${where}.altPrompts[${i}]`),
+        ),
+      ),
+    }),
     ...(s.recommendedKey !== undefined && {
       recommendedKey: expectString(s.recommendedKey, `${where}.recommendedKey`),
     }),
@@ -513,6 +585,8 @@ export const serializeControlledTermField = (x: ControlledTermField): unknown =>
   };
   if (x.helpText !== undefined)
     out['helpText'] = serializeMultilingualString(x.helpText);
+  if (x.altPrompts !== undefined)
+    out['altPrompts'] = x.altPrompts.map(serializeAlternativePrompt);
   if (x.recommendedKey !== undefined)
     out['recommendedKey'] = x.recommendedKey;
   if (x.recommendedProperty !== undefined)
@@ -535,6 +609,13 @@ export function parseControlledTermField(
     ...(s.helpText !== undefined && {
       helpText: parseMultilingualString(s.helpText, `${where}.helpText`),
     }),
+    ...(s.altPrompts !== undefined && {
+      altPrompts: assembleAltPrompts(
+        expectArray(s.altPrompts, `${where}.altPrompts`).map((e, i) =>
+          parseAlternativePrompt(e, `${where}.altPrompts[${i}]`),
+        ),
+      ),
+    }),
     ...(s.recommendedKey !== undefined && {
       recommendedKey: expectString(s.recommendedKey, `${where}.recommendedKey`),
     }),
@@ -556,6 +637,8 @@ export const serializeSingleValuedEnumField = (x: SingleValuedEnumField): unknow
   };
   if (x.helpText !== undefined)
     out['helpText'] = serializeMultilingualString(x.helpText);
+  if (x.altPrompts !== undefined)
+    out['altPrompts'] = x.altPrompts.map(serializeAlternativePrompt);
   if (x.recommendedKey !== undefined)
     out['recommendedKey'] = x.recommendedKey;
   if (x.recommendedProperty !== undefined)
@@ -582,6 +665,13 @@ export function parseSingleValuedEnumField(
     ...(s.helpText !== undefined && {
       helpText: parseMultilingualString(s.helpText, `${where}.helpText`),
     }),
+    ...(s.altPrompts !== undefined && {
+      altPrompts: assembleAltPrompts(
+        expectArray(s.altPrompts, `${where}.altPrompts`).map((e, i) =>
+          parseAlternativePrompt(e, `${where}.altPrompts[${i}]`),
+        ),
+      ),
+    }),
     ...(s.recommendedKey !== undefined && {
       recommendedKey: expectString(s.recommendedKey, `${where}.recommendedKey`),
     }),
@@ -603,6 +693,8 @@ export const serializeMultiValuedEnumField = (x: MultiValuedEnumField): unknown 
   };
   if (x.helpText !== undefined)
     out['helpText'] = serializeMultilingualString(x.helpText);
+  if (x.altPrompts !== undefined)
+    out['altPrompts'] = x.altPrompts.map(serializeAlternativePrompt);
   if (x.recommendedKey !== undefined)
     out['recommendedKey'] = x.recommendedKey;
   if (x.recommendedProperty !== undefined)
@@ -629,6 +721,13 @@ export function parseMultiValuedEnumField(
     ...(s.helpText !== undefined && {
       helpText: parseMultilingualString(s.helpText, `${where}.helpText`),
     }),
+    ...(s.altPrompts !== undefined && {
+      altPrompts: assembleAltPrompts(
+        expectArray(s.altPrompts, `${where}.altPrompts`).map((e, i) =>
+          parseAlternativePrompt(e, `${where}.altPrompts[${i}]`),
+        ),
+      ),
+    }),
     ...(s.recommendedKey !== undefined && {
       recommendedKey: expectString(s.recommendedKey, `${where}.recommendedKey`),
     }),
@@ -650,6 +749,8 @@ export const serializeLinkField = (x: LinkField): unknown => {
   };
   if (x.helpText !== undefined)
     out['helpText'] = serializeMultilingualString(x.helpText);
+  if (x.altPrompts !== undefined)
+    out['altPrompts'] = x.altPrompts.map(serializeAlternativePrompt);
   if (x.recommendedKey !== undefined)
     out['recommendedKey'] = x.recommendedKey;
   if (x.recommendedProperty !== undefined)
@@ -668,6 +769,13 @@ export function parseLinkField(x: unknown, where = 'LinkField'): LinkField {
     prompt: parseMultilingualString(s.prompt, `${where}.prompt`),
     ...(s.helpText !== undefined && {
       helpText: parseMultilingualString(s.helpText, `${where}.helpText`),
+    }),
+    ...(s.altPrompts !== undefined && {
+      altPrompts: assembleAltPrompts(
+        expectArray(s.altPrompts, `${where}.altPrompts`).map((e, i) =>
+          parseAlternativePrompt(e, `${where}.altPrompts[${i}]`),
+        ),
+      ),
     }),
     ...(s.recommendedKey !== undefined && {
       recommendedKey: expectString(s.recommendedKey, `${where}.recommendedKey`),
@@ -690,6 +798,8 @@ export const serializeEmailField = (x: EmailField): unknown => {
   };
   if (x.helpText !== undefined)
     out['helpText'] = serializeMultilingualString(x.helpText);
+  if (x.altPrompts !== undefined)
+    out['altPrompts'] = x.altPrompts.map(serializeAlternativePrompt);
   if (x.recommendedKey !== undefined)
     out['recommendedKey'] = x.recommendedKey;
   if (x.recommendedProperty !== undefined)
@@ -708,6 +818,13 @@ export function parseEmailField(x: unknown, where = 'EmailField'): EmailField {
     prompt: parseMultilingualString(s.prompt, `${where}.prompt`),
     ...(s.helpText !== undefined && {
       helpText: parseMultilingualString(s.helpText, `${where}.helpText`),
+    }),
+    ...(s.altPrompts !== undefined && {
+      altPrompts: assembleAltPrompts(
+        expectArray(s.altPrompts, `${where}.altPrompts`).map((e, i) =>
+          parseAlternativePrompt(e, `${where}.altPrompts[${i}]`),
+        ),
+      ),
     }),
     ...(s.recommendedKey !== undefined && {
       recommendedKey: expectString(s.recommendedKey, `${where}.recommendedKey`),
@@ -730,6 +847,8 @@ export const serializePhoneNumberField = (x: PhoneNumberField): unknown => {
   };
   if (x.helpText !== undefined)
     out['helpText'] = serializeMultilingualString(x.helpText);
+  if (x.altPrompts !== undefined)
+    out['altPrompts'] = x.altPrompts.map(serializeAlternativePrompt);
   if (x.recommendedKey !== undefined)
     out['recommendedKey'] = x.recommendedKey;
   if (x.recommendedProperty !== undefined)
@@ -752,6 +871,13 @@ export function parsePhoneNumberField(
     ...(s.helpText !== undefined && {
       helpText: parseMultilingualString(s.helpText, `${where}.helpText`),
     }),
+    ...(s.altPrompts !== undefined && {
+      altPrompts: assembleAltPrompts(
+        expectArray(s.altPrompts, `${where}.altPrompts`).map((e, i) =>
+          parseAlternativePrompt(e, `${where}.altPrompts[${i}]`),
+        ),
+      ),
+    }),
     ...(s.recommendedKey !== undefined && {
       recommendedKey: expectString(s.recommendedKey, `${where}.recommendedKey`),
     }),
@@ -773,6 +899,8 @@ export const serializeOrcidField = (x: OrcidField): unknown => {
   };
   if (x.helpText !== undefined)
     out['helpText'] = serializeMultilingualString(x.helpText);
+  if (x.altPrompts !== undefined)
+    out['altPrompts'] = x.altPrompts.map(serializeAlternativePrompt);
   if (x.recommendedKey !== undefined)
     out['recommendedKey'] = x.recommendedKey;
   if (x.recommendedProperty !== undefined)
@@ -791,6 +919,13 @@ export function parseOrcidField(x: unknown, where = 'OrcidField'): OrcidField {
     prompt: parseMultilingualString(s.prompt, `${where}.prompt`),
     ...(s.helpText !== undefined && {
       helpText: parseMultilingualString(s.helpText, `${where}.helpText`),
+    }),
+    ...(s.altPrompts !== undefined && {
+      altPrompts: assembleAltPrompts(
+        expectArray(s.altPrompts, `${where}.altPrompts`).map((e, i) =>
+          parseAlternativePrompt(e, `${where}.altPrompts[${i}]`),
+        ),
+      ),
     }),
     ...(s.recommendedKey !== undefined && {
       recommendedKey: expectString(s.recommendedKey, `${where}.recommendedKey`),
@@ -813,6 +948,8 @@ export const serializeRorField = (x: RorField): unknown => {
   };
   if (x.helpText !== undefined)
     out['helpText'] = serializeMultilingualString(x.helpText);
+  if (x.altPrompts !== undefined)
+    out['altPrompts'] = x.altPrompts.map(serializeAlternativePrompt);
   if (x.recommendedKey !== undefined)
     out['recommendedKey'] = x.recommendedKey;
   if (x.recommendedProperty !== undefined)
@@ -831,6 +968,13 @@ export function parseRorField(x: unknown, where = 'RorField'): RorField {
     prompt: parseMultilingualString(s.prompt, `${where}.prompt`),
     ...(s.helpText !== undefined && {
       helpText: parseMultilingualString(s.helpText, `${where}.helpText`),
+    }),
+    ...(s.altPrompts !== undefined && {
+      altPrompts: assembleAltPrompts(
+        expectArray(s.altPrompts, `${where}.altPrompts`).map((e, i) =>
+          parseAlternativePrompt(e, `${where}.altPrompts[${i}]`),
+        ),
+      ),
     }),
     ...(s.recommendedKey !== undefined && {
       recommendedKey: expectString(s.recommendedKey, `${where}.recommendedKey`),
@@ -853,6 +997,8 @@ export const serializeDoiField = (x: DoiField): unknown => {
   };
   if (x.helpText !== undefined)
     out['helpText'] = serializeMultilingualString(x.helpText);
+  if (x.altPrompts !== undefined)
+    out['altPrompts'] = x.altPrompts.map(serializeAlternativePrompt);
   if (x.recommendedKey !== undefined)
     out['recommendedKey'] = x.recommendedKey;
   if (x.recommendedProperty !== undefined)
@@ -871,6 +1017,13 @@ export function parseDoiField(x: unknown, where = 'DoiField'): DoiField {
     prompt: parseMultilingualString(s.prompt, `${where}.prompt`),
     ...(s.helpText !== undefined && {
       helpText: parseMultilingualString(s.helpText, `${where}.helpText`),
+    }),
+    ...(s.altPrompts !== undefined && {
+      altPrompts: assembleAltPrompts(
+        expectArray(s.altPrompts, `${where}.altPrompts`).map((e, i) =>
+          parseAlternativePrompt(e, `${where}.altPrompts[${i}]`),
+        ),
+      ),
     }),
     ...(s.recommendedKey !== undefined && {
       recommendedKey: expectString(s.recommendedKey, `${where}.recommendedKey`),
@@ -893,6 +1046,8 @@ export const serializePubMedIdField = (x: PubMedIdField): unknown => {
   };
   if (x.helpText !== undefined)
     out['helpText'] = serializeMultilingualString(x.helpText);
+  if (x.altPrompts !== undefined)
+    out['altPrompts'] = x.altPrompts.map(serializeAlternativePrompt);
   if (x.recommendedKey !== undefined)
     out['recommendedKey'] = x.recommendedKey;
   if (x.recommendedProperty !== undefined)
@@ -915,6 +1070,13 @@ export function parsePubMedIdField(
     ...(s.helpText !== undefined && {
       helpText: parseMultilingualString(s.helpText, `${where}.helpText`),
     }),
+    ...(s.altPrompts !== undefined && {
+      altPrompts: assembleAltPrompts(
+        expectArray(s.altPrompts, `${where}.altPrompts`).map((e, i) =>
+          parseAlternativePrompt(e, `${where}.altPrompts[${i}]`),
+        ),
+      ),
+    }),
     ...(s.recommendedKey !== undefined && {
       recommendedKey: expectString(s.recommendedKey, `${where}.recommendedKey`),
     }),
@@ -936,6 +1098,8 @@ export const serializeRridField = (x: RridField): unknown => {
   };
   if (x.helpText !== undefined)
     out['helpText'] = serializeMultilingualString(x.helpText);
+  if (x.altPrompts !== undefined)
+    out['altPrompts'] = x.altPrompts.map(serializeAlternativePrompt);
   if (x.recommendedKey !== undefined)
     out['recommendedKey'] = x.recommendedKey;
   if (x.recommendedProperty !== undefined)
@@ -954,6 +1118,13 @@ export function parseRridField(x: unknown, where = 'RridField'): RridField {
     prompt: parseMultilingualString(s.prompt, `${where}.prompt`),
     ...(s.helpText !== undefined && {
       helpText: parseMultilingualString(s.helpText, `${where}.helpText`),
+    }),
+    ...(s.altPrompts !== undefined && {
+      altPrompts: assembleAltPrompts(
+        expectArray(s.altPrompts, `${where}.altPrompts`).map((e, i) =>
+          parseAlternativePrompt(e, `${where}.altPrompts[${i}]`),
+        ),
+      ),
     }),
     ...(s.recommendedKey !== undefined && {
       recommendedKey: expectString(s.recommendedKey, `${where}.recommendedKey`),
@@ -976,6 +1147,8 @@ export const serializeNihGrantIdField = (x: NihGrantIdField): unknown => {
   };
   if (x.helpText !== undefined)
     out['helpText'] = serializeMultilingualString(x.helpText);
+  if (x.altPrompts !== undefined)
+    out['altPrompts'] = x.altPrompts.map(serializeAlternativePrompt);
   if (x.recommendedKey !== undefined)
     out['recommendedKey'] = x.recommendedKey;
   if (x.recommendedProperty !== undefined)
@@ -998,6 +1171,13 @@ export function parseNihGrantIdField(
     ...(s.helpText !== undefined && {
       helpText: parseMultilingualString(s.helpText, `${where}.helpText`),
     }),
+    ...(s.altPrompts !== undefined && {
+      altPrompts: assembleAltPrompts(
+        expectArray(s.altPrompts, `${where}.altPrompts`).map((e, i) =>
+          parseAlternativePrompt(e, `${where}.altPrompts[${i}]`),
+        ),
+      ),
+    }),
     ...(s.recommendedKey !== undefined && {
       recommendedKey: expectString(s.recommendedKey, `${where}.recommendedKey`),
     }),
@@ -1019,6 +1199,8 @@ export const serializeLanguageField = (x: LanguageField): unknown => {
   };
   if (x.helpText !== undefined)
     out['helpText'] = serializeMultilingualString(x.helpText);
+  if (x.altPrompts !== undefined)
+    out['altPrompts'] = x.altPrompts.map(serializeAlternativePrompt);
   if (x.recommendedKey !== undefined)
     out['recommendedKey'] = x.recommendedKey;
   if (x.recommendedProperty !== undefined)
@@ -1041,6 +1223,13 @@ export function parseLanguageField(
     ...(s.helpText !== undefined && {
       helpText: parseMultilingualString(s.helpText, `${where}.helpText`),
     }),
+    ...(s.altPrompts !== undefined && {
+      altPrompts: assembleAltPrompts(
+        expectArray(s.altPrompts, `${where}.altPrompts`).map((e, i) =>
+          parseAlternativePrompt(e, `${where}.altPrompts[${i}]`),
+        ),
+      ),
+    }),
     ...(s.recommendedKey !== undefined && {
       recommendedKey: expectString(s.recommendedKey, `${where}.recommendedKey`),
     }),
@@ -1062,6 +1251,8 @@ export const serializeAttributeValueField = (x: AttributeValueField): unknown =>
   };
   if (x.helpText !== undefined)
     out['helpText'] = serializeMultilingualString(x.helpText);
+  if (x.altPrompts !== undefined)
+    out['altPrompts'] = x.altPrompts.map(serializeAlternativePrompt);
   if (x.recommendedKey !== undefined)
     out['recommendedKey'] = x.recommendedKey;
   if (x.recommendedProperty !== undefined)
@@ -1083,6 +1274,13 @@ export function parseAttributeValueField(
     prompt: parseMultilingualString(s.prompt, `${where}.prompt`),
     ...(s.helpText !== undefined && {
       helpText: parseMultilingualString(s.helpText, `${where}.helpText`),
+    }),
+    ...(s.altPrompts !== undefined && {
+      altPrompts: assembleAltPrompts(
+        expectArray(s.altPrompts, `${where}.altPrompts`).map((e, i) =>
+          parseAlternativePrompt(e, `${where}.altPrompts[${i}]`),
+        ),
+      ),
     }),
     ...(s.recommendedKey !== undefined && {
       recommendedKey: expectString(s.recommendedKey, `${where}.recommendedKey`),

@@ -20,7 +20,7 @@
 // Not re-exported from `index.ts`; consumed only by the family files
 // in this folder.
 
-import { parseAsciiIdentifier } from '../leaves/index.js';
+import { parseAsciiIdentifier, CedarConstructionError } from '../leaves/index.js';
 import {
   type MultilingualString,
   type MultilingualStringInput,
@@ -44,6 +44,7 @@ export interface EmbeddedFieldInitCommon {
   readonly promptOverride?: MultilingualStringInput;
   readonly helpTextOverride?: MultilingualStringInput;
   readonly property?: PropertyInput;
+  readonly promptKey?: string;
 }
 
 export interface AssembledCommon {
@@ -54,9 +55,26 @@ export interface AssembledCommon {
   promptOverride?: MultilingualString;
   helpTextOverride?: MultilingualString;
   property?: Property;
+  promptKey?: string;
+}
+
+// Enforces the spec rule (grammar.md §Alternative Prompts, validation.md):
+// an embedding MUST NOT carry both promptKey (a keyed selection from the
+// referenced field's curated alternatives) and promptOverride (a free-form
+// override). Shared by assembleCommon and the two families that bypass it.
+export function assertPromptSlotsExclusive(init: {
+  promptKey?: unknown;
+  promptOverride?: unknown;
+}): void {
+  if (init.promptKey !== undefined && init.promptOverride !== undefined) {
+    throw new CedarConstructionError(
+      'an embedding MUST NOT carry both promptKey and promptOverride',
+    );
+  }
 }
 
 export function assembleCommon(init: EmbeddedFieldInitCommon): AssembledCommon {
+  assertPromptSlotsExclusive(init);
   const out: AssembledCommon = {
     key: parseAsciiIdentifier(init.key),
   };
@@ -68,6 +86,7 @@ export function assembleCommon(init: EmbeddedFieldInitCommon): AssembledCommon {
   if (init.helpTextOverride !== undefined)
     out.helpTextOverride = multilingualString(init.helpTextOverride);
   if (init.property !== undefined) out.property = property(init.property);
+  if (init.promptKey !== undefined) out.promptKey = parseAsciiIdentifier(init.promptKey);
   return out;
 }
 

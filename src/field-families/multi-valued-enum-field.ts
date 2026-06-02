@@ -18,6 +18,7 @@
 import { type Iri, iri, parseSemanticVersion, parseAsciiIdentifier } from '../leaves/index.js';
 import { type MultilingualString, type MultilingualStringInput, multilingualString } from '../multilingual.js';
 import { type Property, type PropertyInput, property } from '../embedded/property.js';
+import { type AlternativePrompt, type AlternativePromptInput, assembleAltPrompts } from '../embedded/alternative-prompt.js';
 import type { CatalogMetadata, SchemaArtifactVersioning } from '../metadata/index.js';
 import type { ValueRequirement } from '../embedded/requirement.js';
 import type { Cardinality } from '../embedded/cardinality.js';
@@ -138,6 +139,7 @@ export interface MultiValuedEnumField {
   readonly fieldSpec: MultiValuedEnumFieldSpec;
   readonly prompt: MultilingualString;
   readonly helpText?: MultilingualString;
+  readonly altPrompts?: readonly AlternativePrompt[];
   readonly recommendedKey?: string;
   readonly recommendedProperty?: Property;
 }
@@ -150,6 +152,7 @@ export interface MultiValuedEnumFieldInit {
   readonly fieldSpec: MultiValuedEnumFieldSpec;
   readonly prompt: MultilingualStringInput;
   readonly helpText?: MultilingualString;
+  readonly altPrompts?: readonly AlternativePromptInput[];
   readonly recommendedKey?: string;
   readonly recommendedProperty?: PropertyInput;
 }
@@ -166,6 +169,9 @@ export const multiValuedEnumField = (
     versioning: init.versioning,
     prompt: multilingualString(init.prompt),
     ...(init.helpText !== undefined && { helpText: init.helpText }),
+    ...(init.altPrompts !== undefined && {
+      altPrompts: assembleAltPrompts(init.altPrompts),
+    }),
     ...(init.recommendedKey !== undefined && {
       recommendedKey: parseAsciiIdentifier(init.recommendedKey),
     }),
@@ -190,6 +196,7 @@ export interface EmbeddedMultiValuedEnumField {
   readonly promptOverride?: MultilingualString;
   readonly helpTextOverride?: MultilingualString;
   readonly property?: import('../embedded/property.js').Property;
+  readonly promptKey?: string;
   // Sequence of EnumValue defaults. Empty when absent. The grammar models
   // this as `EnumValue*` rather than an optional single value.
   readonly defaultValue?: readonly EnumValue[];

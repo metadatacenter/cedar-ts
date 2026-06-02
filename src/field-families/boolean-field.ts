@@ -14,8 +14,9 @@ import type { CatalogMetadata, SchemaArtifactVersioning } from '../metadata/inde
 import type { ValueRequirement } from '../embedded/requirement.js';
 import type { Visibility } from '../embedded/visibility.js';
 import { type Property, type PropertyInput, property } from '../embedded/property.js';
+import { type AlternativePrompt, type AlternativePromptInput, assembleAltPrompts } from '../embedded/alternative-prompt.js';
 import type { BooleanRenderingHint } from './rendering-hints.js';
-import { fieldRef } from './embedded-field-common.js';
+import { fieldRef, assertPromptSlotsExclusive } from './embedded-field-common.js';
 
 // =====================================================================
 // 1. Identifier
@@ -117,6 +118,7 @@ export interface BooleanField {
   readonly fieldSpec: BooleanFieldSpec;
   readonly prompt: MultilingualString;
   readonly helpText?: MultilingualString;
+  readonly altPrompts?: readonly AlternativePrompt[];
   readonly recommendedKey?: string;
   readonly recommendedProperty?: Property;
 }
@@ -129,6 +131,7 @@ export interface BooleanFieldInit {
   readonly fieldSpec: BooleanFieldSpec;
   readonly prompt: MultilingualStringInput;
   readonly helpText?: MultilingualString;
+  readonly altPrompts?: readonly AlternativePromptInput[];
   readonly recommendedKey?: string;
   readonly recommendedProperty?: PropertyInput;
 }
@@ -143,6 +146,9 @@ export const booleanField = (init: BooleanFieldInit): BooleanField => {
     versioning: init.versioning,
     prompt: multilingualString(init.prompt),
     ...(init.helpText !== undefined && { helpText: init.helpText }),
+    ...(init.altPrompts !== undefined && {
+      altPrompts: assembleAltPrompts(init.altPrompts),
+    }),
     ...(init.recommendedKey !== undefined && {
       recommendedKey: parseAsciiIdentifier(init.recommendedKey),
     }),
@@ -166,6 +172,7 @@ export interface EmbeddedBooleanField {
   readonly promptOverride?: MultilingualString;
   readonly helpTextOverride?: MultilingualString;
   readonly property?: Property;
+  readonly promptKey?: string;
   readonly defaultValue?: BooleanValue;
 }
 
@@ -177,6 +184,7 @@ export interface EmbeddedBooleanFieldInit {
   readonly promptOverride?: MultilingualString;
   readonly helpTextOverride?: MultilingualString;
   readonly property?: PropertyInput;
+  readonly promptKey?: string;
   readonly defaultValue?: BooleanValueInput;
 }
 
@@ -192,17 +200,20 @@ export function embeddedBooleanField(
     promptOverride?: MultilingualString;
     helpTextOverride?: MultilingualString;
     property?: Property;
+    promptKey?: string;
     defaultValue?: BooleanValue;
   } = {
     kind: 'EmbeddedBooleanField',
     key: parseAsciiIdentifier(init.key),
     artifactRef: fieldRef(init.artifactRef),
   };
+  assertPromptSlotsExclusive(init);
   if (init.valueRequirement !== undefined) out.valueRequirement = init.valueRequirement;
   if (init.visibility !== undefined) out.visibility = init.visibility;
   if (init.promptOverride !== undefined) out.promptOverride = multilingualString(init.promptOverride);
   if (init.helpTextOverride !== undefined) out.helpTextOverride = init.helpTextOverride;
   if (init.property !== undefined) out.property = property(init.property);
+  if (init.promptKey !== undefined) out.promptKey = parseAsciiIdentifier(init.promptKey);
   if (init.defaultValue !== undefined) {
     out.defaultValue =
       typeof init.defaultValue === 'boolean'

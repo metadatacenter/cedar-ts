@@ -26,6 +26,7 @@ import type { ValueRequirement } from '../embedded/requirement.js';
 import type { Cardinality } from '../embedded/cardinality.js';
 import type { Visibility } from '../embedded/visibility.js';
 import { type Property, type PropertyInput, property } from '../embedded/property.js';
+import { type AlternativePrompt, type AlternativePromptInput, assembleAltPrompts } from '../embedded/alternative-prompt.js';
 import {
   type AuthorityValueInput,
   authorityValueFromInput,
@@ -157,6 +158,7 @@ export interface DoiField {
   readonly fieldSpec: DoiFieldSpec;
   readonly prompt: MultilingualString;
   readonly helpText?: MultilingualString;
+  readonly altPrompts?: readonly AlternativePrompt[];
   readonly recommendedKey?: string;
   readonly recommendedProperty?: Property;
 }
@@ -169,6 +171,7 @@ export interface DoiFieldInit {
   readonly fieldSpec: DoiFieldSpec;
   readonly prompt: MultilingualStringInput;
   readonly helpText?: MultilingualString;
+  readonly altPrompts?: readonly AlternativePromptInput[];
   readonly recommendedKey?: string;
   readonly recommendedProperty?: PropertyInput;
 }
@@ -183,6 +186,9 @@ export const doiField = (init: DoiFieldInit): DoiField => {
     versioning: init.versioning,
     prompt: multilingualString(init.prompt),
     ...(init.helpText !== undefined && { helpText: init.helpText }),
+    ...(init.altPrompts !== undefined && {
+      altPrompts: assembleAltPrompts(init.altPrompts),
+    }),
     ...(init.recommendedKey !== undefined && {
       recommendedKey: parseAsciiIdentifier(init.recommendedKey),
     }),
@@ -207,6 +213,7 @@ export interface EmbeddedDoiField {
   readonly promptOverride?: MultilingualString;
   readonly helpTextOverride?: MultilingualString;
   readonly property?: Property;
+  readonly promptKey?: string;
   readonly defaultValue?: DoiValue;
 }
 

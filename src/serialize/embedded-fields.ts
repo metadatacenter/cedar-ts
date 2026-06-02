@@ -180,6 +180,7 @@ interface CommonOut {
   promptOverride?: MultilingualString;
   helpTextOverride?: MultilingualString;
   property?: Property;
+  promptKey?: string;
 }
 
 function serializeCommonProps(
@@ -190,6 +191,7 @@ function serializeCommonProps(
     readonly promptOverride?: MultilingualString;
     readonly helpTextOverride?: MultilingualString;
     readonly property?: Property;
+    readonly promptKey?: string;
   },
   out: Record<string, unknown>,
 ): void {
@@ -204,6 +206,7 @@ function serializeCommonProps(
   if (x.helpTextOverride !== undefined)
     out['helpTextOverride'] = serializeMultilingualString(x.helpTextOverride);
   if (x.property !== undefined) out['property'] = serializeProperty(x.property);
+  if (x.promptKey !== undefined) out['promptKey'] = x.promptKey;
 }
 
 function parseCommonProps(
@@ -216,6 +219,7 @@ function parseCommonProps(
   rejectNullProperty(o, 'promptOverride');
   rejectNullProperty(o, 'helpTextOverride');
   rejectNullProperty(o, 'property');
+  rejectNullProperty(o, 'promptKey');
   const out: CommonOut = {};
   if ('valueRequirement' in o)
     out.valueRequirement = parseValueRequirement(
@@ -238,6 +242,8 @@ function parseCommonProps(
     );
   if ('property' in o)
     out.property = parseProperty(o['property'], `${where}.property`);
+  if ('promptKey' in o)
+    out.promptKey = expectString(o['promptKey'], `${where}.promptKey`);
   return out;
 }
 
@@ -251,6 +257,7 @@ const COMMON_FIELD_PROPS = [
   'promptOverride',
   'helpTextOverride',
   'property',
+  'promptKey',
 ];
 const COMMON_FIELD_PROPS_WITH_DEFAULT = [...COMMON_FIELD_PROPS, 'defaultValue'];
 

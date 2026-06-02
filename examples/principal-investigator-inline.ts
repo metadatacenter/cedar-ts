@@ -194,9 +194,19 @@ export const principalInvestigatorTemplate: Template = template({
         // identifier (it would be invalid as an embedding key otherwise).
         recommendedKey: 'full_name',
         recommendedProperty: 'https://schema.org/name',
+        // The field owner's curated, closed set of alternative wordings, each
+        // keyed by a stable PromptKey. The embedding selects one by key via
+        // `promptKey` below (mutually exclusive with the free-form
+        // `promptOverride`); omitting it would select the preferred `prompt`.
+        altPrompts: [
+          { key: 'short', prompt: { value: 'Name', lang: 'en' } },
+          { key: 'formal', prompt: { value: 'Full legal name', lang: 'en' } },
+        ],
       }),
       valueRequirement: 'required',
       property: 'https://schema.org/name',
+      // Select the curated "short" wording by key.
+      promptKey: 'short',
     }),
 
     // Single-valued enum — instance values are EnumValues carrying a
