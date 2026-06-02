@@ -123,6 +123,37 @@ describe('RecommendedKey wire form', () => {
     expect((back as { recommendedKey?: string }).recommendedKey).toBe('patient_dob');
   });
 
+  it('coexists with recommendedProperty on the same field', () => {
+    const f = textField({
+      ...baseMeta,
+      id: 'https://example.org/fields/x',
+      modelVersion: MV,
+      fieldSpec: textFieldSpec(),
+      recommendedKey: 'patient_dob',
+      recommendedProperty: 'http://purl.obolibrary.org/obo/NCIT_C68615',
+    });
+    const wire = serialize(f) as Record<string, unknown>;
+    expect(wire['recommendedKey']).toBe('patient_dob');
+    expect((wire['recommendedProperty'] as Record<string, unknown>)['iri']).toBe(
+      'http://purl.obolibrary.org/obo/NCIT_C68615',
+    );
+    expect(serialize(parseArtifact(wire))).toEqual(wire);
+  });
+
+  it('round-trips snake_case keys mirroring common embedding conventions', () => {
+    for (const key of ['full_name', 'email', 'orcid', 'institution_ror']) {
+      const f = textField({
+        ...baseMeta,
+        id: 'https://example.org/fields/x',
+        modelVersion: MV,
+        fieldSpec: textFieldSpec(),
+        recommendedKey: key,
+      });
+      const back = parseArtifact(serialize(f));
+      expect((back as { recommendedKey?: string }).recommendedKey).toBe(key);
+    }
+  });
+
   it('parseArtifact rejects an invalid recommendedKey on the wire', () => {
     const wire = {
       kind: 'TextField',

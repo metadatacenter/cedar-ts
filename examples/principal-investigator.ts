@@ -194,7 +194,7 @@ const MODEL_VERSION = '0.1.0';
 
 // Plain text field with a minimum length of 1. `textFieldSpec()` accepts an
 // optional init object (omit it to allow any non-empty string).
-const fullName = textField({
+export const fullName = textField({
   id: `${FIELDS}full-name`,
   modelVersion: MODEL_VERSION,
   ...fieldMeta('Full Name', 'Full legal name of the principal investigator.'),
@@ -285,7 +285,7 @@ const academicRank = singleValuedEnumField({
 // Their FieldSpec constructors are nullary because the family itself fixes
 // the value shape (e.g., an EmailValue is a syntactically valid email).
 
-const email = emailField({
+export const email = emailField({
   id: `${FIELDS}email`,
   modelVersion: MODEL_VERSION,
   ...fieldMeta('Email Address', 'Primary work email.'),
@@ -293,7 +293,10 @@ const email = emailField({
   // Advisory: recommends key `email` and property schema.org/email; the
   // embedding adopts both.
   recommendedKey: 'email',
-  recommendedProperty: { iri: 'https://schema.org/email', label: 'email' },
+  recommendedProperty: {
+    iri: 'https://schema.org/email',
+    label: { value: 'email', lang: 'en' },
+  },
 });
 
 const phone = phoneNumberField({
@@ -303,7 +306,7 @@ const phone = phoneNumberField({
   fieldSpec: phoneNumberFieldSpec(),
 });
 
-const orcid = orcidField({
+export const orcid = orcidField({
   id: `${FIELDS}orcid`,
   modelVersion: MODEL_VERSION,
   ...fieldMeta('ORCID iD', 'ORCID identifier (https://orcid.org/...).'),
@@ -712,11 +715,13 @@ export const exampleInstance: TemplateInstance = templateInstance({
 // When this file is executed directly (e.g. via `npm run example`), the
 // template, the projected field summary, and the example instance are
 // printed as JSON to stdout. The exports above are also importable
-// programmatically.
+// programmatically — the guard below keeps importers (e.g. tests) silent.
 
-console.log('=== Template ===');
-console.log(JSON.stringify(serialize(principalInvestigatorTemplate), null, 2));
-console.log('\n=== Field summary ===');
-console.log(JSON.stringify(fieldSummary, null, 2));
-console.log('\n=== Example instance ===');
-console.log(JSON.stringify(serialize(exampleInstance), null, 2));
+if (process.argv[1] && import.meta.url === `file://${process.argv[1]}`) {
+  console.log('=== Template ===');
+  console.log(JSON.stringify(serialize(principalInvestigatorTemplate), null, 2));
+  console.log('\n=== Field summary ===');
+  console.log(JSON.stringify(fieldSummary, null, 2));
+  console.log('\n=== Example instance ===');
+  console.log(JSON.stringify(serialize(exampleInstance), null, 2));
+}

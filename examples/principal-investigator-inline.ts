@@ -296,7 +296,10 @@ export const principalInvestigatorTemplate: Template = template({
         // Advisory: recommends key `email` and property schema.org/email; the
         // embedding adopts both.
         recommendedKey: 'email',
-        recommendedProperty: { iri: 'https://schema.org/email', label: 'email' },
+        recommendedProperty: {
+          iri: 'https://schema.org/email',
+          label: { value: 'email', lang: 'en' },
+        },
       }),
       valueRequirement: 'required',
       property: 'https://schema.org/email',
