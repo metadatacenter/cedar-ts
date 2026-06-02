@@ -1,7 +1,7 @@
 import { CedarConstructionError, parseSemanticVersion } from './leaves/index.js';
 import { type TemplateId, templateId } from './identifiers.js';
 import type { CatalogMetadata, SchemaArtifactVersioning } from './metadata/index.js';
-import type { EmbeddedArtifact } from './embedded/index.js';
+import { type TemplateMember, isSection } from './embedded/index.js';
 import { type Field, isField } from './field-families/index.js';
 import {
   type MultilingualString,
@@ -85,7 +85,7 @@ export interface Template {
   readonly renderingHint?: TemplateRenderingHint;
   readonly header?: MultilingualString;
   readonly footer?: MultilingualString;
-  readonly members: readonly EmbeddedArtifact[];
+  readonly members: readonly TemplateMember[];
 }
 
 // Init type for `template()`. Accepts a bare-string IRI at `id` (widened
@@ -102,7 +102,7 @@ export interface TemplateInit {
   readonly renderingHint?: TemplateRenderingHint;
   readonly header?: MultilingualStringInput;
   readonly footer?: MultilingualStringInput;
-  readonly members?: readonly EmbeddedArtifact[];
+  readonly members?: readonly TemplateMember[];
 }
 
 // Constructor.
@@ -137,7 +137,7 @@ export function template(init: TemplateInit): Template {
     renderingHint?: TemplateRenderingHint;
     header?: MultilingualString;
     footer?: MultilingualString;
-    members: readonly EmbeddedArtifact[];
+    members: readonly TemplateMember[];
   } = {
     kind: 'Template',
     id: typeof init.id === 'string' ? templateId(init.id) : init.id,
@@ -153,22 +153,33 @@ export function template(init: TemplateInit): Template {
   return out;
 }
 
-// Walks the embedded sequence once and throws on the first duplicate
-// key. Keys are plain strings (validated at the embedded-artifact
-// constructor site against the ASCII-identifier pattern).
+// Walks the member tree once — recursing into Section bodies — and throws on
+// the first duplicate EmbeddedArtifactKey. Keys are scoped to the whole
+// Template, not to a single section: two embedded artifacts in different
+// sections still share one key space (grammar.md §Sections, validation.md).
+// Sections carry no key and contribute none; their bodies are traversed.
+// Keys are plain strings (validated at the embedded-artifact constructor site
+// against the ASCII-identifier pattern).
 function assertUniqueEmbeddedArtifactKeys(
-  members: readonly EmbeddedArtifact[],
+  members: readonly TemplateMember[],
 ): void {
   const seen = new Set<string>();
-  for (const e of members) {
-    const k = e.key;
-    if (seen.has(k)) {
-      throw new CedarConstructionError(
-        `Duplicate EmbeddedArtifactKey within Template: ${JSON.stringify(k)}`,
-      );
+  const walk = (ms: readonly TemplateMember[]): void => {
+    for (const m of ms) {
+      if (isSection(m)) {
+        walk(m.members);
+        continue;
+      }
+      const k = m.key;
+      if (seen.has(k)) {
+        throw new CedarConstructionError(
+          `Duplicate EmbeddedArtifactKey within Template: ${JSON.stringify(k)}`,
+        );
+      }
+      seen.add(k);
     }
-    seen.add(k);
-  }
+  };
+  walk(members);
 }
 
 // Runtime type guard for Template. Useful when narrowing within a

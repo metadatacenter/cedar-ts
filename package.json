@@ -25,7 +25,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "example": "tsx examples/principal-investigator.ts",
-    "example:inline": "tsx examples/principal-investigator-inline.ts"
+    "example:inline": "tsx examples/principal-investigator-inline.ts",
+    "example:sectioned": "tsx examples/sectioned-template.ts"
   },
   "devDependencies": {
     "@types/node": "^25.6.0",

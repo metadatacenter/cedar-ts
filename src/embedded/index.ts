@@ -68,6 +68,16 @@ export {
 } from './alternative-prompt.js';
 
 export {
+  type Section,
+  type SectionInit,
+  type TemplateMember,
+  type Collapsibility,
+  COLLAPSIBILITIES,
+  section,
+  isSection,
+} from './section.js';
+
+export {
   type EmbeddedTemplate,
   type EmbeddedTemplateInit,
   embeddedTemplate,
