@@ -1,6 +1,6 @@
 // =====================================================================
-// instances — wire-form serialize/parse for TemplateInstance, FieldValue,
-// NestedTemplateInstance, and the InstanceValue union.
+// instances — wire-form serialize/parse for TemplateInstance, FieldEntry,
+// TemplateEntry, and the InstanceEntry union.
 // =====================================================================
 //
 // Wire form (wire-grammar.md §13):
@@ -10,31 +10,31 @@
 //     id:          string
 //     metadata:    ArtifactMetadata
 //     templateRef: string
-//     members:     array<InstanceValue>
+//     entries:     array<InstanceEntry>
 //   }
 //
-//   InstanceValue ::: FieldValue | NestedTemplateInstance     // discr: kind
+//   InstanceEntry ::: FieldEntry | TemplateEntry     // discr: kind
 //
-//   FieldValue ::: object {
-//     "kind": "FieldValue"
+//   FieldEntry ::: object {
+//     "kind": "FieldEntry"
 //     key:    string
 //     values: nonEmptyArray<Value>
 //   }
 //
-//   NestedTemplateInstance ::: object {
-//     "kind": "NestedTemplateInstance"
+//   TemplateEntry ::: object {
+//     "kind": "TemplateEntry"
 //     key:    string
-//     members: array<InstanceValue>
+//     entries: array<InstanceEntry>
 //   }
 
 import { CedarConstructionError } from '../leaves/index.js';
 import {
-  type FieldValue,
-  type NestedTemplateInstance,
-  type InstanceValue,
+  type FieldEntry,
+  type TemplateEntry,
+  type InstanceEntry,
   type TemplateInstance,
-  fieldValue,
-  nestedTemplateInstance,
+  fieldEntry,
+  templateEntry,
   templateInstance,
 } from '../instances/index.js';
 import type { Value } from '../field-families/index.js';
@@ -58,21 +58,21 @@ import {
 } from './metadata.js';
 import { serializeValue, parseValue } from './values.js';
 
-// ---- FieldValue ------------------------------------------------------
+// ---- FieldEntry ------------------------------------------------------
 
-export function serializeFieldValue(x: FieldValue): unknown {
+export function serializeFieldValue(x: FieldEntry): unknown {
   return {
-    kind: 'FieldValue',
+    kind: 'FieldEntry',
     key: x.key,
     values: x.values.map((v) => serializeValue(v)),
   };
 }
 
-export function parseFieldValue(x: unknown, where = 'FieldValue'): FieldValue {
+export function parseFieldValue(x: unknown, where = 'FieldEntry'): FieldEntry {
   const o = expectObject(x, where);
   expectKnownProperties(o, ['kind', 'key', 'values']);
-  if (o['kind'] !== 'FieldValue') {
-    throw new CedarConstructionError(`${where}: expected kind "FieldValue"`);
+  if (o['kind'] !== 'FieldEntry') {
+    throw new CedarConstructionError(`${where}: expected kind "FieldEntry"`);
   }
   if (!('key' in o)) {
     throw new CedarConstructionError(`${where}: missing required "key"`);
@@ -83,62 +83,62 @@ export function parseFieldValue(x: unknown, where = 'FieldValue'): FieldValue {
   const key = expectString(o['key'], `${where}.key`);
   const arr = expectNonEmptyArray(o['values'], `${where}.values`);
   const values = arr.map((e, i) => parseValue(e, `${where}.values[${i}]`));
-  return fieldValue(key, ...(values as [Value, ...Value[]]));
+  return fieldEntry(key, ...(values as [Value, ...Value[]]));
 }
 
-// ---- NestedTemplateInstance ------------------------------------------
+// ---- TemplateEntry ------------------------------------------
 
 export function serializeNestedTemplateInstance(
-  x: NestedTemplateInstance,
+  x: TemplateEntry,
 ): unknown {
   return {
-    kind: 'NestedTemplateInstance',
+    kind: 'TemplateEntry',
     key: x.key,
-    members: x.members.map((v) => serializeInstanceValue(v)),
+    entries: x.entries.map((v) => serializeInstanceValue(v)),
   };
 }
 
 export function parseNestedTemplateInstance(
   x: unknown,
-  where = 'NestedTemplateInstance',
-): NestedTemplateInstance {
+  where = 'TemplateEntry',
+): TemplateEntry {
   const o = expectObject(x, where);
-  expectKnownProperties(o, ['kind', 'key', 'members']);
-  if (o['kind'] !== 'NestedTemplateInstance') {
+  expectKnownProperties(o, ['kind', 'key', 'entries']);
+  if (o['kind'] !== 'TemplateEntry') {
     throw new CedarConstructionError(
-      `${where}: expected kind "NestedTemplateInstance"`,
+      `${where}: expected kind "TemplateEntry"`,
     );
   }
   if (!('key' in o)) {
     throw new CedarConstructionError(`${where}: missing required "key"`);
   }
-  if (!('members' in o)) {
-    throw new CedarConstructionError(`${where}: missing required "members"`);
+  if (!('entries' in o)) {
+    throw new CedarConstructionError(`${where}: missing required "entries"`);
   }
   const key = expectString(o['key'], `${where}.key`);
-  const arr = expectArray(o['members'], `${where}.members`);
-  const members = arr.map((e, i) =>
-    parseInstanceValue(e, `${where}.members[${i}]`),
+  const arr = expectArray(o['entries'], `${where}.entries`);
+  const entries = arr.map((e, i) =>
+    parseInstanceValue(e, `${where}.entries[${i}]`),
   );
-  return nestedTemplateInstance(key, members);
+  return templateEntry(key, entries);
 }
 
-// ---- InstanceValue union --------------------------------------------
+// ---- InstanceEntry union --------------------------------------------
 
-const INSTANCE_VALUE_KINDS = ['FieldValue', 'NestedTemplateInstance'] as const;
+const INSTANCE_ENTRY_KINDS = ['FieldEntry', 'TemplateEntry'] as const;
 
-export function serializeInstanceValue(x: InstanceValue): unknown {
-  if (x.kind === 'FieldValue') return serializeFieldValue(x);
+export function serializeInstanceValue(x: InstanceEntry): unknown {
+  if (x.kind === 'FieldEntry') return serializeFieldValue(x);
   return serializeNestedTemplateInstance(x);
 }
 
 export function parseInstanceValue(
   x: unknown,
-  where = 'InstanceValue',
-): InstanceValue {
+  where = 'InstanceEntry',
+): InstanceEntry {
   const o = expectObject(x, where);
-  const k = expectKindOneOf(o, INSTANCE_VALUE_KINDS, where);
-  if (k === 'FieldValue') return parseFieldValue(x, where);
+  const k = expectKindOneOf(o, INSTANCE_ENTRY_KINDS, where);
+  if (k === 'FieldEntry') return parseFieldValue(x, where);
   return parseNestedTemplateInstance(x, where);
 }
 
@@ -151,7 +151,7 @@ export function serializeTemplateInstance(x: TemplateInstance): unknown {
     modelVersion: x.modelVersion,
     metadata: serializeCatalogMetadata(x.metadata),
     templateRef: serializeTemplateId(x.templateRef),
-    members: x.members.map((v) => serializeInstanceValue(v)),
+    entries: x.entries.map((v) => serializeInstanceValue(v)),
   };
 }
 
@@ -166,29 +166,29 @@ export function parseTemplateInstance(
     'modelVersion',
     'metadata',
     'templateRef',
-    'members',
+    'entries',
   ]);
   if (o['kind'] !== 'TemplateInstance') {
     throw new CedarConstructionError(
       `${where}: expected kind "TemplateInstance"`,
     );
   }
-  for (const k of ['id', 'modelVersion', 'metadata', 'templateRef', 'members']) {
+  for (const k of ['id', 'modelVersion', 'metadata', 'templateRef', 'entries']) {
     if (!(k in o)) {
       throw new CedarConstructionError(
         `${where}: missing required ${JSON.stringify(k)}`,
       );
     }
   }
-  const arr = expectArray(o['members'], `${where}.members`);
-  const members = arr.map((e, i) =>
-    parseInstanceValue(e, `${where}.members[${i}]`),
+  const arr = expectArray(o['entries'], `${where}.entries`);
+  const entries = arr.map((e, i) =>
+    parseInstanceValue(e, `${where}.entries[${i}]`),
   );
   return templateInstance({
     id: parseTemplateInstanceId(o['id'], `${where}.id`),
     modelVersion: expectString(o['modelVersion'], `${where}.modelVersion`),
     metadata: parseCatalogMetadata(o['metadata'], `${where}.metadata`),
     templateRef: parseTemplateId(o['templateRef'], `${where}.templateRef`),
-    members,
+    entries,
   });
 }

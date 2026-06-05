@@ -48,7 +48,7 @@ import {
   emailFieldSpec,
   emailValue,
   enumValue,
-  fieldValue,
+  fieldEntry,
   fullDateValue,
   isEmbeddedField,
   meaning,
@@ -649,16 +649,16 @@ export const fieldSummary: readonly EmbeddedFieldSummary[] =
 //
 // TemplateInstance carries ArtifactMetadata (NOT SchemaArtifactMetadata —
 // instances are not independently versioned) and references its Template
-// by IRI. Each `fieldValue(...)` call collects one or more typed Values
+// by IRI. Each `fieldEntry(...)` call collects one or more typed Values
 // for a single embedded-field key; the varargs form lets multi-valued
-// fields supply all values within one FieldValue.
+// fields supply all values within one FieldEntry.
 //
 // Cross-template alignment (that the keys actually identify embeddings,
 // that values match the referenced Field's FieldSpec, that cardinality
 // constraints are satisfied) is enforced at validation, not by the
 // constructor — the structural layer only enforces that keys are unique
-// (or, for templates, that a key is not used as both a FieldValue site
-// and a NestedTemplateInstance site).
+// (or, for templates, that a key is not used as both a FieldEntry site
+// and a TemplateEntry site).
 
 export const exampleInstance: TemplateInstance = templateInstance({
   id: templateInstanceId('https://example.org/cedar/instances/pi/0001'),
@@ -668,55 +668,55 @@ export const exampleInstance: TemplateInstance = templateInstance({
     'Example PI details for study EX-2026-001.',
   ),
   templateRef: principalInvestigatorTemplate.id,
-  members: [
-    fieldValue(
+  entries: [
+    fieldEntry(
       'full_name',
       textValue('Jane Smith'),
     ),
     // Enum value: a Token referring to one of the spec's permissibleValues.
-    fieldValue('academic_title', enumValue('associate-professor')),
+    fieldEntry('academic_title', enumValue('associate-professor')),
     // Same shape for an ontology-backed enum — RDF projection follows the
     // spec's Meaning bindings.
-    fieldValue('academic_rank', enumValue('associate-professor')),
-    fieldValue(
+    fieldEntry('academic_rank', enumValue('associate-professor')),
+    fieldEntry(
       'email',
       emailValue('jane.smith@stanford.edu'),
     ),
-    fieldValue(
+    fieldEntry(
       'orcid',
       orcidValue('https://orcid.org/0000-0002-1234-5678'),
     ),
-    fieldValue(
+    fieldEntry(
       'institution_name',
       textValue('Stanford University'),
     ),
-    fieldValue(
+    fieldEntry(
       'institution_ror',
       rorValue('https://ror.org/00f54p054'),
     ),
-    fieldValue(
+    fieldEntry(
       'appointment_date',
       fullDateValue('2018-09-01'),
     ),
     // Boolean value — the PI is accepting new students. The
     // `booleanValue()` constructor accepts a bare JavaScript boolean and
     // wraps it as a BooleanValue.
-    fieldValue(
+    fieldEntry(
       'accepting_new_students',
       booleanValue(true),
     ),
     // Open-lookup controlled-term value: a MeSH descriptor IRI plus its
     // English label. The `term` IRI here is the MeSH descriptor for
     // "Medical Informatics".
-    fieldValue(
+    fieldEntry(
       'primary_research_area',
       controlledTermValue({
         term: MESH_MEDICAL_INFORMATICS_TERM_IRI,
         label: 'Medical Informatics',
       }),
     ),
-    // Multi-valued field — three TextValues collected in one FieldValue.
-    fieldValue(
+    // Multi-valued field — three TextValues collected in one FieldEntry.
+    fieldEntry(
       'research_interests',
       textValue('biomedical informatics'),
       textValue('metadata standards'),

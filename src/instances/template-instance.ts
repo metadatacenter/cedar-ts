@@ -6,11 +6,11 @@ import {
   templateId,
 } from '../identifiers.js';
 import type { CatalogMetadata } from '../metadata/index.js';
-import { isFieldValue } from './field-value.js';
+import { isFieldEntry } from './field-entry.js';
 import {
-  isNestedTemplateInstance,
-  type InstanceValue,
-} from './nested-template-instance.js';
+  isTemplateEntry,
+  type InstanceEntry,
+} from './template-entry.js';
 
 // TemplateInstance — see grammar.md §Instances.
 // An Artifact recording data conforming to a specific Template. Carries
@@ -24,7 +24,7 @@ export interface TemplateInstance {
   readonly modelVersion: string;
   readonly metadata: CatalogMetadata;
   readonly templateRef: TemplateId;
-  readonly members: readonly InstanceValue[];
+  readonly entries: readonly InstanceEntry[];
 }
 
 export interface TemplateInstanceInit {
@@ -32,17 +32,17 @@ export interface TemplateInstanceInit {
   readonly modelVersion: string;
   readonly metadata: CatalogMetadata;
   readonly templateRef: TemplateId | string;
-  readonly members?: readonly InstanceValue[];
+  readonly entries?: readonly InstanceEntry[];
 }
 
 // Constructor. Enforces the structural invariants implied by the grammar
 // without consulting the referenced Template:
-//   - A given EmbeddedArtifactKey appears as a FieldValue at most once
-//     (multi-valued fields collect all values within a single FieldValue).
-//   - A given EmbeddedArtifactKey does not appear as both a FieldValue and
-//     a NestedTemplateInstance (a key in the template identifies one site,
+//   - A given EmbeddedArtifactKey appears as a FieldEntry at most once
+//     (multi-valued fields collect all values within a single FieldEntry).
+//   - A given EmbeddedArtifactKey does not appear as both a FieldEntry and
+//     a TemplateEntry (a key in the template identifies one site,
 //     which is either a Field embedding or a Template embedding, not both).
-// Multiple NestedTemplateInstance entries sharing a key ARE permitted: this
+// Multiple TemplateEntry entries sharing a key ARE permitted: this
 // is the structural representation of multi-cardinality template embeddings
 // (grammar §Instances).
 //
@@ -51,8 +51,8 @@ export interface TemplateInstanceInit {
 // FieldSpec, that cardinality constraints are satisfied) is enforced at
 // validation, not here.
 export function templateInstance(init: TemplateInstanceInit): TemplateInstance {
-  const members = init.members ?? [];
-  assertConsistentInstanceValueKeys(members);
+  const entries = init.entries ?? [];
+  assertConsistentInstanceValueKeys(entries);
   return {
     kind: 'TemplateInstance',
     id: typeof init.id === 'string' ? templateInstanceId(init.id) : init.id,
@@ -62,33 +62,33 @@ export function templateInstance(init: TemplateInstanceInit): TemplateInstance {
       typeof init.templateRef === 'string'
         ? templateId(init.templateRef)
         : init.templateRef,
-    members,
+    entries,
   };
 }
 
 function assertConsistentInstanceValueKeys(
-  members: readonly InstanceValue[],
+  entries: readonly InstanceEntry[],
 ): void {
   const fieldKeys = new Set<string>();
   const templateKeys = new Set<string>();
-  for (const v of members) {
+  for (const v of entries) {
     const k = v.key;
-    if (isFieldValue(v)) {
+    if (isFieldEntry(v)) {
       if (fieldKeys.has(k)) {
         throw new CedarConstructionError(
-          `Duplicate FieldValue key in TemplateInstance: ${JSON.stringify(k)}`,
+          `Duplicate FieldEntry key in TemplateInstance: ${JSON.stringify(k)}`,
         );
       }
       if (templateKeys.has(k)) {
         throw new CedarConstructionError(
-          `EmbeddedArtifactKey ${JSON.stringify(k)} appears as both a FieldValue and a NestedTemplateInstance in TemplateInstance`,
+          `EmbeddedArtifactKey ${JSON.stringify(k)} appears as both a FieldEntry and a TemplateEntry in TemplateInstance`,
         );
       }
       fieldKeys.add(k);
-    } else if (isNestedTemplateInstance(v)) {
+    } else if (isTemplateEntry(v)) {
       if (fieldKeys.has(k)) {
         throw new CedarConstructionError(
-          `EmbeddedArtifactKey ${JSON.stringify(k)} appears as both a FieldValue and a NestedTemplateInstance in TemplateInstance`,
+          `EmbeddedArtifactKey ${JSON.stringify(k)} appears as both a FieldEntry and a TemplateEntry in TemplateInstance`,
         );
       }
       templateKeys.add(k);

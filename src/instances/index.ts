@@ -4,15 +4,15 @@
 //
 // Re-exports:
 //
-//   - FieldValue                          (field-value.ts):
+//   - FieldEntry                          (field-value.ts):
 //       carries one or more typed Values for an embedded-field key
-//   - NestedTemplateInstance + InstanceValue union
+//   - TemplateEntry + InstanceEntry union
 //                                         (nested-template-instance.ts):
 //       recursive instance-side construct for embedded sub-templates;
-//       InstanceValue is the FieldValue | NestedTemplateInstance union
+//       InstanceEntry is the FieldEntry | TemplateEntry union
 //   - TemplateInstance                    (template-instance.ts):
 //       top-level instance-side artifact; conforms to a Template
-//   - isInstanceValue (this file)         predicate over the InstanceValue
+//   - isInstanceEntry (this file)         predicate over the InstanceEntry
 //                                         union
 //   - Artifact union and isArtifact (this file):
 //       top-level union of every artifact kind:
@@ -21,17 +21,17 @@
 //       last layer needed to express the union.
 
 export {
-  type FieldValue,
-  fieldValue,
-  isFieldValue,
-} from './field-value.js';
+  type FieldEntry,
+  fieldEntry,
+  isFieldEntry,
+} from './field-entry.js';
 
 export {
-  type InstanceValue,
-  type NestedTemplateInstance,
-  nestedTemplateInstance,
-  isNestedTemplateInstance,
-} from './nested-template-instance.js';
+  type InstanceEntry,
+  type TemplateEntry,
+  templateEntry,
+  isTemplateEntry,
+} from './template-entry.js';
 
 export {
   type TemplateInstance,
@@ -40,14 +40,14 @@ export {
   isTemplateInstance,
 } from './template-instance.js';
 
-import { isFieldValue } from './field-value.js';
+import { isFieldEntry } from './field-entry.js';
 import {
-  isNestedTemplateInstance,
-  type InstanceValue,
-} from './nested-template-instance.js';
+  isTemplateEntry,
+  type InstanceEntry,
+} from './template-entry.js';
 
-export const isInstanceValue = (x: unknown): x is InstanceValue =>
-  isFieldValue(x) || isNestedTemplateInstance(x);
+export const isInstanceEntry = (x: unknown): x is InstanceEntry =>
+  isFieldEntry(x) || isTemplateEntry(x);
 
 // Artifact — see grammar.md §Core Structure.
 // Top-level union of all artifact kinds: SchemaArtifact (Field | Template),

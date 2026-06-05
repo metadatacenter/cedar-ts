@@ -44,7 +44,7 @@ import {
   emailField,
   emailFieldSpec,
   emailValue,
-  fieldValue,
+  fieldEntry,
   fullDateValue,
   imageComponent,
   multilingualString,
@@ -57,7 +57,7 @@ import {
   multiValuedEnumFieldSpec,
   multiValuedEnumField,
   singleValuedEnumField,
-  nestedTemplateInstance,
+  templateEntry,
   nihGrantIdField,
   nihGrantIdFieldSpec,
   nihGrantIdValue,
@@ -1153,41 +1153,41 @@ const sampleInstance = templateInstance({
   modelVersion: MV,
   metadata: am,
   templateRef: 'https://example.org/templates/demo',
-  values: [
-    fieldValue('title', textValue('hello')),
-    nestedTemplateInstance('sub', [
-      fieldValue('inner', textValue('world')),
+  entries: [
+    fieldEntry('title', textValue('hello')),
+    templateEntry('sub', [
+      fieldEntry('inner', textValue('world')),
     ]),
   ],
 });
 
 describe('TemplateInstance round-trip', () => {
-  it('round-trips with FieldValue and NestedTemplateInstance', () => {
+  it('round-trips with FieldEntry and TemplateEntry', () => {
     const wire = serializeTemplateInstance(sampleInstance);
     const back = parseTemplateInstance(wire);
     expect(serializeTemplateInstance(back)).toEqual(wire);
   });
 
-  it('FieldValue rejects empty values array', () => {
+  it('FieldEntry rejects empty values array', () => {
     expect(() =>
-      parseFieldValue({ kind: 'FieldValue', key: 'k', values: [] }),
+      parseFieldValue({ kind: 'FieldEntry', key: 'k', values: [] }),
     ).toThrow(/non-empty/);
   });
 
-  it('NestedTemplateInstance permits empty values', () => {
-    const n = nestedTemplateInstance('e');
+  it('TemplateEntry permits empty values', () => {
+    const n = templateEntry('e');
     const wire = serializeNestedTemplateInstance(n);
     expect(parseNestedTemplateInstance(wire)).toEqual(n);
   });
 
-  it('InstanceValue rejects unknown kind', () => {
+  it('InstanceEntry rejects unknown kind', () => {
     expect(() =>
       parseInstanceValue({ kind: 'NotAValue', key: 'x', values: [] }),
     ).toThrow(/Expected kind/);
   });
 
-  it('FieldValue serialize / parse round-trip', () => {
-    const fv = fieldValue('k', textValue('v'));
+  it('FieldEntry serialize / parse round-trip', () => {
+    const fv = fieldEntry('k', textValue('v'));
     const wire = serializeFieldValue(fv);
     expect(parseFieldValue(wire)).toEqual(fv);
   });

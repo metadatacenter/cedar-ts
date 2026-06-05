@@ -29,7 +29,7 @@
 //                      non-field embedded types (EmbeddedTemplate,
 //                      EmbeddedPresentationComponent)
 //   - template.ts    : Template artifact and the SchemaArtifact union
-//   - instances/     : TemplateInstance, FieldValue, NestedTemplateInstance
+//   - instances/     : TemplateInstance, FieldEntry, TemplateEntry
 
 export * from './leaves/index.js';
 export * from './multilingual.js';

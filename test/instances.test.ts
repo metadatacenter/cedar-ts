@@ -4,14 +4,14 @@ import {
   attributeValueField,
   attributeValueFieldId,
   attributeValueFieldSpec,
-  fieldValue,
+  fieldEntry,
   fullDateValue,
   isArtifact,
-  isFieldValue,
-  isInstanceValue,
-  isNestedTemplateInstance,
+  isFieldEntry,
+  isInstanceEntry,
+  isTemplateEntry,
   isTemplateInstance,
-  nestedTemplateInstance,
+  templateEntry,
   integerNumberValue,
   presentationComponentId,
   richTextComponent,
@@ -23,7 +23,7 @@ import {
   lifecycleMetadata,
   textValue,
   type Artifact,
-  type InstanceValue,
+  type InstanceEntry,
   type TemplateInstance,
 } from '../src/index.js';
 
@@ -39,23 +39,23 @@ const tref = templateId('https://example.org/templates/demo');
 const titleKey = 'title';
 const studyArmKey = 'study_arm';
 
-describe('FieldValue', () => {
-  it('builds a FieldValue with a single value', () => {
-    const fv = fieldValue(titleKey, textValue('Hello'));
-    expect(fv.kind).toBe('FieldValue');
+describe('FieldEntry', () => {
+  it('builds a FieldEntry with a single value', () => {
+    const fv = fieldEntry(titleKey, textValue('Hello'));
+    expect(fv.kind).toBe('FieldEntry');
     expect(fv.key).toBe(titleKey);
     expect(fv.values).toHaveLength(1);
-    expect(isFieldValue(fv)).toBe(true);
-    expect(isInstanceValue(fv)).toBe(true);
+    expect(isFieldEntry(fv)).toBe(true);
+    expect(isInstanceEntry(fv)).toBe(true);
   });
 
   it('accepts a bare string as the key', () => {
-    const fv = fieldValue('title', textValue('Hello'));
+    const fv = fieldEntry('title', textValue('Hello'));
     expect(fv.key).toBe('title');
   });
 
-  it('builds a FieldValue with multiple values for a multi-valued field', () => {
-    const fv = fieldValue(
+  it('builds a FieldEntry with multiple values for a multi-valued field', () => {
+    const fv = fieldEntry(
       'keywords',
       textValue('alpha'),
       textValue('beta'),
@@ -65,33 +65,33 @@ describe('FieldValue', () => {
   });
 
   it('rejects construction without at least one Value at the type level', () => {
-    // @ts-expect-error fieldValue requires at least one Value (Value+ in the grammar)
-    expect(() => fieldValue(titleKey)).toBeDefined();
+    // @ts-expect-error fieldEntry requires at least one Value (Value+ in the grammar)
+    expect(() => fieldEntry(titleKey)).toBeDefined();
   });
 });
 
-describe('NestedTemplateInstance', () => {
-  it('defaults to empty members when none are supplied', () => {
-    const nti = nestedTemplateInstance(studyArmKey);
-    expect(nti.kind).toBe('NestedTemplateInstance');
-    expect(nti.members).toEqual([]);
-    expect(isNestedTemplateInstance(nti)).toBe(true);
-    expect(isInstanceValue(nti)).toBe(true);
+describe('TemplateEntry', () => {
+  it('defaults to empty entries when none are supplied', () => {
+    const nti = templateEntry(studyArmKey);
+    expect(nti.kind).toBe('TemplateEntry');
+    expect(nti.entries).toEqual([]);
+    expect(isTemplateEntry(nti)).toBe(true);
+    expect(isInstanceEntry(nti)).toBe(true);
   });
 
   it('accepts a bare string as the key', () => {
-    const nti = nestedTemplateInstance('study_arm');
+    const nti = templateEntry('study_arm');
     expect(nti.key).toBe('study_arm');
   });
 
-  it('supports recursive nesting via InstanceValue', () => {
-    const inner = fieldValue(titleKey, textValue('Arm A'));
-    const nti = nestedTemplateInstance(studyArmKey, [inner]);
-    expect(nti.members).toHaveLength(1);
-    expect(isFieldValue(nti.members[0])).toBe(true);
+  it('supports recursive nesting via InstanceEntry', () => {
+    const inner = fieldEntry(titleKey, textValue('Arm A'));
+    const nti = templateEntry(studyArmKey, [inner]);
+    expect(nti.entries).toHaveLength(1);
+    expect(isFieldEntry(nti.entries[0])).toBe(true);
 
-    const deeper = nestedTemplateInstance('outer', [nti]);
-    expect(isNestedTemplateInstance(deeper.members[0])).toBe(true);
+    const deeper = templateEntry('outer', [nti]);
+    expect(isTemplateEntry(deeper.entries[0])).toBe(true);
   });
 });
 
@@ -106,7 +106,7 @@ describe('TemplateInstance', () => {
   it('builds an empty TemplateInstance', () => {
     const ti = templateInstance(baseInit);
     expect(ti.kind).toBe('TemplateInstance');
-    expect(ti.members).toEqual([]);
+    expect(ti.entries).toEqual([]);
     expect(ti.templateRef.iri.value).toBe('https://example.org/templates/demo');
     expect(isTemplateInstance(ti)).toBe(true);
   });
@@ -128,74 +128,74 @@ describe('TemplateInstance', () => {
     const k3 = 'c';
     const ti = templateInstance({
       ...baseInit,
-      members: [
-        fieldValue(k1, textValue('A')),
-        nestedTemplateInstance(k2),
-        fieldValue(k3, textValue('C')),
+      entries: [
+        fieldEntry(k1, textValue('A')),
+        templateEntry(k2),
+        fieldEntry(k3, textValue('C')),
       ],
     });
-    expect(ti.members.map((v) => v.key)).toEqual(['a', 'b', 'c']);
+    expect(ti.entries.map((v) => v.key)).toEqual(['a', 'b', 'c']);
   });
 
-  it('permits multiple NestedTemplateInstance entries with the same key (multi-cardinality)', () => {
+  it('permits multiple TemplateEntry entries with the same key (multi-cardinality)', () => {
     const ti = templateInstance({
       ...baseInit,
-      members: [
-        nestedTemplateInstance(studyArmKey, [
-          fieldValue(titleKey, textValue('Arm A')),
+      entries: [
+        templateEntry(studyArmKey, [
+          fieldEntry(titleKey, textValue('Arm A')),
         ]),
-        nestedTemplateInstance(studyArmKey, [
-          fieldValue(titleKey, textValue('Arm B')),
+        templateEntry(studyArmKey, [
+          fieldEntry(titleKey, textValue('Arm B')),
         ]),
       ],
     });
-    expect(ti.members).toHaveLength(2);
-    expect(ti.members.every((v) => v.key === 'study_arm')).toBe(true);
+    expect(ti.entries).toHaveLength(2);
+    expect(ti.entries.every((v) => v.key === 'study_arm')).toBe(true);
   });
 
   it('rejects two FieldValues sharing a key', () => {
     expect(() =>
       templateInstance({
         ...baseInit,
-        members: [
-          fieldValue(titleKey, textValue('A')),
-          fieldValue(titleKey, textValue('B')),
+        entries: [
+          fieldEntry(titleKey, textValue('A')),
+          fieldEntry(titleKey, textValue('B')),
         ],
       }),
-    ).toThrow(/Duplicate FieldValue key/);
+    ).toThrow(/Duplicate FieldEntry key/);
   });
 
-  it('rejects a key that appears as both a FieldValue and a NestedTemplateInstance', () => {
+  it('rejects a key that appears as both a FieldEntry and a TemplateEntry', () => {
     expect(() =>
       templateInstance({
         ...baseInit,
-        members: [
-          fieldValue(titleKey, textValue('A')),
-          nestedTemplateInstance(titleKey),
+        entries: [
+          fieldEntry(titleKey, textValue('A')),
+          templateEntry(titleKey),
         ],
       }),
-    ).toThrow(/both a FieldValue and a NestedTemplateInstance/);
+    ).toThrow(/both a FieldEntry and a TemplateEntry/);
 
     expect(() =>
       templateInstance({
         ...baseInit,
-        members: [
-          nestedTemplateInstance(titleKey),
-          fieldValue(titleKey, textValue('A')),
+        entries: [
+          templateEntry(titleKey),
+          fieldEntry(titleKey, textValue('A')),
         ],
       }),
-    ).toThrow(/both a FieldValue and a NestedTemplateInstance/);
+    ).toThrow(/both a FieldEntry and a TemplateEntry/);
   });
 
   it('accepts FieldValues drawn from any Value family', () => {
     const ti: TemplateInstance = templateInstance({
       ...baseInit,
-      members: [
-        fieldValue('count', integerNumberValue('1')),
-        fieldValue('born', fullDateValue('1990-01-01')),
+      entries: [
+        fieldEntry('count', integerNumberValue('1')),
+        fieldEntry('born', fullDateValue('1990-01-01')),
       ],
     });
-    const all: InstanceValue[] = [...ti.members];
+    const all: InstanceEntry[] = [...ti.entries];
     expect(all).toHaveLength(2);
   });
 });
@@ -237,7 +237,7 @@ describe('Artifact union', () => {
     for (const a of all) expect(isArtifact(a)).toBe(true);
 
     expect(isArtifact({ kind: 'EmbeddedTextField' })).toBe(false);
-    expect(isArtifact({ kind: 'FieldValue' })).toBe(false);
+    expect(isArtifact({ kind: 'FieldEntry' })).toBe(false);
     expect(isArtifact(null)).toBe(false);
   });
 });
