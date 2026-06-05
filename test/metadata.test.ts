@@ -124,20 +124,20 @@ describe('ArtifactMetadata and SchemaArtifactMetadata', () => {
     expect(m.altLabels).toEqual([]);
     expect(m.annotations).toEqual([]);
     expect('description' in m).toBe(false);
-    expect('identifier' in m).toBe(false);
+    expect('externalSourceId' in m).toBe(false);
   });
 
   it('passes through optional descriptive fields when provided', () => {
     const m = catalogMetadata({
       preferredLabel: 'Study title',
       description: 'The study title',
-      identifier: 'study-001',
+      externalSourceId: 'study-001',
       altLabels: ['Title', 'Name of study'],
       lifecycle: tp,
     });
     expect(m.preferredLabel).toEqual([{ value: 'Study title', lang: 'und' }]);
     expect(m.description).toEqual([{ value: 'The study title', lang: 'und' }]);
-    expect(m.identifier).toBe('study-001');
+    expect(m.externalSourceId).toBe('study-001');
     expect(m.altLabels).toEqual([
       [{ value: 'Title', lang: 'und' }],
       [{ value: 'Name of study', lang: 'und' }],

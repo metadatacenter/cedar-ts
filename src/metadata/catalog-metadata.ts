@@ -29,13 +29,15 @@ import type { Annotation } from './annotations.js';
 // we don't introduce dedicated leaf wrappers per descriptive property; the
 // property name preserves the grammar's distinction. `preferredLabel`,
 // `description`, and each entry of `altLabels` are MultilingualStrings —
-// non-empty sets of language-tagged localizations. `identifier` is a plain
-// string (a technical key, not human-readable display text).
+// non-empty sets of language-tagged localizations. `externalSourceId` is a
+// plain string: a technical key recording some external or institutional
+// system's identifier for this artifact (distinct from the artifact's own
+// IRI identity), not human-readable display text.
 
 export interface CatalogMetadata {
   readonly preferredLabel?: MultilingualString;
   readonly description?: MultilingualString;
-  readonly identifier?: string;
+  readonly externalSourceId?: string;
   readonly altLabels: readonly MultilingualString[];
   readonly lifecycle: LifecycleMetadata;
   readonly annotations: readonly Annotation[];
@@ -44,7 +46,7 @@ export interface CatalogMetadata {
 export interface CatalogMetadataInit {
   readonly preferredLabel?: MultilingualStringInput;
   readonly description?: MultilingualStringInput;
-  readonly identifier?: string;
+  readonly externalSourceId?: string;
   readonly altLabels?: readonly MultilingualStringInput[];
   readonly lifecycle: LifecycleMetadata;
   readonly annotations?: readonly Annotation[];
@@ -54,7 +56,7 @@ export function catalogMetadata(init: CatalogMetadataInit): CatalogMetadata {
   const out: {
     preferredLabel?: MultilingualString;
     description?: MultilingualString;
-    identifier?: string;
+    externalSourceId?: string;
     altLabels: readonly MultilingualString[];
     lifecycle: LifecycleMetadata;
     annotations: readonly Annotation[];
@@ -66,6 +68,7 @@ export function catalogMetadata(init: CatalogMetadataInit): CatalogMetadata {
   if (init.preferredLabel !== undefined)
     out.preferredLabel = multilingualString(init.preferredLabel);
   if (init.description !== undefined) out.description = multilingualString(init.description);
-  if (init.identifier !== undefined) out.identifier = init.identifier;
+  if (init.externalSourceId !== undefined)
+    out.externalSourceId = init.externalSourceId;
   return out;
 }

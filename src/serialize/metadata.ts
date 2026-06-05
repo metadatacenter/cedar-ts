@@ -202,7 +202,7 @@ export function parseAnnotation(x: unknown, where = 'Annotation'): Annotation {
 // ---- CatalogMetadata ------------------------------------------------
 //
 // Wire form is flat: the descriptive properties (preferredLabel,
-// description, identifier, altLabels) sit directly alongside
+// description, externalSourceId, altLabels) sit directly alongside
 // `lifecycle` and `annotations`. Empty `altLabels` and `annotations`
 // are elided. `preferredLabel` is optional.
 //
@@ -213,7 +213,7 @@ export function parseAnnotation(x: unknown, where = 'Annotation'): Annotation {
 const CATALOG_METADATA_KEYS = [
   'preferredLabel',
   'description',
-  'identifier',
+  'externalSourceId',
   'altLabels',
   'lifecycle',
   'annotations',
@@ -225,7 +225,8 @@ export function serializeCatalogMetadata(x: CatalogMetadata): unknown {
     out['preferredLabel'] = serializeMultilingualString(x.preferredLabel);
   if (x.description !== undefined)
     out['description'] = serializeMultilingualString(x.description);
-  if (x.identifier !== undefined) out['identifier'] = x.identifier;
+  if (x.externalSourceId !== undefined)
+    out['externalSourceId'] = x.externalSourceId;
   if (x.altLabels.length > 0)
     out['altLabels'] = x.altLabels.map(serializeMultilingualString);
   out['lifecycle'] = serializeLifecycleMetadata(x.lifecycle);
@@ -242,7 +243,7 @@ export function parseCatalogMetadata(
   expectKnownProperties(o, [...CATALOG_METADATA_KEYS]);
   rejectNullProperty(o, 'preferredLabel');
   rejectNullProperty(o, 'description');
-  rejectNullProperty(o, 'identifier');
+  rejectNullProperty(o, 'externalSourceId');
   if (!('lifecycle' in o)) {
     throw new CedarConstructionError(`${where}: missing required "lifecycle"`);
   }
@@ -255,7 +256,7 @@ export function parseCatalogMetadata(
   const init: {
     preferredLabel?: ReturnType<typeof parseMultilingualString>;
     description?: ReturnType<typeof parseMultilingualString>;
-    identifier?: string;
+    externalSourceId?: string;
     altLabels: readonly ReturnType<typeof parseMultilingualString>[];
     lifecycle: LifecycleMetadata;
     annotations: readonly Annotation[];
@@ -275,7 +276,10 @@ export function parseCatalogMetadata(
     );
   if ('description' in o)
     init.description = parseMultilingualString(o['description'], `${where}.description`);
-  if ('identifier' in o)
-    init.identifier = expectString(o['identifier'], `${where}.identifier`);
+  if ('externalSourceId' in o)
+    init.externalSourceId = expectString(
+      o['externalSourceId'],
+      `${where}.externalSourceId`,
+    );
   return catalogMetadata(init);
 }
