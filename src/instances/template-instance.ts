@@ -24,7 +24,7 @@ export interface TemplateInstance {
   readonly modelVersion: string;
   readonly metadata: CatalogMetadata;
   readonly templateRef: TemplateId;
-  readonly values: readonly InstanceValue[];
+  readonly members: readonly InstanceValue[];
 }
 
 export interface TemplateInstanceInit {
@@ -32,7 +32,7 @@ export interface TemplateInstanceInit {
   readonly modelVersion: string;
   readonly metadata: CatalogMetadata;
   readonly templateRef: TemplateId | string;
-  readonly values?: readonly InstanceValue[];
+  readonly members?: readonly InstanceValue[];
 }
 
 // Constructor. Enforces the structural invariants implied by the grammar
@@ -51,8 +51,8 @@ export interface TemplateInstanceInit {
 // FieldSpec, that cardinality constraints are satisfied) is enforced at
 // validation, not here.
 export function templateInstance(init: TemplateInstanceInit): TemplateInstance {
-  const values = init.values ?? [];
-  assertConsistentInstanceValueKeys(values);
+  const members = init.members ?? [];
+  assertConsistentInstanceValueKeys(members);
   return {
     kind: 'TemplateInstance',
     id: typeof init.id === 'string' ? templateInstanceId(init.id) : init.id,
@@ -62,16 +62,16 @@ export function templateInstance(init: TemplateInstanceInit): TemplateInstance {
       typeof init.templateRef === 'string'
         ? templateId(init.templateRef)
         : init.templateRef,
-    values,
+    members,
   };
 }
 
 function assertConsistentInstanceValueKeys(
-  values: readonly InstanceValue[],
+  members: readonly InstanceValue[],
 ): void {
   const fieldKeys = new Set<string>();
   const templateKeys = new Set<string>();
-  for (const v of values) {
+  for (const v of members) {
     const k = v.key;
     if (isFieldValue(v)) {
       if (fieldKeys.has(k)) {

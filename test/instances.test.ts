@@ -71,10 +71,10 @@ describe('FieldValue', () => {
 });
 
 describe('NestedTemplateInstance', () => {
-  it('defaults to empty values when none are supplied', () => {
+  it('defaults to empty members when none are supplied', () => {
     const nti = nestedTemplateInstance(studyArmKey);
     expect(nti.kind).toBe('NestedTemplateInstance');
-    expect(nti.values).toEqual([]);
+    expect(nti.members).toEqual([]);
     expect(isNestedTemplateInstance(nti)).toBe(true);
     expect(isInstanceValue(nti)).toBe(true);
   });
@@ -87,11 +87,11 @@ describe('NestedTemplateInstance', () => {
   it('supports recursive nesting via InstanceValue', () => {
     const inner = fieldValue(titleKey, textValue('Arm A'));
     const nti = nestedTemplateInstance(studyArmKey, [inner]);
-    expect(nti.values).toHaveLength(1);
-    expect(isFieldValue(nti.values[0])).toBe(true);
+    expect(nti.members).toHaveLength(1);
+    expect(isFieldValue(nti.members[0])).toBe(true);
 
     const deeper = nestedTemplateInstance('outer', [nti]);
-    expect(isNestedTemplateInstance(deeper.values[0])).toBe(true);
+    expect(isNestedTemplateInstance(deeper.members[0])).toBe(true);
   });
 });
 
@@ -106,7 +106,7 @@ describe('TemplateInstance', () => {
   it('builds an empty TemplateInstance', () => {
     const ti = templateInstance(baseInit);
     expect(ti.kind).toBe('TemplateInstance');
-    expect(ti.values).toEqual([]);
+    expect(ti.members).toEqual([]);
     expect(ti.templateRef.iri.value).toBe('https://example.org/templates/demo');
     expect(isTemplateInstance(ti)).toBe(true);
   });
@@ -128,19 +128,19 @@ describe('TemplateInstance', () => {
     const k3 = 'c';
     const ti = templateInstance({
       ...baseInit,
-      values: [
+      members: [
         fieldValue(k1, textValue('A')),
         nestedTemplateInstance(k2),
         fieldValue(k3, textValue('C')),
       ],
     });
-    expect(ti.values.map((v) => v.key)).toEqual(['a', 'b', 'c']);
+    expect(ti.members.map((v) => v.key)).toEqual(['a', 'b', 'c']);
   });
 
   it('permits multiple NestedTemplateInstance entries with the same key (multi-cardinality)', () => {
     const ti = templateInstance({
       ...baseInit,
-      values: [
+      members: [
         nestedTemplateInstance(studyArmKey, [
           fieldValue(titleKey, textValue('Arm A')),
         ]),
@@ -149,15 +149,15 @@ describe('TemplateInstance', () => {
         ]),
       ],
     });
-    expect(ti.values).toHaveLength(2);
-    expect(ti.values.every((v) => v.key === 'study_arm')).toBe(true);
+    expect(ti.members).toHaveLength(2);
+    expect(ti.members.every((v) => v.key === 'study_arm')).toBe(true);
   });
 
   it('rejects two FieldValues sharing a key', () => {
     expect(() =>
       templateInstance({
         ...baseInit,
-        values: [
+        members: [
           fieldValue(titleKey, textValue('A')),
           fieldValue(titleKey, textValue('B')),
         ],
@@ -169,7 +169,7 @@ describe('TemplateInstance', () => {
     expect(() =>
       templateInstance({
         ...baseInit,
-        values: [
+        members: [
           fieldValue(titleKey, textValue('A')),
           nestedTemplateInstance(titleKey),
         ],
@@ -179,7 +179,7 @@ describe('TemplateInstance', () => {
     expect(() =>
       templateInstance({
         ...baseInit,
-        values: [
+        members: [
           nestedTemplateInstance(titleKey),
           fieldValue(titleKey, textValue('A')),
         ],
@@ -190,12 +190,12 @@ describe('TemplateInstance', () => {
   it('accepts FieldValues drawn from any Value family', () => {
     const ti: TemplateInstance = templateInstance({
       ...baseInit,
-      values: [
+      members: [
         fieldValue('count', integerNumberValue('1')),
         fieldValue('born', fullDateValue('1990-01-01')),
       ],
     });
-    const all: InstanceValue[] = [...ti.values];
+    const all: InstanceValue[] = [...ti.members];
     expect(all).toHaveLength(2);
   });
 });

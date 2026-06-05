@@ -668,7 +668,7 @@ export const exampleInstance: TemplateInstance = templateInstance({
     'Example PI details for study EX-2026-001.',
   ),
   templateRef: principalInvestigatorTemplate.id,
-  values: [
+  members: [
     fieldValue(
       'full_name',
       textValue('Jane Smith'),

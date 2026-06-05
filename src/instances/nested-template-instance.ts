@@ -10,24 +10,28 @@ import type { FieldValue } from './field-value.js';
 // entries sharing the same EmbeddedArtifactKey within the containing
 // TemplateInstance — in contrast to multi-valued EmbeddedFields, whose multiple
 // values are collected within a single FieldValue.
+//
+// The child entries live in `members` (an InstanceValue list), parallel to
+// Template.members on the schema side; this is distinct from FieldValue.values,
+// which carries data Values.
 
 export type InstanceValue = FieldValue | NestedTemplateInstance;
 
 export interface NestedTemplateInstance {
   readonly kind: 'NestedTemplateInstance';
   readonly key: string;
-  readonly values: readonly InstanceValue[];
+  readonly members: readonly InstanceValue[];
 }
 
 // `key` is validated against the ASCII-identifier pattern.
 export function nestedTemplateInstance(
   key: string,
-  values: readonly InstanceValue[] = [],
+  members: readonly InstanceValue[] = [],
 ): NestedTemplateInstance {
   return {
     kind: 'NestedTemplateInstance',
     key: parseAsciiIdentifier(key),
-    values,
+    members,
   };
 }
 
