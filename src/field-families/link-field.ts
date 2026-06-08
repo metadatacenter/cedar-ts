@@ -41,9 +41,9 @@ import {
 
 // Identifier for a `LinkField` reusable schema artifact: a typed wrapper
 // around the field's IRI. Distinguished at compile time and runtime from
-// sibling field-id types (e.g. `IntegerNumberFieldId`, `EmailFieldId`) so a caller
+// sibling field-id types (e.g. `IntegerFieldId`, `EmailFieldId`) so a caller
 // can't accidentally pass a `LinkField`'s IRI where (say) a
-// `IntegerNumberField`'s IRI is expected.
+// `IntegerField`'s IRI is expected.
 //
 // On the wire this collapses to a plain JSON string IRI; the typed
 // wrapper exists only in memory.
@@ -57,7 +57,7 @@ export interface LinkFieldId {
 // Idempotent: an existing LinkFieldId passes through unchanged. A bare
 // string IRI is validated and wrapped via `iri()`; a typed `Iri` is wrapped
 // without re-validation. The LinkFieldId wrapper is distinguished from
-// sibling field-id types (e.g. `IntegerNumberFieldId`, `EmailFieldId`) by the
+// sibling field-id types (e.g. `IntegerFieldId`, `EmailFieldId`) by the
 // per-variant `kind` discriminator.
 export const linkFieldId = (
   v: LinkFieldId | Iri | string,

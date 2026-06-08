@@ -13,7 +13,7 @@ import {
   property,
   isEmbeddedField,
   embeddedTextField,
-  embeddedIntegerNumberField,
+  embeddedIntegerField,
   embeddedDateField,
   embeddedSingleValuedEnumField,
   embeddedAttributeValueField,
@@ -26,14 +26,14 @@ import {
   type EmbeddedTextField,
   type EmbeddedDateField,
   textFieldId,
-  integerNumberFieldId,
+  integerFieldId,
   dateFieldId,
   singleValuedEnumFieldId,
   attributeValueFieldId,
   templateId,
   presentationComponentId,
   textValue,
-  integerNumberValue,
+  integerValue,
   textField,
   textFieldSpec,
   template,
@@ -236,7 +236,7 @@ describe('PromptOverride and Property', () => {
 });
 
 const txtRef = textFieldId('https://example.org/fields/title');
-const numRef = integerNumberFieldId('https://example.org/fields/age');
+const numRef = integerFieldId('https://example.org/fields/age');
 const dateRef = dateFieldId('https://example.org/fields/born');
 const enumRef = singleValuedEnumFieldId('https://example.org/fields/sex');
 const attrRef = attributeValueFieldId('https://example.org/fields/attr');
@@ -271,16 +271,16 @@ describe('EmbeddedField constructors', () => {
       artifactRef: txtRef,
     });
 
-    // @ts-expect-error TextFieldReference is not an IntegerNumberFieldReference
-    embeddedIntegerNumberField({ key: 'age', artifactRef: txtRef });
+    // @ts-expect-error TextFieldReference is not an IntegerFieldReference
+    embeddedIntegerField({ key: 'age', artifactRef: txtRef });
   });
 
   it('rejects a misaligned default value at the type level', () => {
-    // @ts-expect-error IntegerNumberValue cannot satisfy a TextField defaultValue (TextValue)
+    // @ts-expect-error IntegerValue cannot satisfy a TextField defaultValue (TextValue)
     embeddedTextField({
       key: 'title',
       artifactRef: txtRef,
-      defaultValue: integerNumberValue('1'),
+      defaultValue: integerValue('1'),
     });
   });
 
@@ -358,18 +358,18 @@ describe('EmbeddedField constructors', () => {
     expect(ef2.defaultValue).toBeUndefined();
   });
 
-  it('embeddedIntegerNumberField accepts a bare string defaultValue (the lexical form)', () => {
-    const ef = embeddedIntegerNumberField({
+  it('embeddedIntegerField accepts a bare string defaultValue (the lexical form)', () => {
+    const ef = embeddedIntegerField({
       key: 'count',
       artifactRef: numRef,
       defaultValue: '42',
     });
-    expect(ef.defaultValue?.kind).toBe('IntegerNumberValue');
+    expect(ef.defaultValue?.kind).toBe('IntegerValue');
     expect(ef.defaultValue?.value).toBe('42');
   });
 
   it('builds a numeric, date, and single-valued-enum embedding without errors', () => {
-    embeddedIntegerNumberField({ key: 'age', artifactRef: numRef });
+    embeddedIntegerField({ key: 'age', artifactRef: numRef });
     embeddedDateField({ key: 'born', artifactRef: dateRef });
     embeddedSingleValuedEnumField({ key: 'sex', artifactRef: enumRef });
   });

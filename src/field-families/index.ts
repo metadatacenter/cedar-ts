@@ -9,8 +9,9 @@
 //
 // Re-exports:
 //
-//   - all 21 per-family slices (text-field.ts, integer-number-field.ts,
-//     real-number-field.ts, boolean-field.ts, …, language-field.ts,
+//   - all 23 per-family slices (text-field.ts, integer-field.ts,
+//     decimal-field.ts, float-field.ts, double-field.ts,
+//     boolean-field.ts, …, language-field.ts,
 //     attribute-value-field.ts) — each contributes a FieldId, Value,
 //     FieldSpec, Field, and EmbeddedField type
 //   - rendering hints                 (rendering-hints.ts)
@@ -37,8 +38,10 @@ export * from './enum-shared.js';
 
 export * from './text-field.js';
 export * from './unit.js';
-export * from './integer-number-field.js';
-export * from './real-number-field.js';
+export * from './integer-field.js';
+export * from './decimal-field.js';
+export * from './float-field.js';
+export * from './double-field.js';
 export * from './boolean-field.js';
 export * from './date-field.js';
 export * from './time-field.js';
@@ -60,17 +63,29 @@ export * from './attribute-value-field.js';
 
 import type { TextField, TextFieldSpec, TextValue, EmbeddedTextField } from './text-field.js';
 import type {
-  IntegerNumberField,
-  IntegerNumberFieldSpec,
-  IntegerNumberValue,
-  EmbeddedIntegerNumberField,
-} from './integer-number-field.js';
+  IntegerField,
+  IntegerFieldSpec,
+  IntegerValue,
+  EmbeddedIntegerField,
+} from './integer-field.js';
 import type {
-  RealNumberField,
-  RealNumberFieldSpec,
-  RealNumberValue,
-  EmbeddedRealNumberField,
-} from './real-number-field.js';
+  DecimalField,
+  DecimalFieldSpec,
+  DecimalValue,
+  EmbeddedDecimalField,
+} from './decimal-field.js';
+import type {
+  FloatField,
+  FloatFieldSpec,
+  FloatValue,
+  EmbeddedFloatField,
+} from './float-field.js';
+import type {
+  DoubleField,
+  DoubleFieldSpec,
+  DoubleValue,
+  EmbeddedDoubleField,
+} from './double-field.js';
 import type { BooleanField, BooleanFieldSpec, BooleanValue, EmbeddedBooleanField } from './boolean-field.js';
 import type { DateField, DateFieldSpec, DateValue, EmbeddedDateField } from './date-field.js';
 import type { TimeField, TimeFieldSpec, TimeValue, EmbeddedTimeField } from './time-field.js';
@@ -113,13 +128,14 @@ import type {
 // Field union
 // =====================================================================
 
-export type NumericField = IntegerNumberField | RealNumberField;
 export type EnumField = SingleValuedEnumField | MultiValuedEnumField;
 
 export type Field =
   | TextField
-  | IntegerNumberField
-  | RealNumberField
+  | IntegerField
+  | DecimalField
+  | FloatField
+  | DoubleField
   | BooleanField
   | DateField
   | TimeField
@@ -141,8 +157,10 @@ export type Field =
 
 const FIELD_KINDS: ReadonlySet<string> = new Set([
   'TextField',
-  'IntegerNumberField',
-  'RealNumberField',
+  'IntegerField',
+  'DecimalField',
+  'FloatField',
+  'DoubleField',
   'BooleanField',
   'DateField',
   'TimeField',
@@ -176,8 +194,10 @@ export function isField(x: unknown): x is Field {
 
 export type EmbeddedField =
   | EmbeddedTextField
-  | EmbeddedIntegerNumberField
-  | EmbeddedRealNumberField
+  | EmbeddedIntegerField
+  | EmbeddedDecimalField
+  | EmbeddedFloatField
+  | EmbeddedDoubleField
   | EmbeddedBooleanField
   | EmbeddedDateField
   | EmbeddedTimeField
@@ -199,8 +219,10 @@ export type EmbeddedField =
 
 const EMBEDDED_FIELD_KINDS: ReadonlySet<string> = new Set([
   'EmbeddedTextField',
-  'EmbeddedIntegerNumberField',
-  'EmbeddedRealNumberField',
+  'EmbeddedIntegerField',
+  'EmbeddedDecimalField',
+  'EmbeddedFloatField',
+  'EmbeddedDoubleField',
   'EmbeddedBooleanField',
   'EmbeddedDateField',
   'EmbeddedTimeField',
@@ -232,12 +254,12 @@ export function isEmbeddedField(x: unknown): x is EmbeddedField {
 // FieldSpec union
 // =====================================================================
 
-export type NumericFieldSpec = IntegerNumberFieldSpec | RealNumberFieldSpec;
-
 export type FieldSpec =
   | TextFieldSpec
-  | IntegerNumberFieldSpec
-  | RealNumberFieldSpec
+  | IntegerFieldSpec
+  | DecimalFieldSpec
+  | FloatFieldSpec
+  | DoubleFieldSpec
   | BooleanFieldSpec
   | DateFieldSpec
   | TimeFieldSpec
@@ -259,8 +281,10 @@ export type FieldSpec =
 
 const FIELD_SPEC_KINDS: ReadonlySet<string> = new Set([
   'TextFieldSpec',
-  'IntegerNumberFieldSpec',
-  'RealNumberFieldSpec',
+  'IntegerFieldSpec',
+  'DecimalFieldSpec',
+  'FloatFieldSpec',
+  'DoubleFieldSpec',
   'BooleanFieldSpec',
   'DateFieldSpec',
   'TimeFieldSpec',
@@ -339,12 +363,12 @@ export function isExternalAuthorityFieldSpec(
 
 export type ContactFieldSpec = EmailFieldSpec | PhoneNumberFieldSpec;
 
-export type NumericValue = IntegerNumberValue | RealNumberValue;
-
 export type Value =
   | TextValue
-  | IntegerNumberValue
-  | RealNumberValue
+  | IntegerValue
+  | DecimalValue
+  | FloatValue
+  | DoubleValue
   | BooleanValue
   | DateValue
   | TimeValue
@@ -360,8 +384,10 @@ export type Value =
 
 const VALUE_KINDS: ReadonlySet<string> = new Set([
   'TextValue',
-  'IntegerNumberValue',
-  'RealNumberValue',
+  'IntegerValue',
+  'DecimalValue',
+  'FloatValue',
+  'DoubleValue',
   'BooleanValue',
   'YearValue',
   'YearMonthValue',
@@ -394,8 +420,10 @@ export function isValue(x: unknown): x is Value {
 // =====================================================================
 
 import type { TextFieldId } from './text-field.js';
-import type { IntegerNumberFieldId } from './integer-number-field.js';
-import type { RealNumberFieldId } from './real-number-field.js';
+import type { IntegerFieldId } from './integer-field.js';
+import type { DecimalFieldId } from './decimal-field.js';
+import type { FloatFieldId } from './float-field.js';
+import type { DoubleFieldId } from './double-field.js';
 import type { BooleanFieldId } from './boolean-field.js';
 import type { DateFieldId } from './date-field.js';
 import type { TimeFieldId } from './time-field.js';
@@ -417,8 +445,10 @@ import type { AttributeValueFieldId } from './attribute-value-field.js';
 
 export type FieldId =
   | TextFieldId
-  | IntegerNumberFieldId
-  | RealNumberFieldId
+  | IntegerFieldId
+  | DecimalFieldId
+  | FloatFieldId
+  | DoubleFieldId
   | BooleanFieldId
   | DateFieldId
   | TimeFieldId
@@ -440,8 +470,10 @@ export type FieldId =
 
 const FIELD_ID_KINDS: ReadonlySet<string> = new Set([
   'TextFieldId',
-  'IntegerNumberFieldId',
-  'RealNumberFieldId',
+  'IntegerFieldId',
+  'DecimalFieldId',
+  'FloatFieldId',
+  'DoubleFieldId',
   'BooleanFieldId',
   'DateFieldId',
   'TimeFieldId',

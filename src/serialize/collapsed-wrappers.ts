@@ -25,8 +25,10 @@ import {
 } from '../identifiers.js';
 import {
   type TextFieldId,
-  type IntegerNumberFieldId,
-  type RealNumberFieldId,
+  type IntegerFieldId,
+  type DecimalFieldId,
+  type FloatFieldId,
+  type DoubleFieldId,
   type BooleanFieldId,
   type DateFieldId,
   type TimeFieldId,
@@ -46,8 +48,10 @@ import {
   type LanguageFieldId,
   type AttributeValueFieldId,
   textFieldId,
-  integerNumberFieldId,
-  realNumberFieldId,
+  integerFieldId,
+  decimalFieldId,
+  floatFieldId,
+  doubleFieldId,
   booleanFieldId,
   dateFieldId,
   timeFieldId,
@@ -103,8 +107,10 @@ export function parseIsoDateTimeStamp(
 // position so the in-memory tag is correct.
 
 export const serializeTextFieldId = (x: TextFieldId): string => x.iri.value;
-export const serializeIntegerNumberFieldId = (x: IntegerNumberFieldId): string => x.iri.value;
-export const serializeRealNumberFieldId = (x: RealNumberFieldId): string => x.iri.value;
+export const serializeIntegerFieldId = (x: IntegerFieldId): string => x.iri.value;
+export const serializeDecimalFieldId = (x: DecimalFieldId): string => x.iri.value;
+export const serializeFloatFieldId = (x: FloatFieldId): string => x.iri.value;
+export const serializeDoubleFieldId = (x: DoubleFieldId): string => x.iri.value;
 export const serializeBooleanFieldId = (x: BooleanFieldId): string => x.iri.value;
 export const serializeDateFieldId = (x: DateFieldId): string => x.iri.value;
 export const serializeTimeFieldId = (x: TimeFieldId): string => x.iri.value;
@@ -126,10 +132,14 @@ export const serializeAttributeValueFieldId = (x: AttributeValueFieldId): string
 
 export const parseTextFieldId = (x: unknown, w = 'TextFieldId'): TextFieldId =>
   textFieldId(expectString(x, w));
-export const parseIntegerNumberFieldId = (x: unknown, w = 'IntegerNumberFieldId'): IntegerNumberFieldId =>
-  integerNumberFieldId(expectString(x, w));
-export const parseRealNumberFieldId = (x: unknown, w = 'RealNumberFieldId'): RealNumberFieldId =>
-  realNumberFieldId(expectString(x, w));
+export const parseIntegerFieldId = (x: unknown, w = 'IntegerFieldId'): IntegerFieldId =>
+  integerFieldId(expectString(x, w));
+export const parseDecimalFieldId = (x: unknown, w = 'DecimalFieldId'): DecimalFieldId =>
+  decimalFieldId(expectString(x, w));
+export const parseFloatFieldId = (x: unknown, w = 'FloatFieldId'): FloatFieldId =>
+  floatFieldId(expectString(x, w));
+export const parseDoubleFieldId = (x: unknown, w = 'DoubleFieldId'): DoubleFieldId =>
+  doubleFieldId(expectString(x, w));
 export const parseBooleanFieldId = (x: unknown, w = 'BooleanFieldId'): BooleanFieldId =>
   booleanFieldId(expectString(x, w));
 export const parseDateFieldId = (x: unknown, w = 'DateFieldId'): DateFieldId =>

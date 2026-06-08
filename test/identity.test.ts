@@ -3,8 +3,8 @@ import {
   CedarConstructionError,
   isFieldId,
   textFieldId,
-  integerNumberFieldId,
-  realNumberFieldId,
+  integerFieldId,
+  decimalFieldId,
   booleanFieldId,
   dateFieldId,
   timeFieldId,
@@ -54,8 +54,8 @@ describe('FieldId basics', () => {
 describe('FieldId — convenience helpers', () => {
   const helpers: Array<[string, (v: string) => { kind: string }]> = [
     ['TextFieldId', textFieldId],
-    ['IntegerNumberFieldId', integerNumberFieldId],
-    ['RealNumberFieldId', realNumberFieldId],
+    ['IntegerFieldId', integerFieldId],
+    ['DecimalFieldId', decimalFieldId],
     ['BooleanFieldId', booleanFieldId],
     ['DateFieldId', dateFieldId],
     ['TimeFieldId', timeFieldId],

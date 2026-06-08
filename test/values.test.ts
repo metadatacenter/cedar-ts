@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import {
   textValue,
-  integerNumberValue,
-  realNumberValue,
+  integerValue,
+  decimalValue,
   booleanValue,
   yearValue,
   yearMonthValue,
@@ -50,17 +50,16 @@ describe('Scalar values', () => {
     expect(lv.lang?.value).toBe('en');
   });
 
-  it('IntegerNumberValue carries a base-10 lexical form', () => {
-    const nv = integerNumberValue('42');
-    expect(nv.kind).toBe('IntegerNumberValue');
+  it('IntegerValue carries a base-10 lexical form', () => {
+    const nv = integerValue('42');
+    expect(nv.kind).toBe('IntegerValue');
     expect(nv.value).toBe('42');
   });
 
-  it('RealNumberValue carries a lexical form plus a datatype enum', () => {
-    const nv = realNumberValue('3.14', 'decimal');
-    expect(nv.kind).toBe('RealNumberValue');
+  it('DecimalValue carries a lexical form; datatype is fixed by the family', () => {
+    const nv = decimalValue('3.14');
+    expect(nv.kind).toBe('DecimalValue');
     expect(nv.value).toBe('3.14');
-    expect(nv.datatype).toBe('decimal');
   });
 
   it('BooleanValue carries a JSON boolean directly', () => {
@@ -219,7 +218,7 @@ describe('AttributeValue (recursive)', () => {
   });
 
   it('can nest another AttributeValue without bound', () => {
-    const inner = attributeValue('depth', integerNumberValue('3'));
+    const inner = attributeValue('depth', integerValue('3'));
     const middle = attributeValue('layer', inner);
     const outer = attributeValue('outer', middle);
     expect(outer.value.kind).toBe('AttributeValue');
@@ -230,8 +229,8 @@ describe('AttributeValue (recursive)', () => {
 describe('Value union recognition', () => {
   it('isValue accepts every concrete Value variant', () => {
     expect(isValue(textValue('x'))).toBe(true);
-    expect(isValue(integerNumberValue('1'))).toBe(true);
-    expect(isValue(realNumberValue('1.0', 'decimal'))).toBe(true);
+    expect(isValue(integerValue('1'))).toBe(true);
+    expect(isValue(decimalValue('1.0'))).toBe(true);
     expect(isValue(booleanValue(true))).toBe(true);
     expect(isValue(yearValue('2024'))).toBe(true);
     expect(isValue(yearMonthValue('2024-06'))).toBe(true);

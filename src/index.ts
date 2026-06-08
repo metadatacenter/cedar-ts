@@ -17,8 +17,9 @@
 //                      TemplateInstanceId, PresentationComponentId)
 //   - metadata/      : descriptive / lifecycle-metadata / schema-artifact-versioning /
 //                      annotations / artifact-metadata
-//   - field-families/: the 21 per-family vertical slices (TextField,
-//                      IntegerNumberField, RealNumberField, BooleanField,
+//   - field-families/: the 23 per-family vertical slices (TextField,
+//                      IntegerField, DecimalField, FloatField, DoubleField,
+//                      BooleanField,
 //                      …, LanguageField, AttributeValueField), plus the Field,
 //                      EmbeddedField, Value, FieldSpec unions. Each Value
 //                      type carries its content directly (no Literal layer).

@@ -2,8 +2,8 @@ import { describe, expect, it } from 'vitest';
 import {
   CedarConstructionError,
   textFieldSpec,
-  integerNumberFieldSpec,
-  realNumberFieldSpec,
+  integerFieldSpec,
+  decimalFieldSpec,
   numericRenderingHint,
   unit,
   dateFieldSpec,
@@ -39,11 +39,11 @@ import {
   dateRenderingHint,
   timeRenderingHint,
   dateTimeRenderingHint,
-  integerNumberValue,
-  realNumberValue,
+  integerValue,
+  decimalValue,
   isTextFieldSpec,
-  isIntegerNumberFieldSpec,
-  isRealNumberFieldSpec,
+  isIntegerFieldSpec,
+  isDecimalFieldSpec,
   isDateFieldSpec,
   isTimeFieldSpec,
   isDateTimeFieldSpec,
@@ -106,11 +106,11 @@ describe('TextFieldSpec', () => {
   });
 });
 
-describe('IntegerNumberFieldSpec', () => {
+describe('IntegerFieldSpec', () => {
   it('builds an empty spec when no constraints are supplied', () => {
-    const fs = integerNumberFieldSpec();
-    expect(fs.kind).toBe('IntegerNumberFieldSpec');
-    expect(isIntegerNumberFieldSpec(fs)).toBe(true);
+    const fs = integerFieldSpec();
+    expect(fs.kind).toBe('IntegerFieldSpec');
+    expect(isIntegerFieldSpec(fs)).toBe(true);
   });
 
   it('Unit pairs an Iri with an optional label', () => {
@@ -118,10 +118,10 @@ describe('IntegerNumberFieldSpec', () => {
     expect(u.iri.value).toBe('http://qudt.org/vocab/unit/M');
     expect(u.label).toEqual([{ value: 'metre', lang: 'und' }]);
 
-    const fs = integerNumberFieldSpec({
+    const fs = integerFieldSpec({
       unit: u,
-      minValue: integerNumberValue('0'),
-      maxValue: integerNumberValue('100'),
+      minValue: integerValue('0'),
+      maxValue: integerValue('100'),
       renderingHint: numericRenderingHint(),
     });
     expect(fs.unit).toBe(u);
@@ -129,18 +129,16 @@ describe('IntegerNumberFieldSpec', () => {
   });
 });
 
-describe('RealNumberFieldSpec', () => {
-  it('requires a datatype kind', () => {
-    const fs = realNumberFieldSpec({ datatype: 'decimal' });
-    expect(fs.datatype).toBe('decimal');
-    expect(isRealNumberFieldSpec(fs)).toBe(true);
+describe('DecimalFieldSpec', () => {
+  it('builds a DecimalFieldSpec with no datatype slot (fixed by family)', () => {
+    const fs = decimalFieldSpec({ });
+    expect(fs.kind).toBe('DecimalFieldSpec');
+    expect(isDecimalFieldSpec(fs)).toBe(true);
   });
 
   it('carries decimalPlaces on the rendering hint', () => {
-    const fs = realNumberFieldSpec({
-      datatype: 'decimal',
-      minValue: realNumberValue('0', 'decimal'),
-      maxValue: realNumberValue('100', 'decimal'),
+    const fs = decimalFieldSpec({ minValue: decimalValue('0'),
+      maxValue: decimalValue('100'),
       renderingHint: numericRenderingHint(3),
     });
     expect(fs.renderingHint?.decimalPlaces).toBe(3);
@@ -339,8 +337,8 @@ describe('FieldSpec union', () => {
   it('isFieldSpec recognises every concrete field spec kind', () => {
     const all: FieldSpec[] = [
       textFieldSpec(),
-      integerNumberFieldSpec(),
-      realNumberFieldSpec({ datatype: 'decimal' }),
+      integerFieldSpec(),
+      decimalFieldSpec({ }),
       dateFieldSpec({ dateValueType: 'fullDate' }),
       timeFieldSpec(),
       dateTimeFieldSpec({ dateTimeValueType: 'dateHourMinute' }),

@@ -1,15 +1,19 @@
 // =====================================================================
-// Real-number field family — real-valued numeric content (xsd:decimal,
-// xsd:float, xsd:double)
+// Decimal field family — exact arbitrary-precision decimals
 // =====================================================================
 //
-// RealNumberValue carries `value: string` (a base-10 real-valued
-// lexical form) plus the required `datatype` enum (`decimal | float
-// | double`).
+// Complete vertical slice for the decimal field family:
+//   - identifier type            : DecimalFieldId
+//   - instance value             : DecimalValue
+//   - schema constraints         : DecimalFieldSpec
+//   - reusable Field artifact    : DecimalField
+//   - Template-embedding wrapper : EmbeddedDecimalField
+//
+// DecimalValue carries `value: string` (a base-10 decimal lexical form). The datatype is
+// fixed at xsd:decimal and is not carried.
 
 import {
   type Iri,
-  type RealNumberDatatypeKind,
   iri,
   parseSemanticVersion, parseAsciiIdentifier
 } from '../leaves/index.js';
@@ -33,23 +37,23 @@ import {
 // 1. Identifier
 // =====================================================================
 
-export interface RealNumberFieldId {
-  readonly kind: 'RealNumberFieldId';
+export interface DecimalFieldId {
+  readonly kind: 'DecimalFieldId';
   readonly iri: Iri;
 }
 
 
-export const realNumberFieldId = (
-  v: RealNumberFieldId | Iri | string,
-): RealNumberFieldId => {
+export const decimalFieldId = (
+  v: DecimalFieldId | Iri | string,
+): DecimalFieldId => {
   if (
     typeof v !== 'string' &&
-    (v as { kind?: unknown }).kind === 'RealNumberFieldId'
+    (v as { kind?: unknown }).kind === 'DecimalFieldId'
   ) {
-    return v as RealNumberFieldId;
+    return v as DecimalFieldId;
   }
   return {
-    kind: 'RealNumberFieldId',
+    kind: 'DecimalFieldId',
     iri: typeof v === 'string' ? iri(v) : (v as Iri),
   };
 };
@@ -58,35 +62,32 @@ export const realNumberFieldId = (
 // 2. Value
 // =====================================================================
 
-export interface RealNumberValue {
-  readonly kind: 'RealNumberValue';
+export interface DecimalValue {
+  readonly kind: 'DecimalValue';
   readonly value: string;
-  readonly datatype: RealNumberDatatypeKind;
 }
 
-export function realNumberValue(
-  value: string,
-  datatype: RealNumberDatatypeKind,
-): RealNumberValue;
-export function realNumberValue(value: RealNumberValue): RealNumberValue;
-export function realNumberValue(
-  value: RealNumberValue | string,
-  datatype?: RealNumberDatatypeKind,
-): RealNumberValue {
+export type DecimalValueInput = DecimalValue | string;
+
+export function decimalValue(value: string): DecimalValue;
+export function decimalValue(value: DecimalValue): DecimalValue;
+export function decimalValue(
+  value: DecimalValue | string,
+): DecimalValue {
   if (typeof value !== 'string') return value;
-  return { kind: 'RealNumberValue', value, datatype: datatype as RealNumberDatatypeKind };
+  return { kind: 'DecimalValue', value };
 }
 
-export function isRealNumberValue(x: unknown): x is RealNumberValue {
+export function isDecimalValue(x: unknown): x is DecimalValue {
   return (
     typeof x === 'object' && x !== null &&
-    (x as { kind?: unknown }).kind === 'RealNumberValue'
+    (x as { kind?: unknown }).kind === 'DecimalValue'
   );
 }
 
 // Best-effort numeric coercion. Returns `NaN` for ill-typed lexical
 // forms; use validation helpers for normative checks.
-export function realNumberValueToNumber(v: RealNumberValue): number {
+export function decimalValueToNumber(v: DecimalValue): number {
   return Number(v.value);
 }
 
@@ -94,64 +95,69 @@ export function realNumberValueToNumber(v: RealNumberValue): number {
 // 3. FieldSpec
 // =====================================================================
 
-export interface RealNumberFieldSpec {
-  readonly kind: 'RealNumberFieldSpec';
-  readonly datatype: RealNumberDatatypeKind;
-  readonly defaultValue?: RealNumberValue;
+export interface DecimalFieldSpec {
+  readonly kind: 'DecimalFieldSpec';
+  readonly defaultValue?: DecimalValue;
   readonly unit?: Unit;
-  readonly minValue?: RealNumberValue;
-  readonly maxValue?: RealNumberValue;
+  readonly minValue?: DecimalValue;
+  readonly maxValue?: DecimalValue;
   readonly renderingHint?: NumericRenderingHint;
-  readonly examples?: readonly RealNumberValue[];
+  readonly examples?: readonly DecimalValue[];
 }
 
-export interface RealNumberFieldSpecInit {
-  readonly datatype: RealNumberDatatypeKind;
-  readonly defaultValue?: RealNumberValue;
+export interface DecimalFieldSpecInit {
+  readonly defaultValue?: DecimalValueInput;
   readonly unit?: Unit;
-  readonly minValue?: RealNumberValue;
-  readonly maxValue?: RealNumberValue;
+  readonly minValue?: DecimalValue;
+  readonly maxValue?: DecimalValue;
   readonly renderingHint?: NumericRenderingHint;
-  readonly examples?: readonly RealNumberValue[];
+  readonly examples?: readonly (DecimalValueInput | DecimalValue)[];
 }
 
-export function realNumberFieldSpec(
-  init: RealNumberFieldSpecInit,
-): RealNumberFieldSpec {
+export function decimalFieldSpec(
+  init?: DecimalFieldSpecInit,
+): DecimalFieldSpec {
   const out: {
-    kind: 'RealNumberFieldSpec';
-    datatype: RealNumberDatatypeKind;
-    defaultValue?: RealNumberValue;
+    kind: 'DecimalFieldSpec';
+    defaultValue?: DecimalValue;
     unit?: Unit;
-    minValue?: RealNumberValue;
-    maxValue?: RealNumberValue;
+    minValue?: DecimalValue;
+    maxValue?: DecimalValue;
     renderingHint?: NumericRenderingHint;
-  } = { kind: 'RealNumberFieldSpec', datatype: init.datatype };
-  if (init.defaultValue !== undefined) out.defaultValue = init.defaultValue;
-  if (init.unit !== undefined) out.unit = init.unit;
-  if (init.minValue !== undefined) out.minValue = init.minValue;
-  if (init.maxValue !== undefined) out.maxValue = init.maxValue;
-  if (init.renderingHint !== undefined) out.renderingHint = init.renderingHint;
-  if (init?.examples !== undefined)
-    (out as { examples?: readonly RealNumberValue[] }).examples = init.examples.slice();
+  } = { kind: 'DecimalFieldSpec' };
+  if (init?.defaultValue !== undefined) {
+    out.defaultValue =
+      typeof init.defaultValue === 'string'
+        ? decimalValue(init.defaultValue)
+        : init.defaultValue;
+  }
+  if (init?.unit !== undefined) out.unit = init.unit;
+  if (init?.minValue !== undefined) out.minValue = init.minValue;
+  if (init?.maxValue !== undefined) out.maxValue = init.maxValue;
+  if (init?.renderingHint !== undefined) out.renderingHint = init.renderingHint;
+  if (init?.examples !== undefined) {
+    (out as { examples?: readonly DecimalValue[] }).examples = init.examples.map((e) => decimalValue(e as never));
+  }
   return out;
 }
 
-export const isRealNumberFieldSpec = (x: unknown): x is RealNumberFieldSpec =>
+export const isDecimalFieldSpec = (
+  x: unknown,
+): x is DecimalFieldSpec =>
   typeof x === 'object' && x !== null &&
-  (x as { kind?: unknown }).kind === 'RealNumberFieldSpec';
+  (x as { kind?: unknown }).kind === 'DecimalFieldSpec';
 
 // =====================================================================
 // 4. Field artifact
 // =====================================================================
 
-export interface RealNumberField {
-  readonly kind: 'RealNumberField';
-  readonly id: RealNumberFieldId;
+export interface DecimalField {
+  readonly kind: 'DecimalField';
+  readonly id: DecimalFieldId;
   readonly modelVersion: string;
   readonly metadata: CatalogMetadata;
   readonly versioning: SchemaArtifactVersioning;
-  readonly fieldSpec: RealNumberFieldSpec;
+  readonly fieldSpec: DecimalFieldSpec;
   readonly prompt: MultilingualString;
   readonly helpText?: MultilingualString;
   readonly altPrompts?: readonly AlternativePrompt[];
@@ -159,12 +165,12 @@ export interface RealNumberField {
   readonly recommendedProperty?: Property;
 }
 
-export interface RealNumberFieldInit {
-  readonly id: RealNumberFieldId | Iri | string;
+export interface DecimalFieldInit {
+  readonly id: DecimalFieldId | Iri | string;
   readonly modelVersion: string;
   readonly metadata: CatalogMetadata;
   readonly versioning: SchemaArtifactVersioning;
-  readonly fieldSpec: RealNumberFieldSpec;
+  readonly fieldSpec: DecimalFieldSpec;
   readonly prompt: MultilingualStringInput;
   readonly helpText?: MultilingualString;
   readonly altPrompts?: readonly AlternativePromptInput[];
@@ -172,10 +178,12 @@ export interface RealNumberFieldInit {
   readonly recommendedProperty?: PropertyInput;
 }
 
-export const realNumberField = (init: RealNumberFieldInit): RealNumberField => {
-  const out: RealNumberField = {
-    kind: 'RealNumberField',
-    id: realNumberFieldId(init.id),
+export const decimalField = (
+  init: DecimalFieldInit,
+): DecimalField => {
+  const out: DecimalField = {
+    kind: 'DecimalField',
+    id: decimalFieldId(init.id),
     modelVersion: parseSemanticVersion(init.modelVersion),
     metadata: init.metadata,
     fieldSpec: init.fieldSpec,
@@ -199,10 +207,10 @@ export const realNumberField = (init: RealNumberFieldInit): RealNumberField => {
 // 5. EmbeddedField
 // =====================================================================
 
-export interface EmbeddedRealNumberField {
-  readonly kind: 'EmbeddedRealNumberField';
+export interface EmbeddedDecimalField {
+  readonly kind: 'EmbeddedDecimalField';
   readonly key: string;
-  readonly artifactRef: RealNumberFieldId;
+  readonly artifactRef: DecimalFieldId;
   readonly valueRequirement?: ValueRequirement;
   readonly cardinality?: Cardinality;
   readonly visibility?: Visibility;
@@ -211,22 +219,28 @@ export interface EmbeddedRealNumberField {
   readonly property?: Property;
   readonly promptKey?: string;
   readonly editability?: Editability;
-  readonly defaultValue?: RealNumberValue;
+  readonly defaultValue?: DecimalValue;
 }
 
-export interface EmbeddedRealNumberFieldInit extends EmbeddedFieldInitCommon {
-  readonly artifactRef: RealNumberFieldId | RealNumberField;
-  readonly defaultValue?: RealNumberValue;
+export interface EmbeddedDecimalFieldInit
+  extends EmbeddedFieldInitCommon {
+  readonly artifactRef: DecimalFieldId | DecimalField;
+  readonly defaultValue?: DecimalValueInput;
 }
 
-export function embeddedRealNumberField(
-  init: EmbeddedRealNumberFieldInit,
-): EmbeddedRealNumberField {
-  const out: EmbeddedRealNumberField = {
+export function embeddedDecimalField(
+  init: EmbeddedDecimalFieldInit,
+): EmbeddedDecimalField {
+  const out: EmbeddedDecimalField = {
     ...assembleCommon(init),
-    kind: 'EmbeddedRealNumberField',
+    kind: 'EmbeddedDecimalField',
     artifactRef: fieldRef(init.artifactRef),
-    ...(init.defaultValue !== undefined && { defaultValue: init.defaultValue }),
+    ...(init.defaultValue !== undefined && {
+      defaultValue:
+        typeof init.defaultValue === 'string'
+          ? decimalValue(init.defaultValue)
+          : init.defaultValue,
+    }),
   };
   return out;
 }

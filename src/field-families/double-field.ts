@@ -1,18 +1,16 @@
 // =====================================================================
-// Integer-number field family — exact-integer numeric content
+// Double field family — IEEE 754 double-precision numbers
 // =====================================================================
 //
-// This file is the complete vertical slice for the integer-number field
-// family. Per the cedar-ts convention each family file holds:
+// Complete vertical slice for the double field family:
+//   - identifier type            : DoubleFieldId
+//   - instance value             : DoubleValue
+//   - schema constraints         : DoubleFieldSpec
+//   - reusable Field artifact    : DoubleField
+//   - Template-embedding wrapper : EmbeddedDoubleField
 //
-//   - identifier type            : IntegerNumberFieldId
-//   - instance value             : IntegerNumberValue
-//   - schema constraints         : IntegerNumberFieldSpec
-//   - reusable Field artifact    : IntegerNumberField
-//   - Template-embedding wrapper : EmbeddedIntegerNumberField
-//
-// IntegerNumberValue carries `value: string` (a base-10 integer lexical
-// form). The datatype is fixed at xsd:integer and is not carried.
+// DoubleValue carries `value: string` (an IEEE 754 double-precision lexical form, incl. INF/-INF/NaN). The datatype is
+// fixed at xsd:double and is not carried.
 
 import {
   type Iri,
@@ -39,23 +37,23 @@ import {
 // 1. Identifier
 // =====================================================================
 
-export interface IntegerNumberFieldId {
-  readonly kind: 'IntegerNumberFieldId';
+export interface DoubleFieldId {
+  readonly kind: 'DoubleFieldId';
   readonly iri: Iri;
 }
 
 
-export const integerNumberFieldId = (
-  v: IntegerNumberFieldId | Iri | string,
-): IntegerNumberFieldId => {
+export const doubleFieldId = (
+  v: DoubleFieldId | Iri | string,
+): DoubleFieldId => {
   if (
     typeof v !== 'string' &&
-    (v as { kind?: unknown }).kind === 'IntegerNumberFieldId'
+    (v as { kind?: unknown }).kind === 'DoubleFieldId'
   ) {
-    return v as IntegerNumberFieldId;
+    return v as DoubleFieldId;
   }
   return {
-    kind: 'IntegerNumberFieldId',
+    kind: 'DoubleFieldId',
     iri: typeof v === 'string' ? iri(v) : (v as Iri),
   };
 };
@@ -64,32 +62,32 @@ export const integerNumberFieldId = (
 // 2. Value
 // =====================================================================
 
-export interface IntegerNumberValue {
-  readonly kind: 'IntegerNumberValue';
+export interface DoubleValue {
+  readonly kind: 'DoubleValue';
   readonly value: string;
 }
 
-export type IntegerNumberValueInput = IntegerNumberValue | string;
+export type DoubleValueInput = DoubleValue | string;
 
-export function integerNumberValue(value: string): IntegerNumberValue;
-export function integerNumberValue(value: IntegerNumberValue): IntegerNumberValue;
-export function integerNumberValue(
-  value: IntegerNumberValue | string,
-): IntegerNumberValue {
+export function doubleValue(value: string): DoubleValue;
+export function doubleValue(value: DoubleValue): DoubleValue;
+export function doubleValue(
+  value: DoubleValue | string,
+): DoubleValue {
   if (typeof value !== 'string') return value;
-  return { kind: 'IntegerNumberValue', value };
+  return { kind: 'DoubleValue', value };
 }
 
-export function isIntegerNumberValue(x: unknown): x is IntegerNumberValue {
+export function isDoubleValue(x: unknown): x is DoubleValue {
   return (
     typeof x === 'object' && x !== null &&
-    (x as { kind?: unknown }).kind === 'IntegerNumberValue'
+    (x as { kind?: unknown }).kind === 'DoubleValue'
   );
 }
 
 // Best-effort numeric coercion. Returns `NaN` for ill-typed lexical
 // forms; use validation helpers for normative checks.
-export function integerNumberValueToNumber(v: IntegerNumberValue): number {
+export function doubleValueToNumber(v: DoubleValue): number {
   return Number(v.value);
 }
 
@@ -97,40 +95,40 @@ export function integerNumberValueToNumber(v: IntegerNumberValue): number {
 // 3. FieldSpec
 // =====================================================================
 
-export interface IntegerNumberFieldSpec {
-  readonly kind: 'IntegerNumberFieldSpec';
-  readonly defaultValue?: IntegerNumberValue;
+export interface DoubleFieldSpec {
+  readonly kind: 'DoubleFieldSpec';
+  readonly defaultValue?: DoubleValue;
   readonly unit?: Unit;
-  readonly minValue?: IntegerNumberValue;
-  readonly maxValue?: IntegerNumberValue;
+  readonly minValue?: DoubleValue;
+  readonly maxValue?: DoubleValue;
   readonly renderingHint?: NumericRenderingHint;
-  readonly examples?: readonly IntegerNumberValue[];
+  readonly examples?: readonly DoubleValue[];
 }
 
-export interface IntegerNumberFieldSpecInit {
-  readonly defaultValue?: IntegerNumberValueInput;
+export interface DoubleFieldSpecInit {
+  readonly defaultValue?: DoubleValueInput;
   readonly unit?: Unit;
-  readonly minValue?: IntegerNumberValue;
-  readonly maxValue?: IntegerNumberValue;
+  readonly minValue?: DoubleValue;
+  readonly maxValue?: DoubleValue;
   readonly renderingHint?: NumericRenderingHint;
-  readonly examples?: readonly (IntegerNumberValueInput | IntegerNumberValue)[];
+  readonly examples?: readonly (DoubleValueInput | DoubleValue)[];
 }
 
-export function integerNumberFieldSpec(
-  init?: IntegerNumberFieldSpecInit,
-): IntegerNumberFieldSpec {
+export function doubleFieldSpec(
+  init?: DoubleFieldSpecInit,
+): DoubleFieldSpec {
   const out: {
-    kind: 'IntegerNumberFieldSpec';
-    defaultValue?: IntegerNumberValue;
+    kind: 'DoubleFieldSpec';
+    defaultValue?: DoubleValue;
     unit?: Unit;
-    minValue?: IntegerNumberValue;
-    maxValue?: IntegerNumberValue;
+    minValue?: DoubleValue;
+    maxValue?: DoubleValue;
     renderingHint?: NumericRenderingHint;
-  } = { kind: 'IntegerNumberFieldSpec' };
+  } = { kind: 'DoubleFieldSpec' };
   if (init?.defaultValue !== undefined) {
     out.defaultValue =
       typeof init.defaultValue === 'string'
-        ? integerNumberValue(init.defaultValue)
+        ? doubleValue(init.defaultValue)
         : init.defaultValue;
   }
   if (init?.unit !== undefined) out.unit = init.unit;
@@ -138,28 +136,28 @@ export function integerNumberFieldSpec(
   if (init?.maxValue !== undefined) out.maxValue = init.maxValue;
   if (init?.renderingHint !== undefined) out.renderingHint = init.renderingHint;
   if (init?.examples !== undefined) {
-    (out as { examples?: readonly IntegerNumberValue[] }).examples = init.examples.map((e) => integerNumberValue(e as never));
+    (out as { examples?: readonly DoubleValue[] }).examples = init.examples.map((e) => doubleValue(e as never));
   }
   return out;
 }
 
-export const isIntegerNumberFieldSpec = (
+export const isDoubleFieldSpec = (
   x: unknown,
-): x is IntegerNumberFieldSpec =>
+): x is DoubleFieldSpec =>
   typeof x === 'object' && x !== null &&
-  (x as { kind?: unknown }).kind === 'IntegerNumberFieldSpec';
+  (x as { kind?: unknown }).kind === 'DoubleFieldSpec';
 
 // =====================================================================
 // 4. Field artifact
 // =====================================================================
 
-export interface IntegerNumberField {
-  readonly kind: 'IntegerNumberField';
-  readonly id: IntegerNumberFieldId;
+export interface DoubleField {
+  readonly kind: 'DoubleField';
+  readonly id: DoubleFieldId;
   readonly modelVersion: string;
   readonly metadata: CatalogMetadata;
   readonly versioning: SchemaArtifactVersioning;
-  readonly fieldSpec: IntegerNumberFieldSpec;
+  readonly fieldSpec: DoubleFieldSpec;
   readonly prompt: MultilingualString;
   readonly helpText?: MultilingualString;
   readonly altPrompts?: readonly AlternativePrompt[];
@@ -167,12 +165,12 @@ export interface IntegerNumberField {
   readonly recommendedProperty?: Property;
 }
 
-export interface IntegerNumberFieldInit {
-  readonly id: IntegerNumberFieldId | Iri | string;
+export interface DoubleFieldInit {
+  readonly id: DoubleFieldId | Iri | string;
   readonly modelVersion: string;
   readonly metadata: CatalogMetadata;
   readonly versioning: SchemaArtifactVersioning;
-  readonly fieldSpec: IntegerNumberFieldSpec;
+  readonly fieldSpec: DoubleFieldSpec;
   readonly prompt: MultilingualStringInput;
   readonly helpText?: MultilingualString;
   readonly altPrompts?: readonly AlternativePromptInput[];
@@ -180,12 +178,12 @@ export interface IntegerNumberFieldInit {
   readonly recommendedProperty?: PropertyInput;
 }
 
-export const integerNumberField = (
-  init: IntegerNumberFieldInit,
-): IntegerNumberField => {
-  const out: IntegerNumberField = {
-    kind: 'IntegerNumberField',
-    id: integerNumberFieldId(init.id),
+export const doubleField = (
+  init: DoubleFieldInit,
+): DoubleField => {
+  const out: DoubleField = {
+    kind: 'DoubleField',
+    id: doubleFieldId(init.id),
     modelVersion: parseSemanticVersion(init.modelVersion),
     metadata: init.metadata,
     fieldSpec: init.fieldSpec,
@@ -209,10 +207,10 @@ export const integerNumberField = (
 // 5. EmbeddedField
 // =====================================================================
 
-export interface EmbeddedIntegerNumberField {
-  readonly kind: 'EmbeddedIntegerNumberField';
+export interface EmbeddedDoubleField {
+  readonly kind: 'EmbeddedDoubleField';
   readonly key: string;
-  readonly artifactRef: IntegerNumberFieldId;
+  readonly artifactRef: DoubleFieldId;
   readonly valueRequirement?: ValueRequirement;
   readonly cardinality?: Cardinality;
   readonly visibility?: Visibility;
@@ -221,26 +219,26 @@ export interface EmbeddedIntegerNumberField {
   readonly property?: Property;
   readonly promptKey?: string;
   readonly editability?: Editability;
-  readonly defaultValue?: IntegerNumberValue;
+  readonly defaultValue?: DoubleValue;
 }
 
-export interface EmbeddedIntegerNumberFieldInit
+export interface EmbeddedDoubleFieldInit
   extends EmbeddedFieldInitCommon {
-  readonly artifactRef: IntegerNumberFieldId | IntegerNumberField;
-  readonly defaultValue?: IntegerNumberValueInput;
+  readonly artifactRef: DoubleFieldId | DoubleField;
+  readonly defaultValue?: DoubleValueInput;
 }
 
-export function embeddedIntegerNumberField(
-  init: EmbeddedIntegerNumberFieldInit,
-): EmbeddedIntegerNumberField {
-  const out: EmbeddedIntegerNumberField = {
+export function embeddedDoubleField(
+  init: EmbeddedDoubleFieldInit,
+): EmbeddedDoubleField {
+  const out: EmbeddedDoubleField = {
     ...assembleCommon(init),
-    kind: 'EmbeddedIntegerNumberField',
+    kind: 'EmbeddedDoubleField',
     artifactRef: fieldRef(init.artifactRef),
     ...(init.defaultValue !== undefined && {
       defaultValue:
         typeof init.defaultValue === 'string'
-          ? integerNumberValue(init.defaultValue)
+          ? doubleValue(init.defaultValue)
           : init.defaultValue,
     }),
   };

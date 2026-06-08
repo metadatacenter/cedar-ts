@@ -18,10 +18,14 @@ import {
 } from '../leaves/index.js';
 import {
   type TextFieldSpec,
-  type IntegerNumberFieldSpec,
-  type RealNumberFieldSpec,
-  type IntegerNumberValue,
-  type RealNumberValue,
+  type IntegerFieldSpec,
+  type DecimalFieldSpec,
+  type FloatFieldSpec,
+  type DoubleFieldSpec,
+  type IntegerValue,
+  type DecimalValue,
+  type FloatValue,
+  type DoubleValue,
   type BooleanValue,
   type BooleanFieldSpec,
   type DateFieldSpec,
@@ -84,8 +88,10 @@ import {
   type DateComponentOrder,
   type TimeFormat,
   textFieldSpec,
-  integerNumberFieldSpec,
-  realNumberFieldSpec,
+  integerFieldSpec,
+  decimalFieldSpec,
+  floatFieldSpec,
+  doubleFieldSpec,
   booleanFieldSpec,
   dateFieldSpec,
   timeFieldSpec,
@@ -147,10 +153,14 @@ import {
   parseMultilingualString,
 } from './multilingual.js';
 import {
-  serializeIntegerNumberValue,
-  parseIntegerNumberValue,
-  serializeRealNumberValue,
-  parseRealNumberValue,
+  serializeIntegerValue,
+  parseIntegerValue,
+  serializeDecimalValue,
+  parseDecimalValue,
+  serializeFloatValue,
+  parseFloatValue,
+  serializeDoubleValue,
+  parseDoubleValue,
   serializeBooleanValue,
   parseBooleanValue,
   serializeTextValue,
@@ -186,7 +196,6 @@ import {
   serializeLanguageValue,
   parseLanguageValue,
 } from './values.js';
-import { REAL_NUMBER_DATATYPE_KINDS, type RealNumberDatatypeKind } from '../leaves/index.js';
 import type {
   TextValue,
   DateValue,
@@ -204,18 +213,6 @@ import type {
   NihGrantIdValue,
 } from '../field-families/index.js';
 
-function parseRealNumberDatatypeKind(
-  x: unknown,
-  where = 'RealNumberDatatype',
-): RealNumberDatatypeKind {
-  const s = expectString(x, where);
-  if (!(REAL_NUMBER_DATATYPE_KINDS as readonly string[]).includes(s)) {
-    throw new CedarConstructionError(
-      `${where}: unknown real-number datatype ${JSON.stringify(s)}; expected one of {${REAL_NUMBER_DATATYPE_KINDS.map((k) => JSON.stringify(k)).join(', ')}}`,
-    );
-  }
-  return s as RealNumberDatatypeKind;
-}
 
 // ---- Rendering hints --------------------------------------------------
 
@@ -962,32 +959,28 @@ export function parseTextFieldSpec(
   return textFieldSpec(init);
 }
 
-// ---- IntegerNumberFieldSpec ------------------------------------------
+// ---- IntegerFieldSpec ---------------------------------
 
-export function serializeIntegerNumberFieldSpec(
-  x: IntegerNumberFieldSpec,
-): unknown {
-  const out: Record<string, unknown> = {
-    kind: 'IntegerNumberFieldSpec',
-  };
+export function serializeIntegerFieldSpec(x: IntegerFieldSpec): unknown {
+  const out: Record<string, unknown> = { kind: 'IntegerFieldSpec' };
   if (x.defaultValue !== undefined)
-    out['defaultValue'] = serializeIntegerNumberValue(x.defaultValue);
+    out['defaultValue'] = serializeIntegerValue(x.defaultValue);
   if (x.unit !== undefined) out['unit'] = serializeUnit(x.unit);
   if (x.minValue !== undefined)
-    out['minValue'] = serializeIntegerNumberValue(x.minValue);
+    out['minValue'] = serializeIntegerValue(x.minValue);
   if (x.maxValue !== undefined)
-    out['maxValue'] = serializeIntegerNumberValue(x.maxValue);
+    out['maxValue'] = serializeIntegerValue(x.maxValue);
   if (x.renderingHint !== undefined)
-    out['renderingHint'] = serializeNumericRenderingHint(x.renderingHint);  if (x.examples !== undefined && x.examples.length > 0)
-    out['examples'] = x.examples.map((e) => serializeIntegerNumberValue(e));
-
+    out['renderingHint'] = serializeNumericRenderingHint(x.renderingHint);
+  if (x.examples !== undefined && x.examples.length > 0)
+    out['examples'] = x.examples.map((e) => serializeIntegerValue(e));
   return out;
 }
 
-export function parseIntegerNumberFieldSpec(
+export function parseIntegerFieldSpec(
   x: unknown,
-  where = 'IntegerNumberFieldSpec',
-): IntegerNumberFieldSpec {
+  where = 'IntegerFieldSpec',
+): IntegerFieldSpec {
   const o = expectObject(x, where);
   expectKnownProperties(o, [
     'kind',
@@ -996,33 +989,28 @@ export function parseIntegerNumberFieldSpec(
     'minValue',
     'maxValue',
     'renderingHint',
-  'examples',
+    'examples',
   ]);
   for (const k of ['defaultValue', 'unit', 'minValue', 'maxValue', 'renderingHint']) {
     rejectNullProperty(o, k);
   }
-  if (o['kind'] !== 'IntegerNumberFieldSpec') {
-    throw new CedarConstructionError(
-      `${where}: expected kind "IntegerNumberFieldSpec"`,
-    );
+  if (o['kind'] !== 'IntegerFieldSpec') {
+    throw new CedarConstructionError(`${where}: expected kind "IntegerFieldSpec"`);
   }
   const init: {
-    defaultValue?: IntegerNumberValue;
+    defaultValue?: IntegerValue;
     unit?: Unit;
-    minValue?: IntegerNumberValue;
-    maxValue?: IntegerNumberValue;
+    minValue?: IntegerValue;
+    maxValue?: IntegerValue;
     renderingHint?: NumericRenderingHint;
   } = {};
   if ('defaultValue' in o)
-    init.defaultValue = parseIntegerNumberValue(
-      o['defaultValue'],
-      `${where}.defaultValue`,
-    );
+    init.defaultValue = parseIntegerValue(o['defaultValue'], `${where}.defaultValue`);
   if ('unit' in o) init.unit = parseUnit(o['unit'], `${where}.unit`);
   if ('minValue' in o)
-    init.minValue = parseIntegerNumberValue(o['minValue'], `${where}.minValue`);
+    init.minValue = parseIntegerValue(o['minValue'], `${where}.minValue`);
   if ('maxValue' in o)
-    init.maxValue = parseIntegerNumberValue(o['maxValue'], `${where}.maxValue`);
+    init.maxValue = parseIntegerValue(o['maxValue'], `${where}.maxValue`);
   if ('renderingHint' in o)
     init.renderingHint = parseNumericRenderingHint(
       o['renderingHint'],
@@ -1033,82 +1021,65 @@ export function parseIntegerNumberFieldSpec(
     if (!Array.isArray(arr)) {
       throw new CedarConstructionError(`${where}.examples: expected array`);
     }
-    (init as { examples?: readonly IntegerNumberValue[] }).examples = arr.map(
-      (entry, i) => parseIntegerNumberValue(entry, `${where}.examples[${i}]`),
+    (init as { examples?: readonly IntegerValue[] }).examples = arr.map(
+      (entry, i) => parseIntegerValue(entry, `${where}.examples[${i}]`),
     );
   }
-  return integerNumberFieldSpec(init);
+  return integerFieldSpec(init);
 }
 
-// ---- RealNumberFieldSpec ---------------------------------------------
+// ---- DecimalFieldSpec ---------------------------------
 
-export function serializeRealNumberFieldSpec(
-  x: RealNumberFieldSpec,
-): unknown {
-  const out: Record<string, unknown> = {
-    kind: 'RealNumberFieldSpec',
-    datatype: x.datatype,
-  };
+export function serializeDecimalFieldSpec(x: DecimalFieldSpec): unknown {
+  const out: Record<string, unknown> = { kind: 'DecimalFieldSpec' };
   if (x.defaultValue !== undefined)
-    out['defaultValue'] = serializeRealNumberValue(x.defaultValue);
+    out['defaultValue'] = serializeDecimalValue(x.defaultValue);
   if (x.unit !== undefined) out['unit'] = serializeUnit(x.unit);
   if (x.minValue !== undefined)
-    out['minValue'] = serializeRealNumberValue(x.minValue);
+    out['minValue'] = serializeDecimalValue(x.minValue);
   if (x.maxValue !== undefined)
-    out['maxValue'] = serializeRealNumberValue(x.maxValue);
+    out['maxValue'] = serializeDecimalValue(x.maxValue);
   if (x.renderingHint !== undefined)
-    out['renderingHint'] = serializeNumericRenderingHint(x.renderingHint);  if (x.examples !== undefined && x.examples.length > 0)
-    out['examples'] = x.examples.map((e) => serializeRealNumberValue(e));
-
+    out['renderingHint'] = serializeNumericRenderingHint(x.renderingHint);
+  if (x.examples !== undefined && x.examples.length > 0)
+    out['examples'] = x.examples.map((e) => serializeDecimalValue(e));
   return out;
 }
 
-export function parseRealNumberFieldSpec(
+export function parseDecimalFieldSpec(
   x: unknown,
-  where = 'RealNumberFieldSpec',
-): RealNumberFieldSpec {
+  where = 'DecimalFieldSpec',
+): DecimalFieldSpec {
   const o = expectObject(x, where);
   expectKnownProperties(o, [
     'kind',
-    'datatype',
     'defaultValue',
     'unit',
     'minValue',
     'maxValue',
     'renderingHint',
-  'examples',
+    'examples',
   ]);
   for (const k of ['defaultValue', 'unit', 'minValue', 'maxValue', 'renderingHint']) {
     rejectNullProperty(o, k);
   }
-  if (o['kind'] !== 'RealNumberFieldSpec') {
-    throw new CedarConstructionError(
-      `${where}: expected kind "RealNumberFieldSpec"`,
-    );
-  }
-  if (!('datatype' in o)) {
-    throw new CedarConstructionError(`${where}: missing required "datatype"`);
+  if (o['kind'] !== 'DecimalFieldSpec') {
+    throw new CedarConstructionError(`${where}: expected kind "DecimalFieldSpec"`);
   }
   const init: {
-    datatype: ReturnType<typeof parseRealNumberDatatypeKind>;
-    defaultValue?: RealNumberValue;
+    defaultValue?: DecimalValue;
     unit?: Unit;
-    minValue?: RealNumberValue;
-    maxValue?: RealNumberValue;
+    minValue?: DecimalValue;
+    maxValue?: DecimalValue;
     renderingHint?: NumericRenderingHint;
-  } = {
-    datatype: parseRealNumberDatatypeKind(o['datatype'], `${where}.datatype`),
-  };
+  } = {};
   if ('defaultValue' in o)
-    init.defaultValue = parseRealNumberValue(
-      o['defaultValue'],
-      `${where}.defaultValue`,
-    );
+    init.defaultValue = parseDecimalValue(o['defaultValue'], `${where}.defaultValue`);
   if ('unit' in o) init.unit = parseUnit(o['unit'], `${where}.unit`);
   if ('minValue' in o)
-    init.minValue = parseRealNumberValue(o['minValue'], `${where}.minValue`);
+    init.minValue = parseDecimalValue(o['minValue'], `${where}.minValue`);
   if ('maxValue' in o)
-    init.maxValue = parseRealNumberValue(o['maxValue'], `${where}.maxValue`);
+    init.maxValue = parseDecimalValue(o['maxValue'], `${where}.maxValue`);
   if ('renderingHint' in o)
     init.renderingHint = parseNumericRenderingHint(
       o['renderingHint'],
@@ -1119,11 +1090,149 @@ export function parseRealNumberFieldSpec(
     if (!Array.isArray(arr)) {
       throw new CedarConstructionError(`${where}.examples: expected array`);
     }
-    (init as { examples?: readonly RealNumberValue[] }).examples = arr.map(
-      (entry, i) => parseRealNumberValue(entry, `${where}.examples[${i}]`),
+    (init as { examples?: readonly DecimalValue[] }).examples = arr.map(
+      (entry, i) => parseDecimalValue(entry, `${where}.examples[${i}]`),
     );
   }
-  return realNumberFieldSpec(init);
+  return decimalFieldSpec(init);
+}
+
+// ---- FloatFieldSpec -----------------------------------
+
+export function serializeFloatFieldSpec(x: FloatFieldSpec): unknown {
+  const out: Record<string, unknown> = { kind: 'FloatFieldSpec' };
+  if (x.defaultValue !== undefined)
+    out['defaultValue'] = serializeFloatValue(x.defaultValue);
+  if (x.unit !== undefined) out['unit'] = serializeUnit(x.unit);
+  if (x.minValue !== undefined)
+    out['minValue'] = serializeFloatValue(x.minValue);
+  if (x.maxValue !== undefined)
+    out['maxValue'] = serializeFloatValue(x.maxValue);
+  if (x.renderingHint !== undefined)
+    out['renderingHint'] = serializeNumericRenderingHint(x.renderingHint);
+  if (x.examples !== undefined && x.examples.length > 0)
+    out['examples'] = x.examples.map((e) => serializeFloatValue(e));
+  return out;
+}
+
+export function parseFloatFieldSpec(
+  x: unknown,
+  where = 'FloatFieldSpec',
+): FloatFieldSpec {
+  const o = expectObject(x, where);
+  expectKnownProperties(o, [
+    'kind',
+    'defaultValue',
+    'unit',
+    'minValue',
+    'maxValue',
+    'renderingHint',
+    'examples',
+  ]);
+  for (const k of ['defaultValue', 'unit', 'minValue', 'maxValue', 'renderingHint']) {
+    rejectNullProperty(o, k);
+  }
+  if (o['kind'] !== 'FloatFieldSpec') {
+    throw new CedarConstructionError(`${where}: expected kind "FloatFieldSpec"`);
+  }
+  const init: {
+    defaultValue?: FloatValue;
+    unit?: Unit;
+    minValue?: FloatValue;
+    maxValue?: FloatValue;
+    renderingHint?: NumericRenderingHint;
+  } = {};
+  if ('defaultValue' in o)
+    init.defaultValue = parseFloatValue(o['defaultValue'], `${where}.defaultValue`);
+  if ('unit' in o) init.unit = parseUnit(o['unit'], `${where}.unit`);
+  if ('minValue' in o)
+    init.minValue = parseFloatValue(o['minValue'], `${where}.minValue`);
+  if ('maxValue' in o)
+    init.maxValue = parseFloatValue(o['maxValue'], `${where}.maxValue`);
+  if ('renderingHint' in o)
+    init.renderingHint = parseNumericRenderingHint(
+      o['renderingHint'],
+      `${where}.renderingHint`,
+    );
+  if ('examples' in o) {
+    const arr = o['examples'];
+    if (!Array.isArray(arr)) {
+      throw new CedarConstructionError(`${where}.examples: expected array`);
+    }
+    (init as { examples?: readonly FloatValue[] }).examples = arr.map(
+      (entry, i) => parseFloatValue(entry, `${where}.examples[${i}]`),
+    );
+  }
+  return floatFieldSpec(init);
+}
+
+// ---- DoubleFieldSpec ----------------------------------
+
+export function serializeDoubleFieldSpec(x: DoubleFieldSpec): unknown {
+  const out: Record<string, unknown> = { kind: 'DoubleFieldSpec' };
+  if (x.defaultValue !== undefined)
+    out['defaultValue'] = serializeDoubleValue(x.defaultValue);
+  if (x.unit !== undefined) out['unit'] = serializeUnit(x.unit);
+  if (x.minValue !== undefined)
+    out['minValue'] = serializeDoubleValue(x.minValue);
+  if (x.maxValue !== undefined)
+    out['maxValue'] = serializeDoubleValue(x.maxValue);
+  if (x.renderingHint !== undefined)
+    out['renderingHint'] = serializeNumericRenderingHint(x.renderingHint);
+  if (x.examples !== undefined && x.examples.length > 0)
+    out['examples'] = x.examples.map((e) => serializeDoubleValue(e));
+  return out;
+}
+
+export function parseDoubleFieldSpec(
+  x: unknown,
+  where = 'DoubleFieldSpec',
+): DoubleFieldSpec {
+  const o = expectObject(x, where);
+  expectKnownProperties(o, [
+    'kind',
+    'defaultValue',
+    'unit',
+    'minValue',
+    'maxValue',
+    'renderingHint',
+    'examples',
+  ]);
+  for (const k of ['defaultValue', 'unit', 'minValue', 'maxValue', 'renderingHint']) {
+    rejectNullProperty(o, k);
+  }
+  if (o['kind'] !== 'DoubleFieldSpec') {
+    throw new CedarConstructionError(`${where}: expected kind "DoubleFieldSpec"`);
+  }
+  const init: {
+    defaultValue?: DoubleValue;
+    unit?: Unit;
+    minValue?: DoubleValue;
+    maxValue?: DoubleValue;
+    renderingHint?: NumericRenderingHint;
+  } = {};
+  if ('defaultValue' in o)
+    init.defaultValue = parseDoubleValue(o['defaultValue'], `${where}.defaultValue`);
+  if ('unit' in o) init.unit = parseUnit(o['unit'], `${where}.unit`);
+  if ('minValue' in o)
+    init.minValue = parseDoubleValue(o['minValue'], `${where}.minValue`);
+  if ('maxValue' in o)
+    init.maxValue = parseDoubleValue(o['maxValue'], `${where}.maxValue`);
+  if ('renderingHint' in o)
+    init.renderingHint = parseNumericRenderingHint(
+      o['renderingHint'],
+      `${where}.renderingHint`,
+    );
+  if ('examples' in o) {
+    const arr = o['examples'];
+    if (!Array.isArray(arr)) {
+      throw new CedarConstructionError(`${where}.examples: expected array`);
+    }
+    (init as { examples?: readonly DoubleValue[] }).examples = arr.map(
+      (entry, i) => parseDoubleValue(entry, `${where}.examples[${i}]`),
+    );
+  }
+  return doubleFieldSpec(init);
 }
 
 // ---- BooleanFieldSpec ------------------------------------------------
@@ -1870,8 +1979,10 @@ export function parseAttributeValueFieldSpec(
 
 const FIELD_SPEC_KINDS = [
   'TextFieldSpec',
-  'IntegerNumberFieldSpec',
-  'RealNumberFieldSpec',
+  'IntegerFieldSpec',
+  'DecimalFieldSpec',
+  'FloatFieldSpec',
+  'DoubleFieldSpec',
   'BooleanFieldSpec',
   'DateFieldSpec',
   'TimeFieldSpec',
@@ -1896,10 +2007,14 @@ export function serializeFieldSpec(x: FieldSpec): unknown {
   switch (x.kind) {
     case 'TextFieldSpec':
       return serializeTextFieldSpec(x);
-    case 'IntegerNumberFieldSpec':
-      return serializeIntegerNumberFieldSpec(x);
-    case 'RealNumberFieldSpec':
-      return serializeRealNumberFieldSpec(x);
+    case 'IntegerFieldSpec':
+      return serializeIntegerFieldSpec(x);
+    case 'DecimalFieldSpec':
+      return serializeDecimalFieldSpec(x);
+    case 'FloatFieldSpec':
+      return serializeFloatFieldSpec(x);
+    case 'DoubleFieldSpec':
+      return serializeDoubleFieldSpec(x);
     case 'BooleanFieldSpec':
       return serializeBooleanFieldSpec(x);
     case 'DateFieldSpec':
@@ -1945,10 +2060,14 @@ export function parseFieldSpec(x: unknown, where = 'FieldSpec'): FieldSpec {
   switch (k) {
     case 'TextFieldSpec':
       return parseTextFieldSpec(x, where);
-    case 'IntegerNumberFieldSpec':
-      return parseIntegerNumberFieldSpec(x, where);
-    case 'RealNumberFieldSpec':
-      return parseRealNumberFieldSpec(x, where);
+    case 'IntegerFieldSpec':
+      return parseIntegerFieldSpec(x, where);
+    case 'DecimalFieldSpec':
+      return parseDecimalFieldSpec(x, where);
+    case 'FloatFieldSpec':
+      return parseFloatFieldSpec(x, where);
+    case 'DoubleFieldSpec':
+      return parseDoubleFieldSpec(x, where);
     case 'BooleanFieldSpec':
       return parseBooleanFieldSpec(x, where);
     case 'DateFieldSpec':

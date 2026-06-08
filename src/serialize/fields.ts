@@ -11,8 +11,10 @@ import {
 import {
   type Field,
   type TextField,
-  type IntegerNumberField,
-  type RealNumberField,
+  type IntegerField,
+  type DecimalField,
+  type FloatField,
+  type DoubleField,
   type BooleanField,
   type DateField,
   type TimeField,
@@ -32,8 +34,10 @@ import {
   type LanguageField,
   type AttributeValueField,
   textField,
-  integerNumberField,
-  realNumberField,
+  integerField,
+  decimalField,
+  floatField,
+  doubleField,
   booleanField,
   dateField,
   timeField,
@@ -69,8 +73,10 @@ import { assembleAltPrompts } from '../embedded/index.js';
 import { expectArray } from './parse-utils.js';
 import {
   serializeTextFieldId,
-  serializeIntegerNumberFieldId,
-  serializeRealNumberFieldId,
+  serializeIntegerFieldId,
+  serializeDecimalFieldId,
+  serializeFloatFieldId,
+  serializeDoubleFieldId,
   serializeBooleanFieldId,
   serializeDateFieldId,
   serializeTimeFieldId,
@@ -90,8 +96,10 @@ import {
   serializeLanguageFieldId,
   serializeAttributeValueFieldId,
   parseTextFieldId,
-  parseIntegerNumberFieldId,
-  parseRealNumberFieldId,
+  parseIntegerFieldId,
+  parseDecimalFieldId,
+  parseFloatFieldId,
+  parseDoubleFieldId,
   parseBooleanFieldId,
   parseDateFieldId,
   parseTimeFieldId,
@@ -119,8 +127,10 @@ import {
 } from './metadata.js';
 import {
   serializeTextFieldSpec,
-  serializeIntegerNumberFieldSpec,
-  serializeRealNumberFieldSpec,
+  serializeIntegerFieldSpec,
+  serializeDecimalFieldSpec,
+  serializeFloatFieldSpec,
+  serializeDoubleFieldSpec,
   serializeBooleanFieldSpec,
   serializeDateFieldSpec,
   serializeTimeFieldSpec,
@@ -140,8 +150,10 @@ import {
   serializeLanguageFieldSpec,
   serializeAttributeValueFieldSpec,
   parseTextFieldSpec,
-  parseIntegerNumberFieldSpec,
-  parseRealNumberFieldSpec,
+  parseIntegerFieldSpec,
+  parseDecimalFieldSpec,
+  parseFloatFieldSpec,
+  parseDoubleFieldSpec,
   parseBooleanFieldSpec,
   parseDateFieldSpec,
   parseTimeFieldSpec,
@@ -263,14 +275,14 @@ export function parseTextField(x: unknown, where = 'TextField'): TextField {
   });
 }
 
-export const serializeIntegerNumberField = (x: IntegerNumberField): unknown => {
+export const serializeIntegerField = (x: IntegerField): unknown => {
   const out: Record<string, unknown> = {
-    kind: 'IntegerNumberField',
-    id: serializeIntegerNumberFieldId(x.id),
+    kind: 'IntegerField',
+    id: serializeIntegerFieldId(x.id),
     modelVersion: x.modelVersion,
     metadata: serializeCatalogMetadata(x.metadata),
     versioning: serializeSchemaArtifactVersioning(x.versioning),
-    fieldSpec: serializeIntegerNumberFieldSpec(x.fieldSpec),
+    fieldSpec: serializeIntegerFieldSpec(x.fieldSpec),
     prompt: serializeMultilingualString(x.prompt),
   };
   if (x.helpText !== undefined)
@@ -284,21 +296,17 @@ export const serializeIntegerNumberField = (x: IntegerNumberField): unknown => {
   return out;
 };
 
-export function parseIntegerNumberField(
+export function parseIntegerField(
   x: unknown,
-  where = 'IntegerNumberField',
-): IntegerNumberField {
-  const s = parseFieldShell<IntegerNumberField>(
-    x,
-    'IntegerNumberField',
-    where,
-  );
-  return integerNumberField({
-    id: parseIntegerNumberFieldId(s.id, `${where}.id`),
+  where = 'IntegerField',
+): IntegerField {
+  const s = parseFieldShell<IntegerField>(x, 'IntegerField', where);
+  return integerField({
+    id: parseIntegerFieldId(s.id, `${where}.id`),
     modelVersion: s.modelVersion,
     metadata: parseCatalogMetadata(s.metadata, `${where}.metadata`),
     versioning: parseSchemaArtifactVersioning(s.versioning, `${where}.versioning`),
-    fieldSpec: parseIntegerNumberFieldSpec(s.fieldSpec, `${where}.fieldSpec`),
+    fieldSpec: parseIntegerFieldSpec(s.fieldSpec, `${where}.fieldSpec`),
     prompt: parseMultilingualString(s.prompt, `${where}.prompt`),
     ...(s.helpText !== undefined && {
       helpText: parseMultilingualString(s.helpText, `${where}.helpText`),
@@ -319,14 +327,14 @@ export function parseIntegerNumberField(
   });
 }
 
-export const serializeRealNumberField = (x: RealNumberField): unknown => {
+export const serializeDecimalField = (x: DecimalField): unknown => {
   const out: Record<string, unknown> = {
-    kind: 'RealNumberField',
-    id: serializeRealNumberFieldId(x.id),
+    kind: 'DecimalField',
+    id: serializeDecimalFieldId(x.id),
     modelVersion: x.modelVersion,
     metadata: serializeCatalogMetadata(x.metadata),
     versioning: serializeSchemaArtifactVersioning(x.versioning),
-    fieldSpec: serializeRealNumberFieldSpec(x.fieldSpec),
+    fieldSpec: serializeDecimalFieldSpec(x.fieldSpec),
     prompt: serializeMultilingualString(x.prompt),
   };
   if (x.helpText !== undefined)
@@ -340,17 +348,121 @@ export const serializeRealNumberField = (x: RealNumberField): unknown => {
   return out;
 };
 
-export function parseRealNumberField(
+export function parseDecimalField(
   x: unknown,
-  where = 'RealNumberField',
-): RealNumberField {
-  const s = parseFieldShell<RealNumberField>(x, 'RealNumberField', where);
-  return realNumberField({
-    id: parseRealNumberFieldId(s.id, `${where}.id`),
+  where = 'DecimalField',
+): DecimalField {
+  const s = parseFieldShell<DecimalField>(x, 'DecimalField', where);
+  return decimalField({
+    id: parseDecimalFieldId(s.id, `${where}.id`),
     modelVersion: s.modelVersion,
     metadata: parseCatalogMetadata(s.metadata, `${where}.metadata`),
     versioning: parseSchemaArtifactVersioning(s.versioning, `${where}.versioning`),
-    fieldSpec: parseRealNumberFieldSpec(s.fieldSpec, `${where}.fieldSpec`),
+    fieldSpec: parseDecimalFieldSpec(s.fieldSpec, `${where}.fieldSpec`),
+    prompt: parseMultilingualString(s.prompt, `${where}.prompt`),
+    ...(s.helpText !== undefined && {
+      helpText: parseMultilingualString(s.helpText, `${where}.helpText`),
+    }),
+    ...(s.altPrompts !== undefined && {
+      altPrompts: assembleAltPrompts(
+        expectArray(s.altPrompts, `${where}.altPrompts`).map((e, i) =>
+          parseAlternativePrompt(e, `${where}.altPrompts[${i}]`),
+        ),
+      ),
+    }),
+    ...(s.recommendedKey !== undefined && {
+      recommendedKey: expectString(s.recommendedKey, `${where}.recommendedKey`),
+    }),
+    ...(s.recommendedProperty !== undefined && {
+      recommendedProperty: parseProperty(s.recommendedProperty, `${where}.recommendedProperty`),
+    }),
+  });
+}
+
+export const serializeFloatField = (x: FloatField): unknown => {
+  const out: Record<string, unknown> = {
+    kind: 'FloatField',
+    id: serializeFloatFieldId(x.id),
+    modelVersion: x.modelVersion,
+    metadata: serializeCatalogMetadata(x.metadata),
+    versioning: serializeSchemaArtifactVersioning(x.versioning),
+    fieldSpec: serializeFloatFieldSpec(x.fieldSpec),
+    prompt: serializeMultilingualString(x.prompt),
+  };
+  if (x.helpText !== undefined)
+    out['helpText'] = serializeMultilingualString(x.helpText);
+  if (x.altPrompts !== undefined)
+    out['altPrompts'] = x.altPrompts.map(serializeAlternativePrompt);
+  if (x.recommendedKey !== undefined)
+    out['recommendedKey'] = x.recommendedKey;
+  if (x.recommendedProperty !== undefined)
+    out['recommendedProperty'] = serializeProperty(x.recommendedProperty);
+  return out;
+};
+
+export function parseFloatField(
+  x: unknown,
+  where = 'FloatField',
+): FloatField {
+  const s = parseFieldShell<FloatField>(x, 'FloatField', where);
+  return floatField({
+    id: parseFloatFieldId(s.id, `${where}.id`),
+    modelVersion: s.modelVersion,
+    metadata: parseCatalogMetadata(s.metadata, `${where}.metadata`),
+    versioning: parseSchemaArtifactVersioning(s.versioning, `${where}.versioning`),
+    fieldSpec: parseFloatFieldSpec(s.fieldSpec, `${where}.fieldSpec`),
+    prompt: parseMultilingualString(s.prompt, `${where}.prompt`),
+    ...(s.helpText !== undefined && {
+      helpText: parseMultilingualString(s.helpText, `${where}.helpText`),
+    }),
+    ...(s.altPrompts !== undefined && {
+      altPrompts: assembleAltPrompts(
+        expectArray(s.altPrompts, `${where}.altPrompts`).map((e, i) =>
+          parseAlternativePrompt(e, `${where}.altPrompts[${i}]`),
+        ),
+      ),
+    }),
+    ...(s.recommendedKey !== undefined && {
+      recommendedKey: expectString(s.recommendedKey, `${where}.recommendedKey`),
+    }),
+    ...(s.recommendedProperty !== undefined && {
+      recommendedProperty: parseProperty(s.recommendedProperty, `${where}.recommendedProperty`),
+    }),
+  });
+}
+
+export const serializeDoubleField = (x: DoubleField): unknown => {
+  const out: Record<string, unknown> = {
+    kind: 'DoubleField',
+    id: serializeDoubleFieldId(x.id),
+    modelVersion: x.modelVersion,
+    metadata: serializeCatalogMetadata(x.metadata),
+    versioning: serializeSchemaArtifactVersioning(x.versioning),
+    fieldSpec: serializeDoubleFieldSpec(x.fieldSpec),
+    prompt: serializeMultilingualString(x.prompt),
+  };
+  if (x.helpText !== undefined)
+    out['helpText'] = serializeMultilingualString(x.helpText);
+  if (x.altPrompts !== undefined)
+    out['altPrompts'] = x.altPrompts.map(serializeAlternativePrompt);
+  if (x.recommendedKey !== undefined)
+    out['recommendedKey'] = x.recommendedKey;
+  if (x.recommendedProperty !== undefined)
+    out['recommendedProperty'] = serializeProperty(x.recommendedProperty);
+  return out;
+};
+
+export function parseDoubleField(
+  x: unknown,
+  where = 'DoubleField',
+): DoubleField {
+  const s = parseFieldShell<DoubleField>(x, 'DoubleField', where);
+  return doubleField({
+    id: parseDoubleFieldId(s.id, `${where}.id`),
+    modelVersion: s.modelVersion,
+    metadata: parseCatalogMetadata(s.metadata, `${where}.metadata`),
+    versioning: parseSchemaArtifactVersioning(s.versioning, `${where}.versioning`),
+    fieldSpec: parseDoubleFieldSpec(s.fieldSpec, `${where}.fieldSpec`),
     prompt: parseMultilingualString(s.prompt, `${where}.prompt`),
     ...(s.helpText !== undefined && {
       helpText: parseMultilingualString(s.helpText, `${where}.helpText`),
@@ -1295,8 +1407,10 @@ export function parseAttributeValueField(
 
 const FIELD_KINDS = [
   'TextField',
-  'IntegerNumberField',
-  'RealNumberField',
+  'IntegerField',
+  'DecimalField',
+  'FloatField',
+  'DoubleField',
   'BooleanField',
   'DateField',
   'TimeField',
@@ -1321,10 +1435,14 @@ export function serializeField(x: Field): unknown {
   switch (x.kind) {
     case 'TextField':
       return serializeTextField(x);
-    case 'IntegerNumberField':
-      return serializeIntegerNumberField(x);
-    case 'RealNumberField':
-      return serializeRealNumberField(x);
+    case 'IntegerField':
+      return serializeIntegerField(x);
+    case 'DecimalField':
+      return serializeDecimalField(x);
+    case 'FloatField':
+      return serializeFloatField(x);
+    case 'DoubleField':
+      return serializeDoubleField(x);
     case 'BooleanField':
       return serializeBooleanField(x);
     case 'DateField':
@@ -1370,10 +1488,14 @@ export function parseField(x: unknown, where = 'Field'): Field {
   switch (k) {
     case 'TextField':
       return parseTextField(x, where);
-    case 'IntegerNumberField':
-      return parseIntegerNumberField(x, where);
-    case 'RealNumberField':
-      return parseRealNumberField(x, where);
+    case 'IntegerField':
+      return parseIntegerField(x, where);
+    case 'DecimalField':
+      return parseDecimalField(x, where);
+    case 'FloatField':
+      return parseFloatField(x, where);
+    case 'DoubleField':
+      return parseDoubleField(x, where);
     case 'BooleanField':
       return parseBooleanField(x, where);
     case 'DateField':

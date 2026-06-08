@@ -14,8 +14,8 @@ import {
   emailValue,
   enumValue,
   fullDateValue,
-  integerNumberFieldSpec,
-  integerNumberValue,
+  integerFieldSpec,
+  integerValue,
   languageFieldSpec,
   languageValue,
   lifecycleMetadata,
@@ -26,8 +26,8 @@ import {
   permissibleValue,
   phoneNumberFieldSpec,
   phoneNumberValue,
-  realNumberFieldSpec,
-  realNumberValue,
+  decimalFieldSpec,
+  decimalValue,
   schemaArtifactVersioning,
   serialize,
   singleValuedEnumFieldSpec,
@@ -69,24 +69,22 @@ describe('Example* slot — construction (typed values, all 20 families)', () =>
     expect(s.examples?.[0]?.value).toBe('hello');
   });
 
-  it('IntegerNumberFieldSpec carries IntegerNumberValue examples', () => {
-    const s = integerNumberFieldSpec({
-      examples: [integerNumberValue('1'), integerNumberValue('100')],
+  it('IntegerFieldSpec carries IntegerValue examples', () => {
+    const s = integerFieldSpec({
+      examples: [integerValue('1'), integerValue('100')],
     });
-    expect(s.examples?.[0]?.kind).toBe('IntegerNumberValue');
+    expect(s.examples?.[0]?.kind).toBe('IntegerValue');
     expect(s.examples?.[0]?.value).toBe('1');
   });
 
-  it('RealNumberFieldSpec carries RealNumberValue examples (requires datatype)', () => {
-    const s = realNumberFieldSpec({
-      datatype: 'decimal',
-      examples: [
-        realNumberValue('3.14', 'decimal'),
-        realNumberValue('2.71', 'decimal'),
+  it('DecimalFieldSpec carries DecimalValue examples', () => {
+    const s = decimalFieldSpec({ examples: [
+        decimalValue('3.14'),
+        decimalValue('2.71'),
       ],
     });
     expect(s.examples).toHaveLength(2);
-    expect(s.examples?.[0]?.kind).toBe('RealNumberValue');
+    expect(s.examples?.[0]?.kind).toBe('DecimalValue');
   });
 
   it('BooleanFieldSpec carries BooleanValue examples', () => {

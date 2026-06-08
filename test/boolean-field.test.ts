@@ -46,7 +46,7 @@ describe('BooleanValue', () => {
 
   it('isBooleanValue discriminates', () => {
     expect(isBooleanValue(booleanValue(true))).toBe(true);
-    expect(isBooleanValue({ kind: 'IntegerNumberValue' })).toBe(false);
+    expect(isBooleanValue({ kind: 'IntegerValue' })).toBe(false);
     expect(isBooleanValue(null)).toBe(false);
   });
 

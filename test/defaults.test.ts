@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import {
   embeddedTextField,
-  embeddedIntegerNumberField,
-  embeddedRealNumberField,
+  embeddedIntegerField,
+  embeddedDecimalField,
   embeddedDateField,
   embeddedTimeField,
   embeddedDateTimeField,
@@ -19,8 +19,8 @@ import {
   embeddedRridField,
   embeddedNihGrantIdField,
   textFieldId,
-  integerNumberFieldId,
-  realNumberFieldId,
+  integerFieldId,
+  decimalFieldId,
   dateFieldId,
   timeFieldId,
   dateTimeFieldId,
@@ -38,8 +38,8 @@ import {
   nihGrantIdFieldId,
   textFieldSpec,
   textValue,
-  integerNumberValue,
-  realNumberValue,
+  integerValue,
+  decimalValue,
   booleanValue,
   controlledTermValue,
   enumValue,
@@ -57,8 +57,8 @@ import {
   yearValue,
   yearMonthValue,
   fullDateValue,
-  integerNumberFieldSpec,
-  realNumberFieldSpec,
+  integerFieldSpec,
+  decimalFieldSpec,
   booleanFieldSpec,
   dateFieldSpec,
   timeFieldSpec,
@@ -108,25 +108,24 @@ describe('EmbeddedXxxField.defaultValue', () => {
     expect(ef2.defaultValue?.kind).toBe('TextValue');
   });
 
-  it('IntegerNumber — IntegerNumberValue (datatype fixed at xsd:integer)', () => {
-    const ef = embeddedIntegerNumberField({
+  it('Integer — IntegerValue (datatype fixed at xsd:integer)', () => {
+    const ef = embeddedIntegerField({
       key: 'n',
-      artifactRef: integerNumberFieldId('https://example.org/x'),
-      defaultValue: integerNumberValue('42'),
+      artifactRef: integerFieldId('https://example.org/x'),
+      defaultValue: integerValue('42'),
     });
-    expect(ef.defaultValue?.kind).toBe('IntegerNumberValue');
+    expect(ef.defaultValue?.kind).toBe('IntegerValue');
     expect(ef.defaultValue?.value).toBe('42');
   });
 
-  it('RealNumber — RealNumberValue (carries datatype enum)', () => {
-    const ef = embeddedRealNumberField({
+  it('Decimal — DecimalValue (datatype fixed by family)', () => {
+    const ef = embeddedDecimalField({
       key: 'r',
-      artifactRef: realNumberFieldId('https://example.org/x'),
-      defaultValue: realNumberValue('3.14', 'decimal'),
+      artifactRef: decimalFieldId('https://example.org/x'),
+      defaultValue: decimalValue('3.14'),
     });
-    expect(ef.defaultValue?.kind).toBe('RealNumberValue');
+    expect(ef.defaultValue?.kind).toBe('DecimalValue');
     expect(ef.defaultValue?.value).toBe('3.14');
-    expect(ef.defaultValue?.datatype).toBe('decimal');
   });
 
   it('Date — DateValue (polymorphic; bare string discriminated by lexical shape)', () => {
@@ -316,22 +315,20 @@ describe('TextFieldSpec.defaultValue is a TextValue', () => {
 // =====================================================================
 
 describe('XxxFieldSpec.defaultValue (universal field-level defaults)', () => {
-  it('IntegerNumberFieldSpec accepts an IntegerNumberValue (or bare numeric string)', () => {
-    const a = integerNumberFieldSpec({ defaultValue: '42' });
-    expect(a.defaultValue?.kind).toBe('IntegerNumberValue');
+  it('IntegerFieldSpec accepts an IntegerValue (or bare numeric string)', () => {
+    const a = integerFieldSpec({ defaultValue: '42' });
+    expect(a.defaultValue?.kind).toBe('IntegerValue');
     expect(a.defaultValue?.value).toBe('42');
 
-    const b = integerNumberFieldSpec({ defaultValue: integerNumberValue('7') });
+    const b = integerFieldSpec({ defaultValue: integerValue('7') });
     expect(b.defaultValue?.value).toBe('7');
   });
 
-  it('RealNumberFieldSpec accepts a RealNumberValue', () => {
-    const fs = realNumberFieldSpec({
-      datatype: 'decimal',
-      defaultValue: realNumberValue('3.14', 'decimal'),
+  it('DecimalFieldSpec accepts a DecimalValue', () => {
+    const fs = decimalFieldSpec({ defaultValue: decimalValue('3.14'),
     });
-    expect(fs.defaultValue?.kind).toBe('RealNumberValue');
-    expect(fs.defaultValue?.datatype).toBe('decimal');
+    expect(fs.defaultValue?.kind).toBe('DecimalValue');
+    expect(fs.defaultValue?.value).toBe('3.14');
   });
 
   it('BooleanFieldSpec accepts a BooleanValue (or bare boolean)', () => {

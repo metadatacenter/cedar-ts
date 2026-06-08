@@ -8,8 +8,10 @@ import { CedarConstructionError } from '../leaves/index.js';
 import {
   type EmbeddedField,
   type EmbeddedTextField,
-  type EmbeddedIntegerNumberField,
-  type EmbeddedRealNumberField,
+  type EmbeddedIntegerField,
+  type EmbeddedDecimalField,
+  type EmbeddedFloatField,
+  type EmbeddedDoubleField,
   type EmbeddedBooleanField,
   type EmbeddedDateField,
   type EmbeddedTimeField,
@@ -29,8 +31,10 @@ import {
   type EmbeddedLanguageField,
   type EmbeddedAttributeValueField,
   embeddedTextField,
-  embeddedIntegerNumberField,
-  embeddedRealNumberField,
+  embeddedIntegerField,
+  embeddedDecimalField,
+  embeddedFloatField,
+  embeddedDoubleField,
   embeddedBooleanField,
   embeddedDateField,
   embeddedTimeField,
@@ -75,8 +79,10 @@ import {
 } from './parse-utils.js';
 import {
   serializeTextFieldId,
-  serializeIntegerNumberFieldId,
-  serializeRealNumberFieldId,
+  serializeIntegerFieldId,
+  serializeDecimalFieldId,
+  serializeFloatFieldId,
+  serializeDoubleFieldId,
   serializeBooleanFieldId,
   serializeDateFieldId,
   serializeTimeFieldId,
@@ -98,8 +104,10 @@ import {
   serializeTemplateId,
   serializePresentationComponentId,
   parseTextFieldId,
-  parseIntegerNumberFieldId,
-  parseRealNumberFieldId,
+  parseIntegerFieldId,
+  parseDecimalFieldId,
+  parseFloatFieldId,
+  parseDoubleFieldId,
   parseBooleanFieldId,
   parseDateFieldId,
   parseTimeFieldId,
@@ -136,10 +144,14 @@ import {
 import {
   serializeTextValue,
   parseTextValue,
-  serializeIntegerNumberValue,
-  parseIntegerNumberValue,
-  serializeRealNumberValue,
-  parseRealNumberValue,
+  serializeIntegerValue,
+  parseIntegerValue,
+  serializeDecimalValue,
+  parseDecimalValue,
+  serializeFloatValue,
+  parseFloatValue,
+  serializeDoubleValue,
+  parseDoubleValue,
   serializeBooleanValue,
   parseBooleanValue,
   serializeDateValue,
@@ -346,29 +358,29 @@ export function parseEmbeddedTextField(
   });
 }
 
-export function serializeEmbeddedIntegerNumberField(x: EmbeddedIntegerNumberField): unknown {
+export function serializeEmbeddedIntegerField(x: EmbeddedIntegerField): unknown {
   const out: Record<string, unknown> = {
-    kind: 'EmbeddedIntegerNumberField',
+    kind: 'EmbeddedIntegerField',
     key: x.key,
-    artifactRef: serializeIntegerNumberFieldId(x.artifactRef),
+    artifactRef: serializeIntegerFieldId(x.artifactRef),
   };
   serializeCommonProps(x, out);
   if (x.defaultValue !== undefined)
-    out['defaultValue'] = serializeIntegerNumberValue(x.defaultValue);
+    out['defaultValue'] = serializeIntegerValue(x.defaultValue);
   return out;
 }
 
-export function parseEmbeddedIntegerNumberField(
+export function parseEmbeddedIntegerField(
   x: unknown,
-  where = 'EmbeddedIntegerNumberField',
-): EmbeddedIntegerNumberField {
-  const s = readShell(x, 'EmbeddedIntegerNumberField', where, true);
-  return embeddedIntegerNumberField({
+  where = 'EmbeddedIntegerField',
+): EmbeddedIntegerField {
+  const s = readShell(x, 'EmbeddedIntegerField', where, true);
+  return embeddedIntegerField({
     key: s.key,
-    artifactRef: parseIntegerNumberFieldId(s.artifactRef, `${where}.artifactRef`),
+    artifactRef: parseIntegerFieldId(s.artifactRef, `${where}.artifactRef`),
     ...s.common,
     ...(s.defaultRaw !== undefined && {
-      defaultValue: parseIntegerNumberValue(
+      defaultValue: parseIntegerValue(
         s.defaultRaw,
         `${where}.defaultValue`,
       ),
@@ -376,29 +388,89 @@ export function parseEmbeddedIntegerNumberField(
   });
 }
 
-export function serializeEmbeddedRealNumberField(x: EmbeddedRealNumberField): unknown {
+export function serializeEmbeddedDecimalField(x: EmbeddedDecimalField): unknown {
   const out: Record<string, unknown> = {
-    kind: 'EmbeddedRealNumberField',
+    kind: 'EmbeddedDecimalField',
     key: x.key,
-    artifactRef: serializeRealNumberFieldId(x.artifactRef),
+    artifactRef: serializeDecimalFieldId(x.artifactRef),
   };
   serializeCommonProps(x, out);
   if (x.defaultValue !== undefined)
-    out['defaultValue'] = serializeRealNumberValue(x.defaultValue);
+    out['defaultValue'] = serializeDecimalValue(x.defaultValue);
   return out;
 }
 
-export function parseEmbeddedRealNumberField(
+export function parseEmbeddedDecimalField(
   x: unknown,
-  where = 'EmbeddedRealNumberField',
-): EmbeddedRealNumberField {
-  const s = readShell(x, 'EmbeddedRealNumberField', where, true);
-  return embeddedRealNumberField({
+  where = 'EmbeddedDecimalField',
+): EmbeddedDecimalField {
+  const s = readShell(x, 'EmbeddedDecimalField', where, true);
+  return embeddedDecimalField({
     key: s.key,
-    artifactRef: parseRealNumberFieldId(s.artifactRef, `${where}.artifactRef`),
+    artifactRef: parseDecimalFieldId(s.artifactRef, `${where}.artifactRef`),
     ...s.common,
     ...(s.defaultRaw !== undefined && {
-      defaultValue: parseRealNumberValue(
+      defaultValue: parseDecimalValue(
+        s.defaultRaw,
+        `${where}.defaultValue`,
+      ),
+    }),
+  });
+}
+
+export function serializeEmbeddedFloatField(x: EmbeddedFloatField): unknown {
+  const out: Record<string, unknown> = {
+    kind: 'EmbeddedFloatField',
+    key: x.key,
+    artifactRef: serializeFloatFieldId(x.artifactRef),
+  };
+  serializeCommonProps(x, out);
+  if (x.defaultValue !== undefined)
+    out['defaultValue'] = serializeFloatValue(x.defaultValue);
+  return out;
+}
+
+export function parseEmbeddedFloatField(
+  x: unknown,
+  where = 'EmbeddedFloatField',
+): EmbeddedFloatField {
+  const s = readShell(x, 'EmbeddedFloatField', where, true);
+  return embeddedFloatField({
+    key: s.key,
+    artifactRef: parseFloatFieldId(s.artifactRef, `${where}.artifactRef`),
+    ...s.common,
+    ...(s.defaultRaw !== undefined && {
+      defaultValue: parseFloatValue(
+        s.defaultRaw,
+        `${where}.defaultValue`,
+      ),
+    }),
+  });
+}
+
+export function serializeEmbeddedDoubleField(x: EmbeddedDoubleField): unknown {
+  const out: Record<string, unknown> = {
+    kind: 'EmbeddedDoubleField',
+    key: x.key,
+    artifactRef: serializeDoubleFieldId(x.artifactRef),
+  };
+  serializeCommonProps(x, out);
+  if (x.defaultValue !== undefined)
+    out['defaultValue'] = serializeDoubleValue(x.defaultValue);
+  return out;
+}
+
+export function parseEmbeddedDoubleField(
+  x: unknown,
+  where = 'EmbeddedDoubleField',
+): EmbeddedDoubleField {
+  const s = readShell(x, 'EmbeddedDoubleField', where, true);
+  return embeddedDoubleField({
+    key: s.key,
+    artifactRef: parseDoubleFieldId(s.artifactRef, `${where}.artifactRef`),
+    ...s.common,
+    ...(s.defaultRaw !== undefined && {
+      defaultValue: parseDoubleValue(
         s.defaultRaw,
         `${where}.defaultValue`,
       ),
@@ -1139,8 +1211,10 @@ export function parseEmbeddedPresentationComponent(
 
 const EMBEDDED_FIELD_KINDS = [
   'EmbeddedTextField',
-  'EmbeddedIntegerNumberField',
-  'EmbeddedRealNumberField',
+  'EmbeddedIntegerField',
+  'EmbeddedDecimalField',
+  'EmbeddedFloatField',
+  'EmbeddedDoubleField',
   'EmbeddedBooleanField',
   'EmbeddedDateField',
   'EmbeddedTimeField',
@@ -1165,10 +1239,14 @@ export function serializeEmbeddedField(x: EmbeddedField): unknown {
   switch (x.kind) {
     case 'EmbeddedTextField':
       return serializeEmbeddedTextField(x);
-    case 'EmbeddedIntegerNumberField':
-      return serializeEmbeddedIntegerNumberField(x);
-    case 'EmbeddedRealNumberField':
-      return serializeEmbeddedRealNumberField(x);
+    case 'EmbeddedIntegerField':
+      return serializeEmbeddedIntegerField(x);
+    case 'EmbeddedDecimalField':
+      return serializeEmbeddedDecimalField(x);
+    case 'EmbeddedFloatField':
+      return serializeEmbeddedFloatField(x);
+    case 'EmbeddedDoubleField':
+      return serializeEmbeddedDoubleField(x);
     case 'EmbeddedBooleanField':
       return serializeEmbeddedBooleanField(x);
     case 'EmbeddedDateField':
@@ -1217,10 +1295,14 @@ export function parseEmbeddedField(
   switch (k) {
     case 'EmbeddedTextField':
       return parseEmbeddedTextField(x, where);
-    case 'EmbeddedIntegerNumberField':
-      return parseEmbeddedIntegerNumberField(x, where);
-    case 'EmbeddedRealNumberField':
-      return parseEmbeddedRealNumberField(x, where);
+    case 'EmbeddedIntegerField':
+      return parseEmbeddedIntegerField(x, where);
+    case 'EmbeddedDecimalField':
+      return parseEmbeddedDecimalField(x, where);
+    case 'EmbeddedFloatField':
+      return parseEmbeddedFloatField(x, where);
+    case 'EmbeddedDoubleField':
+      return parseEmbeddedDoubleField(x, where);
     case 'EmbeddedBooleanField':
       return parseEmbeddedBooleanField(x, where);
     case 'EmbeddedDateField':

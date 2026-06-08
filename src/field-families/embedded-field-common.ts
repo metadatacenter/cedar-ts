@@ -129,8 +129,10 @@ export function assembleCommon(init: EmbeddedFieldInitCommon): AssembledCommon {
 // returned as-is).
 const FIELD_VARIANT_KINDS: ReadonlySet<string> = new Set([
   'TextField',
-  'IntegerNumberField',
-  'RealNumberField',
+  'IntegerField',
+  'DecimalField',
+  'FloatField',
+  'DoubleField',
   'BooleanField',
   'DateField',
   'TimeField',

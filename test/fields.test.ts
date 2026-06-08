@@ -33,12 +33,12 @@ import {
   nihGrantIdField,
   nihGrantIdFieldId,
   nihGrantIdFieldSpec,
-  integerNumberField,
-  integerNumberFieldId,
-  integerNumberFieldSpec,
-  realNumberField,
-  realNumberFieldId,
-  realNumberFieldSpec,
+  integerField,
+  integerFieldId,
+  integerFieldSpec,
+  decimalField,
+  decimalFieldId,
+  decimalFieldSpec,
   ontologyReference,
   ontologySource,
   orcidField,
@@ -67,7 +67,7 @@ import {
   type Field,
   type TextField,
   type DateField,
-  type IntegerNumberFieldSpec,
+  type IntegerFieldSpec,
 } from '../src/index.js';
 
 const tp = lifecycleMetadata({
@@ -110,11 +110,11 @@ describe('Field constructors', () => {
   });
 
   it('rejects a misaligned fieldSpec at the type level', () => {
-    integerNumberField({
-      id: integerNumberFieldId('https://example.org/fields/x'),
+    integerField({
+      id: integerFieldId('https://example.org/fields/x'),
       modelVersion: MV,
       ...meta,
-      // @ts-expect-error TextFieldSpec is not an IntegerNumberFieldSpec
+      // @ts-expect-error TextFieldSpec is not an IntegerFieldSpec
       fieldSpec: textFieldSpec(),
     });
   });
@@ -163,17 +163,17 @@ describe('Per-family helpers', () => {
   it('builds one of each concrete family', () => {
     const all: Field[] = [
       textField({ id: textFieldId('https://example.org/t'), modelVersion: MV, ...meta, fieldSpec: textFieldSpec() }),
-      integerNumberField({
-        id: integerNumberFieldId('https://example.org/n'),
+      integerField({
+        id: integerFieldId('https://example.org/n'),
         modelVersion: MV,
         ...meta,
-        fieldSpec: integerNumberFieldSpec(),
+        fieldSpec: integerFieldSpec(),
       }),
-      realNumberField({
-        id: realNumberFieldId('https://example.org/r'),
+      decimalField({
+        id: decimalFieldId('https://example.org/r'),
         modelVersion: MV,
         ...meta,
-        fieldSpec: realNumberFieldSpec({ datatype: 'decimal' }),
+        fieldSpec: decimalFieldSpec({ }),
       }),
       dateField({
         id: dateFieldId('https://example.org/d'),
@@ -270,15 +270,15 @@ describe('Per-family helpers', () => {
 
 describe('Field kind narrowing', () => {
   it('narrows the FieldSpec type via the per-variant `kind` discriminant', () => {
-    const f: Field = integerNumberField({
-      id: integerNumberFieldId('https://example.org/n'),
+    const f: Field = integerField({
+      id: integerFieldId('https://example.org/n'),
       modelVersion: MV,
       ...meta,
-      fieldSpec: integerNumberFieldSpec(),
+      fieldSpec: integerFieldSpec(),
     });
-    if (f.kind === 'IntegerNumberField') {
-      const spec: IntegerNumberFieldSpec = f.fieldSpec;
-      expect(spec.kind).toBe('IntegerNumberFieldSpec');
+    if (f.kind === 'IntegerField') {
+      const spec: IntegerFieldSpec = f.fieldSpec;
+      expect(spec.kind).toBe('IntegerFieldSpec');
     } else {
       throw new Error('expected integer-number field');
     }
@@ -286,7 +286,7 @@ describe('Field kind narrowing', () => {
 
   it('table check that every family kind discriminant is unique and complete', () => {
     const kinds: Field['kind'][] = [
-      'TextField', 'IntegerNumberField', 'RealNumberField', 'BooleanField',
+      'TextField', 'IntegerField', 'DecimalField', 'BooleanField',
       'DateField', 'TimeField', 'DateTimeField',
       'ControlledTermField', 'SingleValuedEnumField', 'MultiValuedEnumField',
       'LinkField', 'EmailField', 'PhoneNumberField',

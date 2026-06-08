@@ -10,8 +10,7 @@
 //       IRI, BCP-47, ASCII identifier, semver, ISO-8601 date-time,
 //       integer lexical form, plus the assertNonNegativeInteger helper
 //   - the Unicode NFC helper toNfc              (unicode-nfc.ts)
-//   - the XSD / RDF datatype IRI constants and
-//     the RealNumberDatatypeKind enum           (datatype-iris.ts)
+//   - the XSD / RDF datatype IRI constants       (datatype-iris.ts)
 //   - the leaf types Iri, LanguageTag,
 //     IsoDateTimeStamp and their constructors   (leaf-types.ts)
 //
@@ -52,8 +51,6 @@ export {
   XsdStringDatatypeIri,
   XsdBooleanDatatypeIri,
   RdfLangStringDatatypeIri,
-  type RealNumberDatatypeKind,
-  REAL_NUMBER_DATATYPE_KINDS,
 } from './datatype-iris.js';
 export {
   type Iri,

@@ -29,8 +29,8 @@ import {
   embeddedLinkField,
   embeddedMultiValuedEnumField,
   embeddedNihGrantIdField,
-  embeddedIntegerNumberField,
-  embeddedRealNumberField,
+  embeddedIntegerField,
+  embeddedDecimalField,
   embeddedOrcidField,
   embeddedPhoneNumberField,
   embeddedPresentationComponent,
@@ -61,13 +61,13 @@ import {
   nihGrantIdField,
   nihGrantIdFieldSpec,
   nihGrantIdValue,
-  integerNumberField,
-  integerNumberFieldSpec,
-  integerNumberValue,
+  integerField,
+  integerFieldSpec,
+  integerValue,
   numericRenderingHint,
-  realNumberField,
-  realNumberFieldSpec,
-  realNumberValue,
+  decimalField,
+  decimalFieldSpec,
+  decimalValue,
   ontologyDisplayHint,
   ontologyReference,
   ontologySource,
@@ -156,8 +156,8 @@ import {
   linkFieldId,
   multiValuedEnumFieldId,
   nihGrantIdFieldId,
-  integerNumberFieldId,
-  realNumberFieldId,
+  integerFieldId,
+  decimalFieldId,
   orcidFieldId,
   phoneNumberFieldId,
   pubMedIdFieldId,
@@ -210,8 +210,8 @@ describe('MultilingualString round-trip', () => {
 const valueSamples = [
   ['TextValue (no lang)', textValue('hello')],
   ['TextValue (lang)', textValue('hello', 'en')],
-  ['IntegerNumberValue', integerNumberValue('42')],
-  ['RealNumberValue', realNumberValue('3.14', 'decimal')],
+  ['IntegerValue', integerValue('42')],
+  ['DecimalValue', decimalValue('3.14')],
   ['BooleanValue', { kind: 'BooleanValue' as const, value: true }],
   ['YearValue', yearValue('2024')],
   ['YearMonthValue', yearMonthValue('2024-06')],
@@ -402,12 +402,10 @@ describe('Metadata round-trip', () => {
 
 const fieldSpecSamples = [
   ['TextFieldSpec', textFieldSpec({ minLength: 1, maxLength: 100 })],
-  ['IntegerNumberFieldSpec', integerNumberFieldSpec()],
+  ['IntegerFieldSpec', integerFieldSpec()],
   [
-    'RealNumberFieldSpec',
-    realNumberFieldSpec({
-      datatype: 'decimal',
-      renderingHint: numericRenderingHint(2),
+    'DecimalFieldSpec',
+    decimalFieldSpec({ renderingHint: numericRenderingHint(2),
     }),
   ],
   ['DateFieldSpec', dateFieldSpec({ dateValueType: 'fullDate' })],
@@ -498,33 +496,33 @@ describe('EmbeddedXxxField.defaultValue wire-form', () => {
     expect(parseEmbeddedField(wire)).toEqual(e);
   });
 
-  it('IntegerNumber — emits { kind, value }', () => {
-    const e = embeddedIntegerNumberField({
+  it('Integer — emits { kind, value }', () => {
+    const e = embeddedIntegerField({
       key: 'n',
-      artifactRef: integerNumberFieldId('https://example.org/x'),
+      artifactRef: integerFieldId('https://example.org/x'),
       defaultValue: '42',
     });
     const wire = serializeEmbeddedField(e) as {
       defaultValue: { kind: string; value: string };
     };
-    expect(wire.defaultValue.kind).toBe('IntegerNumberValue');
+    expect(wire.defaultValue.kind).toBe('IntegerValue');
     expect(wire.defaultValue.value).toBe('42');
     expect((wire.defaultValue as { datatype?: string }).datatype).toBeUndefined();
     expect(parseEmbeddedField(wire)).toEqual(e);
   });
 
-  it('RealNumber — emits { kind, value, datatype }', () => {
-    const e = embeddedRealNumberField({
+  it('Decimal — emits { kind, value } with no datatype slot', () => {
+    const e = embeddedDecimalField({
       key: 'r',
-      artifactRef: realNumberFieldId('https://example.org/x'),
-      defaultValue: realNumberValue('3.14', 'decimal'),
+      artifactRef: decimalFieldId('https://example.org/x'),
+      defaultValue: decimalValue('3.14'),
     });
     const wire = serializeEmbeddedField(e) as {
-      defaultValue: { kind: string; value: string; datatype: string };
+      defaultValue: { kind: string; value: string };
     };
-    expect(wire.defaultValue.kind).toBe('RealNumberValue');
+    expect(wire.defaultValue.kind).toBe('DecimalValue');
     expect(wire.defaultValue.value).toBe('3.14');
-    expect(wire.defaultValue.datatype).toBe('decimal');
+    expect((wire.defaultValue as { datatype?: string }).datatype).toBeUndefined();
     expect(parseEmbeddedField(wire)).toEqual(e);
   });
 
@@ -630,21 +628,21 @@ const fieldSamples = [
     }),
   ],
   [
-    'IntegerNumberField',
-    integerNumberField({
+    'IntegerField',
+    integerField({
       id: 'https://example.org/fields/int',
       modelVersion: MV,
       ...sam,
-      fieldSpec: integerNumberFieldSpec(),
+      fieldSpec: integerFieldSpec(),
     }),
   ],
   [
-    'RealNumberField',
-    realNumberField({
+    'DecimalField',
+    decimalField({
       id: 'https://example.org/fields/real',
       modelVersion: MV,
       ...sam,
-      fieldSpec: realNumberFieldSpec({ datatype: 'decimal' }),
+      fieldSpec: decimalFieldSpec({ }),
     }),
   ],
   [
@@ -878,17 +876,17 @@ describe('EmbeddedField round-trip', () => {
 
   it.each([
     [
-      'EmbeddedIntegerNumberField',
-      embeddedIntegerNumberField({
+      'EmbeddedIntegerField',
+      embeddedIntegerField({
         key: 'n',
-        artifactRef: integerNumberFieldId('https://example.org/fields/int'),
+        artifactRef: integerFieldId('https://example.org/fields/int'),
       }),
     ],
     [
-      'EmbeddedRealNumberField',
-      embeddedRealNumberField({
+      'EmbeddedDecimalField',
+      embeddedDecimalField({
         key: 'r',
-        artifactRef: realNumberFieldId('https://example.org/fields/real'),
+        artifactRef: decimalFieldId('https://example.org/fields/real'),
       }),
     ],
     [

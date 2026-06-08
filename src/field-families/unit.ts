@@ -1,6 +1,6 @@
 // =====================================================================
-// Unit — measurement / quantity unit, shared by IntegerNumberFieldSpec
-// and RealNumberFieldSpec.
+// Unit — measurement / quantity unit, shared by IntegerFieldSpec
+// and DecimalFieldSpec.
 // =====================================================================
 //
 // The grammar pairs an Iri with an optional human-readable Label,

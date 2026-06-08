@@ -12,7 +12,7 @@ import {
   isTemplateEntry,
   isTemplateInstance,
   templateEntry,
-  integerNumberValue,
+  integerValue,
   presentationComponentId,
   richTextComponent,
   schemaArtifactVersioning,
@@ -191,7 +191,7 @@ describe('TemplateInstance', () => {
     const ti: TemplateInstance = templateInstance({
       ...baseInit,
       entries: [
-        fieldEntry('count', integerNumberValue('1')),
+        fieldEntry('count', integerValue('1')),
         fieldEntry('born', fullDateValue('1990-01-01')),
       ],
     });

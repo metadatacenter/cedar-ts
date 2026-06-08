@@ -84,7 +84,7 @@ export const LANGUAGE_RENDERING_HINTS: readonly LanguageRenderingHint[] = Object
 // NumericRenderingHint
 // =====================================================================
 //
-// Shared by IntegerNumberFieldSpec and RealNumberFieldSpec. Carries an
+// Shared by IntegerFieldSpec and DecimalFieldSpec. Carries an
 // optional `decimalPlaces` (a presentation concern only) plus an
 // optional `placeholder` for the numeric text-entry input.
 

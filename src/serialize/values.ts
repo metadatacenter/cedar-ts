@@ -9,11 +9,13 @@
 // at an EmbeddedSingleValuedEnumField.defaultValue slot) are encoded
 // untagged via the per-type `Untagged` helpers.
 
-import { CedarConstructionError, REAL_NUMBER_DATATYPE_KINDS, type RealNumberDatatypeKind } from '../leaves/index.js';
+import { CedarConstructionError } from '../leaves/index.js';
 import {
   type TextValue,
-  type IntegerNumberValue,
-  type RealNumberValue,
+  type IntegerValue,
+  type DecimalValue,
+  type FloatValue,
+  type DoubleValue,
   type BooleanValue,
   type DateValue,
   type YearValue,
@@ -36,8 +38,10 @@ import {
   type EnumValue,
   type Value,
   textValue,
-  integerNumberValue,
-  realNumberValue,
+  integerValue,
+  decimalValue,
+  floatValue,
+  doubleValue,
   booleanValue,
   yearValue,
   yearMonthValue,
@@ -119,109 +123,114 @@ export function parseTextValueUntagged(x: unknown, where = 'TextValue'): TextVal
   return readTextValueBody(o, where);
 }
 
-// ---- IntegerNumberValue ----------------------------------------------
+// ---- Numeric values (Integer / Decimal / Float / Double) -------------
+//
+// All four numeric value types share the same wire shape — a single
+// `value` lexical form and no datatype slot (the kind fixes the
+// datatype). The codecs below are mechanically parallel.
 
-export function serializeIntegerNumberValue(x: IntegerNumberValue): unknown {
-  return { kind: 'IntegerNumberValue', value: x.value };
+export function serializeIntegerValue(x: IntegerValue): unknown {
+  return { kind: 'IntegerValue', value: x.value };
 }
-
-export function serializeIntegerNumberValueUntagged(x: IntegerNumberValue): unknown {
+export function serializeIntegerValueUntagged(x: IntegerValue): unknown {
   return { value: x.value };
 }
-
-export function parseIntegerNumberValue(
-  x: unknown,
-  where = 'IntegerNumberValue',
-): IntegerNumberValue {
+export function parseIntegerValue(x: unknown, where = 'IntegerValue'): IntegerValue {
   const o = expectObject(x, where);
   expectKnownProperties(o, ['kind', 'value']);
-  if (o['kind'] !== 'IntegerNumberValue') {
-    throw new CedarConstructionError(
-      `${where}: expected kind "IntegerNumberValue"`,
-    );
+  if (o['kind'] !== 'IntegerValue') {
+    throw new CedarConstructionError(`${where}: expected kind "IntegerValue"`);
   }
   if (!('value' in o)) {
     throw new CedarConstructionError(`${where}: missing required "value"`);
   }
-  return integerNumberValue(expectString(o['value'], `${where}.value`));
+  return integerValue(expectString(o['value'], `${where}.value`));
 }
-
-export function parseIntegerNumberValueUntagged(
-  x: unknown,
-  where = 'IntegerNumberValue',
-): IntegerNumberValue {
+export function parseIntegerValueUntagged(x: unknown, where = 'IntegerValue'): IntegerValue {
   const o = expectObject(x, where);
   expectKnownProperties(o, ['value']);
   if (!('value' in o)) {
     throw new CedarConstructionError(`${where}: missing required "value"`);
   }
-  return integerNumberValue(expectString(o['value'], `${where}.value`));
+  return integerValue(expectString(o['value'], `${where}.value`));
 }
 
-// ---- RealNumberValue -------------------------------------------------
-
-function parseRealNumberDatatypeAtPos(
-  raw: unknown,
-  where: string,
-): RealNumberDatatypeKind {
-  const s = expectString(raw, where);
-  if (!(REAL_NUMBER_DATATYPE_KINDS as readonly string[]).includes(s)) {
-    throw new CedarConstructionError(
-      `${where}: unknown real-number datatype ${JSON.stringify(s)}; expected one of {${REAL_NUMBER_DATATYPE_KINDS.map((k) => JSON.stringify(k)).join(', ')}}`,
-    );
-  }
-  return s as RealNumberDatatypeKind;
+export function serializeDecimalValue(x: DecimalValue): unknown {
+  return { kind: 'DecimalValue', value: x.value };
 }
-
-export function serializeRealNumberValue(x: RealNumberValue): unknown {
-  return {
-    kind: 'RealNumberValue',
-    value: x.value,
-    datatype: x.datatype,
-  };
+export function serializeDecimalValueUntagged(x: DecimalValue): unknown {
+  return { value: x.value };
 }
-
-export function serializeRealNumberValueUntagged(x: RealNumberValue): unknown {
-  return { value: x.value, datatype: x.datatype };
-}
-
-export function parseRealNumberValue(
-  x: unknown,
-  where = 'RealNumberValue',
-): RealNumberValue {
+export function parseDecimalValue(x: unknown, where = 'DecimalValue'): DecimalValue {
   const o = expectObject(x, where);
-  expectKnownProperties(o, ['kind', 'value', 'datatype']);
-  if (o['kind'] !== 'RealNumberValue') {
-    throw new CedarConstructionError(`${where}: expected kind "RealNumberValue"`);
+  expectKnownProperties(o, ['kind', 'value']);
+  if (o['kind'] !== 'DecimalValue') {
+    throw new CedarConstructionError(`${where}: expected kind "DecimalValue"`);
   }
   if (!('value' in o)) {
     throw new CedarConstructionError(`${where}: missing required "value"`);
   }
-  if (!('datatype' in o)) {
-    throw new CedarConstructionError(`${where}: missing required "datatype"`);
-  }
-  return realNumberValue(
-    expectString(o['value'], `${where}.value`),
-    parseRealNumberDatatypeAtPos(o['datatype'], `${where}.datatype`),
-  );
+  return decimalValue(expectString(o['value'], `${where}.value`));
 }
-
-export function parseRealNumberValueUntagged(
-  x: unknown,
-  where = 'RealNumberValue',
-): RealNumberValue {
+export function parseDecimalValueUntagged(x: unknown, where = 'DecimalValue'): DecimalValue {
   const o = expectObject(x, where);
-  expectKnownProperties(o, ['value', 'datatype']);
+  expectKnownProperties(o, ['value']);
   if (!('value' in o)) {
     throw new CedarConstructionError(`${where}: missing required "value"`);
   }
-  if (!('datatype' in o)) {
-    throw new CedarConstructionError(`${where}: missing required "datatype"`);
+  return decimalValue(expectString(o['value'], `${where}.value`));
+}
+
+export function serializeFloatValue(x: FloatValue): unknown {
+  return { kind: 'FloatValue', value: x.value };
+}
+export function serializeFloatValueUntagged(x: FloatValue): unknown {
+  return { value: x.value };
+}
+export function parseFloatValue(x: unknown, where = 'FloatValue'): FloatValue {
+  const o = expectObject(x, where);
+  expectKnownProperties(o, ['kind', 'value']);
+  if (o['kind'] !== 'FloatValue') {
+    throw new CedarConstructionError(`${where}: expected kind "FloatValue"`);
   }
-  return realNumberValue(
-    expectString(o['value'], `${where}.value`),
-    parseRealNumberDatatypeAtPos(o['datatype'], `${where}.datatype`),
-  );
+  if (!('value' in o)) {
+    throw new CedarConstructionError(`${where}: missing required "value"`);
+  }
+  return floatValue(expectString(o['value'], `${where}.value`));
+}
+export function parseFloatValueUntagged(x: unknown, where = 'FloatValue'): FloatValue {
+  const o = expectObject(x, where);
+  expectKnownProperties(o, ['value']);
+  if (!('value' in o)) {
+    throw new CedarConstructionError(`${where}: missing required "value"`);
+  }
+  return floatValue(expectString(o['value'], `${where}.value`));
+}
+
+export function serializeDoubleValue(x: DoubleValue): unknown {
+  return { kind: 'DoubleValue', value: x.value };
+}
+export function serializeDoubleValueUntagged(x: DoubleValue): unknown {
+  return { value: x.value };
+}
+export function parseDoubleValue(x: unknown, where = 'DoubleValue'): DoubleValue {
+  const o = expectObject(x, where);
+  expectKnownProperties(o, ['kind', 'value']);
+  if (o['kind'] !== 'DoubleValue') {
+    throw new CedarConstructionError(`${where}: expected kind "DoubleValue"`);
+  }
+  if (!('value' in o)) {
+    throw new CedarConstructionError(`${where}: missing required "value"`);
+  }
+  return doubleValue(expectString(o['value'], `${where}.value`));
+}
+export function parseDoubleValueUntagged(x: unknown, where = 'DoubleValue'): DoubleValue {
+  const o = expectObject(x, where);
+  expectKnownProperties(o, ['value']);
+  if (!('value' in o)) {
+    throw new CedarConstructionError(`${where}: missing required "value"`);
+  }
+  return doubleValue(expectString(o['value'], `${where}.value`));
 }
 
 // ---- BooleanValue ----------------------------------------------------
@@ -828,8 +837,10 @@ export function parseLanguageValueUntagged(
 
 const VALUE_KINDS = [
   'TextValue',
-  'IntegerNumberValue',
-  'RealNumberValue',
+  'IntegerValue',
+  'DecimalValue',
+  'FloatValue',
+  'DoubleValue',
   'BooleanValue',
   'YearValue',
   'YearMonthValue',
@@ -855,10 +866,14 @@ export function serializeValue(x: Value): unknown {
   switch (x.kind) {
     case 'TextValue':
       return serializeTextValue(x);
-    case 'IntegerNumberValue':
-      return serializeIntegerNumberValue(x);
-    case 'RealNumberValue':
-      return serializeRealNumberValue(x);
+    case 'IntegerValue':
+      return serializeIntegerValue(x);
+    case 'DecimalValue':
+      return serializeDecimalValue(x);
+    case 'FloatValue':
+      return serializeFloatValue(x);
+    case 'DoubleValue':
+      return serializeDoubleValue(x);
     case 'BooleanValue':
       return serializeBooleanValue(x);
     case 'YearValue':
@@ -906,10 +921,14 @@ export function parseValue(x: unknown, where = 'Value'): Value {
   switch (k) {
     case 'TextValue':
       return parseTextValue(x, where);
-    case 'IntegerNumberValue':
-      return parseIntegerNumberValue(x, where);
-    case 'RealNumberValue':
-      return parseRealNumberValue(x, where);
+    case 'IntegerValue':
+      return parseIntegerValue(x, where);
+    case 'DecimalValue':
+      return parseDecimalValue(x, where);
+    case 'FloatValue':
+      return parseFloatValue(x, where);
+    case 'DoubleValue':
+      return parseDoubleValue(x, where);
     case 'BooleanValue':
       return parseBooleanValue(x, where);
     case 'YearValue':
