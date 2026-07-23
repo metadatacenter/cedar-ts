@@ -19,6 +19,20 @@ re-exported from internal subpaths.
 npm install @metadatacenter/cedar-model
 ```
 
+### Installing from GitHub
+
+The package is not yet published to the npm registry. Until it is, install
+directly from GitHub:
+
+```bash
+npm install github:metadatacenter/cedar-ts
+```
+
+npm clones the repo and runs the `prepare` script, which compiles
+`dist/` in place, so the installed package is immediately importable. A
+local checkout works the same way (`npm install ../cedar-ts`) after
+`npm run build`.
+
 ## Example
 
 Build a small reusable Field, embed it in a Template, and produce a conforming
