@@ -102,6 +102,34 @@ Two end-to-end examples in [`examples/`](examples/) build a Principal
 Investigator template with most of the model exercised, in two equivalent
 styles (top-level Field constants vs. inline Field construction).
 
+## Serialization
+
+The `serialize/` module reads and writes the spec's wire form. Every
+top-level type `T` has `serializeT(x): unknown` / `parseT(x): T` helpers,
+plus generic dispatchers: `serialize(x)` dispatches on `x.kind`, and
+`parse(x, type)` / `parseArtifact(x)` go the other way. Serializers return
+a JSON-compatible value — call `JSON.stringify` yourself. Parsing is
+strict: malformed input throws `CedarConstructionError`, and explicit
+`null` for optional properties is rejected (they must be omitted).
+
+### YAML
+
+The same wire form can be rendered as YAML:
+
+```ts
+import { toYaml, fromYaml } from '@metadatacenter/cedar-model';
+
+const text = toYaml(tpl);            // YAML 1.2 rendering of the wire form
+const back = fromYaml(text);         // dispatches by `kind`
+const tpl2 = fromYaml(text, 'Template'); // or parse against a known type
+```
+
+`fromYaml` feeds the parsed document to the same strict parser, so all
+parse guarantees carry over; YAML syntax errors and duplicate map keys
+throw `CedarConstructionError`. YAML is a convenience of this binding
+only — the spec defines the wire form in JSON, and JSON remains the
+interchange encoding.
+
 ## Source layout
 
 ```
@@ -131,6 +159,9 @@ src/
   template.ts         Template artifact and SchemaArtifact union
   instances/          TemplateInstance, FieldValue, NestedTemplateInstance,
                       and the Artifact union
+  serialize/          wire-form serializers / strict parsers (per-type
+                      helpers, generic serialize/parse dispatchers,
+                      toYaml/fromYaml)
   index.ts            public package surface (barrel)
 ```
 

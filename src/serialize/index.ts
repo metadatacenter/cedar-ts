@@ -15,12 +15,22 @@
 //      type-name string parameter so the parser knows the slot it is being
 //      called at (top-down parse).
 //
+//   3. YAML helpers (convenience).
+//        toYaml(x: SerializableArtifact): string
+//        fromYaml(text: string, type?, where?): SerializableArtifact
+//      The same wire form rendered as YAML 1.2 instead of JSON.
+//
 // The output of serialization is `unknown` (a JSON-compatible value).
 // Callers do `JSON.stringify` themselves.
 //
 // Strict parse: the parsers reject malformed input by throwing
 // CedarConstructionError. They also reject explicit `null` for optional
 // properties (those MUST be omitted; per serialization.md §4.2).
+
+import {
+  parse as parseYamlText,
+  stringify as stringifyYamlValue,
+} from 'yaml';
 
 import { CedarConstructionError } from '../leaves/index.js';
 
@@ -155,6 +165,47 @@ export function parse(
     case 'Artifact':
       return parseArtifact(x, w);
   }
+}
+
+// ---- YAML helpers -----------------------------------------------------
+
+// The wire form is defined in JSON (serialization.md); YAML 1.2 is a
+// strict superset of JSON's data model, so these helpers render and
+// consume the same wire-form value as YAML text. YAML is a convenience
+// of this TypeScript binding only — it is deliberately NOT an encoding
+// defined by cedar-structural-spec, and JSON remains the interchange
+// form. `toYaml(x)` is
+// `serialize(x)` emitted as YAML; `fromYaml(text, type?)` parses YAML
+// text and hands the result to the strict wire-form parser, so all
+// parse guarantees (CedarConstructionError on malformed input,
+// explicit-null rejection) carry over unchanged. YAML documents with
+// duplicate map keys are rejected. Callers needing YAML emit options
+// can compose the layers themselves: `YAML.stringify(serialize(x), opts)`.
+
+export function toYaml(x: SerializableArtifact): string {
+  return stringifyYamlValue(serialize(x));
+}
+
+export function fromYaml(
+  text: string,
+  type:
+    | 'Template'
+    | 'TemplateInstance'
+    | 'PresentationComponent'
+    | 'Field'
+    | 'Artifact' = 'Artifact',
+  where?: string,
+): SerializableArtifact {
+  const w = where ?? type;
+  let data: unknown;
+  try {
+    data = parseYamlText(text);
+  } catch (e) {
+    throw new CedarConstructionError(
+      `${w}: invalid YAML: ${e instanceof Error ? e.message : String(e)}`,
+    );
+  }
+  return parse(data, type, w);
 }
 
 // Parses any of the document-root artifact kinds, dispatching by `kind`.
